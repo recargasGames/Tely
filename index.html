@@ -6,7 +6,6 @@
     <title>TELY 🎬</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script>
@@ -42,7 +41,6 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.4);
             backdrop-filter: blur(8px);
         }
-        /* Estilo para el logo + nombre */
         .logo-contenedor {
             display: flex;
             align-items: center;
@@ -66,8 +64,6 @@
         .tarjeta:hover { transform: scale(1.04); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
         .info-tarjeta { padding: 0.7rem; text-align: center; }
         .anio { font-size: 0.8rem; color: #94A3B8; margin-top: 0.3rem; }
-
-        /* Menú perfil con historial */
         .menu-perfil { position: relative; }
         .btn-perfil { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
         .dropdown { 
@@ -90,11 +86,10 @@
             font-weight: bold;
             color: #A78BFA;
         }
-        .dropdown a, .dropdown button { 
+        .dropdown button { 
             display: block; 
             padding: 0.7rem 0.8rem; 
             color: #E2E8F0; 
-            text-decoration: none; 
             border: none; 
             background: none; 
             width: 100%; 
@@ -105,17 +100,13 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .dropdown a:hover, .dropdown button:hover { background: #202030; color: #A78BFA; }
+        .dropdown button:hover { background: #202030; color: #A78BFA; }
         .historial-vacio { padding: 1rem; text-align: center; color: #94A3B8; font-size: 0.9rem; }
-
-        /* Modal inicio de sesión */
         .modal-login { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem; }
         .caja-login { background: #151520; padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 0 20px rgba(124, 58, 237, 0.2); }
         .btn-google { width: 100%; padding: 1rem; background: #ffffff; color: #333; border: none; border-radius: 8px; font-weight: bold; margin-top: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.8rem; cursor: pointer; font-size: 1rem; }
         .btn-google i { color: #4285F4; font-size: 1.3rem; }
         .btn-cerrar { margin-top: 1.2rem; background: none; border: none; color: #EF4444; cursor: pointer; font-weight: bold; }
-
-        /* Reproductor */
         .modal-video { position: fixed; inset: 0; background: #000; z-index: 9998; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; transform: rotate(90deg); transform-origin: left top; width: 100vh; height: 100vw; top: 0; left: 100%; }
         .modal-video.vertical { transform: rotate(0deg); width: 100%; height: 100%; left: 0; }
         #video-container { width: 100%; max-width: 1200px; aspect-ratio: 16/9; background: #000; border-radius: 8px; overflow: hidden; }
@@ -125,13 +116,10 @@
 <body>
 
 <header>
-    <!-- 🎯 AQUÍ VA EL LOGO + NOMBRE -->
     <div class="logo-contenedor">
-        <!-- Cambia 'logo.png' por el nombre de tu archivo o enlace -->
         <img src="logo.png" alt="Logo TELY" class="logo">
         <h1>TELY</h1>
     </div>
-
     <div class="menu-perfil">
         <button class="btn-perfil" onclick="toggleMenu()">
             <i class="fa-solid fa-user-circle"></i>
@@ -162,7 +150,6 @@
     <div id="lista-contenido" class="grid-peliculas"></div>
 </div>
 
-<!-- Modal Inicio de Sesión -->
 <div id="modal-login" class="modal-login oculto">
     <div class="caja-login">
         <h2 class="text-2xl font-bold text-acento mb-3">Bienvenido a TELY</h2>
@@ -174,7 +161,6 @@
     </div>
 </div>
 
-<!-- Reproductor -->
 <div id="modal-video" class="modal-video oculto vertical">
     <div class="w-full max-w-4xl flex justify-between items-center mb-3">
         <h3 id="titulo-video" class="text-lg font-bold text-white"></h3>
@@ -184,7 +170,7 @@
 </div>
 
 <script>
-// 👇 TU CONFIGURACIÓN DE FIREBASE
+// Configuración Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCYetRSA0nsZsGiqABbTtjq-5a4bz5-oDk",
   authDomain: "tely-675c0.firebaseapp.com",
@@ -200,18 +186,26 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 let videoPendiente = null;
 
-// 🎬 LISTA DE CONTENIDO
+// 🎬 LISTA DE CONTENIDO - CON RAMBO 1 AGREGADO
 const contenido = [
     {
         id: 1,
+        titulo: "Rambo 1",
+        anio: 1982,
+        categoria: "peliculas",
+        portada: "rambo1.png", // sube tu portada con este nombre
+        video: "rambo1.mp4" // sube tu película con este nombre
+    },
+    {
+        id: 2,
         titulo: "Película MediaDelivery",
         anio: 2026,
-        categoria: "recientes",
+        categoria: "peliculas",
         portada: "media.png",
         video: "https://player.mediadelivery.net/play/687159/225fe8f9-0da5-4258-a3e6-7b21de9839fa"
     },
     {
-        id: 2,
+        id: 3,
         titulo: "Así Aprenderás",
         anio: 2025,
         categoria: "series",
@@ -219,7 +213,7 @@ const contenido = [
         video: "https://vidmoly.me/dl/8x41dp7ngg7s"
     },
     {
-        id: 3,
+        id: 4,
         titulo: "Mufasa: El Rey León",
         anio: 2024,
         categoria: "peliculas",
@@ -227,7 +221,7 @@ const contenido = [
         video: "https://lat-servicio.one/down.gffxm"
     },
     {
-        id: 4,
+        id: 5,
         titulo: "Iron Lung",
         anio: 2023,
         categoria: "peliculas",
@@ -235,7 +229,7 @@ const contenido = [
         video: ""
     },
     {
-        id: 5,
+        id: 6,
         titulo: "Toy Story 5",
         anio: 2026,
         categoria: "recientes",
@@ -243,24 +237,16 @@ const contenido = [
         video: ""
     },
     {
-        id: 6,
+        id: 7,
         titulo: "Naruto",
         anio: 2002,
         categoria: "anime",
         portada: "naruto.png",
         video: ""
-    },
-    {
-        id: 7,
-        titulo: "Rambo 1",
-        anio: 1982,
-        categoria: "peliculas",
-        portada: "rambo.png",
-        video:"Rambo 1.mp4"
-    },
+    }
 ];
 
-// 📚 HISTORIAL DE VISUALIZACIÓN
+// 📚 Historial de visualización
 function agregarAlHistorial(item) {
     let historial = JSON.parse(localStorage.getItem('historialTely')) || [];
     historial = historial.filter(h => h.id !== item.id);
@@ -343,32 +329,47 @@ function iniciarConGoogle() {
             cerrarModalLogin();
             if (videoPendiente) { abrirVideo(videoPendiente.video, videoPendiente.titulo); agregarAlHistorial(videoPendiente); videoPendiente = null; }
         })
-        .catch(err => alert("Error: " + err.message));
+        .catch(err => {
+            alert("Error de inicio de sesión: " + err.message);
+            console.error(err);
+        });
 }
 function cerrarSesion() { auth.signOut().then(() => document.getElementById("nombrePerfil").textContent = "Invitado"); }
 
-// Reproductor
+// Reproductor compatible con todos los formatos
 function abrirVideo(ruta, titulo) {
-    if (!ruta) return alert("Enlace no configurado");
+    if (!ruta) return alert("Archivo de video no disponible");
     document.getElementById("titulo-video").textContent = titulo;
     const contenedor = document.getElementById("video-container");
+
     if (ruta.includes("/play/")) {
         contenedor.innerHTML = `<iframe src="${ruta}" frameborder="0" allowfullscreen allow="autoplay; fullscreen" style="width:100%; height:100%; border-radius:8px;"></iframe>`;
     } else {
-        contenedor.innerHTML = `<video id="mi-video" controls controlsList="nodownload" playsinline preload="auto" style="width:100%; height:100%;"></video>`;
-        const v = document.getElementById("mi-video"); v.src = ruta; v.load(); v.play().catch(() => {});
+        contenedor.innerHTML = `<video id="mi-video" controls controlsList="nodownload" playsinline preload="auto" style="width:100%; height:100%;">
+            <source src="${ruta}" type="video/mp4">
+            Tu navegador no soporta este formato de video.
+        </video>`;
+        const v = document.getElementById("mi-video");
+        v.load();
+        v.play().catch(e => console.log("Reproducción automática bloqueada:", e));
     }
-    setTimeout(() => { const elem = document.querySelector("#mi-video") || document.querySelector("iframe"); elem?.requestFullscreen?.(); }, 300);
+
+    setTimeout(() => {
+        const elem = document.querySelector("#mi-video") || document.querySelector("iframe");
+        elem?.requestFullscreen?.();
+    }, 300);
+
     document.getElementById("modal-video").classList.remove("oculto", "vertical");
     document.body.style.overflow = "hidden";
 }
+
 function cerrarVideo() {
     document.getElementById("video-container").innerHTML = "";
     document.getElementById("modal-video").classList.add("oculto", "vertical");
     document.body.style.overflow = "auto";
 }
 
-// Inicio
+// Inicializar
 auth.onAuthStateChanged(u => { if (u) document.getElementById("nombrePerfil").textContent = u.displayName; });
 window.onload = () => { mostrarContenido("recientes"); mostrarHistorial(); };
 </script>
