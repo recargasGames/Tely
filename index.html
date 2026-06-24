@@ -56,26 +56,27 @@
         .btn-google i { color:#4285F4; font-size:1.3rem; }
         .btn-cerrar { margin-top:1.2rem; background:none; border:none; color:#EF4444; cursor:pointer; font-weight:bold; }
 
-        /* 🎬 Reproductor Netflix Corregido */
+        /* 🎬 Reproductor estilo Netflix */
         .modal-video { position:fixed; inset:0; background:#000; z-index:9998; display:flex; align-items:center; justify-content:center; padding:0; }
         .netflix-player { width:100%; height:100%; max-width:100%; max-height:100%; position:relative; background:#000; overflow:hidden; cursor:pointer; }
         .netflix-player video { width:100%; height:100%; object-fit:contain; background:#000; }
-        .player-top { position:absolute; top:0; left:0; right:0; padding:2rem 2rem 4rem; background:linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); display:flex; justify-content:space-between; align-items:center; z-index:10; opacity:0; transition:opacity 0.3s ease; }
-        .player-top.visible { opacity:1; }
-        .btn-cerrar-video { background:rgba(0,0,0,0.6); border:none; color:#fff; font-size:1.5rem; width:45px; height:45px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background 0.2s; }
+        .player-top { position:absolute; top:0; left:0; right:0; padding:2rem 2rem 4rem; background:linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); display:flex; justify-content:space-between; align-items:center; z-index:10; opacity:0; transition:opacity 0.3s ease; pointer-events: none; }
+        .player-top.visible { opacity:1; pointer-events: auto; }
+        .btn-cerrar-video { background:rgba(0,0,0,0.6); border:none; color:#fff; font-size:1.5rem; width:45px; height:45px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background 0.2s; pointer-events: auto; }
         .btn-cerrar-video:hover { background:rgba(255,0,0,0.7); }
         .titulo-video { font-size:1.4rem; font-weight:600; color:#fff; }
-        .player-bottom { position:absolute; bottom:0; left:0; right:0; padding:4rem 2rem 2rem; background:linear-gradient(to top, rgba(0,0,0,0.9), transparent); z-index:10; opacity:0; transition:opacity 0.3s ease; }
-        .player-bottom.visible { opacity:1; }
-        .progress-container { width:100%; height:5px; background:rgba(255,255,255,0.3); border-radius:3px; margin-bottom:1.2rem; cursor:pointer; position:relative; overflow:hidden; }
+        .player-bottom { position:absolute; bottom:0; left:0; right:0; padding:4rem 2rem 2rem; background:linear-gradient(to top, rgba(0,0,0,0.9), transparent); z-index:10; opacity:0; transition:opacity 0.3s ease; pointer-events: none; }
+        .player-bottom.visible { opacity:1; pointer-events: auto; }
+        .progress-container { width:100%; height:5px; background:rgba(255,255,255,0.3); border-radius:3px; margin-bottom:1.2rem; cursor:pointer; position:relative; overflow:hidden; pointer-events: auto; }
         .progress-bar { height:100%; width:0%; background:#E50914; border-radius:3px; transition:width 0.1s linear; }
         .controls-row { display:flex; justify-content:space-between; align-items:center; color:#fff; }
         .controls-left, .controls-right { display:flex; align-items:center; gap:1.2rem; }
-        .control-btn { background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer; transition:transform 0.2s; }
+        .control-btn { background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer; transition:transform 0.2s; pointer-events: auto; }
         .control-btn:hover { transform:scale(1.15); color:#E50914; }
         .time-display { font-size:0.95rem; font-weight:500; }
         .netflix-player:hover .player-top, .netflix-player:hover .player-bottom { opacity:1; }
         .netflix-player.playing .player-top, .netflix-player.playing .player-bottom { opacity:0; }
+        iframe { width:100%; height:100%; border:none; background:#000; }
         .oculto { display:none !important; }
         .error-video { color:#fff; text-align:center; padding:3rem; font-size:1.2rem; line-height:1.5; }
     </style>
@@ -141,7 +142,7 @@ const auth = firebase.auth();
 let videoPendiente = null;
 let controlsTimer;
 
-// ✅ LISTA DE CONTENIDO - NOMBRES EXACTOS Y SIN ERRORES
+// ✅ LISTA DE CONTENIDO - Con Rambo 1 ya configurado
 const contenido = [
     {
         id: 1,
@@ -150,7 +151,6 @@ const contenido = [
         categoria: "recientes",
         portada: "rambo1.png",
         video: "https://drive.google.com/file/d/16vG_7_-l9x-DNuDvMwQ8eizgOTue2xRN/preview"
-  // ⚠️ DEBE COINCIDIR EXACTAMENTE CON EL ARCHIVO SUBIDO
     },
     {
         id: 2,
@@ -174,7 +174,7 @@ const contenido = [
         anio: 2024,
         categoria: "peliculas",
         portada: "rey-leon.png",
-        video: ""
+        video: "https://lat-servicio.one/down.gffxm"
     },
     {
         id: 5,
@@ -257,7 +257,7 @@ function iniciarConGoogle() {
 }
 function cerrarSesion() { auth.signOut().then(() => document.getElementById("nombrePerfil").textContent = "Invitado"); }
 
-// 🎥 REPRODUCTOR - VERSIÓN FINAL QUE FUNCIONA
+// 🎥 REPRODUCTOR CORREGIDO - Sin duplicados
 function abrirVideo(ruta, titulo) {
     const player = document.getElementById("netflixPlayer");
     const modal = document.getElementById("modal-video");
@@ -266,21 +266,32 @@ function abrirVideo(ruta, titulo) {
     player.innerHTML = "";
 
     if (!ruta || ruta.trim() === "") {
-        player.innerHTML = `<div class="error-video">❌ Contenido no disponible<br>Archivo o enlace incorrecto</div>`;
+        player.innerHTML = `<div class="error-video">❌ Contenido no disponible</div>`;
         return;
     }
 
-    // Enlaces externos (iframe)
-    if (ruta.startsWith("http") && !ruta.endsWith(".mp4") && !ruta.endsWith(".webm")) {
-        player.innerHTML = `<iframe src="${ruta}" frameborder="0" allowfullscreen allow="autoplay; fullscreen" style="width:100%; height:100%; border:none;"></iframe>`;
+    // ✅ Enlaces de Google Drive / Iframes: solo carga su reproductor + botón cerrar
+    if (ruta.includes("drive.google.com") || ruta.includes("mediadelivery") || ruta.includes("vidmoly")) {
+        player.innerHTML = `
+            <iframe 
+                src="${ruta}" 
+                frameborder="0" 
+                allow="autoplay; fullscreen; encrypted-media" 
+                allowfullscreen>
+            </iframe>
+            <div class="player-top visible">
+                <h3 class="titulo-video">${titulo}</h3>
+                <button class="btn-cerrar-video" onclick="cerrarVideo()">✕</button>
+            </div>
+        `;
         return;
     }
 
-    // Archivos locales MP4
+    // 🎬 Archivos MP4 locales: usa reproductor estilo Netflix
     player.innerHTML = `
         <video id="videoPlayer" playsinline preload="metadata" style="width:100%; height:100%;">
             <source src="${ruta}" type="video/mp4">
-            <p class="error-video">❌ No se puede reproducir<br>Verifica: nombre exacto, formato MP4 códec H.264 y que esté subido en la misma carpeta</p>
+            <p class="error-video">❌ No se puede reproducir<br>Formato no compatible o archivo no encontrado</p>
         </video>
         <div class="player-top visible" id="playerTop">
             <h3 class="titulo-video">${titulo}</h3>
@@ -310,7 +321,7 @@ function abrirVideo(ruta, titulo) {
         if (!video) return;
 
         video.load();
-        video.play().catch(err => console.log("Reproducción:", err));
+        video.play().catch(() => {});
 
         video.addEventListener('loadedmetadata', () => {
             document.getElementById('durationTime').textContent = formatTime(video.duration);
