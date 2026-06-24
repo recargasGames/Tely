@@ -25,144 +25,59 @@
         }
     </script>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }
-        body { 
-            background: linear-gradient(135deg, #0A0A0F 0%, #121222 100%); 
-            color: #E2E8F0; 
-            min-height: 100vh;
-        }
-        header { 
-            background: rgba(21, 21, 32, 0.9); 
-            padding: 1rem; 
-            position: sticky; 
-            top: 0; 
-            z-index: 50; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
-            backdrop-filter: blur(8px);
-        }
-        .logo-contenedor {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-        }
-        .logo {
-            width: 40px;
-            height: 40px;
-            object-fit: contain;
-            border-radius: 6px;
-        }
-        h1 { color: #7C3AED; font-size: 1.7rem; font-weight: bold; margin: 0; }
-        .portada { aspect-ratio: 2/3; object-fit: cover; width: 100%; border-radius: 8px; }
-        .categorias { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; padding: 1rem; }
-        .btn-cat { padding: 0.8rem; border: none; border-radius: 8px; background: #151520; color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-cat.activo { background: #7C3AED; box-shadow: 0 0 10px rgba(124, 58, 237, 0.4); }
-        .contenedor-seccion { padding: 0 1rem 2rem; margin-top: 1.5rem; }
-        .titulo-seccion { font-size: 1.2rem; font-weight: bold; margin-bottom: 1rem; color: #A78BFA; }
-        .grid-peliculas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-        .tarjeta { background: #151520; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-        .tarjeta:hover { transform: scale(1.04); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        .info-tarjeta { padding: 0.7rem; text-align: center; }
-        .anio { font-size: 0.8rem; color: #94A3B8; margin-top: 0.3rem; }
-        .menu-perfil { position: relative; }
-        .btn-perfil { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
-        .dropdown { position: absolute; right: 0; top: 120%; background: #151520; border-radius: 8px; width: 220px; max-height: 70vh; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: none; z-index: 100; }
-        .dropdown.mostrar { display: block; }
-        .dropdown-header { padding: 0.8rem; border-bottom: 1px solid #2a2a3a; font-weight: bold; color: #A78BFA; }
-        .dropdown button { display: block; padding: 0.7rem 0.8rem; color: #E2E8F0; border: none; background: none; width: 100%; text-align: left; cursor: pointer; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .dropdown button:hover { background: #202030; color: #A78BFA; }
-        .historial-vacio { padding: 1rem; text-align: center; color: #94A3B8; font-size: 0.9rem; }
-        .modal-login { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem; }
-        .caja-login { background: #151520; padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 0 20px rgba(124, 58, 237, 0.2); }
-        .btn-google { width: 100%; padding: 1rem; background: #ffffff; color: #333; border: none; border-radius: 8px; font-weight: bold; margin-top: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.8rem; cursor: pointer; font-size: 1rem; }
-        .btn-google i { color: #4285F4; font-size: 1.3rem; }
-        .btn-cerrar { margin-top: 1.2rem; background: none; border: none; color: #EF4444; cursor: pointer; font-weight: bold; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background: linear-gradient(135deg, #0A0A0F 0%, #121222 100%); color: #E2E8F0; min-height: 100vh; }
+        header { background: rgba(21,21,32,0.9); padding: 1rem; position: sticky; top:0; z-index:50; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 10px rgba(0,0,0,0.4); backdrop-filter: blur(8px); }
+        .logo-contenedor { display:flex; align-items:center; gap:0.7rem; }
+        .logo { width:40px; height:40px; object-fit:contain; border-radius:6px; }
+        h1 { color:#7C3AED; font-size:1.7rem; font-weight:bold; margin:0; }
+        .portada { aspect-ratio:2/3; object-fit:cover; width:100%; border-radius:8px; }
+        .categorias { display:grid; grid-template-columns:repeat(4,1fr); gap:0.6rem; padding:1rem; }
+        .btn-cat { padding:0.8rem; border:none; border-radius:8px; background:#151520; color:#fff; font-weight:bold; cursor:pointer; transition:0.2s; }
+        .btn-cat.activo { background:#7C3AED; box-shadow:0 0 10px rgba(124,58,237,0.4); }
+        .contenedor-seccion { padding:0 1rem 2rem; margin-top:1.5rem; }
+        .titulo-seccion { font-size:1.2rem; font-weight:bold; margin-bottom:1rem; color:#A78BFA; }
+        .grid-peliculas { display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; }
+        .tarjeta { background:#151520; border-radius:10px; overflow:hidden; cursor:pointer; transition:transform 0.2s, box-shadow 0.2s; }
+        .tarjeta:hover { transform:scale(1.04); box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+        .info-tarjeta { padding:0.7rem; text-align:center; }
+        .anio { font-size:0.8rem; color:#94A3B8; margin-top:0.3rem; }
+        .menu-perfil { position:relative; }
+        .btn-perfil { background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer; }
+        .dropdown { position:absolute; right:0; top:120%; background:#151520; border-radius:8px; width:220px; max-height:70vh; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,0.4); display:none; z-index:100; }
+        .dropdown.mostrar { display:block; }
+        .dropdown-header { padding:0.8rem; border-bottom:1px solid #2a2a3a; font-weight:bold; color:#A78BFA; }
+        .dropdown button { display:block; padding:0.7rem 0.8rem; color:#E2E8F0; border:none; background:none; width:100%; text-align:left; cursor:pointer; font-size:0.9rem; }
+        .dropdown button:hover { background:#202030; color:#A78BFA; }
+        .historial-vacio { padding:1rem; text-align:center; color:#94A3B8; font-size:0.9rem; }
+        .modal-login { position:fixed; inset:0; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:9999; padding:1rem; }
+        .caja-login { background:#151520; padding:2.5rem; border-radius:12px; width:100%; max-width:360px; text-align:center; box-shadow:0 0 20px rgba(124,58,237,0.2); }
+        .btn-google { width:100%; padding:1rem; background:#fff; color:#333; border:none; border-radius:8px; font-weight:bold; margin-top:1.5rem; display:flex; align-items:center; justify-content:center; gap:0.8rem; cursor:pointer; }
+        .btn-google i { color:#4285F4; font-size:1.3rem; }
+        .btn-cerrar { margin-top:1.2rem; background:none; border:none; color:#EF4444; cursor:pointer; font-weight:bold; }
 
-        /* 🎬 REPRODUCTOR ESTILO NETFLIX */
-        .modal-video { 
-            position: fixed; inset: 0; background: #000; z-index: 9998; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 0; transform: rotate(90deg); transform-origin: left top; 
-            width: 100vh; height: 100vw; top: 0; left: 100%;
-        }
-        .modal-video.vertical { transform: rotate(0deg); width: 100%; height: 100%; left: 0; }
-        
-        .netflix-player {
-            width: 100%; height: 100%; position: relative; background: #000;
-            overflow: hidden; cursor: pointer;
-        }
-        .netflix-player video {
-            width: 100%; height: 100%; object-fit: contain;
-        }
-
-        /* Controles superiores */
-        .player-top {
-            position: absolute; top: 0; left: 0; right: 0;
-            padding: 2rem 2rem 4rem;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
-            display: flex; justify-content: space-between; align-items: center;
-            z-index: 10; opacity: 0; transition: opacity 0.3s ease;
-        }
-        .player-top.visible { opacity: 1; }
-        .btn-cerrar-video {
-            background: rgba(0,0,0,0.6); border: none; color: white;
-            font-size: 1.5rem; width: 45px; height: 45px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: background 0.2s;
-        }
-        .btn-cerrar-video:hover { background: rgba(255,0,0,0.7); }
-        .titulo-video { font-size: 1.4rem; font-weight: 600; color: white; }
-
-        /* Controles inferiores */
-        .player-bottom {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            padding: 4rem 2rem 2rem;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            z-index: 10; opacity: 0; transition: opacity 0.3s ease;
-        }
-        .player-bottom.visible { opacity: 1; }
-
-        /* Barra de progreso */
-        .progress-container {
-            width: 100%; height: 5px; background: rgba(255,255,255,0.3);
-            border-radius: 3px; margin-bottom: 1.2rem; cursor: pointer;
-            position: relative; overflow: hidden;
-        }
-        .progress-bar {
-            height: 100%; width: 0%; background: #E50914;
-            border-radius: 3px; transition: width 0.1s linear;
-        }
-
-        /* Botones de control */
-        .controls-row {
-            display: flex; justify-content: space-between; align-items: center;
-            color: white;
-        }
-        .controls-left, .controls-right {
-            display: flex; align-items: center; gap: 1.2rem;
-        }
-        .control-btn {
-            background: none; border: none; color: white;
-            font-size: 1.3rem; cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .control-btn:hover { transform: scale(1.15); color: #E50914; }
-        .time-display { font-size: 0.95rem; font-weight: 500; }
-
-        /* Ocultar controles automáticamente */
-        .netflix-player:hover .player-top,
-        .netflix-player:hover .player-bottom {
-            opacity: 1;
-        }
-        .netflix-player.playing .player-top,
-        .netflix-player.playing .player-bottom {
-            opacity: 0;
-        }
-
-        .oculto { display: none !important; }
-        .error-video { color: white; text-align: center; padding: 2rem; font-size: 1.2rem; }
+        /* 🎬 Reproductor Netflix Corregido */
+        .modal-video { position:fixed; inset:0; background:#000; z-index:9998; display:flex; align-items:center; justify-content:center; padding:0; }
+        .netflix-player { width:100%; height:100%; max-width:100%; max-height:100%; position:relative; background:#000; overflow:hidden; cursor:pointer; }
+        .netflix-player video { width:100%; height:100%; object-fit:contain; background:#000; }
+        .player-top { position:absolute; top:0; left:0; right:0; padding:2rem 2rem 4rem; background:linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); display:flex; justify-content:space-between; align-items:center; z-index:10; opacity:0; transition:opacity 0.3s ease; }
+        .player-top.visible { opacity:1; }
+        .btn-cerrar-video { background:rgba(0,0,0,0.6); border:none; color:#fff; font-size:1.5rem; width:45px; height:45px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background 0.2s; }
+        .btn-cerrar-video:hover { background:rgba(255,0,0,0.7); }
+        .titulo-video { font-size:1.4rem; font-weight:600; color:#fff; }
+        .player-bottom { position:absolute; bottom:0; left:0; right:0; padding:4rem 2rem 2rem; background:linear-gradient(to top, rgba(0,0,0,0.9), transparent); z-index:10; opacity:0; transition:opacity 0.3s ease; }
+        .player-bottom.visible { opacity:1; }
+        .progress-container { width:100%; height:5px; background:rgba(255,255,255,0.3); border-radius:3px; margin-bottom:1.2rem; cursor:pointer; position:relative; overflow:hidden; }
+        .progress-bar { height:100%; width:0%; background:#E50914; border-radius:3px; transition:width 0.1s linear; }
+        .controls-row { display:flex; justify-content:space-between; align-items:center; color:#fff; }
+        .controls-left, .controls-right { display:flex; align-items:center; gap:1.2rem; }
+        .control-btn { background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer; transition:transform 0.2s; }
+        .control-btn:hover { transform:scale(1.15); color:#E50914; }
+        .time-display { font-size:0.95rem; font-weight:500; }
+        .netflix-player:hover .player-top, .netflix-player:hover .player-bottom { opacity:1; }
+        .netflix-player.playing .player-top, .netflix-player.playing .player-bottom { opacity:0; }
+        .oculto { display:none !important; }
+        .error-video { color:#fff; text-align:center; padding:3rem; font-size:1.2rem; line-height:1.5; }
     </style>
 </head>
 <body>
@@ -173,19 +88,13 @@
         <h1>TELY</h1>
     </div>
     <div class="menu-perfil">
-        <button class="btn-perfil" onclick="toggleMenu()">
-            <i class="fa-solid fa-user-circle"></i>
-        </button>
+        <button class="btn-perfil" onclick="toggleMenu()"><i class="fa-solid fa-user-circle"></i></button>
         <div class="dropdown" id="menuPerfil">
             <div class="dropdown-header" id="nombrePerfil">Invitado</div>
             <div class="dropdown-header">📺 Visto recientemente</div>
             <div id="listaHistorial"></div>
-            <button onclick="limpiarHistorial()" class="text-yellow-400 text-sm mt-1">
-                <i class="fa-solid fa-trash mr-1"></i> Limpiar historial
-            </button>
-            <button onclick="cerrarSesion()" class="text-red-400 mt-2 border-t border-gray-700 pt-2">
-                <i class="fa-solid fa-right-from-bracket mr-2"></i> Cerrar sesión
-            </button>
+            <button onclick="limpiarHistorial()" class="text-yellow-400 text-sm mt-1"><i class="fa-solid fa-trash mr-1"></i> Limpiar historial</button>
+            <button onclick="cerrarSesion()" class="text-red-400 mt-2 border-t border-gray-700 pt-2"><i class="fa-solid fa-right-from-bracket mr-2"></i> Cerrar sesión</button>
         </div>
     </div>
 </header>
@@ -202,20 +111,16 @@
     <div id="lista-contenido" class="grid-peliculas"></div>
 </div>
 
-<!-- Modal Inicio de Sesión -->
 <div id="modal-login" class="modal-login oculto">
     <div class="caja-login">
         <h2 class="text-2xl font-bold text-acento mb-3">Bienvenido a TELY</h2>
-        <p class="text-gray-300 mb-4">Inicia sesión con tu cuenta Google para ver todo el contenido</p>
-        <button class="btn-google" onclick="iniciarConGoogle()">
-            <i class="fa-brands fa-google"></i> Continuar con Google
-        </button>
+        <p class="text-gray-300 mb-4">Inicia sesión con Google para ver todo el contenido</p>
+        <button class="btn-google" onclick="iniciarConGoogle()"><i class="fa-brands fa-google"></i> Continuar con Google</button>
         <button class="btn-cerrar" onclick="cerrarModalLogin()">❌ Cerrar</button>
     </div>
 </div>
 
-<!-- 🎬 REPRODUCTOR ESTILO NETFLIX -->
-<div id="modal-video" class="modal-video oculto vertical">
+<div id="modal-video" class="modal-video oculto">
     <div class="netflix-player" id="netflixPlayer"></div>
 </div>
 <script>
@@ -236,7 +141,7 @@ const auth = firebase.auth();
 let videoPendiente = null;
 let controlsTimer;
 
-// 🎬 LISTA DE CONTENIDO (NOMBRES EXACTOS)
+// ✅ LISTA DE CONTENIDO - NOMBRES EXACTOS Y SIN ERRORES
 const contenido = [
     {
         id: 1,
@@ -244,7 +149,7 @@ const contenido = [
         anio: 1982,
         categoria: "recientes",
         portada: "rambo1.png",
-        video: "Rambo1.mp4"
+        video: "Rambo1.mp4"  // ⚠️ DEBE COINCIDIR EXACTAMENTE CON EL ARCHIVO SUBIDO
     },
     {
         id: 2,
@@ -268,7 +173,7 @@ const contenido = [
         anio: 2024,
         categoria: "peliculas",
         portada: "rey-leon.png",
-        video: "rey-leon"
+        video: ",rey-leon.mp4"
     },
     {
         id: 5,
@@ -288,7 +193,7 @@ const contenido = [
     }
 ];
 
-// 📚 Historial
+// Historial
 function agregarAlHistorial(item) {
     let historial = JSON.parse(localStorage.getItem('historialTely')) || [];
     historial = historial.filter(h => h.id !== item.id);
@@ -312,14 +217,14 @@ function mostrarHistorial() {
 
 function limpiarHistorial() { localStorage.removeItem('historialTely'); mostrarHistorial(); }
 
-// Mostrar contenido
+// Mostrar lista
 function mostrarContenido(categoria) {
     const lista = document.getElementById("lista-contenido");
     lista.innerHTML = "";
     contenido.filter(i => i.categoria === categoria).forEach(item => {
         const tarjeta = document.createElement("div");
         tarjeta.className = "tarjeta";
-        tarjeta.innerHTML = `<img src="${item.portada}" alt="${item.titulo}" class="portada"><div class="info-tarjeta"><h3>${item.titulo}</h3><p class="anio">${item.anio}</p></div>`;
+        tarjeta.innerHTML = `<img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy"><div class="info-tarjeta"><h3>${item.titulo}</h3><p class="anio">${item.anio}</p></div>`;
         tarjeta.onclick = () => auth.currentUser ? abrirVideo(item.video, item.titulo) : (videoPendiente = item, abrirModalLogin());
         lista.appendChild(tarjeta);
     });
@@ -351,25 +256,30 @@ function iniciarConGoogle() {
 }
 function cerrarSesion() { auth.signOut().then(() => document.getElementById("nombrePerfil").textContent = "Invitado"); }
 
-// 🎥 Reproductor Netflix
+// 🎥 REPRODUCTOR - VERSIÓN FINAL QUE FUNCIONA
 function abrirVideo(ruta, titulo) {
     const player = document.getElementById("netflixPlayer");
-    document.getElementById("modal-video").classList.remove("oculto", "vertical");
+    const modal = document.getElementById("modal-video");
+    modal.classList.remove("oculto");
     document.body.style.overflow = "hidden";
+    player.innerHTML = "";
 
-    if (!ruta) {
-        player.innerHTML = `<div class="error-video">❌ Archivo no disponible</div>`;
+    if (!ruta || ruta.trim() === "") {
+        player.innerHTML = `<div class="error-video">❌ Contenido no disponible<br>Archivo o enlace incorrecto</div>`;
         return;
     }
 
-    if (ruta.startsWith("http") && ruta.includes("/play/")) {
-        player.innerHTML = `<iframe src="${ruta}" frameborder="0" allowfullscreen allow="autoplay; fullscreen" style="width:100%; height:100%;"></iframe>`;
+    // Enlaces externos (iframe)
+    if (ruta.startsWith("http") && !ruta.endsWith(".mp4") && !ruta.endsWith(".webm")) {
+        player.innerHTML = `<iframe src="${ruta}" frameborder="0" allowfullscreen allow="autoplay; fullscreen" style="width:100%; height:100%; border:none;"></iframe>`;
         return;
     }
 
+    // Archivos locales MP4
     player.innerHTML = `
-        <video id="videoPlayer" playsinline preload="auto" style="width:100%; height:100%;">
+        <video id="videoPlayer" playsinline preload="metadata" style="width:100%; height:100%;">
             <source src="${ruta}" type="video/mp4">
+            <p class="error-video">❌ No se puede reproducir<br>Verifica: nombre exacto, formato MP4 códec H.264 y que esté subido en la misma carpeta</p>
         </video>
         <div class="player-top visible" id="playerTop">
             <h3 class="titulo-video">${titulo}</h3>
@@ -396,22 +306,27 @@ function abrirVideo(ruta, titulo) {
 
     setTimeout(() => {
         const video = document.getElementById('videoPlayer');
+        if (!video) return;
+
         video.load();
-        video.play().catch(() => {});
+        video.play().catch(err => console.log("Reproducción:", err));
 
         video.addEventListener('loadedmetadata', () => {
             document.getElementById('durationTime').textContent = formatTime(video.duration);
         });
+
         video.addEventListener('timeupdate', () => {
-            const pct = (video.currentTime / video.duration) * 100;
-            document.getElementById('progressBar').style.width = `${pct}%`;
+            const porcentaje = (video.currentTime / video.duration) * 100;
+            document.getElementById('progressBar').style.width = `${porcentaje}%`;
             document.getElementById('currentTime').textContent = formatTime(video.currentTime);
         });
+
         video.addEventListener('play', () => {
             player.classList.add('playing');
             document.getElementById('playPauseBtn').innerHTML = `<i class="fa-solid fa-pause"></i>`;
             hideControlsAfterDelay();
         });
+
         video.addEventListener('pause', () => {
             player.classList.remove('playing');
             document.getElementById('playPauseBtn').innerHTML = `<i class="fa-solid fa-play"></i>`;
@@ -419,45 +334,65 @@ function abrirVideo(ruta, titulo) {
         });
 
         document.getElementById('progressContainer').addEventListener('click', e => {
-            const w = e.currentTarget.clientWidth;
-            video.currentTime = (e.offsetX / w) * video.duration;
+            const ancho = e.currentTarget.clientWidth;
+            video.currentTime = (e.offsetX / ancho) * video.duration;
         });
+
         player.addEventListener('mousemove', hideControlsAfterDelay);
-    }, 200);
+    }, 250);
 }
 
 function cerrarVideo() {
-    document.getElementById("modal-video").classList.add("oculto", "vertical");
+    document.getElementById("modal-video").classList.add("oculto");
     document.body.style.overflow = "auto";
     clearTimeout(controlsTimer);
 }
 
 function togglePlay() {
     const v = document.getElementById('videoPlayer');
+    if (!v) return;
     v.paused ? v.play() : v.pause();
 }
+
 function toggleVolume() {
     const v = document.getElementById('videoPlayer');
+    if (!v) return;
     v.muted = !v.muted;
     document.getElementById('volumeBtn').innerHTML = v.muted ? `<i class="fa-solid fa-volume-xmark"></i>` : `<i class="fa-solid fa-volume-high"></i>`;
 }
-function skipBackward() { document.getElementById('videoPlayer').currentTime -= 10; }
-function skipForward() { document.getElementById('videoPlayer').currentTime += 10; }
-function formatTime(s) {
-    const m = Math.floor(s / 60);
-    const sec = Math.floor(s % 60);
-    return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+
+function skipBackward() { const v = document.getElementById('videoPlayer'); if (v) v.currentTime -= 10; }
+function skipForward() { const v = document.getElementById('videoPlayer'); if (v) v.currentTime += 10; }
+
+function formatTime(segundos) {
+    const min = Math.floor(segundos / 60);
+    const seg = Math.floor(segundos % 60);
+    return `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
 }
-function showControls() { document.getElementById('playerTop').classList.add('visible'); document.getElementById('playerBottom').classList.add('visible'); }
-function hideControls() { document.getElementById('playerTop').classList.remove('visible'); document.getElementById('playerBottom').classList.remove('visible'); }
+
+function showControls() {
+    document.getElementById('playerTop')?.classList.add('visible');
+    document.getElementById('playerBottom')?.classList.add('visible');
+}
+
+function hideControls() {
+    document.getElementById('playerTop')?.classList.remove('visible');
+    document.getElementById('playerBottom')?.classList.remove('visible');
+}
+
 function hideControlsAfterDelay() {
     showControls();
     clearTimeout(controlsTimer);
-    controlsTimer = setTimeout(() => { if (!document.getElementById('videoPlayer').paused) hideControls(); }, 3000);
+    controlsTimer = setTimeout(() => {
+        const v = document.getElementById('videoPlayer');
+        if (v && !v.paused) hideControls();
+    }, 3500);
 }
+
 function toggleFullscreen() {
     const el = document.getElementById('modal-video');
-    document.fullscreenElement ? document.exitFullscreen() : el.requestFullscreen().catch(() => {});
+    if (!document.fullscreenElement) el.requestFullscreen().catch(() => {});
+    else document.exitFullscreen();
 }
 
 auth.onAuthStateChanged(u => { if (u) document.getElementById("nombrePerfil").textContent = u.displayName; });
