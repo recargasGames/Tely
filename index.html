@@ -42,6 +42,8 @@
         .tarjeta:hover { transform:scale(1.04); box-shadow:0 4px 12px rgba(0,0,0,0.3); }
         .info-tarjeta { padding:0.7rem; text-align:center; }
         .anio { font-size:0.8rem; color:#94A3B8; margin-top:0.3rem; }
+        .badge-video { display:inline-block; font-size:0.6rem; background:#7C3AED; padding:0.15rem 0.6rem; border-radius:12px; color:#fff; margin-top:0.2rem; }
+        .badge-sin-video { display:inline-block; font-size:0.6rem; background:#333; padding:0.15rem 0.6rem; border-radius:12px; color:#666; margin-top:0.2rem; }
         .menu-perfil { position:relative; }
         .btn-perfil { background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer; }
         .dropdown { position:absolute; right:0; top:120%; background:#151520; border-radius:8px; width:220px; max-height:70vh; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,0.4); display:none; z-index:100; }
@@ -56,16 +58,33 @@
         .btn-google i { color:#4285F4; font-size:1.3rem; }
         .btn-cerrar { margin-top:1.2rem; background:none; border:none; color:#EF4444; cursor:pointer; font-weight:bold; }
 
-        /* 🎬 Reproductor - Solo usa iframe externo */
-        .modal-video { position:fixed; inset:0; background:#000; z-index:9998; display:flex; align-items:center; justify-content:center; padding:0; }
-        .netflix-player { width:100%; height:100%; max-width:100%; max-height:100%; position:relative; background:#000; overflow:hidden; }
-        iframe { width:100%; height:100%; border:none; background:#000; }
-        .player-top { position:absolute; top:0; left:0; right:0; padding:2rem 2rem 4rem; background:linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); display:flex; justify-content:space-between; align-items:center; z-index:10; }
+        /* 🎬 Reproductor y temporadas */
+        .modal-video { position:fixed; inset:0; background:#000; z-index:9998; display:flex; flex-direction:column; padding:0; }
+        .netflix-player { width:100%; height:75vh; position:relative; background:#000; overflow:hidden; }
+        iframe, object { width:100%; height:100%; border:none; background:#000; }
+        .player-top { position:absolute; top:0; left:0; right:0; padding:1.5rem; background:linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); display:flex; justify-content:space-between; align-items:center; z-index:10; }
         .btn-cerrar-video { background:rgba(0,0,0,0.6); border:none; color:#fff; font-size:1.5rem; width:45px; height:45px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background 0.2s; }
         .btn-cerrar-video:hover { background:rgba(255,0,0,0.7); }
-        .titulo-video { font-size:1.4rem; font-weight:600; color:#fff; }
+        .titulo-video { font-size:1.3rem; font-weight:600; color:#fff; }
+
+        .seccion-capitulos { height:25vh; background:#121222; border-top:1px solid #2a2a3a; padding:1rem; overflow-y:auto; }
+        .selector-temporadas { display:flex; gap:0.8rem; margin-bottom:1rem; flex-wrap:wrap; }
+        .btn-temporada { padding:0.5rem 1rem; border-radius:6px; border:none; background:#1e1e2f; color:#fff; cursor:pointer; }
+        .btn-temporada.activa { background:#7C3AED; }
+        .lista-capitulos { display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:0.6rem; }
+        .btn-capitulo { padding:0.6rem; border-radius:6px; border:none; background:#1e1e2f; color:#fff; cursor:pointer; text-align:center; font-size:0.9rem; }
+        .btn-capitulo:hover { background:#2a2a3f; }
+        .btn-capitulo.activo { background:#7C3AED; }
+
         .oculto { display:none !important; }
         .error-video { color:#fff; text-align:center; padding:3rem; font-size:1.2rem; line-height:1.5; }
+
+        @media (min-width: 640px) {
+            .grid-peliculas { grid-template-columns:repeat(3,1fr); }
+        }
+        @media (min-width: 1024px) {
+            .grid-peliculas { grid-template-columns:repeat(6,1fr); }
+        }
     </style>
 </head>
 <body>
@@ -95,7 +114,7 @@
 </div>
 
 <div class="contenedor-seccion">
-    <h2 class="titulo-seccion" id="tituloSeccion">Películas Recientes</h2>
+    <h2 class="titulo-seccion" id="tituloSeccion">Cargando contenido...</h2>
     <div id="lista-contenido" class="grid-peliculas"></div>
 </div>
 
@@ -110,9 +129,15 @@
 
 <div id="modal-video" class="modal-video oculto">
     <div class="netflix-player" id="netflixPlayer"></div>
-</div>
-<script>
-// Configuración Firebase
+    <div class="seccion-capitulos oculto" id="seccionCapitulos">
+        <h4 class="text-sm text-gray-300 mb-2">Selecciona temporada y capítulo</h4>
+        <div class="selector-temporadas" id="selectorTemporadas"></div>
+        <div class="lista-capitulos" id="listaCapitulos"></div>
+    </div>
+</div><script>
+// ==============================================
+// 🔧 CONFIGURACIÓN FIREBASE
+// ==============================================
 const firebaseConfig = {
   apiKey: "AIzaSyCYetRSA0nsZsGiqABbTtjq-5a4bz5-oDk",
   authDomain: "tely-675c0.firebaseapp.com",
@@ -127,157 +152,424 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 let videoPendiente = null;
+let serieActual = null;
 
-// ✅ LISTA DE CONTENIDO - Enlace de Rambo listo para Google Drive
-const contenido = [
-    {
-        id: 1,
-        titulo: "Rambo 1",
-        anio: 1982,
-        categoria: "recientes",
-        portada: "rambo1.png",
-        video: "https://drive.google.com/file/d/16vG_7_-l9x-DNuDvMwQ8eizgOTue2xRN/preview"
-    },
-    {
-        id: 2,
-        titulo: "Película MediaDelivery",
-        anio: 2026,
-        categoria: "peliculas",
-        portada: "media.png",
-        video: "https://player.mediadelivery.net/play/687159/225fe8f9-0da5-4258-a3e6-7b21de9839fa"
-    },
-    {
-        id: 3,
-        titulo: "Así Aprenderás",
-        anio: 2025,
-        categoria: "series",
-        portada: "haci.png",
-        video: "https://vidmoly.biz/embed-qo3n9hrm1o9g.html"
-    },
-    {
-        id: 4,
-        titulo: "Mufasa: El Rey León",
-        anio: 2024,
-        categoria: "peliculas",
-        portada: "rey-leon.png",
-        video: "https://lat-servicio.one/down.gffxm"
-    },
-    {
-        id: 5,
-        titulo: "Iron Lung",
-        anio: 2023,
-        categoria: "peliculas",
-        portada: "Iron-lung.png",
-        video: ""
-    },
-    {
-        id: 6,
-        titulo: "Toy Story 5",
-        anio: 2026,
-        categoria: "recientes",
-        portada: "Toy-Story5.png",
-        video: ""
-    }
+// ==============================================
+// 🔑 CONFIGURACIÓN TMDB
+// ==============================================
+const TMDB_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4ZGQ5OWI1YTE1YWNmZGQ5OGUzYjI0OWQ1Zjg5MGFmNCIsIm5iZiI6MTc4MjI3NzIzMS4zMzMsInN1YiI6IjZhM2I2NDZmZThmMTMwOTc2MWVjNDYxYiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.JLmHWuXkhDc9LreAvXFZa0qTS7PR_nrj_SSwVm9UZ9Y";
+const TMDB_API_KEY = "8dd99b5a15acfdd98e3b249d5f890af4";
+const TMDB_BASE = "https://api.themoviedb.org/3";
+const TMDB_IMG = "https://image.tmdb.org/t/p/w500";
+const TMDB_LANG = "es-ES";
+
+const opcionesTMDB = {
+  method: "GET",
+  headers: {
+    "Authorization": `Bearer ${TMDB_TOKEN}`,
+    "Content-Type": "application/json;charset=utf-8"
+  }
+};
+
+// ==============================================
+// 📦 TU CATÁLOGO PERSONAL CON ENLACES DE VIDEO
+// ==============================================
+const MI_CONTENIDO = [
+  // === PELÍCULAS CON VIDEO ===
+  {
+    id: 'm1',
+    titulo: 'Rambo 1',
+    anio: 1982,
+    tipo: 'pelicula',
+    categoria: 'recientes',
+    portada: 'rambo1.png',
+    video: 'https://vidmoly.biz/embed-zpqaemei0ljl.html'
+  },
+  {
+    id: 'm2',
+    titulo: 'Demonio Negro',
+    anio: 1982,
+    tipo: 'pelicula',
+    categoria: 'peliculas',
+    portada: 'dm.png',
+    video: 'https://vidmoly.biz/embed-vw401s1vxe6r.html'
+  },
+  {
+    id: 'm3',
+    titulo: 'John Wick',
+    anio: 2014,
+    tipo: 'pelicula',
+    categoria: 'peliculas',
+    portada: 'https://image.tmdb.org/t/p/w500/fZPSd91yGE9fCcCe6OoQr6E3Bev.jpg',
+    video: 'https://www.youtube.com/embed/C0BMx-qxsP4'
+  },
+  {
+    id: 'm4',
+    titulo: 'Dune',
+    anio: 2021,
+    tipo: 'pelicula',
+    categoria: 'peliculas',
+    portada: 'https://image.tmdb.org/t/p/w500/d5NXSklXo0qyIYkgV94XAgMIckC.jpg',
+    video: 'https://www.youtube.com/embed/8Bk1TtHj_0o'
+  },
+
+  // === SERIES CON TEMPORADAS Y CAPÍTULOS ===
+  {
+    id: 's1',
+    titulo: 'Así Aprenderás',
+    anio: 2025,
+    tipo: 'serie',
+    categoria: 'series',
+    portada: 'haci.png',
+    temporadas: [
+      {
+        numero: 1,
+        nombre: 'Temporada 1',
+        capitulos: [
+          { numero: 1, titulo: 'Capítulo 1', video: 'https://vidmoly.me/dl/8x41dp7ngg7s' },
+          { numero: 2, titulo: 'Capítulo 2', video: '' },
+          { numero: 3, titulo: 'Capítulo 3', video: '' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 's2',
+    titulo: 'Breaking Bad',
+    anio: 2008,
+    tipo: 'serie',
+    categoria: 'series',
+    portada: 'https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
+    temporadas: [
+      {
+        numero: 1,
+        nombre: 'Temporada 1',
+        capitulos: [
+          { numero: 1, titulo: 'Pilot', video: 'https://www.youtube.com/embed/HhesaQXLuRY' },
+          { numero: 2, titulo: 'Cat\'s in the Bag...', video: 'https://www.youtube.com/embed/1z9jBbgvYFc' }
+        ]
+      },
+      {
+        numero: 2,
+        nombre: 'Temporada 2',
+        capitulos: [
+          { numero: 1, titulo: 'Seven Thirty-Seven', video: '' },
+          { numero: 2, titulo: 'Grilled', video: '' }
+        ]
+      }
+    ]
+  }
 ];
 
-// Historial
+// ==============================================
+// 📦 CARGA DE CONTENIDO (TMDb + TU CONTENIDO)
+// ==============================================
+let contenido = [];
+
+async function cargarContenidoCompleto() {
+  document.getElementById("tituloSeccion").textContent = "Recientes";
+  const lista = document.getElementById("lista-contenido");
+  lista.innerHTML = '<div class="col-span-2 text-center py-10 text-gray-400">Cargando...</div>';
+
+  try {
+    // 1. Cargar películas populares de TMDb (SOLO PORTADAS)
+    const resPeliculas = await fetch(`${TMDB_BASE}/movie/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB);
+    const datosPeliculas = await resPeliculas.json();
+
+    const resSeries = await fetch(`${TMDB_BASE}/tv/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB);
+    const datosSeries = await resSeries.json();
+
+    // 2. Convertir datos de TMDb a formato compatible (sin video)
+    const pelisTMDB = datosPeliculas.results.slice(0, 10).map(p => ({
+      id: `tmdb_${p.id}`,
+      titulo: p.title,
+      anio: p.release_date ? p.release_date.split("-")[0] : "N/D",
+      tipo: "pelicula",
+      categoria: "peliculas",
+      portada: p.poster_path ? `${TMDB_IMG}${p.poster_path}` : "portada-default.png",
+      video: "",
+      deTMDB: true
+    }));
+
+    const seriesTMDB = datosSeries.results.slice(0, 8).map(s => ({
+      id: `tmdb_${s.id}`,
+      titulo: s.name,
+      anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D",
+      tipo: "serie",
+      categoria: "series",
+      portada: s.poster_path ? `${TMDB_IMG}${s.poster_path}` : "portada-default.png",
+      temporadas: [],
+      deTMDB: true
+    }));
+
+    // 3. UNIR: TU CONTENIDO (con video) + TMDb (sin video)
+    contenido = [
+      ...MI_CONTENIDO,
+      ...pelisTMDB,
+      ...seriesTMDB
+    ];
+
+    // 4. Mostrar la categoría "recientes"
+    mostrarContenido("recientes");
+
+  } catch (err) {
+    console.error("Error TMDB:", err);
+    // Si falla TMDb, mostrar solo tu contenido
+    contenido = [...MI_CONTENIDO];
+    mostrarContenido("recientes");
+  }
+}
+
+// ==============================================
+// 📋 FUNCIONES GENERALES
+// ==============================================
 function agregarAlHistorial(item) {
-    let historial = JSON.parse(localStorage.getItem('historialTely')) || [];
-    historial = historial.filter(h => h.id !== item.id);
-    historial.unshift({ id: item.id, titulo: item.titulo, video: item.video });
-    if (historial.length > 10) historial.pop();
-    localStorage.setItem('historialTely', JSON.stringify(historial));
-    mostrarHistorial();
+  let historial = JSON.parse(localStorage.getItem("historialTely")) || [];
+  historial = historial.filter(h => h.id !== item.id);
+  historial.unshift({ id: item.id, titulo: item.titulo, tipo: item.tipo });
+  if (historial.length > 10) historial.pop();
+  localStorage.setItem("historialTely", JSON.stringify(historial));
+  mostrarHistorial();
 }
 
 function mostrarHistorial() {
-    const contenedor = document.getElementById('listaHistorial');
-    const historial = JSON.parse(localStorage.getItem('historialTely')) || [];
-    contenedor.innerHTML = historial.length ? '' : `<div class="historial-vacio">Aún no has visto nada</div>`;
-    historial.forEach(item => {
-        const btn = document.createElement('button');
-        btn.innerHTML = `<i class="fa-solid fa-play mr-2"></i> ${item.titulo}`;
-        btn.onclick = () => auth.currentUser ? abrirVideo(item.video, item.titulo) : (videoPendiente = item, abrirModalLogin(), toggleMenu());
-        contenedor.appendChild(btn);
-    });
+  const contenedor = document.getElementById("listaHistorial");
+  const historial = JSON.parse(localStorage.getItem("historialTely")) || [];
+  contenedor.innerHTML = historial.length ? "" : `<div class="historial-vacio">Aún no has visto nada</div>`;
+  historial.forEach(item => {
+    const btn = document.createElement("button");
+    btn.innerHTML = `<i class="fa-solid fa-play mr-2"></i> ${item.titulo}`;
+    btn.onclick = () => {
+      const encontrado = contenido.find(c => c.id === item.id);
+      if (!encontrado) return;
+      auth.currentUser ?
+        (encontrado.tipo === "pelicula" ? abrirVideoPelicula(encontrado) : abrirSerie(encontrado)) :
+        (videoPendiente = encontrado, abrirModalLogin(), toggleMenu());
+    };
+    contenedor.appendChild(btn);
+  });
 }
 
-function limpiarHistorial() { localStorage.removeItem('historialTely'); mostrarHistorial(); }
+function limpiarHistorial() {
+  localStorage.removeItem("historialTely");
+  mostrarHistorial();
+}
 
-// Mostrar lista
 function mostrarContenido(categoria) {
-    const lista = document.getElementById("lista-contenido");
-    lista.innerHTML = "";
-    contenido.filter(i => i.categoria === categoria).forEach(item => {
-        const tarjeta = document.createElement("div");
-        tarjeta.className = "tarjeta";
-        tarjeta.innerHTML = `<img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy"><div class="info-tarjeta"><h3>${item.titulo}</h3><p class="anio">${item.anio}</p></div>`;
-        tarjeta.onclick = () => auth.currentUser ? abrirVideo(item.video, item.titulo) : (videoPendiente = item, abrirModalLogin());
-        lista.appendChild(tarjeta);
-    });
+  const lista = document.getElementById("lista-contenido");
+  lista.innerHTML = "";
+  
+  // Primero mostrar las de tu catálogo (con video), luego las de TMDb
+  const misItems = MI_CONTENIDO.filter(i => i.categoria === categoria);
+  const otrosItems = contenido.filter(i => i.categoria === categoria && !MI_CONTENIDO.includes(i));
+
+  const filtrados = [...misItems, ...otrosItems];
+
+  if (filtrados.length === 0) {
+    lista.innerHTML = `<p class="col-span-2 text-center text-gray-400 py-10">Sin contenido en esta categoría</p>`;
+    return;
+  }
+
+  filtrados.forEach(item => {
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "tarjeta";
+    
+    const tieneVideo = item.video || (item.temporadas && item.temporadas.length > 0 && item.temporadas[0].capitulos.some(c => c.video));
+    
+    tarjeta.innerHTML = `
+      <img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy">
+      <div class="info-tarjeta">
+        <h3 class="font-medium truncate">${item.titulo}</h3>
+        <p class="anio">${item.anio} • ${item.tipo === "pelicula" ? "Película" : "Serie"}</p>
+        ${tieneVideo ? '<span class="badge-video">▶ Disponible</span>' : '<span class="badge-sin-video">🔒 Sin video</span>'}
+      </div>
+    `;
+    
+    tarjeta.onclick = () => {
+      if (!tieneVideo) {
+        alert('⚠️ Este contenido solo tiene portada, no tiene video disponible.');
+        return;
+      }
+      auth.currentUser ?
+        (item.tipo === "pelicula" ? abrirVideoPelicula(item) : abrirSerie(item)) :
+        (videoPendiente = item, abrirModalLogin());
+    };
+    lista.appendChild(tarjeta);
+  });
 }
 
 function cambiarCategoria(cat) {
-    document.querySelectorAll(".btn-cat").forEach(b => b.classList.remove("activo"));
-    event.target.classList.add("activo");
-    const titulos = { recientes: "Recientes", peliculas: "Películas", series: "Series", anime: "Anime" };
-    document.getElementById("tituloSeccion").textContent = titulos[cat];
-    mostrarContenido(cat);
+  document.querySelectorAll(".btn-cat").forEach(b => b.classList.remove("activo"));
+  event.target.classList.add("activo");
+  const titulos = { recientes: "Recientes", peliculas: "Películas", series: "Series", anime: "Anime" };
+  document.getElementById("tituloSeccion").textContent = titulos[cat];
+  mostrarContenido(cat);
 }
 
-function toggleMenu() { mostrarHistorial(); document.getElementById("menuPerfil").classList.toggle("mostrar"); }
-window.onclick = e => { if (!e.target.matches('.btn-perfil, .btn-perfil *')) document.getElementById("menuPerfil").classList.remove("mostrar"); };
+function toggleMenu() {
+  mostrarHistorial();
+  document.getElementById("menuPerfil").classList.toggle("mostrar");
+}
 
-// Inicio de sesión
+window.onclick = e => {
+  if (!e.target.matches(".btn-perfil, .btn-perfil *")) document.getElementById("menuPerfil").classList.remove("mostrar");
+};
+
+// ==============================================
+// 🔐 INICIO DE SESIÓN
+// ==============================================
 function abrirModalLogin() { document.getElementById("modal-login").classList.remove("oculto"); }
 function cerrarModalLogin() { document.getElementById("modal-login").classList.add("oculto"); videoPendiente = null; }
+
 function iniciarConGoogle() {
-    const proveedor = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(proveedor)
-        .then(res => {
-            document.getElementById("nombrePerfil").textContent = res.user.displayName;
-            cerrarModalLogin();
-            if (videoPendiente) { abrirVideo(videoPendiente.video, videoPendiente.titulo); agregarAlHistorial(videoPendiente); videoPendiente = null; }
-        })
-        .catch(err => alert("Error: " + err.message));
+  const proveedor = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(proveedor)
+    .then(res => {
+      document.getElementById("nombrePerfil").textContent = res.user.displayName;
+      cerrarModalLogin();
+      if (videoPendiente) {
+        videoPendiente.tipo === "pelicula" ? abrirVideoPelicula(videoPendiente) : abrirSerie(videoPendiente);
+        agregarAlHistorial(videoPendiente);
+        videoPendiente = null;
+      }
+    })
+    .catch(err => alert("Error: " + err.message));
 }
+
 function cerrarSesion() { auth.signOut().then(() => document.getElementById("nombrePerfil").textContent = "Invitado"); }
 
-// 🎥 REPRODUCTOR - SOLO IFRAME EXTERNO (Google Drive, etc.)
-function abrirVideo(ruta, titulo) {
-    const player = document.getElementById("netflixPlayer");
-    const modal = document.getElementById("modal-video");
-    modal.classList.remove("oculto");
-    document.body.style.overflow = "hidden";
-    player.innerHTML = "";
+// ==============================================
+// 🎬 REPRODUCTOR CORREGIDO (con <object> para VidMoly)
+// ==============================================
+function abrirVideoPelicula(peli) {
+  const player = document.getElementById("netflixPlayer");
+  const modal = document.getElementById("modal-video");
+  const seccionCap = document.getElementById("seccionCapitulos");
+  modal.classList.remove("oculto");
+  seccionCap.classList.add("oculto");
+  document.body.style.overflow = "hidden";
+  player.innerHTML = "";
 
-    if (!ruta || ruta.trim() === "") {
-        player.innerHTML = `<div class="error-video">❌ Contenido no disponible</div>`;
-        return;
-    }
+  if (!peli.video) {
+    player.innerHTML = `<div class="error-video">❌ Enlace de video no agregado</div>`;
+    return;
+  }
 
-    // Carga solo el reproductor de la fuente externa
+  let src = peli.video;
+  let esVidMoly = src.includes('vidmoly');
+  
+  // 🆕 Si es VidMoly y NO es embed, usar <object> que funciona mejor
+  if (esVidMoly && !src.includes('embed')) {
     player.innerHTML = `
-        <iframe 
-            src="${ruta}" 
-            frameborder="0" 
-            allow="autoplay; fullscreen; encrypted-media" 
-            allowfullscreen>
-        </iframe>
-        <div class="player-top">
-            <h3 class="titulo-video">${titulo}</h3>
-            <button class="btn-cerrar-video" onclick="cerrarVideo()">✕</button>
-        </div>
+      <object type="text/html" data="${src}" style="width:100%; height:100%; border:none; background:#000;"></object>
+      <div class="player-top">
+        <h3 class="titulo-video">${peli.titulo} (${peli.anio})</h3>
+        <button class="btn-cerrar-video" onclick="cerrarVideo()">✕</button>
+      </div>
     `;
+  } else {
+    // Para YouTube y otros servicios que sí funcionan con iframe
+    player.innerHTML = `
+      <iframe src="${src}" frameborder="0" allow="autoplay; fullscreen; encrypted-media" allowfullscreen></iframe>
+      <div class="player-top">
+        <h3 class="titulo-video">${peli.titulo} (${peli.anio})</h3>
+        <button class="btn-cerrar-video" onclick="cerrarVideo()">✕</button>
+      </div>
+    `;
+  }
+  
+  agregarAlHistorial(peli);
+}
+
+function abrirSerie(serie) {
+  serieActual = serie;
+  const player = document.getElementById("netflixPlayer");
+  const modal = document.getElementById("modal-video");
+  const seccionCap = document.getElementById("seccionCapitulos");
+  modal.classList.remove("oculto");
+  seccionCap.classList.remove("oculto");
+  document.body.style.overflow = "hidden";
+  player.innerHTML = `<div class="error-video">Selecciona temporada y capítulo</div>`;
+
+  if (!serie.temporadas || serie.temporadas.length === 0) {
+    player.innerHTML = `<div class="error-video">❌ Sin temporadas registradas</div>`;
+    return;
+  }
+
+  const contTemporadas = document.getElementById("selectorTemporadas");
+  contTemporadas.innerHTML = "";
+  serie.temporadas.forEach((temp, idx) => {
+    const btn = document.createElement("button");
+    btn.className = `btn-temporada ${idx === 0 ? "activa" : ""}`;
+    btn.textContent = temp.nombre;
+    btn.onclick = () => {
+      document.querySelectorAll(".btn-temporada").forEach(b => b.classList.remove("activa"));
+      btn.classList.add("activa");
+      mostrarCapitulos(temp);
+    };
+    contTemporadas.appendChild(btn);
+  });
+
+  mostrarCapitulos(serie.temporadas[0]);
+  agregarAlHistorial(serie);
+}
+
+function mostrarCapitulos(temporada) {
+  const contCap = document.getElementById("listaCapitulos");
+  contCap.innerHTML = "";
+  temporada.capitulos.forEach(cap => {
+    const btn = document.createElement("button");
+    btn.className = "btn-capitulo";
+    btn.textContent = `Cap. ${cap.numero}`;
+    btn.onclick = () => {
+      document.querySelectorAll(".btn-capitulo").forEach(b => b.classList.remove("activo"));
+      btn.classList.add("activo");
+      reproducirCapitulo(cap);
+    };
+    contCap.appendChild(btn);
+  });
+}
+
+function reproducirCapitulo(cap) {
+  const player = document.getElementById("netflixPlayer");
+  if (!cap.video) {
+    player.innerHTML = `<div class="error-video">❌ Capítulo sin enlace</div>`;
+    return;
+  }
+  
+  let src = cap.video;
+  let esVidMoly = src.includes('vidmoly');
+  
+  if (esVidMoly && !src.includes('embed')) {
+    player.innerHTML = `
+      <object type="text/html" data="${src}" style="width:100%; height:100%; border:none; background:#000;"></object>
+      <div class="player-top">
+        <h3 class="titulo-video">${serieActual.titulo} - Capítulo ${cap.numero}</h3>
+        <button class="btn-cerrar-video" onclick="cerrarVideo()">✕</button>
+      </div>
+    `;
+  } else {
+    player.innerHTML = `
+      <iframe src="${src}" frameborder="0" allow="autoplay; fullscreen; encrypted-media" allowfullscreen></iframe>
+      <div class="player-top">
+        <h3 class="titulo-video">${serieActual.titulo} - Capítulo ${cap.numero}</h3>
+        <button class="btn-cerrar-video" onclick="cerrarVideo()">✕</button>
+      </div>
+    `;
+  }
 }
 
 function cerrarVideo() {
-    document.getElementById("modal-video").classList.add("oculto");
-    document.body.style.overflow = "auto";
+  document.getElementById("modal-video").classList.add("oculto");
+  document.body.style.overflow = "auto";
+  serieActual = null;
 }
 
+// ==============================================
+// ⚡ INICIO
+// ==============================================
 auth.onAuthStateChanged(u => { if (u) document.getElementById("nombrePerfil").textContent = u.displayName; });
-window.onload = () => mostrarContenido("recientes");
+window.onload = cargarContenidoCompleto;
 </script>
 
 </body>
