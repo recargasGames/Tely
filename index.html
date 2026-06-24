@@ -16,14 +16,16 @@
                         fondo: '#0A0A0F',
                         tarjeta: '#151520',
                         acento: '#7C3AED',
-                        texto: '#E2E8F0'
+                        texto: '#E2E8F0',
+                        netflix: '#E50914',
+                        netflixDark: '#181818'
                     }
                 }
             }
         }
     </script>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family:sans-serif; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }
         body { 
             background: linear-gradient(135deg, #0A0A0F 0%, #121222 100%); 
             color: #E2E8F0; 
@@ -66,40 +68,10 @@
         .anio { font-size: 0.8rem; color: #94A3B8; margin-top: 0.3rem; }
         .menu-perfil { position: relative; }
         .btn-perfil { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
-        .dropdown { 
-            position: absolute; 
-            right: 0; 
-            top: 120%; 
-            background: #151520; 
-            border-radius: 8px; 
-            width: 220px; 
-            max-height: 70vh;
-            overflow-y: auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4); 
-            display: none; 
-            z-index: 100; 
-        }
+        .dropdown { position: absolute; right: 0; top: 120%; background: #151520; border-radius: 8px; width: 220px; max-height: 70vh; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: none; z-index: 100; }
         .dropdown.mostrar { display: block; }
-        .dropdown-header {
-            padding: 0.8rem;
-            border-bottom: 1px solid #2a2a3a;
-            font-weight: bold;
-            color: #A78BFA;
-        }
-        .dropdown button { 
-            display: block; 
-            padding: 0.7rem 0.8rem; 
-            color: #E2E8F0; 
-            border: none; 
-            background: none; 
-            width: 100%; 
-            text-align: left; 
-            cursor: pointer;
-            font-size: 0.9rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        .dropdown-header { padding: 0.8rem; border-bottom: 1px solid #2a2a3a; font-weight: bold; color: #A78BFA; }
+        .dropdown button { display: block; padding: 0.7rem 0.8rem; color: #E2E8F0; border: none; background: none; width: 100%; text-align: left; cursor: pointer; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .dropdown button:hover { background: #202030; color: #A78BFA; }
         .historial-vacio { padding: 1rem; text-align: center; color: #94A3B8; font-size: 0.9rem; }
         .modal-login { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem; }
@@ -107,10 +79,90 @@
         .btn-google { width: 100%; padding: 1rem; background: #ffffff; color: #333; border: none; border-radius: 8px; font-weight: bold; margin-top: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.8rem; cursor: pointer; font-size: 1rem; }
         .btn-google i { color: #4285F4; font-size: 1.3rem; }
         .btn-cerrar { margin-top: 1.2rem; background: none; border: none; color: #EF4444; cursor: pointer; font-weight: bold; }
-        .modal-video { position: fixed; inset: 0; background: #000; z-index: 9998; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; transform: rotate(90deg); transform-origin: left top; width: 100vh; height: 100vw; top: 0; left: 100%; }
+
+        /* 🎬 REPRODUCTOR ESTILO NETFLIX */
+        .modal-video { 
+            position: fixed; inset: 0; background: #000; z-index: 9998; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 0; transform: rotate(90deg); transform-origin: left top; 
+            width: 100vh; height: 100vw; top: 0; left: 100%;
+        }
         .modal-video.vertical { transform: rotate(0deg); width: 100%; height: 100%; left: 0; }
-        #video-container { width: 100%; max-width: 1200px; aspect-ratio: 16/9; background: #000; border-radius: 8px; overflow: hidden; }
+        
+        .netflix-player {
+            width: 100%; height: 100%; position: relative; background: #000;
+            overflow: hidden; cursor: pointer;
+        }
+        .netflix-player video {
+            width: 100%; height: 100%; object-fit: contain;
+        }
+
+        /* Controles superiores */
+        .player-top {
+            position: absolute; top: 0; left: 0; right: 0;
+            padding: 2rem 2rem 4rem;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 10; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .player-top.visible { opacity: 1; }
+        .btn-cerrar-video {
+            background: rgba(0,0,0,0.6); border: none; color: white;
+            font-size: 1.5rem; width: 45px; height: 45px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .btn-cerrar-video:hover { background: rgba(255,0,0,0.7); }
+        .titulo-video { font-size: 1.4rem; font-weight: 600; color: white; }
+
+        /* Controles inferiores */
+        .player-bottom {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 4rem 2rem 2rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            z-index: 10; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .player-bottom.visible { opacity: 1; }
+
+        /* Barra de progreso */
+        .progress-container {
+            width: 100%; height: 5px; background: rgba(255,255,255,0.3);
+            border-radius: 3px; margin-bottom: 1.2rem; cursor: pointer;
+            position: relative; overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%; width: 0%; background: #E50914;
+            border-radius: 3px; transition: width 0.1s linear;
+        }
+
+        /* Botones de control */
+        .controls-row {
+            display: flex; justify-content: space-between; align-items: center;
+            color: white;
+        }
+        .controls-left, .controls-right {
+            display: flex; align-items: center; gap: 1.2rem;
+        }
+        .control-btn {
+            background: none; border: none; color: white;
+            font-size: 1.3rem; cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .control-btn:hover { transform: scale(1.15); color: #E50914; }
+        .time-display { font-size: 0.95rem; font-weight: 500; }
+
+        /* Ocultar controles automáticamente */
+        .netflix-player:hover .player-top,
+        .netflix-player:hover .player-bottom {
+            opacity: 1;
+        }
+        .netflix-player.playing .player-top,
+        .netflix-player.playing .player-bottom {
+            opacity: 0;
+        }
+
         .oculto { display: none !important; }
+        .error-video { color: white; text-align: center; padding: 2rem; font-size: 1.2rem; }
     </style>
 </head>
 <body>
@@ -150,6 +202,7 @@
     <div id="lista-contenido" class="grid-peliculas"></div>
 </div>
 
+<!-- Modal Inicio de Sesión -->
 <div id="modal-login" class="modal-login oculto">
     <div class="caja-login">
         <h2 class="text-2xl font-bold text-acento mb-3">Bienvenido a TELY</h2>
@@ -161,14 +214,10 @@
     </div>
 </div>
 
+<!-- 🎬 REPRODUCTOR ESTILO NETFLIX -->
 <div id="modal-video" class="modal-video oculto vertical">
-    <div class="w-full max-w-4xl flex justify-between items-center mb-3">
-        <h3 id="titulo-video" class="text-lg font-bold text-white"></h3>
-        <button onclick="cerrarVideo()" class="text-2xl text-white hover:text-red-500">✕</button>
-    </div>
-    <div id="video-container"></div>
+    <div class="netflix-player" id="netflixPlayer"></div>
 </div>
-
 <script>
 // Configuración Firebase
 const firebaseConfig = {
@@ -185,16 +234,17 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 let videoPendiente = null;
+let controlsTimer;
 
-// 🎬 LISTA DE CONTENIDO - CON RAMBO 1 AGREGADO
+// 🎬 LISTA DE CONTENIDO (NOMBRES EXACTOS)
 const contenido = [
     {
         id: 1,
         titulo: "Rambo 1",
         anio: 1982,
-        categoria: "peliculas",
-        portada: "rambo1.png", // sube tu portada con este nombre
-        video: "rambo1.mp4" // sube tu película con este nombre
+        categoria: "recientes",
+        portada: "rambo1.png",
+        video: "Rambo1.mp4"
     },
     {
         id: 2,
@@ -218,7 +268,7 @@ const contenido = [
         anio: 2024,
         categoria: "peliculas",
         portada: "rey-leon.png",
-        video: "https://lat-servicio.one/down.gffxm"
+        video: "rey-leon"
     },
     {
         id: 5,
@@ -235,18 +285,10 @@ const contenido = [
         categoria: "recientes",
         portada: "Toy-Story5.png",
         video: ""
-    },
-    {
-        id: 7,
-        titulo: "Naruto",
-        anio: 2002,
-        categoria: "anime",
-        portada: "naruto.png",
-        video: ""
     }
 ];
 
-// 📚 Historial de visualización
+// 📚 Historial
 function agregarAlHistorial(item) {
     let historial = JSON.parse(localStorage.getItem('historialTely')) || [];
     historial = historial.filter(h => h.id !== item.id);
@@ -259,63 +301,39 @@ function agregarAlHistorial(item) {
 function mostrarHistorial() {
     const contenedor = document.getElementById('listaHistorial');
     const historial = JSON.parse(localStorage.getItem('historialTely')) || [];
-    contenedor.innerHTML = '';
-    if (historial.length === 0) {
-        contenedor.innerHTML = `<div class="historial-vacio">Aún no has visto nada</div>`;
-        return;
-    }
+    contenedor.innerHTML = historial.length ? '' : `<div class="historial-vacio">Aún no has visto nada</div>`;
     historial.forEach(item => {
         const btn = document.createElement('button');
-        btn.innerHTML = `<i class="fa-solid fa-play mr-2 text-xs"></i> ${item.titulo}`;
-        btn.onclick = () => {
-            auth.currentUser ? abrirVideo(item.video, item.titulo) : (videoPendiente = item, abrirModalLogin());
-            toggleMenu();
-        };
+        btn.innerHTML = `<i class="fa-solid fa-play mr-2"></i> ${item.titulo}`;
+        btn.onclick = () => auth.currentUser ? abrirVideo(item.video, item.titulo) : (videoPendiente = item, abrirModalLogin(), toggleMenu());
         contenedor.appendChild(btn);
     });
 }
 
-function limpiarHistorial() {
-    localStorage.removeItem('historialTely');
-    mostrarHistorial();
-}
+function limpiarHistorial() { localStorage.removeItem('historialTely'); mostrarHistorial(); }
 
 // Mostrar contenido
 function mostrarContenido(categoria) {
     const lista = document.getElementById("lista-contenido");
     lista.innerHTML = "";
-    const filtrados = contenido.filter(item => item.categoria === categoria);
-    filtrados.forEach(item => {
+    contenido.filter(i => i.categoria === categoria).forEach(item => {
         const tarjeta = document.createElement("div");
         tarjeta.className = "tarjeta";
         tarjeta.innerHTML = `<img src="${item.portada}" alt="${item.titulo}" class="portada"><div class="info-tarjeta"><h3>${item.titulo}</h3><p class="anio">${item.anio}</p></div>`;
-        tarjeta.onclick = () => {
-            if (auth.currentUser) {
-                abrirVideo(item.video, item.titulo);
-                agregarAlHistorial(item);
-            } else {
-                videoPendiente = item;
-                abrirModalLogin();
-            }
-        };
+        tarjeta.onclick = () => auth.currentUser ? abrirVideo(item.video, item.titulo) : (videoPendiente = item, abrirModalLogin());
         lista.appendChild(tarjeta);
     });
 }
 
-// Cambiar categorías
 function cambiarCategoria(cat) {
     document.querySelectorAll(".btn-cat").forEach(b => b.classList.remove("activo"));
     event.target.classList.add("activo");
-    const titulos = { recientes: "Películas Recientes", peliculas: "Todas las Películas", series: "Series Populares", anime: "Anime" };
+    const titulos = { recientes: "Recientes", peliculas: "Películas", series: "Series", anime: "Anime" };
     document.getElementById("tituloSeccion").textContent = titulos[cat];
     mostrarContenido(cat);
 }
 
-// Menú perfil
-function toggleMenu() {
-    mostrarHistorial();
-    document.getElementById("menuPerfil").classList.toggle("mostrar");
-}
+function toggleMenu() { mostrarHistorial(); document.getElementById("menuPerfil").classList.toggle("mostrar"); }
 window.onclick = e => { if (!e.target.matches('.btn-perfil, .btn-perfil *')) document.getElementById("menuPerfil").classList.remove("mostrar"); };
 
 // Inicio de sesión
@@ -329,49 +347,121 @@ function iniciarConGoogle() {
             cerrarModalLogin();
             if (videoPendiente) { abrirVideo(videoPendiente.video, videoPendiente.titulo); agregarAlHistorial(videoPendiente); videoPendiente = null; }
         })
-        .catch(err => {
-            alert("Error de inicio de sesión: " + err.message);
-            console.error(err);
-        });
+        .catch(err => alert("Error: " + err.message));
 }
 function cerrarSesion() { auth.signOut().then(() => document.getElementById("nombrePerfil").textContent = "Invitado"); }
 
-// Reproductor compatible con todos los formatos
+// 🎥 Reproductor Netflix
 function abrirVideo(ruta, titulo) {
-    if (!ruta) return alert("Archivo de video no disponible");
-    document.getElementById("titulo-video").textContent = titulo;
-    const contenedor = document.getElementById("video-container");
-
-    if (ruta.includes("/play/")) {
-        contenedor.innerHTML = `<iframe src="${ruta}" frameborder="0" allowfullscreen allow="autoplay; fullscreen" style="width:100%; height:100%; border-radius:8px;"></iframe>`;
-    } else {
-        contenedor.innerHTML = `<video id="mi-video" controls controlsList="nodownload" playsinline preload="auto" style="width:100%; height:100%;">
-            <source src="${ruta}" type="video/mp4">
-            Tu navegador no soporta este formato de video.
-        </video>`;
-        const v = document.getElementById("mi-video");
-        v.load();
-        v.play().catch(e => console.log("Reproducción automática bloqueada:", e));
-    }
-
-    setTimeout(() => {
-        const elem = document.querySelector("#mi-video") || document.querySelector("iframe");
-        elem?.requestFullscreen?.();
-    }, 300);
-
+    const player = document.getElementById("netflixPlayer");
     document.getElementById("modal-video").classList.remove("oculto", "vertical");
     document.body.style.overflow = "hidden";
+
+    if (!ruta) {
+        player.innerHTML = `<div class="error-video">❌ Archivo no disponible</div>`;
+        return;
+    }
+
+    if (ruta.startsWith("http") && ruta.includes("/play/")) {
+        player.innerHTML = `<iframe src="${ruta}" frameborder="0" allowfullscreen allow="autoplay; fullscreen" style="width:100%; height:100%;"></iframe>`;
+        return;
+    }
+
+    player.innerHTML = `
+        <video id="videoPlayer" playsinline preload="auto" style="width:100%; height:100%;">
+            <source src="${ruta}" type="video/mp4">
+        </video>
+        <div class="player-top visible" id="playerTop">
+            <h3 class="titulo-video">${titulo}</h3>
+            <button class="btn-cerrar-video" onclick="cerrarVideo()">✕</button>
+        </div>
+        <div class="player-bottom visible" id="playerBottom">
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="controls-row">
+                <div class="controls-left">
+                    <button class="control-btn" id="playPauseBtn" onclick="togglePlay()"><i class="fa-solid fa-play"></i></button>
+                    <button class="control-btn" onclick="skipBackward()"><i class="fa-solid fa-rotate-left"></i></button>
+                    <button class="control-btn" onclick="skipForward()"><i class="fa-solid fa-rotate-right"></i></button>
+                    <div class="time-display"><span id="currentTime">00:00</span> / <span id="durationTime">00:00</span></div>
+                </div>
+                <div class="controls-right">
+                    <button class="control-btn" id="volumeBtn" onclick="toggleVolume()"><i class="fa-solid fa-volume-high"></i></button>
+                    <button class="control-btn" onclick="toggleFullscreen()"><i class="fa-solid fa-expand"></i></button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    setTimeout(() => {
+        const video = document.getElementById('videoPlayer');
+        video.load();
+        video.play().catch(() => {});
+
+        video.addEventListener('loadedmetadata', () => {
+            document.getElementById('durationTime').textContent = formatTime(video.duration);
+        });
+        video.addEventListener('timeupdate', () => {
+            const pct = (video.currentTime / video.duration) * 100;
+            document.getElementById('progressBar').style.width = `${pct}%`;
+            document.getElementById('currentTime').textContent = formatTime(video.currentTime);
+        });
+        video.addEventListener('play', () => {
+            player.classList.add('playing');
+            document.getElementById('playPauseBtn').innerHTML = `<i class="fa-solid fa-pause"></i>`;
+            hideControlsAfterDelay();
+        });
+        video.addEventListener('pause', () => {
+            player.classList.remove('playing');
+            document.getElementById('playPauseBtn').innerHTML = `<i class="fa-solid fa-play"></i>`;
+            showControls();
+        });
+
+        document.getElementById('progressContainer').addEventListener('click', e => {
+            const w = e.currentTarget.clientWidth;
+            video.currentTime = (e.offsetX / w) * video.duration;
+        });
+        player.addEventListener('mousemove', hideControlsAfterDelay);
+    }, 200);
 }
 
 function cerrarVideo() {
-    document.getElementById("video-container").innerHTML = "";
     document.getElementById("modal-video").classList.add("oculto", "vertical");
     document.body.style.overflow = "auto";
+    clearTimeout(controlsTimer);
 }
 
-// Inicializar
+function togglePlay() {
+    const v = document.getElementById('videoPlayer');
+    v.paused ? v.play() : v.pause();
+}
+function toggleVolume() {
+    const v = document.getElementById('videoPlayer');
+    v.muted = !v.muted;
+    document.getElementById('volumeBtn').innerHTML = v.muted ? `<i class="fa-solid fa-volume-xmark"></i>` : `<i class="fa-solid fa-volume-high"></i>`;
+}
+function skipBackward() { document.getElementById('videoPlayer').currentTime -= 10; }
+function skipForward() { document.getElementById('videoPlayer').currentTime += 10; }
+function formatTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+}
+function showControls() { document.getElementById('playerTop').classList.add('visible'); document.getElementById('playerBottom').classList.add('visible'); }
+function hideControls() { document.getElementById('playerTop').classList.remove('visible'); document.getElementById('playerBottom').classList.remove('visible'); }
+function hideControlsAfterDelay() {
+    showControls();
+    clearTimeout(controlsTimer);
+    controlsTimer = setTimeout(() => { if (!document.getElementById('videoPlayer').paused) hideControls(); }, 3000);
+}
+function toggleFullscreen() {
+    const el = document.getElementById('modal-video');
+    document.fullscreenElement ? document.exitFullscreen() : el.requestFullscreen().catch(() => {});
+}
+
 auth.onAuthStateChanged(u => { if (u) document.getElementById("nombrePerfil").textContent = u.displayName; });
-window.onload = () => { mostrarContenido("recientes"); mostrarHistorial(); };
+window.onload = () => mostrarContenido("recientes");
 </script>
 
 </body>
