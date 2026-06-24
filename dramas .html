@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TELY🎬</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { fondo:'#0F0F17', tarjeta:'#1A1A25', acento:'#6366F1', texto:'#E2E8F0' } } } }
+    </script>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:sans-serif; }
+        body { background:#0F0F17; color:#fff; }
+        header { background:#1A1A25; padding:1rem; position:sticky; top:0; z-index:50; display:flex; justify-content:space-between; align-items:center; }
+        h1 { color:#6366F1; font-size:1.5rem; }
+        .portada { aspect-ratio:2/3; object-fit:cover; width:100%; border-radius:6px; }
+        .grid-categorias { display:grid; grid-template-columns:repeat(4,1fr); gap:0.5rem; padding:1rem; }
+        .btn-cat { padding:0.7rem; border-radius:6px; border:none; background:#1A1A25; color:#fff; font-weight:bold; }
+        .btn-cat.activo { background:#6366F1; }
+        .grid-contenido { display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; padding:1rem; }
+        .tarjeta { background:#1A1A25; border-radius:8px; overflow:hidden; cursor:pointer; transition:transform 0.2s; }
+        .tarjeta:hover { transform:scale(1.03); }
+        .modal-login { position:fixed; inset:0; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:9999; }
+        .caja-login { background:#1A1A25; padding:2rem; border-radius:12px; width:90%; max-width:350px; text-align:center; }
+        .btn-google { width:100%; padding:0.9rem; background:#fff; color:#333; border:none; border-radius:6px; font-weight:bold; margin-top:1rem; display:flex; align-items:center; justify-content:center; gap:0.7rem; }
+        .cerrar { margin-top:1rem; color:#ff5555; background:none; border:none; }
+        .modal-video { position:fixed; inset:0; background:#000; z-index:9998; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1rem; transform:rotate(90deg); transform-origin:left top; width:100vh; height:100vw; top:0; left:100%; }
+        .modal-video.vertical { transform:rotate(0deg); width:100%; height:100%; left:0; }
+        #mi-video { width:100%; height:100%; border-radius:8px; }
+        .oculto { display:none !important; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>TELY🎬</h1>
+    <div id="usuario-info">
+        <span id="nombre-usuario" class="mr-2"></span>
+        <button id="btn-salir" onclick="cerrarSesion()" class="text-red-400 oculto">Salir</button>
+    </div>
+</header>
+
+<div class="grid-categorias">
+    <button class="btn-cat activo" onclick="cambiar('estrenos')">Estrenos</button>
+    <button class="btn-cat" onclick="cambiar('peliculas')">Películas</button>
+    <button class="btn-cat" onclick="cambiar('series')">Series</button>
+    <button class="btn-cat" onclick="cambiar('anime')">Anime</button>
+</div>
+
+<div class="grid-contenido" id="lista-contenido"></div>
+
+<div class="modal-login oculto" id="modal-login">
+    <div class="caja-login">
+        <h2>Inicia sesión</h2>
+        <p>Para ver el contenido, usa tu cuenta Google</p>
+        <button class="btn-google" onclick="iniciarConGoogle()">
+            <i class="fa-brands fa-google"></i> Continuar con Google
+        </button>
+        <button class="cerrar" onclick="cerrarLogin()">Cerrar</button>
+    </div>
+</div>
+
+<div class="modal-video oculto vertical" id="modal-video">
+    <div class="w-full flex justify-between items-center mb-2">
+        <h3 id="titulo-video" class="text-white text-lg"></h3>
+        <button onclick="cerrarVideo()" class="text-white text-xl">✕</button>
+    </div>
+    <video id="mi-video" controls controlsList="nodownload" playsinline class="w-full h-full"></video>
+</div>
+
+<script>
+// 👇 PEGA AQUÍ TU CONFIGURACIÓN DE FIREBASE
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_AUTH_DOMAIN",
+  databaseURL: "TU_URL_BASE",
+  projectId: "TU_PROYECTO",
+  storageBucket: "TU_BUCKET",
+  messagingSenderId: "TU_SENDER",
+  appId: "TU_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+let contenido = [];
+let videoPendiente = null;
+
+db.ref("contenido").on("value", snap => {
+    contenido = snap.val() || [];
+    mostrarLista("estrenos");
+});
+
+function mostrarLista(cat) {
+    const lista = document.getElementById("lista-contenido");
+    lista.innerHTML = "";
+    const filtrados = contenido.filter(i => i.categoria === cat);
+    filtrados.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "tarjeta";
+        div.innerHTML = `
+            <img src="${item.portada}" alt="${item.titulo}" class="portada">
+            <p class="text-center p-2">${item.titulo}</p>
+        `;
+        div.onclick = () => {
+            if (auth.currentUser) abrirVideo(item.video, item.titulo);
+            else { videoPendiente = item; abrirLogin(); }
+        };
+        lista.appendChild(div);
+    });
+}
+
+function cambiar(cat) {
+    document.querySelectorAll(".btn-cat").forEach(b => b.classList.remove("activo"));
+    event.target.classList.add("activo");
+    mostrarLista(cat);
+}
+
+function abrirLogin() { document.getElementById("modal-login").classList.remove("oculto"); }
+function cerrarLogin() { document.getElementById("modal-login").classList.add("oculto"); videoPendiente = null; }
+
+function iniciarConGoogle() {
+    const prov = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(prov)
+    .then(res => {
+        const u = res.user;
+        db.ref("usuarios/" + u.uid).set({ nombre: u.displayName, correo: u.email, fecha: new Date().toISOString() });
+        document.getElementById("nombre-usuario").textContent = "Hola, " + u.displayName;
+        document.getElementById("btn-salir").classList.remove("oculto");
+        cerrarLogin();
+        if (videoPendiente) abrirVideo(videoPendiente.video, videoPendiente.titulo);
+    })
+    .catch(e => alert("Error: " + e.message));
+}
+
+function cerrarSesion() {
+    auth.signOut().then(() => {
+        document.getElementById("nombre-usuario").textContent = "";
+        document.getElementById("btn-salir").classList.add("oculto");
+    });
+}
+
+function abrirVideo(ruta, titulo) {
+    document.getElementById("titulo-video").textContent = titulo;
+    const v = document.getElementById("mi-video");
+    v.src = ruta; v.load(); v.play().catch(() => {});
+    setTimeout(() => v.requestFullscreen?.(), 250);
+    document.getElementById("modal-video").classList.remove("oculto", "vertical");
+    document.body.style.overflow = "hidden";
+}
+
+function cerrarVideo() {
+    const v = document.getElementById("mi-video"); v.pause(); v.src = "";
+    document.getElementById("modal-video").classList.add("oculto", "vertical");
+    document.body.style.overflow = "auto";
+}
+
+auth.onAuthStateChanged(u => {
+    if (u) {
+        document.getElementById("nombre-usuario").textContent = "Hola, " + u.displayName;
+        document.getElementById("btn-salir").classList.remove("oculto");
+    }
+});
+</script>
+
+</body>
+</html>
