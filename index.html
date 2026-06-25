@@ -7,12 +7,12 @@
     <meta http-equiv="X-Frame-Options" content="ALLOWALL">
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self' data: blob:;
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com https://api.themoviedb.org;
         style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com;
         font-src 'self' https://cdnjs.cloudflare.com;
         frame-src 'self' https://mixdrop.top https://mixdrop.ag https://*.vidmoly.to https://*.voe.sx;
         media-src 'self' https://mixdrop.top https://mixdrop.ag https://*.vidmoly.to;
-        connect-src 'self' https://*.firebaseio.com https://www.googleapis.com https://www.gstatic.com;
+        connect-src 'self' https://*.firebaseio.com https://www.googleapis.com https://www.gstatic.com https://api.themoviedb.org;
     ">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -47,6 +47,7 @@
         .titulo-app { font-size: 2rem; font-weight: 700; margin: 0; }
         .menu-derecha { display: flex; align-items: center; gap: 1rem; }
         .btn-menu { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #F8FAFC; padding: 0.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .btn-menu:hover { background: #334155; }
 
         .seccion-recientes { padding: 0 1.2rem 1.5rem; margin-top: 1rem; }
         .titulo-seccion { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
@@ -126,15 +127,18 @@
         .titulo-recomendadas { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #F8FAFC; }
 
         .menu-perfil { position: relative; }
-        .dropdown { position: absolute; right: 0; top: 120%; background: #1E293B; border-radius: 10px; width: 280px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); display: none; z-index: 200; border: 1px solid #334155; overflow: hidden; }
-        .dropdown.mostrar { display: block; }
+        .dropdown { position: absolute; right: 0; top: calc(100% + 10px); background: #1E293B; border-radius: 10px; width: 280px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); display: none; z-index: 200; border: 1px solid #334155; overflow: hidden; }
+        .dropdown.mostrar { display: block; animation: aparecer 0.2s ease; }
+        @keyframes aparecer { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
         .dropdown-header { padding: 1rem; border-bottom: 1px solid #334155; font-weight: 600; color: #F8FAFC; }
-        .dropdown button { display: block; width: 100%; padding: 0.9rem 1rem; text-align: left; border: none; background: none; cursor: pointer; font-size: 0.95rem; color: #CBD5E1; transition: 0.2s; }
-        .dropdown button:hover { background: #334155; color: #F8FAFC; }
+        .dropdown-item { display: flex; align-items: center; gap: 0.5rem; width: 100%; padding: 0.9rem 1rem; text-align: left; border: none; background: none; cursor: pointer; font-size: 0.95rem; color: #CBD5E1; transition: all 0.2s; }
+        .dropdown-item:hover { background: #334155; color: #F8FAFC; padding-left: 1.2rem; }
+        .divisor { height: 1px; background: #334155; margin: 0.5rem 0; }
         .historial-vacio { padding: 1.5rem; text-align: center; color: #9CA3AF; font-size: 0.9rem; }
 
-        .modal-login { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-        .contenedor-login { background: #1E293B; border-radius: 16px; padding: 2rem; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #334155; }
+        .modal-login { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(4px); }
+        .contenedor-login { background: #1E293B; border-radius: 16px; padding: 2rem; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #334155; animation: subir 0.3s ease; }
+        @keyframes subir { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .oculto { display: none !important; }
     </style>
 </head>
@@ -142,20 +146,23 @@
 <header>
     <div class="flex justify-between items-center">
         <div class="logo-contenedor">
-            <img src="logo.png" alt="Logo TELY" class="logo" loading="lazy">
+            <img src="logo.png" alt="Logo TELY" class="logo" loading="lazy" onerror="this.style.display='none'">
             <h1 class="titulo-app">TELY 🎬</h1>
         </div>
         <div class="menu-derecha">
-            <button class="btn-menu" onclick="cambiarModo()"><i class="fa-solid fa-moon" id="iconoModo"></i></button>
+            <button class="btn-menu" onclick="cambiarModo()" title="Cambiar modo"><i class="fa-solid fa-moon" id="iconoModo"></i></button>
             <div class="menu-perfil">
-                <button class="btn-menu" onclick="toggleMenu()"><i class="fa-solid fa-user-circle"></i></button>
+                <button class="btn-menu" onclick="toggleMenu()" title="Perfil"><i class="fa-solid fa-user-circle"></i></button>
                 <div class="dropdown" id="menuPerfil">
-                    <div class="dropdown-header" id="nombrePerfil">Acceder</div>
+                    <div class="dropdown-header" id="nombrePerfil">🔑 Acceder a tu cuenta</div>
+                    <div class="divisor"></div>
                     <div class="dropdown-header">📺 Visto recientemente</div>
                     <div id="listaHistorial"></div>
-                    <button onclick="limpiarHistorial()" class="text-amber-400 hover:bg-amber-900/30">🗑️ Limpiar historial</button>
-                    <button onclick="abrirModalLogin()" class="text-blue-400 hover:bg-blue-900/30 mt-1">🔑 Iniciar sesión</button>
-                    <button onclick="cerrarSesion()" class="text-red-400 hover:bg-red-900/30 border-t border-gray-700 mt-2 pt-2">🚪 Cerrar sesión</button>
+                    <div class="divisor"></div>
+                    <button class="dropdown-item text-amber-400" onclick="limpiarHistorial()">🗑️ Limpiar historial</button>
+                    <button class="dropdown-item text-blue-400" onclick="abrirModalLogin()">🔑 Iniciar sesión</button>
+                    <button class="dropdown-item text-red-400" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+                    <button class="dropdown-item text-green-400 oculto" id="btnAdmin" onclick="irAlPanelAdmin()">⚙️ Panel Admin</button>
                 </div>
             </div>
         </div>
@@ -230,24 +237,30 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 <script>
-// ✅ CONFIGURACIÓN EXACTA DE TU PROYECTO
+// ✅ TU CONFIGURACIÓN FIREBASE NUEVA + PANEL ADMIN
 const firebaseConfig = {
-  apiKey: "AIzaSyCYetRSA0nsZsGiqABbTtjq-5a4bz5-oDk",
-  authDomain: "tely-675c0.firebaseapp.com",
-  databaseURL: "https://tely-675c0-default-rtdb.firebaseio.com",
-  projectId: "tely-675c0",
-  storageBucket: "tely-675c0.appspot.com",
-  messagingSenderId: "375009551428",
-  appId: "1:375009551428:web:33846891b7641f97a20811"
+  apiKey: "AIzaSyCwLATDpQN1RWv3rLPjJXbNnIBkyo_BUfI",
+  authDomain: "tely-ap.firebaseapp.com",
+  databaseURL: "https://tely-ap-default-rtdb.firebaseio.com",
+  projectId: "tely-ap",
+  storageBucket: "tely-ap.firebasestorage.app",
+  messagingSenderId: "760862940967",
+  appId: "1:760862940967:web:69bbbbfee0de40f68a1302",
+  measurementId: "G-1MVRN8QNLG"
 };
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-let recaptchaVerifier, confirmationResult, videoPendiente = null, contenido = [], enlaceActual = "";
+// ✅ API TMDB - pon aquí tu clave real cuando la tengas
+const TMDB_API_KEY = "TU_CLAVE_TMDB_AQUI";
+const TMDB_IMG_URL = "https://image.tmdb.org/t/p/w500";
 
-// ✅ CONTENIDO DE EJEMPLO
+let recaptchaVerifier, confirmationResult, videoPendiente = null, contenido = [], enlaceActual = "";
+const ADMIN_UIDS = ["ID_DE_TU_USUARIO_AQUI"]; // Agrega tu UID aquí para ser admin
+
+// ✅ CONTENIDO BASE
 const MI_PELICULAS = [
   {
     id: "rambo_001",
@@ -255,59 +268,12 @@ const MI_PELICULAS = [
     anio: "1982",
     tipo: "pelicula",
     categoria: "peliculas",
-    portada: "rambo1.png",
-    sinopsis: "Un ex soldado de élite regresa a su pueblo natal y se enfrenta a la hostilidad de las autoridades locales, desatando una guerra por su libertad.",
+    tmdb_id: "1370",
+    sinopsis: "Un ex soldado de élite regresa a su pueblo natal y se enfrenta a la hostilidad de las autoridades locales.",
     puntuacion: "7.7",
     genero: "Acción / Aventura",
     fecha_agregado: "2026-06-25",
-    opciones: [
-      { nombre: "Mixdrop", url: "https://mixdrop.top/e/nl1k1k66ad8n3z" }
-    ]
-  },
-  {
-    id: "jhonwick_001",
-    titulo: "John Wick",
-    anio: "2014",
-    tipo: "pelicula",
-    categoria: "peliculas",
-    portada: "Jhon-wick.png",
-    sinopsis: "Un asesino a sueldo retirado vuelve a la acción para vengarse de quienes le hicieron daño.",
-    puntuacion: "7.4",
-    genero: "Acción / Crimen",
-    fecha_agregado: "2026-06-24",
-    opciones: [
-      { nombre: "Mixdrop", url: "https://mixdrop.top/e/ejemplo_johnwick" }
-    ]
-  },
-  {
-    id: "pulmon_acero_001",
-    titulo: "Pulmón de Acero",
-    anio: "2024",
-    tipo: "pelicula",
-    categoria: "peliculas",
-    portada: "Pulmón de acero.png",
-    sinopsis: "Una historia de supervivencia en condiciones extremas.",
-    puntuacion: "6.8",
-    genero: "Drama / Acción",
-    fecha_agregado: "2026-06-23",
-    opciones: [
-      { nombre: "Mixdrop", url: "https://mixdrop.top/e/ejemplo_pulmon" }
-    ]
-  },
-  {
-    id: "toy_story_001",
-    titulo: "Toy Story 5",
-    anio: "2026",
-    tipo: "pelicula",
-    categoria: "peliculas",
-    portada: "ToyStory5.png",
-    sinopsis: "Las aventuras de Woody, Buzz y sus amigos continúan en esta nueva entrega.",
-    puntuacion: "8.2",
-    genero: "Animación / Comedia",
-    fecha_agregado: "2026-06-22",
-    opciones: [
-      { nombre: "Mixdrop", url: "https://mixdrop.top/e/ejemplo_toystory" }
-    ]
+    opciones: [{ nombre: "Mixdrop", url: "https://mixdrop.top/e/nl1k1k66ad8n3z" }]
   }
 ];
 
@@ -318,103 +284,84 @@ const MI_SERIES = [
     anio: "2008",
     tipo: "serie",
     categoria: "series",
-    portada: "rey-leon.png",
-    sinopsis: "Un profesor de química con cáncer terminal empieza a fabricar metanfetamina para asegurar el futuro de su familia.",
+    tmdb_id: "1396",
+    sinopsis: "Un profesor de química con cáncer empieza a fabricar metanfetamina.",
     puntuacion: "9.2",
     genero: "Drama / Crimen",
     fecha_agregado: "2026-06-21",
-    temporadas: [
-      {
-        numero: 1,
-        capitulos: [
-          { numero: 1, titulo: "El principio del fin", opciones: [{ nombre: "Mixdrop", url: "https://mixdrop.top/e/ejemplo_serie1" }] }
-        ]
-      }
-    ]
+    temporadas: [{ numero: 1, capitulos: [{ numero: 1, titulo: "El principio", opciones: [{ nombre: "Mixdrop", url: "https://mixdrop.top/e/ejemplo" }] }] }]
   }
 ];
 
-// ✅ Funciones de carga y visualización
-async function cargarContenidoAdmin() {
+// ✅ Funciones TMDB
+async function obtenerDatosTMDB(tmdbId, tipo) {
+  if (!TMDB_API_KEY || TMDB_API_KEY === "TU_CLAVE_TMDB_AQUI") return null;
   try {
-    const snapshot = await db.ref("contenido_personalizado").once("value");
-    const datosAdmin = snapshot.val();
-    return datosAdmin ? Object.values(datosAdmin) : [];
+    const res = await fetch(`https://api.themoviedb.org/3/${tipo}/${tmdbId}?api_key=${TMDB_API_KEY}&language=es-ES`);
+    return res.ok ? await res.json() : null;
   } catch (err) {
-    console.log("Sin contenido de Firebase:", err);
-    return [];
+    console.log("Error TMDB:", err);
+    return null;
   }
 }
 
+// ✅ Cargar todo el contenido
 async function cargarTodoContenido() {
   contenido = [...MI_PELICULAS, ...MI_SERIES];
+  const admin = await cargarContenidoAdmin();
+  if (admin.length) contenido = [...contenido, ...admin];
+  contenido.sort((a,b) => new Date(b.fecha_agregado||"1970") - new Date(a.fecha_agregado||"1970"));
   document.getElementById("contadorTotal").textContent = `${contenido.length} títulos`;
   mostrarRecientes();
   mostrarContenido("peliculas");
+}
 
-  const admin = await cargarContenidoAdmin();
-  if (admin.length > 0) {
-    contenido = [...contenido, ...admin];
-    contenido.sort((a, b) => new Date(b.fecha_agregado || "1970-01-01") - new Date(a.fecha_agregado || "1970-01-01"));
-    document.getElementById("contadorTotal").textContent = `${contenido.length} títulos`;
-    mostrarRecientes();
-    mostrarContenido(document.querySelector(".btn-pestana.activa").getAttribute("onclick").split("'")[1]);
-  }
+async function cargarContenidoAdmin() {
+  try {
+    const snap = await db.ref("contenido_admin").once("value");
+    return snap.val() ? Object.values(snap.val()) : [];
+  } catch { return []; }
 }
 
 function mostrarRecientes() {
-  const contenedor = document.getElementById("listaRecientes");
-  const recientes = contenido.slice(0, 6);
-  contenedor.innerHTML = "";
-  recientes.forEach(item => {
-    const tarjeta = document.createElement("div");
-    tarjeta.className = "tarjeta-recientes";
-    tarjeta.innerHTML = `
-      <img src="${item.portada}" alt="${item.titulo}" class="portada-recientes" loading="lazy" onerror="this.src='logo.png'">
-      <div class="texto-recientes">${item.titulo}</div>
-    `;
-    tarjeta.onclick = () => {
-      if (!auth.currentUser) {
-        videoPendiente = item;
-        abrirModalLogin();
-      } else {
-        abrirDetalle(item);
-      }
-    };
-    contenedor.appendChild(tarjeta);
+  const cont = document.getElementById("listaRecientes");
+  cont.innerHTML = "";
+  contenido.slice(0,6).forEach(async item => {
+    let portada = item.portada;
+    if (item.tmdb_id && TMDB_API_KEY !== "TU_CLAVE_TMDB_AQUI") {
+      const datos = await obtenerDatosTMDB(item.tmdb_id, item.tipo);
+      if (datos?.poster_path) portada = TMDB_IMG_URL + datos.poster_path;
+    }
+    const div = document.createElement("div");
+    div.className = "tarjeta-recientes";
+    div.innerHTML = `<img src="${portada||'logo.png'}" class="portada-recientes" loading="lazy"><div class="texto-recientes">${item.titulo}</div>`;
+    div.onclick = () => auth.currentUser ? abrirDetalle(item) : (videoPendiente = item, abrirModalLogin());
+    cont.appendChild(div);
   });
 }
 
-function mostrarContenido(categoria) {
+function mostrarContenido(cat) {
   const lista = document.getElementById("lista-contenido");
   lista.innerHTML = "";
-  const filtrados = contenido.filter(x => x.categoria === categoria);
-  if (!filtrados.length) { 
-    lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-16 text-lg">Sin ${categoria} disponibles</p>`; 
-    return; 
-  }
-  filtrados.forEach(item => {
-    const tieneVideo = (item.opciones?.length > 0 || item.temporadas?.length > 0);
-    const tarjeta = document.createElement("div");
-    tarjeta.className = "tarjeta";
-    tarjeta.innerHTML = `
+  const filtrados = contenido.filter(x => x.categoria === cat);
+  if (!filtrados.length) { lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-16">Sin contenido</p>`; return; }
+  filtrados.forEach(async item => {
+    let portada = item.portada;
+    if (item.tmdb_id && TMDB_API_KEY !== "TU_CLAVE_TMDB_AQUI") {
+      const datos = await obtenerDatosTMDB(item.tmdb_id, item.tipo);
+      if (datos?.poster_path) portada = TMDB_IMG_URL + datos.poster_path;
+    }
+    const tiene = item.opciones?.length || item.temporadas?.length;
+    const div = document.createElement("div");
+    div.className = "tarjeta";
+    div.innerHTML = `
       <span class="etiqueta-anio">${item.anio}</span>
       <i class="fa-solid fa-star estrella"></i>
-      <img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy" onerror="this.src='logo.png'">
-      <div class="info-tarjeta">
-        <h3>${item.titulo}</h3>
-        ${tieneVideo ? '<span class="badge-video">▶ Disponible</span>' : '<span class="badge-sin-video">🔒 Sin enlace</span>'}
-      </div>
+      <img src="${portada||'logo.png'}" class="portada" loading="lazy">
+      <div class="info-tarjeta"><h3>${item.titulo}</h3><span class="${tiene?'badge-video':'badge-sin-video'}">${tiene?'▶ Disponible':'🔒 Sin enlace'}</span></div>
     `;
-    tarjeta.onclick = () => {
-      if (!auth.currentUser) {
-        videoPendiente = item;
-        abrirModalLogin();
-      } else {
-        abrirDetalle(item);
-      }
-    };
-    lista.appendChild(tarjeta);
+    div.onclick = () => auth.currentUser ? abrirDetalle(item) : (videoPendiente = item, abrirModalLogin());
+    lista.appendChild(div);
   });
 }
 
@@ -422,17 +369,10 @@ function cambiarModo() {
   const body = document.body;
   const icono = document.getElementById("iconoModo");
   const icono2 = document.getElementById("iconoModo2");
-  if (body.classList.contains("dark")) {
-    body.classList.remove("dark");
-    icono.className = "fa-solid fa-moon";
-    if (icono2) icono2.className = "fa-solid fa-moon";
-    localStorage.setItem("modo", "claro");
-  } else {
-    body.classList.add("dark");
-    icono.className = "fa-solid fa-sun";
-    if (icono2) icono2.className = "fa-solid fa-sun";
-    localStorage.setItem("modo", "oscuro");
-  }
+  const activo = body.classList.toggle("dark");
+  icono.className = activo ? "fa-solid fa-sun" : "fa-solid fa-moon";
+  if (icono2) icono2.className = activo ? "fa-solid fa-sun" : "fa-solid fa-moon";
+  localStorage.setItem("modo", activo ? "oscuro" : "claro");
 }
 
 if (localStorage.getItem("modo") === "oscuro" || (!localStorage.getItem("modo") && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
@@ -449,102 +389,93 @@ window.onclick = e => { if (!e.target.matches(".btn-menu, .btn-menu *")) documen
 
 function buscarContenido() {
   const texto = document.getElementById("buscadorInput").value.trim().toLowerCase();
-  const resultados = contenido.filter(x => x.titulo.toLowerCase().includes(texto));
+  const res = contenido.filter(x => x.titulo.toLowerCase().includes(texto));
   const lista = document.getElementById("lista-contenido");
   lista.innerHTML = "";
-  resultados.length ? resultados.forEach(item => {
-    const tarjeta = document.createElement("div");
-    tarjeta.className = "tarjeta";
-    tarjeta.innerHTML = `
-      <span class="etiqueta-anio">${item.anio}</span>
-      <i class="fa-solid fa-star estrella"></i>
-      <img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy" onerror="this.src='logo.png'">
-      <div class="info-tarjeta"><h3>${item.titulo}</h3></div>
-    `;
-    tarjeta.onclick = () => {
-      if (!auth.currentUser) {
-        videoPendiente = item;
-        abrirModalLogin();
-      } else {
-        abrirDetalle(item);
-      }
-    };
-    lista.appendChild(tarjeta);
-  }) : lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-16 text-lg">Sin resultados para tu búsqueda</p>`;
+  res.length ? res.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "tarjeta";
+    div.innerHTML = `<span class="etiqueta-anio">${item.anio}</span><i class="fa-solid fa-star estrella"></i><img src="${item.portada||'logo.png'}" class="portada"><div class="info-tarjeta"><h3>${item.titulo}</h3></div>`;
+    div.onclick = () => auth.currentUser ? abrirDetalle(item) : (videoPendiente = item, abrirModalLogin());
+    lista.appendChild(div);
+  }) : lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-16">Sin resultados</p>`;
 }
 
-function abrirModalLogin() { document.getElementById("modal-login").classList.remove("oculto"); }
+function abrirModalLogin() { document.getElementById("modal-login").classList.remove("oculto"); toggleMenu(); }
 function cerrarModalLogin() { document.getElementById("modal-login").classList.add("oculto"); videoPendiente = null; }
 
-// ✅ INICIO DE SESIÓN CORREGIDO
+// ✅ Inicio de sesión Google
 function iniciarConGoogle() {
-  const proveedor = new firebase.auth.GoogleAuthProvider();
-  proveedor.setCustomParameters({ prompt: 'select_account' });
-  auth.signInWithPopup(proveedor)
-    .then((resultado) => {
-      document.getElementById("nombrePerfil").textContent = resultado.user.displayName || resultado.user.email;
+  if (window.location.protocol === "file:") { alert("❌ Súbelo a Vercel primero"); return; }
+  const prov = new firebase.auth.GoogleAuthProvider();
+  prov.setCustomParameters({ prompt: "select_account" });
+  auth.signInWithPopup(prov)
+    .then(res => {
+      document.getElementById("nombrePerfil").textContent = `👤 ${res.user.displayName || res.user.email}`;
       cerrarModalLogin();
+      if (ADMIN_UIDS.includes(res.user.uid)) document.getElementById("btnAdmin").classList.remove("oculto");
       if (videoPendiente) abrirDetalle(videoPendiente);
     })
-    .catch((error) => {
-      console.error("Error completo:", error.code, error.message);
-      // Mensaje más claro
-      if (error.code === "auth/unauthorized-domain") {
-        alert("❌ ERROR: El dominio no está agregado en Firebase. Ve a Configuración → Dominios autorizados y agrega: tely-zeta.vercel.app");
-      } else if (error.code === "auth/popup-blocked") {
-        alert("❌ El navegador bloqueó la ventana emergente. Permite ventanas emergentes en tu navegador.");
-      } else {
-        alert(`❌ Error: ${error.message}`);
-      }
+    .catch(err => {
+      if (err.code === "auth/unauthorized-domain") alert("❌ Agrega dominios en Firebase");
+      else alert(`❌ Error: ${err.message}`);
     });
 }
+
+// ✅ Inicio de sesión por teléfono
+function enviarCodigo() {
+  const tel = document.getElementById("telefonoInput").value.trim();
+  if (!tel) return alert("Ingresa tu número con código +58");
+  if (!recaptchaVerifier) recaptchaVerifier = new firebase.auth.RecaptchaVerifier("telefonoInput", { size: "invisible" });
+  auth.signInWithPhoneNumber(tel, recaptchaVerifier)
+    .then(res => {
+      confirmationResult = res;
+      document.getElementById("seccionCodigo").classList.remove("oculto");
+      alert("Código enviado al teléfono");
+    })
+    .catch(err => alert(`Error: ${err.message}`));
+}
+
+function verificarCodigo() {
+  const cod = document.getElementById("codigoInput").value.trim();
+  if (!cod) return alert("Escribe el código");
+  confirmationResult.confirm(cod)
+    .then(res => {
+      document.getElementById("nombrePerfil").textContent = `👤 ${res.user.phoneNumber}`;
+      cerrarModalLogin();
+      if (ADMIN_UIDS.includes(res.user.uid)) document.getElementById("btnAdmin").classList.remove("oculto");
+    })
+    .catch(err => alert("Código incorrecto"));
+}
+
 function abrirDetalle(item) {
   document.getElementById("tituloDetalle").textContent = `${item.titulo} (${item.anio})`;
   document.getElementById("tituloCabecera").textContent = item.titulo;
   document.getElementById("anioDetalle").textContent = item.anio;
-  document.getElementById("puntuacionDetalle").textContent = item.puntuacion || "7.0";
-  document.getElementById("generoDetalle").textContent = item.genero || "";
-  document.getElementById("sinopsisDetalle").textContent = item.sinopsis || "Sin sinopsis disponible";
+  document.getElementById("puntuacionDetalle").textContent = item.puntuacion;
+  document.getElementById("generoDetalle").textContent = item.genero;
+  document.getElementById("sinopsisDetalle").textContent = item.sinopsis;
 
-  const contenedor = document.getElementById("contenidoReproductor");
-  contenedor.innerHTML = "";
-
-  if (item.tipo === "pelicula" && item.opciones?.length > 0) {
-    let html = `
-      <div class="reproductor-contenedor" id="reproductorPrincipal">
-        <iframe src="${item.opciones[0].url}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation-by-user-activation" referrerpolicy="no-referrer-when-downgrade" allowfullscreen loading="lazy"></iframe>
-      </div>
-      <div class="botones-opciones" id="listaOpciones">
-    `;
-    item.opciones.forEach((op, i) => {
-      html += `<button class="btn-opcion ${i === 0 ? 'activo' : ''}" onclick="cambiarFuente('${op.url}', this)">${op.nombre}</button>`;
-    });
-    html += `
-      </div>
-      <div class="aviso">
-        <i class="fa-solid fa-info-circle"></i>
-        Si ves error, activa pantalla completa o prueba otro servidor
-      </div>
-    `;
-    contenedor.innerHTML = html;
-    enlaceActual = item.opciones[0].url;
-  } else if (item.tipo === "serie") {
-    contenedor.innerHTML = `<p class="text-center py-16 text-gray-400 text-lg">📺 Selecciona temporada y capítulo</p>`;
+  const cont = document.getElementById("contenidoReproductor");
+  cont.innerHTML = "";
+  if (item.tipo === "pelicula" && item.opciones?.length) {
+    let html = `<div class="reproductor-contenedor"><iframe src="${item.opciones[0].url}" allowfullscreen></iframe></div><div class="botones-opciones">`;
+    item.opciones.forEach((o,i) => html += `<button class="btn-opcion ${i===0?'activo':''}" onclick="cambiarFuente('${o.url}', this)">${o.nombre}</button>`);
+    html += `</div>`;
+    cont.innerHTML = html;
   } else {
-    contenedor.innerHTML = `<div class="text-center py-16 text-gray-400 text-lg">❌ Sin enlaces disponibles</div>`;
+    cont.innerHTML = `<p class="text-center py-16 text-gray-400">Sin enlaces disponibles</p>`;
   }
 
-  mostrarRecomendaciones(item);
   document.getElementById("paginaDetalle").style.display = "block";
   document.body.style.overflow = "hidden";
   agregarAlHistorial(item);
 }
 
-function cambiarFuente(url, boton) {
-  document.querySelectorAll(".btn-opcion").forEach(btn => btn.classList.remove("activo"));
-  boton.classList.add("activo");
-  enlaceActual = url;
-  document.getElementById("reproductorPrincipal").innerHTML = `<iframe src="${url}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation-by-user-activation" referrerpolicy="no-referrer-when-downgrade" allowfullscreen loading="lazy"></iframe>`;
+function cambiarFuente(url, btn) {
+  document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo"));
+  btn.classList.add("activo");
+  document.querySelector("#reproductorPrincipal iframe").src = url;
 }
 
 function cerrarDetalle() {
@@ -555,7 +486,7 @@ function cerrarDetalle() {
 function agregarAlHistorial(item) {
   let h = JSON.parse(localStorage.getItem("historialTely")) || [];
   h = h.filter(x => x.id !== item.id);
-  h.unshift({ id: item.id, titulo: item.titulo, tipo: item.tipo });
+  h.unshift({ id: item.id, titulo: item.titulo });
   if (h.length > 10) h.pop();
   localStorage.setItem("historialTely", JSON.stringify(h));
   mostrarHistorial();
@@ -564,71 +495,34 @@ function agregarAlHistorial(item) {
 function mostrarHistorial() {
   const c = document.getElementById("listaHistorial");
   const h = JSON.parse(localStorage.getItem("historialTely")) || [];
-  c.innerHTML = h.length ? "" : `<div class="historial-vacio">Aún no ves nada</div>`;
+  c.innerHTML = h.length ? "" : `<div class="historial-vacio">Aún no has visto nada</div>`;
   h.forEach(i => {
     const btn = document.createElement("button");
+    btn.className = "dropdown-item";
     btn.innerHTML = `<i class="fa-solid fa-play mr-2"></i> ${i.titulo}`;
-    btn.onclick = () => { const f = contenido.find(x => x.id === i.id); if (f) abrirDetalle(f); };
+    btn.onclick = () => abrirDetalle(contenido.find(x => x.id === i.id));
     c.appendChild(btn);
   });
 }
 
 function limpiarHistorial() { localStorage.removeItem("historialTely"); mostrarHistorial(); }
 
-function enviarCodigo() { alert("Función de teléfono en desarrollo"); }
-function verificarCodigo() { alert("Verificación en desarrollo"); }
-
-function cerrarSesion() { 
-  auth.signOut().then(() => { 
-    document.getElementById("nombrePerfil").textContent = "Acceder"; 
+function cerrarSesion() {
+  auth.signOut().then(() => {
+    document.getElementById("nombrePerfil").textContent = "🔑 Acceder a tu cuenta";
+    document.getElementById("btnAdmin").classList.add("oculto");
     localStorage.removeItem("historialTely");
     mostrarHistorial();
-  }); 
-}
-
-function mostrarRecomendaciones(itemActual) {
-  const contenedor = document.getElementById("recomendadasLista");
-  contenedor.innerHTML = "";
-  const similares = contenido.filter(x =>
-    x.id !== itemActual.id &&
-    x.tipo === itemActual.tipo &&
-    x.genero && itemActual.genero &&
-    x.genero.includes(itemActual.genero.split("/")[0].trim())
-  ).slice(0, 8);
-
-  if (similares.length === 0) {
-    contenedor.innerHTML = `<p class="text-gray-400 w-full text-center py-4">No hay recomendaciones disponibles</p>`;
-    return;
-  }
-
-  similares.forEach(sim => {
-    const tarjeta = document.createElement("div");
-    tarjeta.className = "tarjeta-recomendada";
-    tarjeta.innerHTML = `
-      <img src="${sim.portada}" alt="${sim.titulo}" class="portada-recomendada" loading="lazy" onerror="this.src='logo.png'">
-      <div class="texto-recomendada">${sim.titulo}</div>
-    `;
-    tarjeta.onclick = () => abrirDetalle(sim);
-    contenedor.appendChild(tarjeta);
+    document.getElementById("menuPerfil").classList.remove("mostrar");
   });
 }
 
+function irAlPanelAdmin() { window.location.href = "/admin.html"; }
+
 auth.onAuthStateChanged(usuario => {
-  if (usuario) {
-    document.getElementById("nombrePerfil").textContent = usuario.displayName || usuario.phoneNumber || usuario.email;
-  }
+  if (usuario && ADMIN_UIDS.includes(usuario.uid)) document.getElementById("btnAdmin").classList.remove("oculto");
   cargarTodoContenido();
 });
-
-window.addEventListener('popstate', function(e) {
-  if (document.getElementById("paginaDetalle").style.display === "block") {
-    cerrarDetalle();
-    e.preventDefault();
-    history.pushState(null, '', window.location.href);
-  }
-});
-
-history.pushState(null, '', window.location.href);
 </script>
 </body>
 </html>
