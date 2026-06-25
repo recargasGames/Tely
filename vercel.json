@@ -5,7 +5,7 @@
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "X-Frame-Options", "value": "ALLOWALL" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; frame-src 'self' https://mixdrop.top https://mixdrop.ag https://*.vidmoly.to https://*.voe.sx; media-src 'self' https://mixdrop.top https://mixdrop.ag https://*.vidmoly.to; connect-src 'self' https://*.firebaseio.com https://www.googleapis.com https://www.gstatic.com;" }
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com https://api.themoviedb.org; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; frame-src 'self' https://mixdrop.top https://mixdrop.ag https://*.vidmoly.to https://*.voe.sx; connect-src 'self' https://*.firebaseio.com https://www.googleapis.com https://www.gstatic.com https://api.themoviedb.org;" }
       ]
     }
   ]
