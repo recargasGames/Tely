@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin TELY 🛠️</title>
+    <title>Panel Admin - TELY 🎬</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -17,166 +14,114 @@
                     colors: {
                         fondo: '#0F172A',
                         tarjeta: '#1E293B',
-                        acento: '#3B82F6',
-                        exito: '#10B981',
-                        alerta: '#F59E0B',
-                        error: '#EF4444'
+                        acento: '#60A5FA',
+                        alerta: '#EF4444',
+                        exito: '#10B981'
                     }
                 }
             }
         }
     </script>
     <style>
-        body { background: #0F172A; color: #F8FAFC; min-height: 100vh; }
-        .input-form { background: #1E293B; border: 1px solid #334155; color: #F8FAFC; }
-        .input-form:focus { outline: none; border-color: #3B82F6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); }
-        .btn-guardar { background: #10B981; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0F172A; color: #F8FAFC; font-family: 'Segoe UI', Roboto, sans-serif; min-height: 100vh; padding: 1rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        input, select, textarea { width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #334155; background: #1E293B; color: #F8FAFC; font-size: 1rem; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #60A5FA; box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2); }
+        .btn { padding: 0.9rem 1.5rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-guardar { background: #10B981; color: white; }
         .btn-guardar:hover { background: #059669; }
-        .btn-buscar { background: #3B82F6; }
-        .btn-buscar:hover { background: #2563EB; }
+        .btn-limpiar { background: #475569; color: white; }
+        .btn-limpiar:hover { background: #334155; }
+        .btn-eliminar { background: #EF4444; color: white; }
+        .opcion { display: flex; gap: 0.8rem; align-items: center; margin-bottom: 0.8rem; }
+        .opcion input { flex: 1; }
+        .oculto { display: none !important; }
     </style>
 </head>
-<body class="p-4 md:p-6">
+<body class="dark">
+    <div class="max-w-3xl mx-auto">
+        <header class="mb-6 pb-4 border-b border-gray-700">
+            <h1 class="text-2xl font-bold flex items-center gap-2">
+                <i class="fa fa-film"></i> Panel de Administración TELY
+            </h1>
+            <p class="text-gray-400 mt-1">Agrega, edita o elimina contenido personalizado</p>
+        </header>
 
-    <header class="mb-8 text-center">
-        <h1 class="text-3xl font-bold text-acento">🛠️ Panel de Administración TELY</h1>
-        <p class="text-gray-400 mt-1">Gestiona tu contenido fácilmente</p>
-    </header>
-
-    <!-- 🔹 NAVEGACIÓN ENTRE SECCIONES -->
-    <div class="flex gap-3 mb-6 overflow-x-auto pb-2">
-        <button onclick="cambiarSeccion('tmdb')" id="tabTmdb" class="px-5 py-2 rounded-lg bg-acento font-medium">🎬 Contenido TMDB</button>
-        <button onclick="cambiarSeccion('propio')" id="tabPropio" class="px-5 py-2 rounded-lg bg-tarjeta hover:bg-gray-700 font-medium">➕ Agregar Contenido Propio</button>
-    </div>
-
-    <!-- ====================================== -->
-    <!-- SECCIÓN 1: GESTIONAR CONTENIDO TMDB -->
-    <!-- ====================================== -->
-    <div id="seccionTmdb" class="block">
-        <div class="bg-tarjeta rounded-xl p-5 mb-6 shadow-lg">
-            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-film"></i> Películas/Series de TMDB
-            </h2>
-            <p class="text-gray-300 mb-4">
-                Ingresa el ID de TMDB para agregar imagen personalizada y enlaces de reproducción.
-            </p>
-
-            <div class="grid md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block mb-1 text-sm text-gray-300">ID de TMDB</label>
-                    <input type="text" id="tmdbId" placeholder="Ej: 245891 (John Wick 1)" class="input-form w-full p-3 rounded-lg">
-                </div>
-                <div>
-                    <label class="block mb-1 text-sm text-gray-300">URL de Imagen / Portada</label>
-                    <input type="text" id="tmdbPortada" placeholder="https://image.tmdb.org/t/p/w500/..." class="input-form w-full p-3 rounded-lg">
-                </div>
+        <form id="formulario" class="bg-tarjeta p-5 rounded-xl shadow-lg mb-8" data-id="">
+            <div class="form-group">
+                <label>Título</label>
+                <input type="text" id="titulo" required placeholder="Ej: John Wick">
             </div>
 
-            <div class="mb-4">
-                <label class="block mb-1 text-sm text-gray-300">Título</label>
-                <input type="text" id="tmdbTitulo" placeholder="Ej: John Wick: Capítulo 2" class="input-form w-full p-3 rounded-lg">
-            </div>
-
-            <div class="mb-4">
-                <label class="block mb-1 text-sm text-gray-300">Enlaces de reproducción</label>
-                <div id="enlacesTmdbContainer">
-                    <div class="flex gap-2 mb-2">
-                        <input type="text" placeholder="Nombre opción" class="input-form w-1/3 p-2 rounded-lg">
-                        <input type="text" placeholder="URL del video" class="input-form w-2/3 p-2 rounded-lg">
-                    </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="form-group">
+                    <label>Año</label>
+                    <input type="text" id="anio" placeholder="Ej: 2014">
                 </div>
-                <button onclick="agregarCampoEnlace('tmdb')" class="text-acento text-sm mt-1 hover:underline">
-                    <i class="fa-solid fa-plus"></i> Agregar otra opción
-                </button>
-            </div>
-
-            <button onclick="guardarContenidoTMDB()" class="btn-guardar text-white px-6 py-2.5 rounded-lg font-medium">
-                💾 Guardar en Firebase
-            </button>
-        </div>
-
-        <!-- Lista de contenido TMDB ya guardado -->
-        <div class="bg-tarjeta rounded-xl p-5 shadow-lg">
-            <h3 class="text-lg font-semibold mb-3">📋 Contenido TMDB Guardado</h3>
-            <div id="listaTmdb" class="space-y-2 text-sm"></div>
-        </div>
-    </div>
-
-    <!-- ====================================== -->
-    <!-- SECCIÓN 2: AGREGAR CONTENIDO PROPIO -->
-    <!-- ====================================== -->
-    <div id="seccionPropio" class="hidden">
-        <div class="bg-tarjeta rounded-xl p-5 mb-6 shadow-lg">
-            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-plus-circle"></i> Agregar Contenido Propio
-            </h2>
-            <p class="text-gray-300 mb-4">
-                Completa todos los datos para agregar películas o series que no estén en TMDB.
-            </p>
-
-            <div class="grid md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block mb-1 text-sm text-gray-300">Título</label>
-                    <input type="text" id="propioTitulo" class="input-form w-full p-3 rounded-lg">
-                </div>
-                <div>
-                    <label class="block mb-1 text-sm text-gray-300">Año</label>
-                    <input type="text" id="propioAnio" class="input-form w-full p-3 rounded-lg">
-                </div>
-                <div>
-                    <label class="block mb-1 text-sm text-gray-300">Tipo</label>
-                    <select id="propioTipo" class="input-form w-full p-3 rounded-lg">
+                <div class="form-group">
+                    <label>Tipo</label>
+                    <select id="tipo">
                         <option value="pelicula">Película</option>
                         <option value="serie">Serie</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block mb-1 text-sm text-gray-300">Categoría</label>
-                    <select id="propioCategoria" class="input-form w-full p-3 rounded-lg">
-                        <option value="peliculas">Películas</option>
-                        <option value="series">Series</option>
-                    </select>
-                </div>
             </div>
 
-            <div class="mb-4">
-                <label class="block mb-1 text-sm text-gray-300">URL de Portada / Imagen</label>
-                <input type="text" id="propioPortada" class="input-form w-full p-3 rounded-lg">
+            <div class="form-group">
+                <label>URL de Portada / Imagen</label>
+                <input type="text" id="portada" placeholder="Ej: https://dominio.com/imagen.png o john-wick.png">
             </div>
 
-            <div class="mb-4">
-                <label class="block mb-1 text-sm text-gray-300">Sinopsis</label>
-                <textarea id="propioSinopsis" rows="3" class="input-form w-full p-3 rounded-lg"></textarea>
+            <div class="form-group">
+                <label>Sinopsis</label>
+                <textarea id="sinopsis" rows="3" placeholder="Breve descripción del contenido..."></textarea>
             </div>
 
-            <div class="mb-4">
-                <label class="block mb-1 text-sm text-gray-300">Enlaces de reproducción</label>
-                <div id="enlacesPropioContainer">
-                    <div class="flex gap-2 mb-2">
-                        <input type="text" placeholder="Nombre opción" class="input-form w-1/3 p-2 rounded-lg">
-                        <input type="text" placeholder="URL del video" class="input-form w-2/3 p-2 rounded-lg">
+            <div class="form-group">
+                <label>ID de TMDB (opcional)</label>
+                <input type="text" id="tmdb_id" placeholder="Para vincular con datos automáticos">
+            </div>
+
+            <div class="form-group">
+                <label>Opciones de reproducción</label>
+                <div id="contenedor-opciones">
+                    <div class="opcion">
+                        <input type="text" class="nombre-opcion" placeholder="Nombre ej: Opción 1">
+                        <input type="url" class="url-opcion" placeholder="Enlace de video">
+                        <button type="button" class="text-alerta text-xl" onclick="eliminarOpcion(this)"><i class="fa fa-times"></i></button>
                     </div>
                 </div>
-                <button onclick="agregarCampoEnlace('propio')" class="text-acento text-sm mt-1 hover:underline">
-                    <i class="fa-solid fa-plus"></i> Agregar otra opción
+                <button type="button" onclick="agregarOpcion()" class="text-acento mt-2 text-sm">
+                    <i class="fa fa-plus mr-1"></i> Agregar otra opción
                 </button>
             </div>
 
-            <button onclick="guardarContenidoPropio()" class="btn-guardar text-white px-6 py-2.5 rounded-lg font-medium">
-                💾 Guardar en Firebase
-            </button>
-        </div>
+            <div class="flex gap-3 mt-6">
+                <button type="submit" class="btn btn-guardar flex items-center gap-2">
+                    <i class="fa fa-save"></i> Guardar contenido
+                </button>
+                <button type="button" onclick="limpiarFormulario()" class="btn btn-limpiar flex items-center gap-2">
+                    <i class="fa fa-refresh"></i> Limpiar
+                </button>
+            </div>
+        </form>
 
-        <div class="bg-tarjeta rounded-xl p-5 shadow-lg">
-            <h3 class="text-lg font-semibold mb-3">📋 Contenido Propio Guardado</h3>
-            <div id="listaPropio" class="space-y-2 text-sm"></div>
+        <div class="bg-tarjeta p-5 rounded-xl shadow-lg">
+            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                <i class="fa fa-list"></i> Contenido Guardado
+            </h2>
+            <div id="lista-contenido-propio"></div>
         </div>
     </div>
 
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
     <script>
-        // ----------------------
-        // CONFIGURACIÓN FIREBASE
-        // ----------------------
+        // Configuración de Firebase (la misma que usas en tu app)
         const firebaseConfig = {
             apiKey: "AIzaSyCYetRSA0nsZsGiqABbTtjq-5a4bz5-oDk",
             authDomain: "tely-675c0.firebaseapp.com",
@@ -190,162 +135,158 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // ----------------------
-        // FUNCIONES DE NAVEGACIÓN
-        // ----------------------
-        function cambiarSeccion(seccion) {
-            document.getElementById('seccionTmdb').classList.toggle('hidden', seccion !== 'tmdb');
-            document.getElementById('seccionPropio').classList.toggle('hidden', seccion !== 'propio');
-            document.getElementById('tabTmdb').classList.toggle('bg-acento', seccion === 'tmdb');
-            document.getElementById('tabTmdb').classList.toggle('bg-tarjeta', seccion !== 'tmdb');
-            document.getElementById('tabPropio').classList.toggle('bg-acento', seccion === 'propio');
-            document.getElementById('tabPropio').classList.toggle('bg-tarjeta', seccion !== 'propio');
+        // ✅ FUNCIÓN QUE FALTABA (causaba el error)
+        function listarContenidoPropio() {
+            const contenedor = document.getElementById("lista-contenido-propio");
+            contenedor.innerHTML = "<p class='text-gray-400 text-center py-6'>Cargando contenido...</p>";
+
+            db.ref("contenido_personalizado").once("value")
+                .then(snapshot => {
+                    const datos = snapshot.val();
+                    contenedor.innerHTML = "";
+
+                    if (!datos) {
+                        contenedor.innerHTML = "<p class='text-gray-400 text-center py-6'>Aún no hay contenido guardado</p>";
+                        return;
+                    }
+
+                    Object.entries(datos).forEach(([id, item]) => {
+                        const tarjeta = document.createElement("div");
+                        tarjeta.className = "bg-gray-800 p-4 rounded-lg mb-3 flex flex-wrap justify-between items-center gap-3";
+                        tarjeta.innerHTML = `
+                            <div>
+                                <h3 class="font-bold text-lg">${item.titulo || "Sin título"}</h3>
+                                <p class="text-gray-300 text-sm">${item.tipo === "pelicula" ? "Película" : "Serie"} • ${item.anio || "N/D"}</p>
+                                <p class="text-gray-400 text-xs mt-1">ID TMDB: ${item.tmdb_id || "No asignado"}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="cargarParaEditar('${id}')" class="text-acento p-2 rounded hover:bg-gray-700" title="Editar">
+                                    <i class="fa fa-pen"></i>
+                                </button>
+                                <button onclick="eliminarContenido('${id}')" class="text-alerta p-2 rounded hover:bg-gray-700" title="Eliminar">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                        contenedor.appendChild(tarjeta);
+                    });
+                })
+                .catch(err => {
+                    contenedor.innerHTML = `<p class="text-alerta text-center py-4">Error: ${err.message}</p>`;
+                });
         }
 
-        // ----------------------
-        // AGREGAR CAMPOS DE ENLACES
-        // ----------------------
-        function agregarCampoEnlace(tipo) {
-            const contenedor = document.getElementById(`enlaces${tipo.charAt(0).toUpperCase() + tipo.slice(1)}Container`);
-            const nuevo = document.createElement('div');
-            nuevo.className = 'flex gap-2 mb-2';
-            nuevo.innerHTML = `
-                <input type="text" placeholder="Nombre opción" class="input-form w-1/3 p-2 rounded-lg">
-                <input type="text" placeholder="URL del video" class="input-form w-2/3 p-2 rounded-lg">
-                <button onclick="this.parentElement.remove()" class="text-red-500 px-2">✕</button>
+        // Funciones auxiliares
+        function agregarOpcion() {
+            const contenedor = document.getElementById("contenedor-opciones");
+            const nueva = document.createElement("div");
+            nueva.className = "opcion";
+            nueva.innerHTML = `
+                <input type="text" class="nombre-opcion" placeholder="Nombre ej: Opción 2">
+                <input type="url" class="url-opcion" placeholder="Enlace de video">
+                <button type="button" class="text-alerta text-xl" onclick="eliminarOpcion(this)"><i class="fa fa-times"></i></button>
             `;
-            contenedor.appendChild(nuevo);
+            contenedor.appendChild(nueva);
         }
 
-        // ----------------------
-        // GUARDAR CONTENIDO TMDB
-        // ----------------------
-        async function guardarContenidoTMDB() {
-            const tmdb_id = document.getElementById('tmdbId').value.trim();
-            const titulo = document.getElementById('tmdbTitulo').value.trim();
-            const portada = document.getElementById('tmdbPortada').value.trim();
+        function eliminarOpcion(boton) {
+            boton.parentElement.remove();
+        }
 
-            if (!tmdb_id || !titulo) return alert('Completa al menos ID y Título');
+        function limpiarFormulario() {
+            document.getElementById("formulario").reset();
+            document.getElementById("formulario").dataset.id = "";
+            document.getElementById("contenedor-opciones").innerHTML = `
+                <div class="opcion">
+                    <input type="text" class="nombre-opcion" placeholder="Nombre ej: Opción 1">
+                    <input type="url" class="url-opcion" placeholder="Enlace de video">
+                    <button type="button" class="text-alerta text-xl" onclick="eliminarOpcion(this)"><i class="fa fa-times"></i></button>
+                </div>
+            `;
+        }
 
-            // Recopilar enlaces
+        function cargarParaEditar(id) {
+            db.ref(`contenido_personalizado/${id}`).once("value")
+                .then(snap => {
+                    const item = snap.val();
+                    if (!item) return;
+
+                    document.getElementById("formulario").dataset.id = id;
+                    document.getElementById("titulo").value = item.titulo || "";
+                    document.getElementById("anio").value = item.anio || "";
+                    document.getElementById("tipo").value = item.tipo || "pelicula";
+                    document.getElementById("portada").value = item.portada || "";
+                    document.getElementById("sinopsis").value = item.sinopsis || "";
+                    document.getElementById("tmdb_id").value = item.tmdb_id || "";
+
+                    const contenedor = document.getElementById("contenedor-opciones");
+                    contenedor.innerHTML = "";
+                    if (item.opciones && item.opciones.length > 0) {
+                        item.opciones.forEach(op => {
+                            const div = document.createElement("div");
+                            div.className = "opcion";
+                            div.innerHTML = `
+                                <input type="text" class="nombre-opcion" value="${op.nombre || ""}" placeholder="Nombre">
+                                <input type="url" class="url-opcion" value="${op.url || ""}" placeholder="Enlace">
+                                <button type="button" class="text-alerta text-xl" onclick="eliminarOpcion(this)"><i class="fa fa-times"></i></button>
+                            `;
+                            contenedor.appendChild(div);
+                        });
+                    } else {
+                        agregarOpcion();
+                    }
+
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+        }
+
+        function eliminarContenido(id) {
+            if (!confirm("¿Seguro que quieres eliminar este contenido? No se puede deshacer.")) return;
+            db.ref(`contenido_personalizado/${id}`).remove()
+                .then(() => {
+                    listarContenidoPropio();
+                    alert("Contenido eliminado correctamente");
+                })
+                .catch(err => alert("Error al eliminar: " + err.message));
+        }
+
+        // Guardar al enviar el formulario
+        document.getElementById("formulario").addEventListener("submit", function(e) {
+            e.preventDefault();
+
             const opciones = [];
-            const campos = document.querySelectorAll('#enlacesTmdbContainer > div');
-            campos.forEach(campo => {
-                const nombre = campo.children[0].value.trim();
-                const url = campo.children[1].value.trim();
+            document.querySelectorAll(".opcion").forEach(op => {
+                const nombre = op.querySelector(".nombre-opcion").value.trim();
+                const url = op.querySelector(".url-opcion").value.trim();
                 if (nombre && url) opciones.push({ nombre, url });
             });
 
             const datos = {
-                tmdb_id,
-                titulo,
-                portada,
-                tipo: 'pelicula',
-                categoria: 'peliculas',
-                opciones
+                titulo: document.getElementById("titulo").value.trim(),
+                anio: document.getElementById("anio").value.trim(),
+                tipo: document.getElementById("tipo").value,
+                categoria: document.getElementById("tipo").value === "pelicula" ? "peliculas" : "series",
+                portada: document.getElementById("portada").value.trim(),
+                sinopsis: document.getElementById("sinopsis").value.trim(),
+                tmdb_id: document.getElementById("tmdb_id").value.trim() || null,
+                opciones: opciones,
+                fecha_creacion: new Date().toISOString()
             };
 
-            try {
-                await db.ref(`contenido_personalizado/tmdb_${tmdb_id}`).set(datos);
-                alert('✅ Contenido TMDB guardado correctamente');
-                listarContenidoTMDB();
-            } catch (err) {
-                alert('❌ Error: ' + err.message);
-            }
-        }
+            const idActual = this.dataset.id;
+            const ref = idActual ? db.ref(`contenido_personalizado/${idActual}`) : db.ref("contenido_personalizado").push();
 
-        // ----------------------
-        // GUARDAR CONTENIDO PROPIO
-        // ----------------------
-        async function guardarContenidoPropio() {
-            const titulo = document.getElementById('propioTitulo').value.trim();
-            const anio = document.getElementById('propioAnio').value.trim();
-            const tipo = document.getElementById('propioTipo').value;
-            const categoria = document.getElementById('propioCategoria').value;
-            const portada = document.getElementById('propioPortada').value.trim();
-            const sinopsis = document.getElementById('propioSinopsis').value.trim();
+            ref.set(datos)
+                .then(() => {
+                    limpiarFormulario();
+                    listarContenidoPropio();
+                    alert("✅ Contenido guardado correctamente");
+                })
+                .catch(err => alert("❌ Error al guardar: " + err.message));
+        });
 
-            if (!titulo || !anio || !portada) return alert('Completa los campos obligatorios');
-
-            const opciones = [];
-            const campos = document.querySelectorAll('#enlacesPropioContainer > div');
-            campos.forEach(campo => {
-                const nombre = campo.children[0].value.trim();
-                const url = campo.children[1].value.trim();
-                if (nombre && url) opciones.push({ nombre, url });
-            });
-
-            const id = `propio_${Date.now()}`;
-            const datos = {
-                id,
-                titulo,
-                anio,
-                tipo,
-                categoria,
-                portada,
-                sinopsis,
-                opciones
-            };
-
-            try {
-                await db.ref(`contenido_personalizado/${id}`).set(datos);
-                alert('✅ Contenido propio guardado correctamente');
-                listarContenidoPropio();
-            } catch (err) {
-                alert('❌ Error: ' + err.message);
-            }
-        }
-
-        // ----------------------
-        // LISTAR CONTENIDO GUARDADO
-        // ----------------------
-        async function listarContenidoTMDB() {
-            const lista = document.getElementById('listaTmdb');
-            lista.innerHTML = 'Cargando...';
-            const snapshot = await db.ref('contenido_personalizado').orderByChild('tmdb_id').startAt('1').once('value');
-            const datos = snapshot.val() || {};
-            lista.innerHTML = '';
-            for (const key in datos) {
-                if (datos[key].tmdb_id) {
-                    const item = datos[key];
-                    lista.innerHTML += `<div class="p-2 bg-gray-700 rounded flex justify-between items-center">
-                        <span>🎬 ${item.titulo} (ID: ${item.tmdb_id})</span>
-                        <button onclick="eliminar('${key}')" class="text-red-400">Borrar</button>
-                    </div>`;
-                }
-            }
-        }
-
-        async function listarContenidoPropio() {
-            const lista = document.getElementById('listaPropio');
-            lista.innerHTML = 'Cargando...';
-            const snapshot = await db.ref('contenido_personalizado').once('value');
-            const datos = snapshot.val() || {};
-            lista.innerHTML = '';
-            for (const key in datos) {
-                if (!datos[key].tmdb_id) {
-                    const item = datos[key];
-                    lista.innerHTML += `<div class="p-2 bg-gray-700 rounded flex justify-between items-center">
-                        <span>➕ ${item.titulo} (${item.anio})</span>
-                        <button onclick="eliminar('${key}')" class="text-red-400">Borrar</button>
-                    </div>`;
-                }
-            }
-        }
-
-        async function eliminar(clave) {
-            if (confirm('¿Seguro que quieres borrar este contenido?')) {
-                await db.ref(`contenido_personalizado/${clave}`).remove();
-                listarContenidoTMDB();
-                listarContenidoPropio();
-            }
-        }
-
-        // Cargar listas al abrir
-        window.onload = () => {
-            listarContenidoTMDB();
-            listarContenidoPropio();
-        };
+        // Cargar lista al abrir la página
+        window.onload = listarContenidoPropio;
     </script>
 </body>
 </html>

@@ -59,7 +59,7 @@
         body.dark .contador { background: #334155; color: #CBD5E1; }
 
         .grid-contenido { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; padding: 0 1.2rem 2rem; }
-        @media (max-width: 480px) { .grid-contenido { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 480px) { .grid-contenido { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; } }
         .tarjeta { border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; position: relative; }
         body.dark .tarjeta { background: #1E293B; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
         .tarjeta:hover { transform: translateY(-4px); }
@@ -210,7 +210,6 @@
     <div class="bg-white dark:bg-gray-800 p-8 rounded-xl w-full max-w-md mx-auto shadow-xl">
         <h2 class="text-2xl font-bold text-center mb-4 dark:text-white">Iniciar Sesión</h2>
         <p class="text-center text-gray-600 dark:text-gray-300 mb-6">Elige tu método de acceso</p>
-        <div id="captcha-contenedor" style="display: none;"></div>
         <button class="w-full py-3 bg-blue-600 text-white rounded-lg font-medium flex items-center justify-center gap-2 mb-4" onclick="iniciarConGoogle()">
             <i class="fa-brands fa-google"></i> Continuar con Google
         </button>
@@ -227,7 +226,6 @@
     </div>
 </div>
 <script>
-// CONFIGURACIÓN FIREBASE - CONECTADO A TU PANEL ADMIN
 const firebaseConfig = {
   apiKey: "AIzaSyCYetRSA0nsZsGiqABbTtjq-5a4bz5-oDk",
   authDomain: "tely-675c0.firebaseapp.com",
@@ -242,22 +240,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
-
-// Variables globales
 let recaptchaVerifier, confirmationResult, videoPendiente = null, serieActual = null, contenido = [];
 
-// CONFIGURACIÓN TMDB
-const TMDB_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4ZGQ5OWI1YTE1YWNmZGQ5OGUzYjI0OWQ1Zjg5MGFmNCIsIm5iZiI6MTc4MjI3NzIzMS4zMzMsInN1YiI6IjZhM2I2NDZmZThmMTMwOTc2MWVjNDYxYiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.JLmHWuXkhDc9LreAvXFZa0qTS7PR_nrj_SSwVm9UZ9Y";
-const TMDB_BASE = "https://api.themoviedb.org/3";
-const TMDB_IMG = "https://image.tmdb.org/t/p/w500";
-const TMDB_LANG = "es-ES";
-
-const opcionesTMDB = {
-  method: "GET",
-  headers: { "Authorization": `Bearer ${TMDB_TOKEN}`, "Content-Type": "application/json;charset=utf-8" }
-};
-
-// TU CONTENIDO BASE + TODAS LAS JOHN WICK AGREGADAS FIJAS
 const MI_CONTENIDO = [
   {
     id: "tmdb_1136",
@@ -265,7 +249,7 @@ const MI_CONTENIDO = [
     anio: "1982",
     tipo: "pelicula",
     categoria: "peliculas",
-    portada: "rambo1.png",
+    portada: "https://image.tmdb.org/t/p/w500/5CbGw0lYgFkKj0mG8Z7xQZQHk6b.jpg",
     sinopsis: "Un ex soldado regresa a su pueblo natal y se enfrenta a la hostilidad de las autoridades locales.",
     puntuacion: "7.7",
     genero: "Acción / Aventura",
@@ -317,130 +301,9 @@ const MI_CONTENIDO = [
         ]
       }
     ]
-  },
-  // 🎬 TODAS LAS JOHN WICK AGREGADAS FIJAMENTE
-  {
-    id: "johnwick_1",
-    titulo: "John Wick",
-    anio: "2014",
-    tipo: "pelicula",
-    categoria: "peliculas",
-    portada: "https://image.tmdb.org/t/p/w500/fZPSd9tSTa6ySn3DwuF8piuW0yX.jpg",
-    sinopsis: "Un ex asesino a sueldo sale de su retiro para vengarse de los hombres que le robaron todo lo que amaba.",
-    puntuacion: "7.4",
-    genero: "Acción / Crimen",
-    opciones: []
-  },
-  {
-    id: "johnwick_2",
-    titulo: "John Wick: Pacto de sangre",
-    anio: "2017",
-    tipo: "pelicula",
-    categoria: "peliculas",
-    portada: "https://image.tmdb.org/t/p/w500/n4NJJ9N6v5d4h4u3qg8jKfX7s9m.jpg",
-    sinopsis: "John Wick es obligado a cumplir un antiguo pacto y debe enfrentar a los asesinos más peligrosos del mundo.",
-    puntuacion: "7.7",
-    genero: "Acción / Crimen",
-    opciones: []
-  },
-  {
-    id: "johnwick_3",
-    titulo: "John Wick 3: Parabellum",
-    anio: "2019",
-    tipo: "pelicula",
-    categoria: "peliculas",
-    portada: "https://image.tmdb.org/t/p/w500/ziEuG1essHh0bY7RfU9OQk8eX2v.jpg",
-    sinopsis: "Con un precio sobre su cabeza, John Wick recorre las calles de Nueva York huyendo de todos los que quieren cobrar la recompensa.",
-    puntuacion: "7.8",
-    genero: "Acción / Crimen",
-    opciones: []
-  },
-  {
-    id: "johnwick_4",
-    titulo: "John Wick 4",
-    anio: "2023",
-    tipo: "pelicula",
-    categoria: "peliculas",
-    portada: "https://image.tmdb.org/t/p/w500/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg",
-    sinopsis: "John Wick descubre el camino para derrotar a la Alta Mesa y debe enfrentarse a nuevos enemigos con alianzas poderosas en todo el mundo.",
-    puntuacion: "7.9",
-    genero: "Acción / Crimen",
-    opciones: []
   }
 ];
 
-// Carga contenido desde tu panel admin
-async function cargarContenidoAdmin() {
-  try {
-    const snapshot = await db.ref("contenido_personalizado").once("value");
-    const datosAdmin = snapshot.val();
-    return datosAdmin ? Object.values(datosAdmin) : [];
-  } catch (err) {
-    console.log("Sin conexión al panel admin:", err);
-    return [];
-  }
-}
-
-// FUNCIÓN MEJORADA: CARGA PRIMERO LO TUYO, LUEGO TMDB (AHORA TRAE 30 PELÍCULAS EN VEZ DE 12)
-async function cargarContenidoCompleto() {
-  const lista = document.getElementById("lista-contenido");
-  lista.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-400">📡 Cargando contenido...</div>';
-
-  // Primero carga contenido propio y del panel
-  const contenidoAdmin = await cargarContenidoAdmin();
-  contenido = [...MI_CONTENIDO, ...contenidoAdmin];
-
-  // Luego agrega TMDB con MÁS resultados para que no falten títulos
-  try {
-    const resPeliculas = await fetch(`${TMDB_BASE}/movie/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB);
-    const datosPeliculas = await resPeliculas.json();
-
-    const resSeries = await fetch(`${TMDB_BASE}/tv/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB);
-    const datosSeries = await resSeries.json();
-
-    // ⚠️ CAMBIO: Ahora trae 30 películas en vez de 12
-    const pelisTMDB = datosPeliculas.results.slice(0, 30).map(p => ({
-      id: `tmdb_${p.id}`,
-      titulo: p.title,
-      anio: p.release_date ? p.release_date.split("-")[0] : "N/D",
-      tipo: "pelicula",
-      categoria: "peliculas",
-      portada: p.poster_path ? `${TMDB_IMG}${p.poster_path}` : "https://via.placeholder.com/300x450?text=Sin+Portada",
-      sinopsis: p.overview || "Sin sinopsis disponible",
-      puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A",
-      genero: "Película",
-      video: "",
-      opciones: [],
-      temporadas: [],
-      deTMDB: true
-    }));
-
-    const seriesTMDB = datosSeries.results.slice(0, 15).map(s => ({
-      id: `tmdb_${s.id}`,
-      titulo: s.name,
-      anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D",
-      tipo: "serie",
-      categoria: "series",
-      portada: s.poster_path ? `${TMDB_IMG}${s.poster_path}` : "https://via.placeholder.com/300x450?text=Sin+Portada",
-      sinopsis: s.overview || "Sin sinopsis disponible",
-      puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A",
-      genero: "Serie",
-      video: "",
-      opciones: [],
-      temporadas: [],
-      deTMDB: true
-    }));
-
-    contenido = [...contenido, ...pelisTMDB, ...seriesTMDB];
-  } catch (err) {
-    console.log("TMDB tardó o falló, mostrando solo contenido disponible:", err);
-  }
-
-  document.getElementById("contadorTotal").textContent = `${contenido.length} títulos`;
-  mostrarContenido("estrenos");
-}
-
-// Cambio de modo oscuro/claro
 function cambiarModo() {
   const body = document.body;
   const icono = document.getElementById("iconoModo");
@@ -463,25 +326,159 @@ if (localStorage.getItem("modo") === "oscuro" || (!localStorage.getItem("modo") 
   document.getElementById("iconoModo").className = "fa-solid fa-sun";
 }
 
-// Navegación entre categorías (funciona perfecto)
-function cambiarCategoria(cat) {
-  document.querySelectorAll(".btn-pestana").forEach(b => {
-    b.classList.remove("activa");
-    b.classList.add("inactiva");
-  });
-  event.target.classList.remove("inactiva");
-  event.target.classList.add("activa");
-  mostrarContenido(cat);
+const TMDB_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4ZGQ5OWI1YTE1YWNmZGQ5OGUzYjI0OWQ1Zjg5MGFmNCIsIm5iZiI6MTc4MjI3NzIzMS4zMzMsInN1YiI6IjZhM2I2NDZmZThmMTMwOTc2MWVjNDYxYiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.JLmHWuXkhDc9LreAvXFZa0qTS7PR_nrj_SSwVm9UZ9Y";
+const TMDB_BASE = "https://api.themoviedb.org/3";
+const TMDB_IMG = "https://image.tmdb.org/t/p/w500";
+const TMDB_LANG = "es-ES";
+
+const opcionesTMDB = {
+  method: "GET",
+  headers: { "Authorization": `Bearer ${TMDB_TOKEN}`, "Content-Type": "application/json;charset=utf-8" }
+};
+
+// ✅ FUNCIÓN CORREGIDA: CARGA CONTENIDO DEL PANEL ADMIN
+async function cargarContenidoAdmin() {
+  try {
+    const snapshot = await db.ref("contenido_personalizado").once("value");
+    const datosAdmin = snapshot.val();
+    return datosAdmin ? Object.values(datosAdmin) : [];
+  } catch (err) {
+    console.log("Sin contenido del panel:", err);
+    return [];
+  }
 }
+
+// ✅ FUNCIÓN CORREGIDA: FUSIONA DATOS Y PRIORIZA IMÁGENES/ENLACES DEL ADMIN
+async function cargarContenidoCompleto() {
+  const lista = document.getElementById("lista-contenido");
+  lista.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-400">Cargando contenido...</div>';
+
+  try {
+    const resPeliculas = await fetch(`${TMDB_BASE}/movie/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB);
+    const datosPeliculas = await resPeliculas.json();
+
+    const resSeries = await fetch(`${TMDB_BASE}/tv/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB);
+    const datosSeries = await resSeries.json();
+
+    const contenidoAdmin = await cargarContenidoAdmin();
+
+    // Procesar películas: SI HAY EN ADMIN, USA SUS DATOS
+    const pelisTMDB = datosPeliculas.results.slice(0, 12).map(p => {
+      const enAdmin = contenidoAdmin.find(a => a.tmdb_id == p.id);
+      return {
+        id: `tmdb_${p.id}`,
+        tmdb_id: p.id,
+        titulo: enAdmin?.titulo || p.title,
+        anio: p.release_date ? p.release_date.split("-")[0] : "N/D",
+        tipo: "pelicula",
+        categoria: "peliculas",
+        portada: enAdmin?.portada ? enAdmin.portada : (p.poster_path ? `${TMDB_IMG}${p.poster_path}` : "https://via.placeholder.com/300x450?text=Sin+Portada"),
+        sinopsis: enAdmin?.sinopsis || p.overview || "Sin sinopsis disponible",
+        puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A",
+        genero: "Película",
+        opciones: enAdmin?.opciones || [],
+        temporadas: enAdmin?.temporadas || [],
+        deTMDB: true
+      };
+    });
+
+    // Procesar series: MISMA LÓGICA
+    const seriesTMDB = datosSeries.results.slice(0, 8).map(s => {
+      const enAdmin = contenidoAdmin.find(a => a.tmdb_id == s.id);
+      return {
+        id: `tmdb_${s.id}`,
+        tmdb_id: s.id,
+        titulo: enAdmin?.titulo || s.name,
+        anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D",
+        tipo: "serie",
+        categoria: "series",
+        portada: enAdmin?.portada ? enAdmin.portada : (s.poster_path ? `${TMDB_IMG}${s.poster_path}` : "https://via.placeholder.com/300x450?text=Sin+Portada"),
+        sinopsis: enAdmin?.sinopsis || s.overview || "Sin sinopsis disponible",
+        puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A",
+        genero: "Serie",
+        opciones: enAdmin?.opciones || [],
+        temporadas: enAdmin?.temporadas || [],
+        deTMDB: true
+      };
+    });
+
+    // UNIR TODO: MI CONTENIDO + ADMIN + TMDB
+    contenido = [...MI_CONTENIDO, ...contenidoAdmin.filter(a => !a.tmdb_id), ...pelisTMDB, ...seriesTMDB];
+
+  } catch (err) {
+    console.error("Error TMDB:", err);
+    const contenidoAdmin = await cargarContenidoAdmin();
+    contenido = [...MI_CONTENIDO, ...contenidoAdmin];
+  }
+
+  document.getElementById("contadorTotal").textContent = `${contenido.length} títulos`;
+  mostrarContenido("estrenos");
+}
+function iniciarConGoogle() {
+  const proveedor = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(proveedor)
+    .then(res => {
+      document.getElementById("nombrePerfil").textContent = res.user.displayName || res.user.email;
+      cerrarModalLogin();
+      if (videoPendiente) { abrirDetalle(videoPendiente); agregarAlHistorial(videoPendiente); videoPendiente = null; }
+    })
+    .catch(err => alert("Error al iniciar sesión: " + err.message));
+}
+
+function iniciarRecaptcha() {
+  if (!recaptchaVerifier) recaptchaVerifier = new firebase.auth.RecaptchaVerifier('modal-login', { size: 'invisible' });
+}
+
+function enviarCodigo() {
+  iniciarRecaptcha();
+  const telefono = document.getElementById("telefonoInput").value.trim();
+  if (!telefono.startsWith("+")) return alert("Agrega código de país ej: +58...");
+  auth.signInWithPhoneNumber(telefono, recaptchaVerifier)
+    .then(res => { confirmationResult = res; document.getElementById("seccionCodigo").classList.remove("oculto"); })
+    .catch(err => alert("Error: " + err.message));
+}
+
+function verificarCodigo() {
+  const codigo = document.getElementById("codigoInput").value.trim();
+  confirmationResult.confirm(codigo)
+    .then(res => {
+      document.getElementById("nombrePerfil").textContent = res.user.phoneNumber;
+      cerrarModalLogin();
+      if (videoPendiente) { abrirDetalle(videoPendiente); agregarAlHistorial(videoPendiente); videoPendiente = null; }
+    })
+    .catch(err => alert("Código incorrecto o expirado"));
+}
+
+function cerrarSesion() { auth.signOut().then(() => { document.getElementById("nombrePerfil").textContent = "Acceder"; location.reload(); }); }
+
+function agregarAlHistorial(item) {
+  let h = JSON.parse(localStorage.getItem("historialTely")) || [];
+  h = h.filter(x => x.id !== item.id);
+  h.unshift({ id: item.id, titulo: item.titulo, tipo: item.tipo });
+  if (h.length > 10) h.pop();
+  localStorage.setItem("historialTely", JSON.stringify(h));
+  mostrarHistorial();
+}
+
+function mostrarHistorial() {
+  const c = document.getElementById("listaHistorial");
+  const h = JSON.parse(localStorage.getItem("historialTely")) || [];
+  c.innerHTML = h.length ? "" : `<div class="historial-vacio">Aún no has visto nada</div>`;
+  h.forEach(i => {
+    const btn = document.createElement("button");
+    btn.innerHTML = `<i class="fa-solid fa-play mr-2"></i> ${i.titulo}`;
+    btn.onclick = () => { const f = contenido.find(x => x.id === i.id); if (!f) return; auth.currentUser ? abrirDetalle(f) : (videoPendiente = f, abrirModalLogin(), toggleMenu()); };
+    c.appendChild(btn);
+  });
+}
+
+function limpiarHistorial() { localStorage.removeItem("historialTely"); mostrarHistorial(); }
 
 function mostrarContenido(categoria) {
   const lista = document.getElementById("lista-contenido");
   lista.innerHTML = "";
   const filtrados = contenido.filter(x => x.categoria === categoria);
-  if (!filtrados.length) {
-    lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">Sin contenido en esta sección</p>`;
-    return;
-  }
+  if (!filtrados.length) { lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">Sin contenido en esta sección</p>`; return; }
   filtrados.forEach(item => {
     const tieneVideo = (item.opciones && item.opciones.length > 0) || (item.temporadas && item.temporadas.length > 0);
     const tarjeta = document.createElement("div");
@@ -495,17 +492,142 @@ function mostrarContenido(categoria) {
         ${tieneVideo ? '<span class="badge-video">▶ Disponible</span>' : '<span class="badge-sin-video">🔒 Sin enlace</span>'}
       </div>
     `;
-    tarjeta.onclick = () => {
-      if (!auth.currentUser) {
-        videoPendiente = item;
-        abrirModalLogin();
-      } else {
-        abrirDetalle(item);
-      }
-    };
+    tarjeta.onclick = (e) => { e.preventDefault(); if (!auth.currentUser) { videoPendiente = item; abrirModalLogin(); } else abrirDetalle(item); };
     lista.appendChild(tarjeta);
   });
 }
+
+function cambiarCategoria(cat) {
+  document.querySelectorAll(".btn-pestana").forEach(b => { b.classList.remove("activa"); b.classList.add("inactiva"); });
+  event.target.classList.remove("inactiva"); event.target.classList.add("activa"); mostrarContenido(cat);
+}
+
+function toggleMenu() { mostrarHistorial(); document.getElementById("menuPerfil").classList.toggle("mostrar"); }
+window.onclick = e => { if (!e.target.matches(".btn-menu, .btn-menu *")) document.getElementById("menuPerfil").classList.remove("mostrar"); };
+
+function buscarContenido() {
+  const texto = document.getElementById("buscadorInput").value.trim().toLowerCase();
+  const resultados = contenido.filter(x => x.titulo.toLowerCase().includes(texto));
+  const lista = document.getElementById("lista-contenido");
+  lista.innerHTML = "";
+  resultados.length ? resultados.forEach(item => {
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "tarjeta relative";
+    tarjeta.innerHTML = `
+      <span class="etiqueta-anio">${item.anio}</span>
+      <i class="fa-solid fa-star estrella"></i>
+      <img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy">
+      <div class="info-tarjeta"><h3>${item.titulo}</h3></div>
+    `;
+    tarjeta.onclick = () => abrirDetalle(item);
+    lista.appendChild(tarjeta);
+  }) : lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">No se encontraron coincidencias</p>`;
+}
+
+function abrirModalLogin() { document.getElementById("modal-login").classList.remove("oculto"); }
+function cerrarModalLogin() { document.getElementById("modal-login").classList.add("oculto"); videoPendiente = null; }
+
+function abrirDetalle(item) {
+  document.getElementById("fondoPortada").style.backgroundImage = `url(${item.portada})`;
+  document.getElementById("tituloDetalle").textContent = item.titulo;
+  document.getElementById("anioDetalle").textContent = item.anio;
+  document.getElementById("puntuacionDetalle").textContent = item.puntuacion || "7.0";
+  document.getElementById("generoDetalle").textContent = item.genero || (item.tipo === "pelicula" ? "Película" : "Serie");
+  document.getElementById("sinopsisDetalle").textContent = item.sinopsis || "Sin sinopsis disponible";
+
+  const contenedor = document.getElementById("contenidoReproductor");
+  contenedor.innerHTML = "";
+
+  if (item.tipo === "pelicula") {
+    contenedor.innerHTML = `
+      <div class="mt-6">
+        <div class="h-[300px] bg-black rounded-xl flex items-center justify-center mb-4">
+          <button class="w-20 h-20 rounded-full bg-amber-500 text-3xl flex items-center justify-center" 
+            onclick='abrirVideoPelicula(${JSON.stringify(item).replace(/"/g, '&quot;')})'>▶</button>
+        </div>
+      </div>
+    `;
+  } else {
+    contenedor.innerHTML = `<div class="mt-6"><div id="tempDetalle" class="selector-temporadas"></div><div id="capsDetalle" class="lista-capitulos mt-4"></div></div>`;
+    serieActual = item;
+    if (item.temporadas?.length > 0) {
+      const contTemp = document.getElementById("tempDetalle");
+      item.temporadas.forEach((temp, i) => {
+        const btn = document.createElement("button");
+        btn.className = `btn-temporada ${i === 0 ? 'activa' : ''}`;
+        btn.textContent = temp.nombre;
+        btn.onclick = () => {
+          document.querySelectorAll("#tempDetalle .btn-temporada").forEach(b => b.classList.remove("activa"));
+          btn.classList.add("activa");
+          mostrarCapitulosDetalle(temp);
+        };
+        contTemp.appendChild(btn);
+      });
+      mostrarCapitulosDetalle(item.temporadas[0]);
+    }
+  }
+
+  document.getElementById("paginaDetalle").style.display = "block";
+  document.body.style.overflow = "hidden";
+}
+
+function mostrarCapitulosDetalle(temporada) {
+  const contenedor = document.getElementById("capsDetalle");
+  contenedor.innerHTML = "";
+  temporada.capitulos.forEach(cap => {
+    const btn = document.createElement("button");
+    btn.className = "btn-capitulo";
+    btn.textContent = `Cap. ${cap.numero}`;
+    btn.onclick = () => abrirCapitulo(cap);
+    contenedor.appendChild(btn);
+  });
+}
+
+function cerrarDetalle() {
+  document.getElementById("paginaDetalle").style.display = "none";
+  document.body.style.overflow = "auto";
+  serieActual = null;
+}
+
+function detenerVideo() {
+  const player = document.getElementById("netflixPlayer");
+  player.innerHTML = "";
+}
+
+function abrirVideoPelicula(peli) {
+  cerrarDetalle();
+  detenerVideo();
+  const player = document.getElementById("netflixPlayer");
+  const modal = document.getElementById("modal-video");
+  const panelOpciones = document.getElementById("panelOpciones");
+  const botones = document.getElementById("botonesOpciones");
+
+  modal.classList.remove("oculto");
+  panelOpciones.classList.remove("oculto");
+  document.body.style.overflow = "hidden";
+  botones.innerHTML = "";
+
+  if (peli.opciones && peli.opciones.length > 0) {
+    peli.opciones.forEach((op, i) => {
+      const btn = document.createElement("button");
+      btn.className = `btn-opcion ${i === 0 ? 'activo' : ''}`;
+      btn.innerHTML = `<i class="fa-solid fa-play mr-1"></i> ${op.nombre}`;
+      btn.onclick = () => {
+        document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo"));
+        btn.classList.add("activo");
+        reproducirOpcion(op.url, peli.titulo, peli.anio, op.nombre);
+      };
+      botones.appendChild(btn);
+    });
+    reproducirOpcion(peli.opciones[0].url, peli.titulo, peli.anio, peli.opciones[0].nombre);
+  } else {
+    player.innerHTML = `<div class="error-video">❌ Sin enlaces disponibles</div>`;
+    return;
+  }
+
+  agregarAlHistorial(peli);
+}
+
 function reproducirOpcion(url, titulo, anio, opcion) {
   const player = document.getElementById("netflixPlayer");
   let enlace = url.trim();
@@ -528,7 +650,11 @@ function reproducirOpcion(url, titulo, anio, opcion) {
     const id = enlace.match(/[-\w]{25,}/)?.[0];
     if (id) {
       enlace = `https://drive.google.com/uc?export=stream&id=${id}&confirm=t&cache=1`;
-      player.innerHTML = `<video src="${enlace}" controlsList="nodownload noremoteplayback" controls playsinline preload="auto" crossorigin="anonymous" style="width:100%;height:100%;background:#000;">Tu navegador no soporta el video.</video>`;
+      player.innerHTML = `
+        <video src="${enlace}" controlsList="nodownload noremoteplayback" controls playsinline preload="auto" crossorigin="anonymous" style="width:100%;height:100%;background:#000;">
+          Tu navegador no soporta el video.
+        </video>
+      `;
     } else {
       player.innerHTML = `<div class="error-video">❌ Enlace de Drive inválido</div>`;
       return;
@@ -537,82 +663,83 @@ function reproducirOpcion(url, titulo, anio, opcion) {
     const id = enlace.match(/\/v\/([a-zA-Z0-9_-]+)/)?.[1];
     if (id) {
       enlace = `https://streamtape.com/get_video?id=${id}&stream=1&e=1`;
-      player.innerHTML = `<video src="${enlace}" controlsList="nodownload noremoteplayback" controls playsinline preload="auto" crossorigin="anonymous" style="width:100%;height:100%;background:#000;">Tu navegador no soporta el video.</video>`;
+      player.innerHTML = `
+        <video src="${enlace}" controlsList="nodownload noremoteplayback" controls playsinline preload="auto" crossorigin="anonymous" style="width:100%;height:100%;background:#000;">
+          Tu navegador no soporta el video.
+        </video>
+      `;
     } else {
       player.innerHTML = `<div class="error-video">❌ Enlace de Streamtape inválido</div>`;
       return;
     }
-  } else if (enlace.match(/\.(mp4|mkv|webm|m3u8)$/i)) {
-    player.innerHTML = `<video src="${enlace}" controlsList="nodownload noremoteplayback" controls playsinline preload="auto" crossorigin="anonymous" style="width:100%;height:100%;background:#000;">Tu navegador no soporta este formato.</video>`;
   } else {
     player.innerHTML = `<iframe src="${enlace}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="width:100%;height:100%;background:#000;"></iframe>`;
   }
+
+  player.innerHTML += `
+    <div class="player-top">
+      <h3 class="titulo-video">${titulo} ${anio ? `(${anio})` : ''} ${opcion ? ` • ${opcion}` : ''}</h3>
+      <button class="btn-cerrar-video" onclick="cerrarVideo()"><i class="fa-solid fa-arrow-left"></i></button>
+    </div>
+  `;
 }
 
-function abrirCapitulo(capitulo) {
-  cerrarDetalle();
+function abrirCapitulo(cap) {
   detenerVideo();
   const player = document.getElementById("netflixPlayer");
-  const modal = document.getElementById("modal-video");
-  const seccionCaps = document.getElementById("seccionCapitulos");
   const panelOpciones = document.getElementById("panelOpciones");
   const botones = document.getElementById("botonesOpciones");
+  const seccionCaps = document.getElementById("seccionCapitulos");
 
-  modal.classList.remove("oculto");
-  seccionCaps.classList.remove("oculto");
+  seccionCaps.classList.add("oculto");
   panelOpciones.classList.remove("oculto");
-  document.body.style.overflow = "hidden";
   botones.innerHTML = "";
 
-  if (capitulo.opciones && capitulo.opciones.length > 0) {
-    capitulo.opciones.forEach((op, i) => {
+  if (cap.opciones && cap.opciones.length > 0) {
+    cap.opciones.forEach((op, i) => {
       const btn = document.createElement("button");
       btn.className = `btn-opcion ${i === 0 ? 'activo' : ''}`;
       btn.innerHTML = `<i class="fa-solid fa-play mr-1"></i> ${op.nombre}`;
       btn.onclick = () => {
         document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo"));
         btn.classList.add("activo");
-        reproducirOpcion(op.url, `${serieActual.titulo} - Cap. ${capitulo.numero}`, serieActual.anio, op.nombre);
+        reproducirOpcion(op.url, serieActual.titulo, `Cap. ${cap.numero}`, op.nombre);
       };
       botones.appendChild(btn);
     });
-    reproducirOpcion(capitulo.opciones[0].url, `${serieActual.titulo} - Cap. ${capitulo.numero}`, serieActual.anio, capitulo.opciones[0].nombre);
+    reproducirOpcion(cap.opciones[0].url, serieActual.titulo, `Cap. ${cap.numero}`, cap.opciones[0].nombre);
   } else {
-    player.innerHTML = `<div class="error-video">❌ Sin enlaces para este capítulo</div>`;
-    return;
+    player.innerHTML = `<div class="error-video">❌ Sin enlace para este capítulo</div>`;
   }
-
-  agregarAlHistorial({ ...serieActual, tipo: "serie" });
 }
 
 function cerrarVideo() {
   detenerVideo();
   document.getElementById("modal-video").classList.add("oculto");
-  document.getElementById("seccionCapitulos").classList.add("oculto");
-  document.getElementById("panelOpciones").classList.add("oculto");
+  document.getElementById("seccionCapitulos").classList.remove("oculto");
   document.body.style.overflow = "auto";
 }
 
-// Carga inicial al abrir la app
-window.addEventListener("load", () => {
+auth.onAuthStateChanged(usuario => {
+  if (usuario) {
+    document.getElementById("nombrePerfil").textContent = usuario.displayName || usuario.phoneNumber || usuario.email;
+  }
   cargarContenidoCompleto();
-  mostrarHistorial();
-  auth.onAuthStateChanged(usuario => {
-    if (usuario) {
-      document.getElementById("nombrePerfil").textContent = usuario.displayName || usuario.email || usuario.phoneNumber || "Usuario";
-    } else {
-      document.getElementById("nombrePerfil").textContent = "Acceder";
-    }
-  });
 });
 
-// Cerrar con tecla Escape
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape") {
-    if (!document.getElementById("modal-video").classList.contains("oculto")) cerrarVideo();
-    else if (!document.getElementById("paginaDetalle").classList.contains("oculto")) cerrarDetalle();
+window.addEventListener('popstate', function(e) {
+  if (!document.getElementById("modal-video").classList.contains("oculto")) {
+    cerrarVideo();
+    e.preventDefault();
+    history.pushState(null, '', window.location.href);
+  } else if (!document.getElementById("paginaDetalle").style.display || document.getElementById("paginaDetalle").style.display !== "none") {
+    cerrarDetalle();
+    e.preventDefault();
+    history.pushState(null, '', window.location.href);
   }
 });
+
+history.pushState(null, '', window.location.href);
 </script>
 </body>
 </html>
