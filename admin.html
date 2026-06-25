@@ -1,489 +1,250 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Administrador 🛠️</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        fondo: '#FFFFFF',
-                        texto: '#111827',
-                        grisClaro: '#F3F4F6',
-                        grisMedio: '#9CA3AF',
-                        oscuro: '#1F2937',
-                        acento: '#1F2937',
-                        botonActivo: '#1F2937',
-                        botonInactivo: '#E5E7EB',
-                        naranja: '#F59E0B',
-                        rojo: '#EF4444',
-                        verde: '#10B981',
-                        fondoOscuro: '#0F172A',
-                        textoOscuro: '#F8FAFC',
-                        grisOscuro: '#1E293B'
-                    },
-                    fontFamily: {
-                        sans: ['Segoe UI', 'Roboto', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; transition: background 0.3s, color 0.3s; }
-        body { background: #FFFFFF; color: #111827; min-height: 100vh; }
-        body.dark { background: #0F172A; color: #F8FAFC; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - TELY</title>
+  <!-- Estilos y librerías -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Firebase (misma configuración que tu index.html) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
-        header { padding: 1.2rem; background: #fff; border-bottom: 1px solid #E5E7EB; position: sticky; top: 0; z-index: 50; }
-        body.dark header { background: #1E293B; border-color: #334155; }
-        .titulo-app { font-size: 1.8rem; font-weight: 700; color: #111827; }
-        body.dark .titulo-app { color: #F8FAFC; }
-        .menu-derecha { display: flex; align-items: center; gap: 1rem; }
-        .btn-menu { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #111827; }
-        body.dark .btn-menu { color: #F8FAFC; }
-
-        .pestanas { display: flex; gap: 0.8rem; padding: 0 1.2rem 1rem; margin-top: 1rem; }
-        .btn-pestana { padding: 0.7rem 1.4rem; border-radius: 9999px; border: none; font-weight: 500; cursor: pointer; transition: 0.2s; }
-        .btn-pestana.inactiva { background: #E5E7EB; color: #374151; }
-        body.dark .btn-pestana.inactiva { background: #334155; color: #CBD5E1; }
-        .btn-pestana.activa { background: #1F2937; color: #FFFFFF; }
-        body.dark .btn-pestana.activa { background: #60A5FA; color: #0F172A; }
-
-        .buscador { display: flex; align-items: center; gap: 0.8rem; padding: 0 1.2rem 1.5rem; flex-wrap: wrap; }
-        .input-buscar { flex: 1; padding: 0.9rem 1.2rem; border-radius: 9999px; border: 1px solid #E5E7EB; font-size: 1rem; background: #fff; color: #111827; min-width: 200px; }
-        body.dark .input-buscar { background: #1E293B; border-color: #334155; color: #F8FAFC; }
-        .btn-buscar { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #6B7280; padding: 0.5rem; }
-        body.dark .btn-buscar { color: #94A3B8; }
-        .contador { background: #E5E7EB; padding: 0.7rem 1rem; border-radius: 9999px; font-weight: 500; font-size: 0.9rem; }
-        body.dark .contador { background: #334155; color: #CBD5E1; }
-
-        .grid-contenido { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; padding: 0 1.2rem 2rem; }
-        .tarjeta { border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; position: relative; }
-        body.dark .tarjeta { background: #1E293B; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-        .tarjeta:hover { transform: translateY(-4px); }
-        .portada { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
-        .etiqueta-anio { position: absolute; top: 0.7rem; left: 0.7rem; background: rgba(0,0,0,0.8); color: #fff; padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; }
-        .etiqueta-origen { position: absolute; top: 0.7rem; right: 0.7rem; background: #2563EB; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.7rem; }
-        .etiqueta-origen.tmdb { background: #10B981; }
-        .acciones-tarjeta { position: absolute; bottom: 0.7rem; right: 0.7rem; display: flex; gap: 0.4rem; }
-        .btn-editar { background: #10B981; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; }
-        .btn-eliminar { background: #EF4444; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; }
-        .info-tarjeta { padding: 0.8rem; }
-        .info-tarjeta h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.2rem; line-height: 1.3; }
-        body.dark .info-tarjeta h3 { color: #F8FAFC; }
-        .badge-tipo { font-size: 0.8rem; color: #60A5FA; font-weight: 500; }
-
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem; }
-        .modal-contenido { background: white; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 1.5rem; }
-        body.dark .modal-contenido { background: #1E293B; color: #F8FAFC; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; }
-        .btn-cerrar { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #EF4444; }
-        .form-grupo { margin-bottom: 1rem; }
-        label { display: block; margin-bottom: 0.4rem; font-weight: 500; }
-        input, select, textarea { width: 100%; padding: 0.7rem; border: 1px solid #D1D5DB; border-radius: 8px; background: #F9FAFB; }
-        body.dark input, body.dark select, body.dark textarea { background: #0F172A; border-color: #334155; color: #F8FAFC; }
-        .btn-agregar { background: #10B981; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 1rem; }
-        .oculto { display: none !important; }
-    </style>
+  <style>
+    /* Eliminar desplazamiento lateral */
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #0f1115;
+      overflow-x: hidden !important;
+      width: 100%;
+    }
+    * {
+      box-sizing: border-box;
+    }
+  </style>
 </head>
-<body>
+<body class="text-gray-200 font-sans">
 
-<header>
-    <div class="flex justify-between items-center">
-        <h1 class="titulo-app">Panel Administrador</h1>
-        <div class="flex items-center gap-3">
-            <button class="btn-menu" onclick="cambiarModo()"><i class="fa-solid fa-moon" id="iconoModo"></i></button>
-            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium" onclick="abrirModalNuevo()">➕ Agregar Contenido</button>
-        </div>
+  <div class="w-full max-w-6xl mx-auto p-4 sm:p-6">
+
+    <!-- Encabezado -->
+    <div class="flex flex-wrap justify-between items-center mb-6 pb-4 border-b border-gray-700 gap-3">
+      <h1 class="text-2xl sm:text-3xl font-bold text-white">⚙️ Panel de Administración TELY</h1>
+      <a href="/" class="text-blue-400 hover:text-blue-300 flex items-center gap-2">
+        <i class="fa-solid fa-arrow-left"></i> Volver al sitio
+      </a>
     </div>
-</header>
 
-<div class="pestanas">
-    <button class="btn-pestana activa" onclick="cambiarCategoriaAdmin('peliculas')">Películas</button>
-    <button class="btn-pestana inactiva" onclick="cambiarCategoriaAdmin('series')">Series</button>
-    <button class="btn-pestana inactiva" onclick="cambiarCategoriaAdmin('anime')">Anime</button>
-    <button class="btn-pestana inactiva" onclick="cambiarCategoriaAdmin('todos')">Ver Todo</button>
-</div>
+    <!-- Formulario de agregar contenido -->
+    <div class="bg-gray-800 p-5 sm:p-6 rounded-xl shadow-lg mb-8">
+      <h2 class="text-xl sm:text-2xl font-semibold text-white mb-5">➕ Agregar Película o Serie</h2>
 
-<div class="buscador">
-    <input type="text" class="input-buscar" placeholder="Buscar..." id="buscadorAdmin">
-    <button class="btn-buscar" onclick="buscarAdmin()"><i class="fa-solid fa-magnifying-glass"></i></button>
-    <div class="contador" id="contadorAdmin">0 elementos</div>
-</div>
+      <form id="formContenido" class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-<div class="grid-contenido" id="listaAdmin"></div>
-
-<!-- MODAL AGREGAR / EDITAR -->
-<div id="modalForm" class="modal oculto">
-    <div class="modal-contenido">
-        <div class="modal-header">
-            <h3 class="text-xl font-bold" id="tituloModal">Agregar Nuevo Contenido</h3>
-            <button class="btn-cerrar" onclick="cerrarModalForm()">&times;</button>
+        <!-- Tipo de contenido -->
+        <div>
+          <label class="block text-gray-300 mb-2 text-sm">Tipo</label>
+          <select id="tipoContenido" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-blue-500">
+            <option value="pelicula">Película</option>
+            <option value="serie">Serie</option>
+          </select>
         </div>
 
-        <div class="form-grupo">
-            <label>Tipo de contenido</label>
-            <select id="tipoContenido" onchange="cambiarTipoForm()">
-                <option value="pelicula">Película</option>
-                <option value="serie">Serie</option>
-            </select>
+        <!-- Categoría -->
+        <div>
+          <label class="block text-gray-300 mb-2 text-sm">Categoría</label>
+          <select id="categoriaContenido" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-blue-500">
+            <option value="estrenos">Estrenos</option>
+            <option value="peliculas">Películas</option>
+            <option value="series">Series</option>
+          </select>
         </div>
 
-        <div class="form-grupo">
-            <label>Título</label>
-            <input type="text" id="tituloInput" placeholder="Ej: Mi Película">
+        <!-- Título -->
+        <div class="md:col-span-2">
+          <label class="block text-gray-300 mb-2 text-sm">Título</label>
+          <input type="text" id="tituloContenido" placeholder="Ej: El Padrino" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-blue-500" required>
         </div>
 
-        <div class="form-grupo">
-            <label>Año</label>
-            <input type="text" id="anioInput" placeholder="Ej: 2025">
+        <!-- Año -->
+        <div>
+          <label class="block text-gray-300 mb-2 text-sm">Año</label>
+          <input type="text" id="anioContenido" placeholder="Ej: 1972" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white">
         </div>
 
-        <div class="form-grupo">
-            <label>URL de la portada</label>
-            <input type="text" id="portadaInput" placeholder="Enlace de imagen">
+        <!-- Género -->
+        <div>
+          <label class="block text-gray-300 mb-2 text-sm">Género</label>
+          <input type="text" id="generoContenido" placeholder="Ej: Crimen / Drama" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white">
         </div>
 
-        <div class="form-grupo">
-            <label>Sinopsis</label>
-            <textarea id="sinopsisInput" rows="3" placeholder="Resumen de la historia..."></textarea>
+        <!-- Puntuación -->
+        <div>
+          <label class="block text-gray-300 mb-2 text-sm">Puntuación (0.0 - 10.0)</label>
+          <input type="number" step="0.1" min="0" max="10" id="puntuacionContenido" placeholder="Ej: 9.2" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white">
         </div>
 
-        <div id="camposPelicula">
-            <div class="form-grupo">
-                <label>Opción 1 de reproducción</label>
-                <input type="text" id="opc1Input" placeholder="Enlace Google Drive, Vidmoly, etc.">
-            </div>
-            <div class="form-grupo">
-                <label>Opción 2 de reproducción</label>
-                <input type="text" id="opc2Input" placeholder="Otro enlace si tienes">
-            </div>
+        <!-- Ruta de imagen PNG -->
+        <div class="md:col-span-2">
+          <label class="block text-gray-300 mb-2 text-sm">Ruta de la portada (formato PNG)</label>
+          <input type="text" id="portadaContenido" placeholder="Ej: /imagenes/portadas/el-padrino.png" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-blue-500" required>
+          <small class="text-gray-400">Funciona directamente en tu dominio Vercel / GitHub</small>
         </div>
 
-        <div id="camposSerie" class="oculto">
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Las temporadas y capítulos se agregan después de guardar.</p>
+        <!-- Sinopsis -->
+        <div class="md:col-span-2">
+          <label class="block text-gray-300 mb-2 text-sm">Sinopsis</label>
+          <textarea id="sinopsisContenido" rows="3" placeholder="Resumen de la historia..." class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-blue-500"></textarea>
         </div>
 
-        <button class="btn-agregar" onclick="guardarContenido()">💾 Guardar Cambios</button>
+        <!-- Enlaces de reproducción -->
+        <div class="md:col-span-2">
+          <h4 class="text-white font-medium mb-3">🔗 Enlaces de reproducción</h4>
+          <div id="listaEnlaces" class="space-y-3 mb-4 w-full"></div>
+          <button type="button" onclick="agregarCampoEnlace()" class="bg-blue-600 px-4 py-2 rounded-lg text-sm text-white hover:bg-blue-700 transition">
+            + Agregar otro enlace
+          </button>
+        </div>
+
+        <!-- Botón Guardar -->
+        <div class="md:col-span-2 mt-2">
+          <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition text-lg">
+            💾 Guardar Contenido
+          </button>
+        </div>
+      </form>
     </div>
-</div>
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCYetRSA0nsZsGiqABbTtjq-5a4bz5-oDk",
-  authDomain: "tely-675c0.firebaseapp.com",
-  databaseURL: "https://tely-675c0-default-rtdb.firebaseio.com",
-  projectId: "tely-675c0",
-  storageBucket: "tely-675c0.firebasestorage.app",
-  messagingSenderId: "375009551428",
-  appId: "1:375009551428:web:33846891b7641f97a20811",
-  measurementId: "G-V1HFDG2366"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-// Configuración TMDB para cargar contenido público
-const TMDB_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4ZGQ5OWI1YTE1YWNmZGQ5OGUzYjI0OWQ1Zjg5MGFmNCIsIm5iZiI6MTc4MjI3NzIzMS4zMzMsInN1YiI6IjZhM2I2NDZmZThmMTMwOTc2MWVjNDYxYiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.JLmHWuXkhDc9LreAvXFZa0qTS7PR_nrj_SSwVm9UZ9Y";
-const TMDB_BASE = "https://api.themoviedb.org/3";
-const TMDB_IMG = "https://image.tmdb.org/t/p/w500";
-const TMDB_LANG = "es-ES";
-
-let listaContenidoAdmin = [];
-let modoEdicion = false;
-let idEdicion = null;
-</script>
-<script>
-function cambiarModo() {
-  const body = document.body;
-  const icono = document.getElementById("iconoModo");
-  if (body.classList.contains("dark")) {
-    body.classList.remove("dark");
-    icono.className = "fa-solid fa-moon";
-    localStorage.setItem("modo", "claro");
-  } else {
-    body.classList.add("dark");
-    icono.className = "fa-solid fa-sun";
-    localStorage.setItem("modo", "oscuro");
-  }
-}
-
-if (localStorage.getItem("modo") === "oscuro" || (!localStorage.getItem("modo") && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-  document.body.classList.add("dark");
-  document.getElementById("iconoModo").className = "fa-solid fa-sun";
-}
-
-function abrirModalNuevo() {
-  modoEdicion = false;
-  idEdicion = null;
-  document.getElementById("tituloModal").textContent = "Agregar Nuevo Contenido";
-  document.getElementById("tipoContenido").value = "pelicula";
-  document.getElementById("tituloInput").value = "";
-  document.getElementById("anioInput").value = "";
-  document.getElementById("portadaInput").value = "";
-  document.getElementById("sinopsisInput").value = "";
-  document.getElementById("opc1Input").value = "";
-  document.getElementById("opc2Input").value = "";
-  cambiarTipoForm();
-  document.getElementById("modalForm").classList.remove("oculto");
-}
-
-function cerrarModalForm() {
-  document.getElementById("modalForm").classList.add("oculto");
-}
-
-function cambiarTipoForm() {
-  const tipo = document.getElementById("tipoContenido").value;
-  if (tipo === "pelicula") {
-    document.getElementById("camposPelicula").classList.remove("oculto");
-    document.getElementById("camposSerie").classList.add("oculto");
-  } else {
-    document.getElementById("camposPelicula").classList.add("oculto");
-    document.getElementById("camposSerie").classList.remove("oculto");
-  }
-}
-
-// Cargar contenido de Firebase + TMDB
-async function cargarContenidoAdmin() {
-  const lista = document.getElementById("listaAdmin");
-  lista.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-400">Cargando contenido...</div>';
-
-  try {
-    // 1. Cargar tu contenido personalizado
-    const snapshot = await db.ref("contenido_personalizado").once("value");
-    const datosAdmin = snapshot.val();
-    const contenidoPropio = datosAdmin 
-      ? Object.entries(datosAdmin).map(([id, valor]) => ({ id, ...valor, origen: "propio" })) 
-      : [];
-
-    // 2. Cargar contenido de TMDB
-    const resPelis = await fetch(`${TMDB_BASE}/movie/popular?language=${TMDB_LANG}&page=1`, {
-      headers: { Authorization: `Bearer ${TMDB_TOKEN}` }
-    });
-    const datosPelis = await resPelis.json();
-    const pelisTMDB = datosPelis.results.slice(0, 15).map(p => ({
-      id: `tmdb_${p.id}`,
-      titulo: p.title,
-      anio: p.release_date ? p.release_date.split("-")[0] : "N/D",
-      tipo: "pelicula",
-      categoria: "peliculas",
-      portada: p.poster_path ? `${TMDB_IMG}${p.poster_path}` : "https://via.placeholder.com/300x450?text=Sin+Portada",
-      sinopsis: p.overview || "Sin sinopsis",
-      puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A",
-      genero: "Película",
-      opciones: [],
-      origen: "tmdb"
-    }));
-
-    const resSeries = await fetch(`${TMDB_BASE}/tv/popular?language=${TMDB_LANG}&page=1`, {
-      headers: { Authorization: `Bearer ${TMDB_TOKEN}` }
-    });
-    const datosSeries = await resSeries.json();
-    const seriesTMDB = datosSeries.results.slice(0, 10).map(s => ({
-      id: `tmdb_${s.id}`,
-      titulo: s.name,
-      anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D",
-      tipo: "serie",
-      categoria: "series",
-      portada: s.poster_path ? `${TMDB_IMG}${s.poster_path}` : "https://via.placeholder.com/300x450?text=Sin+Portada",
-      sinopsis: s.overview || "Sin sinopsis",
-      puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A",
-      genero: "Serie",
-      temporadas: [],
-      origen: "tmdb"
-    }));
-
-    // Unir todo
-    listaContenidoAdmin = [...contenidoPropio, ...pelisTMDB, ...seriesTMDB];
-    document.getElementById("contadorAdmin").textContent = `${listaContenidoAdmin.length} elementos`;
-    mostrarListaAdmin("peliculas");
-
-  } catch (err) {
-    console.error("Error cargando contenido:", err);
-    lista.innerHTML = '<div class="col-span-3 text-center py-10 text-red-500">❌ Error al cargar contenido</div>';
-  }
-}
-</script>
-<script>
-function mostrarListaAdmin(categoria) {
-  const lista = document.getElementById("listaAdmin");
-  lista.innerHTML = "";
-  let filtrados = [];
-
-  if (categoria === "todos") {
-    filtrados = listaContenidoAdmin;
-  } else {
-    filtrados = listaContenidoAdmin.filter(i => i.categoria === categoria);
-  }
-
-  if (filtrados.length === 0) {
-    lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">No hay contenido en esta sección</p>`;
-    return;
-  }
-
-  filtrados.forEach(item => {
-    const tarjeta = document.createElement("div");
-    tarjeta.className = "tarjeta";
-    tarjeta.innerHTML = `
-      <span class="etiqueta-anio">${item.anio}</span>
-      <span class="etiqueta-origen ${item.origen === 'tmdb' ? 'tmdb' : ''}">
-        ${item.origen === 'tmdb' ? 'TMDB' : 'Mío'}
-      </span>
-      ${item.origen === 'propio' ? `
-      <div class="acciones-tarjeta">
-        <button class="btn-editar" onclick="editarContenido('${item.id}')"><i class="fa-solid fa-pen"></i></button>
-        <button class="btn-eliminar" onclick="eliminarContenido('${item.id}')"><i class="fa-solid fa-trash"></i></button>
-      </div>` : ''}
-      <img src="${item.portada || 'https://via.placeholder.com/300x450?text=Sin+Portada'}" alt="${item.titulo}" class="portada">
-      <div class="info-tarjeta">
-        <h3>${item.titulo}</h3>
-        <span class="badge-tipo">${item.tipo === 'pelicula' ? 'Película' : 'Serie'}</span>
+    <!-- Lista de contenido agregado -->
+    <div class="bg-gray-800 p-5 sm:p-6 rounded-xl shadow-lg w-full">
+      <h3 class="text-xl sm:text-2xl font-semibold text-white mb-5">📚 Contenido Agregado</h3>
+      <div id="listaContenidoAdmin" class="space-y-3 text-gray-200 w-full">
+        <p class="text-gray-400 text-center py-6">Cargando contenido...</p>
       </div>
-    `;
-    lista.appendChild(tarjeta);
-  });
-}
+    </div>
 
-function cambiarCategoriaAdmin(cat) {
-  document.querySelectorAll(".btn-pestana").forEach(b => { b.classList.remove("activa"); b.classList.add("inactiva"); });
-  event.target.classList.remove("inactiva");
-  event.target.classList.add("activa");
-  mostrarListaAdmin(cat);
-}
+  </div>
 
-function buscarAdmin() {
-  const termino = document.getElementById("buscadorAdmin").value.trim().toLowerCase();
-  const resultados = listaContenidoAdmin.filter(i => i.titulo.toLowerCase().includes(termino));
-  const lista = document.getElementById("listaAdmin");
-  lista.innerHTML = "";
+  <script>
+    // CONFIGURACIÓN FIREBASE (IGUAL A TU index.html)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCYetRSA0nsZsGiqABbTtjq-5a4bz5-oDk",
+      authDomain: "tely-675c0.firebaseapp.com",
+      databaseURL: "https://tely-675c0-default-rtdb.firebaseio.com",
+      projectId: "tely-675c0",
+      storageBucket: "tely-675c0.appspot.com",
+      messagingSenderId: "375009551428",
+      appId: "1:375009551428:web:33846891b7641f97a20811",
+      measurementId: "G-V1HFDG2366"
+    };
 
-  if (resultados.length === 0) {
-    lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">Sin resultados</p>`;
-    return;
-  }
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-  resultados.forEach(item => {
-    const tarjeta = document.createElement("div");
-    tarjeta.className = "tarjeta";
-    tarjeta.innerHTML = `
-      <span class="etiqueta-anio">${item.anio}</span>
-      <span class="etiqueta-origen ${item.origen === 'tmdb' ? 'tmdb' : ''}">
-        ${item.origen === 'tmdb' ? 'TMDB' : 'Mío'}
-      </span>
-      ${item.origen === 'propio' ? `
-      <div class="acciones-tarjeta">
-        <button class="btn-editar" onclick="editarContenido('${item.id}')"><i class="fa-solid fa-pen"></i></button>
-        <button class="btn-eliminar" onclick="eliminarContenido('${item.id}')"><i class="fa-solid fa-trash"></i></button>
-      </div>` : ''}
-      <img src="${item.portada || 'https://via.placeholder.com/300x450?text=Sin+Portada'}" alt="${item.titulo}" class="portada">
-      <div class="info-tarjeta">
-        <h3>${item.titulo}</h3>
-        <span class="badge-tipo">${item.tipo === 'pelicula' ? 'Película' : 'Serie'}</span>
-      </div>
-    `;
-    lista.appendChild(tarjeta);
-  });
-}
-
-async function guardarContenido() {
-  const tipo = document.getElementById("tipoContenido").value;
-  const titulo = document.getElementById("tituloInput").value.trim();
-  const anio = document.getElementById("anioInput").value.trim();
-  const portada = document.getElementById("portadaInput").value.trim();
-  const sinopsis = document.getElementById("sinopsisInput").value.trim();
-  const opc1 = document.getElementById("opc1Input").value.trim();
-  const opc2 = document.getElementById("opc2Input").value.trim();
-
-  if (!titulo || !anio || !portada) {
-    alert("⚠️ Completa título, año y portada como mínimo");
-    return;
-  }
-
-  const datos = {
-    titulo,
-    anio,
-    portada,
-    sinopsis: sinopsis || "Sin sinopsis disponible",
-    tipo,
-    categoria: tipo === "pelicula" ? "peliculas" : "series",
-    puntuacion: "7.0",
-    genero: tipo === "pelicula" ? "Película" : "Serie",
-    origen: "propio"
-  };
-
-  if (tipo === "pelicula") {
-    datos.opciones = [];
-    if (opc1) datos.opciones.push({ nombre: "Opción 1", url: opc1 });
-    if (opc2) datos.opciones.push({ nombre: "Opción 2", url: opc2 });
-  } else {
-    datos.temporadas = [];
-  }
-
-  try {
-    if (modoEdicion && idEdicion) {
-      await db.ref(`contenido_personalizado/${idEdicion}`).update(datos);
-      alert("✅ Actualizado correctamente");
-    } else {
-      await db.ref("contenido_personalizado").push(datos);
-      alert("✅ Agregado correctamente");
+    // Agregar campos dinámicos para enlaces
+    function agregarCampoEnlace() {
+      const contenedor = document.getElementById("listaEnlaces");
+      const div = document.createElement("div");
+      div.className = "flex flex-wrap sm:flex-row gap-2 items-center w-full";
+      div.innerHTML = `
+        <input type="text" placeholder="Nombre de la opción" class="flex-1 min-w-[120px] p-2 rounded bg-gray-700 border border-gray-600 text-white" data-nombre>
+        <input type="url" placeholder="URL del video" class="flex-[2] min-w-[200px] p-2 rounded bg-gray-700 border border-gray-600 text-white" data-url>
+        <button type="button" onclick="this.parentElement.remove()" class="text-red-400 text-xl hover:text-red-500 px-2">×</button>
+      `;
+      contenedor.appendChild(div);
     }
-    cerrarModalForm();
-    cargarContenidoAdmin();
-  } catch (err) {
-    console.error("Error:", err);
-    if (err.code === "PERMISSION_DENIED") {
-      alert("❌ Recuerda: esto funciona subido a la web (https), no abierto como archivo local");
-    } else {
-      alert("❌ Error: " + err.message);
+
+    // Guardar en Firebase
+    document.getElementById("formContenido").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const enlaces = [];
+      document.querySelectorAll("#listaEnlaces > div").forEach(div => {
+        const nombre = div.querySelector("[data-nombre]").value.trim();
+        const url = div.querySelector("[data-url]").value.trim();
+        if (nombre && url) enlaces.push({ nombre, url });
+      });
+
+      const nuevoContenido = {
+        id: `admin_${Date.now()}`,
+        titulo: document.getElementById("tituloContenido").value.trim(),
+        anio: document.getElementById("anioContenido").value.trim() || "N/D",
+        tipo: document.getElementById("tipoContenido").value,
+        categoria: document.getElementById("categoriaContenido").value,
+        portada: document.getElementById("portadaContenido").value.trim(),
+        sinopsis: document.getElementById("sinopsisContenido").value.trim() || "Sin sinopsis disponible",
+        puntuacion: document.getElementById("puntuacionContenido").value.trim() || "7.0",
+        genero: document.getElementById("generoContenido").value.trim() || "Sin clasificar",
+        opciones: enlaces,
+        temporadas: [],
+        deAdmin: true
+      };
+
+      try {
+        await db.ref("contenido_personalizado/" + nuevoContenido.id).set(nuevoContenido);
+        alert("✅ Contenido guardado correctamente");
+        document.getElementById("formContenido").reset();
+        document.getElementById("listaEnlaces").innerHTML = "";
+        agregarCampoEnlace();
+        cargarListaContenido();
+      } catch (error) {
+        alert("❌ Error al guardar: " + error.message);
+      }
+    });
+
+    // Cargar lista de contenido guardado
+    async function cargarListaContenido() {
+      const lista = document.getElementById("listaContenidoAdmin");
+      lista.innerHTML = "<p class='text-gray-400 text-center py-6'>Cargando...</p>";
+
+      try {
+        const snapshot = await db.ref("contenido_personalizado").once("value");
+        const datos = snapshot.val() ? Object.values(snapshot.val()) : [];
+
+        if (!datos.length) {
+          lista.innerHTML = "<p class='text-gray-400 text-center py-6'>Aún no has agregado contenido.</p>";
+          return;
+        }
+
+        lista.innerHTML = "";
+        datos.forEach(item => {
+          const fila = document.createElement("div");
+          fila.className = "flex flex-wrap justify-between items-center bg-gray-700 p-3 rounded-lg gap-3 w-full";
+          fila.innerHTML = `
+            <div class="flex-1">
+              <strong class="text-white">${item.titulo}</strong> <span class="text-gray-300">(${item.anio})</span>
+              <br>
+              <small class="text-gray-400">Tipo: ${item.tipo.toUpperCase()} | Portada: ${item.portada}</small>
+            </div>
+            <button onclick="eliminarContenido('${item.id}')" class="text-red-400 hover:text-red-500 p-1" title="Eliminar">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          `;
+          lista.appendChild(fila);
+        });
+      } catch (error) {
+        lista.innerHTML = "<p class='text-red-400 text-center py-6'>Error al cargar contenido</p>";
+      }
     }
-  }
-}
 
-async function editarContenido(id) {
-  const item = listaContenidoAdmin.find(i => i.id === id);
-  if (!item || item.origen === "tmdb") return;
+    // Eliminar contenido
+    async function eliminarContenido(id) {
+      if (!confirm("¿Estás seguro de eliminar este contenido? No se puede recuperar.")) return;
+      try {
+        await db.ref("contenido_personalizado/" + id).remove();
+        cargarListaContenido();
+      } catch (error) {
+        alert("❌ Error al eliminar: " + error.message);
+      }
+    }
 
-  modoEdicion = true;
-  idEdicion = id;
-  document.getElementById("tituloModal").textContent = "Editar Contenido";
-  document.getElementById("tipoContenido").value = item.tipo;
-  document.getElementById("tituloInput").value = item.titulo;
-  document.getElementById("anioInput").value = item.anio;
-  document.getElementById("portadaInput").value = item.portada;
-  document.getElementById("sinopsisInput").value = item.sinopsis || "";
-
-  if (item.tipo === "pelicula" && item.opciones) {
-    document.getElementById("opc1Input").value = item.opciones[0]?.url || "";
-    document.getElementById("opc2Input").value = item.opciones[1]?.url || "";
-  }
-
-  cambiarTipoForm();
-  document.getElementById("modalForm").classList.remove("oculto");
-}
-
-async function eliminarContenido(id) {
-  const item = listaContenidoAdmin.find(i => i.id === id);
-  if (!item || item.origen === "tmdb") return;
-  if (!confirm("¿Seguro que quieres borrarlo? No se puede recuperar")) return;
-
-  try {
-    await db.ref(`contenido_personalizado/${id}`).remove();
-    alert("🗑️ Eliminado correctamente");
-    cargarContenidoAdmin();
-  } catch (err) {
-    alert("❌ Error al borrar: " + err.message);
-  }
-}
-
-window.onload = cargarContenidoAdmin;
-</script>
-
+    // Inicializar
+    window.addEventListener("load", () => {
+      agregarCampoEnlace();
+      cargarListaContenido();
+    });
+  </script>
 </body>
 </html>
