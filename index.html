@@ -481,19 +481,23 @@ function iniciarConGoogle() {
   const proveedor = new firebase.auth.GoogleAuthProvider();
   proveedor.setCustomParameters({ prompt: 'select_account' });
   auth.signInWithPopup(proveedor)
-    .then(res => {
-      document.getElementById("nombrePerfil").textContent = res.user.displayName || res.user.email;
+    .then((resultado) => {
+      document.getElementById("nombrePerfil").textContent = resultado.user.displayName || resultado.user.email;
       cerrarModalLogin();
       if (videoPendiente) abrirDetalle(videoPendiente);
     })
-    .catch(err => {
-      console.error("Error inicio sesión:", err);
-      if (err.code !== "auth/popup-closed-by-user") {
-        alert(`⚠️ Error: ${err.message}\nRevisa que hayas activado Google en Firebase y agregado tu dominio.`);
+    .catch((error) => {
+      console.error("Error completo:", error.code, error.message);
+      // Mensaje más claro
+      if (error.code === "auth/unauthorized-domain") {
+        alert("❌ ERROR: El dominio no está agregado en Firebase. Ve a Configuración → Dominios autorizados y agrega: tely-zeta.vercel.app");
+      } else if (error.code === "auth/popup-blocked") {
+        alert("❌ El navegador bloqueó la ventana emergente. Permite ventanas emergentes en tu navegador.");
+      } else {
+        alert(`❌ Error: ${error.message}`);
       }
     });
 }
-
 function abrirDetalle(item) {
   document.getElementById("tituloDetalle").textContent = `${item.titulo} (${item.anio})`;
   document.getElementById("tituloCabecera").textContent = item.titulo;
