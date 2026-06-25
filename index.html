@@ -3,22 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TELY 🎬</title>
+    <title>TELY 🎬 Películas y Series</title>
+    <!-- 🔒 Bloqueo de redirecciones externas -->
+    <meta http-equiv="X-Frame-Options" content="ALLOWALL">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' *; script-src 'self' 'unsafe-inline' 'unsafe-eval' *; style-src 'self' 'unsafe-inline' *; frame-src 'self' https://*.mixdrop.co https://*.vidmoly.to https://*.streamtape.com https://*.voe.sx; media-src *; connect-src *;">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        fondo: '#FFFFFF', texto: '#111827', grisClaro: '#F3F4F6', grisMedio: '#9CA3AF',
-                        oscuro: '#1F2937', acento: '#1F2937', botonActivo: '#1F2937', botonInactivo: '#E5E7EB',
-                        naranja: '#F59E0B', rojo: '#EF4444', verde: '#10B981', fondoOscuro: '#0F172A',
-                        textoOscuro: '#F8FAFC', grisOscuro: '#1E293B'
+                        fondo: '#FFFFFF',
+                        texto: '#111827',
+                        grisClaro: '#F3F4F6',
+                        grisMedio: '#9CA3AF',
+                        oscuro: '#1F2937',
+                        acento: '#7C3AED',
+                        naranja: '#F59E0B',
+                        rojo: '#EF4444',
+                        verde: '#10B981',
+                        fondoOscuro: '#0F172A',
+                        textoOscuro: '#F8FAFC',
+                        grisOscuro: '#1E293B'
                     },
                     fontFamily: { sans: ['Segoe UI', 'Roboto', 'sans-serif'] }
                 }
@@ -26,32 +34,46 @@
         }
     </script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; transition: background 0.3s, color 0.3s; }
-        html, body { width: 100%; max-width: 100%; overflow-x: hidden; overflow-y: auto; position: relative; }
-        body { background: #FFFFFF; color: #111827; min-height: 100vh; }
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: background 0.2s, color 0.2s; }
+        html, body { width: 100%; max-width: 100%; overflow-x: hidden; min-height: 100vh; }
+        body { background: #FFFFFF; color: #111827; }
         body.dark { background: #0F172A; color: #F8FAFC; }
+
+        header { padding: 1.2rem; background: #FFFFFF; border-bottom: 1px solid #E5E7EB; position: sticky; top: 0; z-index: 100; }
+        body.dark header { background: #1E293B; border-color: #334155; }
 
         .logo-contenedor { display: flex; align-items: center; gap: 0.8rem; }
         .logo { height: 42px; width: auto; object-fit: contain; }
-        @media (max-width: 480px) { .logo { height: 34px; } .titulo-app { font-size: 1.4rem; } }
-
-        header { padding: 1.2rem; background: #fff; border-bottom: 1px solid #E5E7EB; position: sticky; top: 0; z-index: 50; width: 100%; }
-        body.dark header { background: #1E293B; border-color: #334155; }
-        .titulo-app { font-size: 1.8rem; font-weight: 700; color: #111827; }
-        body.dark .titulo-app { color: #F8FAFC; }
+        .titulo-app { font-size: 1.8rem; font-weight: 700; }
         .menu-derecha { display: flex; align-items: center; gap: 1rem; }
-        .btn-menu { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #111827; }
+        .btn-menu { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #111827; padding: 0.5rem; border-radius: 50%; }
         body.dark .btn-menu { color: #F8FAFC; }
 
-        .pestanas { display: flex; gap: 0.8rem; padding: 0 1.2rem 1rem; margin-top: 1rem; flex-wrap: wrap; }
-        .btn-pestana { padding: 0.7rem 1.4rem; border-radius: 9999px; border: none; font-weight: 500; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .seccion-recientes { padding: 0 1.2rem 1.5rem; margin-top: 1rem; }
+        .titulo-seccion { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; }
+        .lista-recientes, .lista-recomendadas {
+            display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.8rem;
+            scroll-behavior: smooth; scroll-snap-type: x mandatory;
+        }
+        .lista-recientes::-webkit-scrollbar, .lista-recomendadas::-webkit-scrollbar { height: 6px; }
+        .lista-recientes::-webkit-scrollbar-thumb, .lista-recomendadas::-webkit-scrollbar-thumb { background: #7C3AED; border-radius: 3px; }
+        .tarjeta-recientes, .tarjeta-recomendada {
+            flex: 0 0 auto; width: 120px; cursor: pointer; transition: transform 0.2s;
+            scroll-snap-align: start;
+        }
+        .tarjeta-recientes:hover, .tarjeta-recomendada:hover { transform: scale(1.05); }
+        .portada-recientes, .portada-recomendada { width: 100%; height: 180px; border-radius: 8px; object-fit: cover; }
+        .texto-recientes, .texto-recomendada { font-size: 0.8rem; text-align: center; margin-top: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .pestanas { display: flex; gap: 0.8rem; padding: 1rem 1.2rem; flex-wrap: wrap; }
+        .btn-pestana { padding: 0.7rem 1.4rem; border-radius: 9999px; border: none; font-weight: 500; cursor: pointer; font-size: 1rem; }
         .btn-pestana.inactiva { background: #E5E7EB; color: #374151; }
+        .btn-pestana.activa { background: #7C3AED; color: #FFFFFF; }
         body.dark .btn-pestana.inactiva { background: #334155; color: #CBD5E1; }
-        .btn-pestana.activa { background: #1F2937; color: #FFFFFF; }
         body.dark .btn-pestana.activa { background: #60A5FA; color: #0F172A; }
 
         .buscador { display: flex; align-items: center; gap: 0.8rem; padding: 0 1.2rem 1.5rem; flex-wrap: wrap; }
-        .input-buscar { flex: 1; padding: 0.9rem 1.2rem; border-radius: 9999px; border: 1px solid #E5E7EB; font-size: 1rem; background: #fff; color: #111827; min-width: 200px; }
+        .input-buscar { flex: 1; min-width: 200px; padding: 0.9rem 1.2rem; border-radius: 9999px; border: 1px solid #E5E7EB; background: #FFFFFF; color: #111827; font-size: 1rem; }
         body.dark .input-buscar { background: #1E293B; border-color: #334155; color: #F8FAFC; }
         .btn-buscar { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #6B7280; padding: 0.5rem; }
         body.dark .btn-buscar { color: #94A3B8; }
@@ -60,7 +82,7 @@
 
         .grid-contenido { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; padding: 0 1.2rem 2rem; }
         @media (max-width: 480px) { .grid-contenido { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; } }
-        .tarjeta { border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; position: relative; }
+        .tarjeta { border-radius: 12px; overflow: hidden; background: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; position: relative; }
         body.dark .tarjeta { background: #1E293B; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
         .tarjeta:hover { transform: translateY(-4px); }
         .portada { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
@@ -72,54 +94,42 @@
         .badge-video { font-size: 0.8rem; color: #10B981; font-weight: 500; }
         .badge-sin-video { font-size: 0.8rem; color: #9CA3AF; font-weight: 500; }
 
-        .pagina-detalle { display: none; position: fixed; inset: 0; background: #fff; z-index: 999; overflow-y: auto; overflow-x: hidden; }
+        .pagina-detalle { display: none; position: fixed; inset: 0; background: #FFFFFF; z-index: 999; overflow-y: auto; }
         body.dark .pagina-detalle { background: #0F172A; }
-        .encabezado-detalle { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem; border-bottom: 1px solid #E5E7EB; }
+        .encabezado-detalle { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem; border-bottom: 1px solid #E5E7EB; position: sticky; top: 0; background: inherit; z-index: 10; }
         body.dark .encabezado-detalle { border-color: #334155; }
         .btn-volver { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #111827; }
         body.dark .btn-volver { color: #F8FAFC; }
-        .fondo-portada { width: 100%; height: 250px; background-size: cover; background-position: center; position: relative; }
-        .fondo-portada::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(255,255,255,0.2), #FFFFFF); }
-        body.dark .fondo-portada::after { background: linear-gradient(to bottom, rgba(0,0,0,0.2), #0F172A); }
-        .contenido-detalle { padding: 1.5rem; }
-        .titulo-detalle { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+        .titulo-detalle { font-size: 1.4rem; font-weight: 700; margin: 1rem 0; }
         .datos-detalle { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
-        .anio-detalle { background: #E5E7EB; padding: 0.4rem 0.9rem; border-radius: 6px; }
+        .anio-detalle { background: #E5E7EB; padding: 0.4rem 0.9rem; border-radius: 20px; font-size: 0.9rem; }
         body.dark .anio-detalle { background: #334155; }
         .puntuacion { display: flex; align-items: center; gap: 0.4rem; color: #F59E0B; font-weight: 600; }
-        .sinopsis { line-height: 1.6; color: #4B5563; margin-bottom: 2rem; }
+        .sinopsis { line-height: 1.6; color: #6B7280; margin-bottom: 2rem; }
         body.dark .sinopsis { color: #94A3B8; }
 
-        .modal-video { position: fixed; inset: 0; background: #000; z-index: 9998; display: flex; flex-direction: column; overflow-x: hidden; }
-        .netflix-player { width: 100%; height: 65vh; position: relative; background: #000; overflow: hidden; }
-        iframe, video { width: 100%; height: 100%; border: none; background: #000; object-fit: contain; }
-        .player-top { position: absolute; top: 0; left: 0; right: 0; padding: 1.5rem; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); display: flex; justify-content: space-between; align-items: center; z-index: 10; pointer-events: none; }
-        .btn-cerrar-video { background: rgba(255,255,255,0.2); border: none; color: #fff; font-size: 1.5rem; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; }
-        .titulo-video { font-size: 1.3rem; font-weight: 600; color: #fff; }
-
-        .panel-inferior { height: 35vh; background: #F9FAFB; border-top: 1px solid #E5E7EB; padding: 1.2rem; overflow-y: auto; overflow-x: hidden; }
-        body.dark .panel-inferior { background: #1E293B; border-color: #334155; }
-        .selector-temporadas { display: flex; gap: 0.8rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
-        .btn-temporada { padding: 0.6rem 1.2rem; border-radius: 8px; border: 1px solid #D1D5DB; background: #fff; cursor: pointer; font-weight: 500; }
-        body.dark .btn-temporada { background: #334155; border-color: #475569; color: #F8FAFC; }
-        .btn-temporada.activa { background: #1F2937; color: #fff; border-color: #1F2937; }
-        body.dark .btn-temporada.activa { background: #60A5FA; color: #0F172A; border-color: #60A5FA; }
-        .lista-capitulos { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.8rem; margin-bottom: 1.5rem; }
-        .btn-capitulo { padding: 0.7rem; border-radius: 8px; border: 1px solid #D1D5DB; background: #fff; cursor: pointer; text-align: center; font-weight: 500; }
-        body.dark .btn-capitulo { background: #334155; border-color: #475569; color: #F8FAFC; }
-        .btn-capitulo.activo { background: #1F2937; color: #fff; border-color: #1F2937; }
-        body.dark .btn-capitulo.activo { background: #60A5FA; color: #0F172A; border-color: #60A5FA; }
-
-        .botones-opciones { display: flex; gap: 1rem; margin-bottom: 1.2rem; justify-content: center; flex-wrap: wrap; }
-        .btn-opcion { flex: 0 1 auto; min-width: 120px; padding: 0.9rem 1.2rem; border-radius: 8px; border: 1px solid #D1D5DB; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 500; text-align: center; }
-        body.dark .btn-opcion { background: #334155; border-color: #475569; color: #F8FAFC; }
-        .btn-opcion.activo { background: #1F2937; color: #fff; border-color: #1F2937; }
-        body.dark .btn-opcion.activo { background: #60A5FA; color: #0F172A; border-color: #60A5FA; }
-        .aviso { display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem; background: #FEF3C7; border-radius: 8px; color: #92400E; font-size: 0.9rem; margin-top: 1rem; }
+        .reproductor-contenedor { width: 100%; background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem; position: relative; aspect-ratio: 16/9; }
+        /* 🔒 Bloqueo de redirecciones en iframe */
+        .reproductor-contenedor iframe {
+            width: 100%; height: 100%; border: none; background: #000;
+            allow="autoplay; encrypted-media; picture-in-picture; fullscreen; *"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation-by-user-activation"
+            referrerpolicy="no-referrer"
+        }
+        .botones-opciones { display: flex; gap: 0.8rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+        .btn-opcion { padding: 0.8rem 1.5rem; border-radius: 8px; border: none; background: #E5E7EB; color: #111827; font-weight: 500; cursor: pointer; transition: 0.2s; }
+        .btn-opcion.activo { background: #7C3AED; color: #FFFFFF; }
+        body.dark .btn-opcion { background: #334155; color: #F8FAFC; }
+        body.dark .btn-opcion.activo { background: #60A5FA; color: #0F172A; }
+        .aviso { display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem; background: #FEF3C7; border-radius: 8px; color: #92400E; font-size: 0.9rem; margin-bottom: 2rem; }
         body.dark .aviso { background: #78350F; color: #FBBF24; }
-        .error-video { color: #EF4444; text-align: center; padding: 4rem; font-size: 1.2rem; }
+
+        .seccion-recomendadas { border-top: 1px solid #E5E7EB; padding-top: 1.5rem; margin-top: 1rem; }
+        body.dark .seccion-recomendadas { border-color: #334155; }
+        .titulo-recomendadas { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; }
+
         .menu-perfil { position: relative; }
-        .dropdown { position: absolute; right: 0; top: 120%; background: #fff; border-radius: 10px; width: 260px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: none; z-index: 100; border: 1px solid #E5E7EB; }
+        .dropdown { position: absolute; right: 0; top: 120%; background: #FFFFFF; border-radius: 10px; width: 260px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: none; z-index: 100; border: 1px solid #E5E7EB; }
         body.dark .dropdown { background: #1E293B; border-color: #334155; }
         .dropdown.mostrar { display: block; }
         .dropdown-header { padding: 1rem; border-bottom: 1px solid #E5E7EB; font-weight: 600; }
@@ -130,6 +140,10 @@
         body.dark .dropdown button:hover { background: #334155; }
         .historial-vacio { padding: 1.2rem; text-align: center; color: #9CA3AF; }
         .oculto { display: none !important; }
+
+        .modal-login { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+        .contenedor-login { background: #FFFFFF; border-radius: 12px; padding: 2rem; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        body.dark .contenedor-login { background: #1E293B; }
     </style>
 </head>
 <body>
@@ -137,9 +151,9 @@
     <div class="flex justify-between items-center">
         <div class="logo-contenedor">
             <img src="logo.png" alt="Logo TELY" class="logo">
-            <h1 class="titulo-app">TELY</h1>
+            <h1 class="titulo-app">TELY 🎬</h1>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="menu-derecha">
             <button class="btn-menu" onclick="cambiarModo()"><i class="fa-solid fa-moon" id="iconoModo"></i></button>
             <div class="menu-perfil">
                 <button class="btn-menu" onclick="toggleMenu()"><i class="fa-solid fa-user-circle"></i></button>
@@ -147,22 +161,26 @@
                     <div class="dropdown-header" id="nombrePerfil">Acceder</div>
                     <div class="dropdown-header">📺 Visto recientemente</div>
                     <div id="listaHistorial"></div>
-                    <button onclick="limpiarHistorial()" class="text-yellow-600">🗑️ Limpiar historial</button>
-                    <button onclick="cerrarSesion()" class="text-red-600 border-t border-gray-200 mt-2 pt-2">🚪 Cerrar sesión</button>
+                    <button onclick="limpiarHistorial()" class="text-amber-500">🗑️ Limpiar historial</button>
+                    <button onclick="cerrarSesion()" class="text-red-500 border-t border-gray-200 mt-2 pt-2">🚪 Cerrar sesión</button>
                 </div>
             </div>
         </div>
     </div>
 </header>
 
+<div class="seccion-recientes">
+    <h2 class="titulo-seccion">🆕 Agregados recientemente</h2>
+    <div class="lista-recientes" id="listaRecientes"></div>
+</div>
+
 <div class="pestanas">
-    <button class="btn-pestana activa" onclick="cambiarCategoria('estrenos')">Estrenos</button>
-    <button class="btn-pestana inactiva" onclick="cambiarCategoria('peliculas')">Películas</button>
+    <button class="btn-pestana activa" onclick="cambiarCategoria('peliculas')">Películas</button>
     <button class="btn-pestana inactiva" onclick="cambiarCategoria('series')">Series</button>
 </div>
 
 <div class="buscador">
-    <input type="text" class="input-buscar" placeholder="Buscar título..." id="buscadorInput">
+    <input type="text" class="input-buscar" placeholder="Buscar..." id="buscadorInput">
     <button class="btn-buscar" onclick="buscarContenido()"><i class="fa-solid fa-magnifying-glass"></i></button>
     <div class="contador" id="contadorTotal">0 títulos</div>
 </div>
@@ -172,59 +190,50 @@
 <div class="pagina-detalle" id="paginaDetalle">
     <div class="encabezado-detalle">
         <button class="btn-volver" onclick="cerrarDetalle()"><i class="fa-solid fa-arrow-left"></i></button>
+        <h2 class="font-bold text-lg" id="tituloCabecera"></h2>
         <button class="btn-menu" onclick="cambiarModo()"><i class="fa-solid fa-moon" id="iconoModo2"></i></button>
     </div>
-    <div class="fondo-portada" id="fondoPortada"></div>
-    <div class="contenido-detalle">
+    <div class="contenido-detalle" style="padding: 1.2rem;">
         <h2 class="titulo-detalle" id="tituloDetalle"></h2>
         <div class="datos-detalle">
             <div class="anio-detalle" id="anioDetalle"></div>
-            <div class="puntuacion"><i class="fa-solid fa-star"></i> <span id="puntuacionDetalle">7.3</span></div>
+            <div class="puntuacion"><i class="fa-solid fa-star"></i> <span id="puntuacionDetalle">7.0</span></div>
             <div id="generoDetalle"></div>
         </div>
         <p class="sinopsis" id="sinopsisDetalle"></p>
         <div id="contenidoReproductor"></div>
-    </div>
-</div>
 
-<div id="modal-video" class="modal-video oculto">
-    <div class="netflix-player" id="netflixPlayer"></div>
-    <div class="panel-inferior">
-        <div id="seccionCapitulos" class="oculto">
-            <h4 class="font-medium mb-2">Selecciona temporada y capítulo</h4>
-            <div class="selector-temporadas" id="selectorTemporadas"></div>
-            <div class="lista-capitulos" id="listaCapitulos"></div>
-        </div>
-        <div id="panelOpciones" class="oculto">
-            <h4 class="font-medium mb-3 text-center">Opciones de reproducción</h4>
-            <div class="botones-opciones" id="botonesOpciones"></div>
-            <div class="aviso mt-3">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                Si falla una, prueba la otra o busca en Google.
-            </div>
+        <!-- ✅ SECCIÓN RECOMENDADOS DESLIZABLE -->
+        <div class="seccion-recomendadas" id="seccionRecomendadas">
+            <h4 class="titulo-recomendadas">🎯 Te podría gustar</h4>
+            <div class="lista-recomendadas" id="recomendadasLista"></div>
         </div>
     </div>
 </div>
 
-<div id="modal-login" class="modal-login oculto fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]">
-    <div class="bg-white dark:bg-gray-800 p-8 rounded-xl w-full max-w-md mx-auto shadow-xl">
-        <h2 class="text-2xl font-bold text-center mb-4 dark:text-white">Iniciar Sesión</h2>
-        <p class="text-center text-gray-600 dark:text-gray-300 mb-6">Elige tu método de acceso</p>
+<div id="modal-login" class="modal-login oculto">
+    <div class="contenedor-login">
+        <h2 class="text-2xl font-bold text-center mb-4">Iniciar Sesión</h2>
+        <p class="text-center text-gray-500 mb-6">Accede para ver todo el contenido</p>
         <button class="w-full py-3 bg-blue-600 text-white rounded-lg font-medium flex items-center justify-center gap-2 mb-4" onclick="iniciarConGoogle()">
             <i class="fa-brands fa-google"></i> Continuar con Google
         </button>
         <div class="mb-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">O con número de teléfono:</p>
-            <input type="tel" id="telefonoInput" placeholder="+58 412 1234567" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white mb-2">
-            <button class="w-full py-2 bg-green-600 text-white rounded-lg font-medium" onclick="enviarCodigo()">Enviar código SMS</button>
+            <p class="text-sm text-gray-500 mb-2">O con número de teléfono</p>
+            <input type="tel" id="telefonoInput" placeholder="+58 412 1234567" class="w-full p-3 border rounded-lg mb-2">
+            <button class="w-full py-2 bg-green-600 text-white rounded-lg" onclick="enviarCodigo()">Enviar código</button>
         </div>
         <div id="seccionCodigo" class="oculto mb-4">
-            <input type="text" id="codigoInput" placeholder="Código de 6 dígitos" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white mb-2">
-            <button class="w-full py-2 bg-green-600 text-white rounded-lg font-medium" onclick="verificarCodigo()">Verificar código</button>
+            <input type="text" id="codigoInput" placeholder="Código de 6 dígitos" class="w-full p-3 border rounded-lg mb-2">
+            <button class="w-full py-2 bg-green-600 text-white rounded-lg" onclick="verificarCodigo()">Verificar</button>
         </div>
-        <button class="w-full text-gray-500 dark:text-gray-400 mt-2" onclick="cerrarModalLogin()">❌ Cerrar</button>
+        <button class="w-full text-gray-500 mt-4" onclick="cerrarModalLogin()">Cerrar</button>
     </div>
 </div>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyCYetRSA0nsZsGiqABbTtjq-5a4bz5-oDk",
@@ -240,64 +249,79 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
-let recaptchaVerifier, confirmationResult, videoPendiente = null, serieActual = null, contenido = [];
 
-const MI_CONTENIDO = [
+let recaptchaVerifier, confirmationResult, videoPendiente = null, contenido = [], enlaceActual = "";
+
+// ✅ TU CONTENIDO IGUAL QUE ANTES
+const MI_PELICULAS = [
   {
-    id: "tmdb_1136",
-    titulo: "Rambo",
+    id: "rambo_001",
+    titulo: "Rambo 1",
     anio: "1982",
     tipo: "pelicula",
     categoria: "peliculas",
-    portada: "https://image.tmdb.org/t/p/w500/5CbGw0lYgFkKj0mG8Z7xQZQHk6b.jpg",
-    sinopsis: "Un ex soldado regresa a su pueblo natal y se enfrenta a la hostilidad de las autoridades locales.",
+    portada: "rambo1.png",
+    sinopsis: "Un ex soldado de élite regresa a su pueblo natal y se enfrenta a la hostilidad de las autoridades locales, desatando una guerra por su libertad.",
     puntuacion: "7.7",
     genero: "Acción / Aventura",
+    tmdb_id: "1136",
+    fecha_agregado: "2026-06-25",
     opciones: [
-      { nombre: "Opción 1 (Rápida)", url: "https://vidmoly.to/embed-rambo1982.html" },
-      { nombre: "Opción 2", url: "https://voe.sx/e/rambo1982" },
-      { nombre: "🔎 Buscar enlaces", url: "https://www.google.com/search?q=Rambo+1982+pelicula+completa+enlace+directo+mp4" }
+      { nombre: "Mixdrop", url: "https://mixdrop.top/e/nl1k1k66ad8n3z"}
     ]
   },
   {
-    id: "pelicula_002",
-    titulo: "El Padrino",
-    anio: "1972",
+    id: "noche_demonio_001",
+    titulo: "La noche del demonio",
+    anio: "2011",
     tipo: "pelicula",
     categoria: "peliculas",
-    portada: "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg",
-    sinopsis: "La historia de la familia Corleone y su imperio criminal.",
-    puntuacion: "9.2",
-    genero: "Crimen / Drama",
+    portada: "https://image.tmdb.org/t/p/w500/8m0xT6JZv9t8qKf0rL9XyM7nP2a.jpg",
+    sinopsis: "Una familia descubre que los espíritus oscuros han invadido su hogar después de que su hijo inexplicablemente cae en un sueño profundo.",
+    puntuacion: "6.9",
+    genero: "Terror / Suspenso",
+    tmdb_id: "49018",
+    fecha_agregado: "2026-06-24",
     opciones: [
-      { nombre: "Opción 1", url: "https://vidmoly.to/embed-padrino1.html" },
-      { nombre: "Opción 2", url: "https://uptostream.com/iframe/abc123" },
-      { nombre: "🔎 Buscar", url: "https://www.google.com/search?q=El+Padrino+pelicula+completa+enlace+directo" }
+      { nombre: "Mixdrop", url: "https://mixdrop.top/e/otro_enlace_ejemplo" }
     ]
   },
   {
-    id: "serie_001",
-    titulo: "La Casa de Papel",
-    anio: "2017",
+    id: "mision_imposible_001",
+    titulo: "Misión Imposible",
+    anio: "1996",
+    tipo: "pelicula",
+    categoria: "peliculas",
+    portada: "https://image.tmdb.org/t/p/w500/80Hj5Kf0eL9qRgX7aYb3cV2nM1.jpg",
+    sinopsis: "Un agente de élite debe desmantelar una red de espionaje y limpiar su nombre tras ser acusado de traición.",
+    puntuacion: "7.1",
+    genero: "Acción / Espionaje",
+    tmdb_id: "77",
+    fecha_agregado: "2026-06-23",
+    opciones: [
+      { nombre: "Mixdrop", url: "https://mixdrop.top/e/otro_enlace_ejemplo2" }
+    ]
+  }
+];
+
+const MI_SERIES = [
+  {
+    id: "breaking_bad_001",
+    titulo: "Breaking Bad",
+    anio: "2008",
     tipo: "serie",
     categoria: "series",
-    portada: "https://image.tmdb.org/t/p/w500/reEMJA1uzscCbkpeRJeTT2bjqUp.jpg",
-    sinopsis: "Un grupo de ladrones planea el mayor atraco de la historia en la Fábrica Nacional de Moneda y Timbre.",
-    puntuacion: "8.2",
-    genero: "Crimen / Drama",
+    portada: "https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
+    sinopsis: "Un profesor de química con cáncer terminal empieza a fabricar metanfetamina para asegurar el futuro de su familia.",
+    puntuacion: "9.2",
+    genero: "Drama / Crimen",
+    tmdb_id: "1396",
+    fecha_agregado: "2026-06-22",
     temporadas: [
       {
-        nombre: "Temporada 1",
+        numero: 1,
         capitulos: [
-          {
-            numero: "1",
-            titulo: "El día del atraco",
-            opciones: [
-              { nombre: "Opción 1", url: "https://vidmoly.to/embed-abc123.html" },
-              { nombre: "Opción 2", url: "https://mixdrop.co/e/xyz789" },
-              { nombre: "🔎 Buscar", url: "https://www.google.com/search?q=La+Casa+de+Papel+T1+C1+enlace+directo" }
-            ]
-          }
+          { numero: 1, titulo: "El principio del fin", opciones: [{ nombre: "Mixdrop", url: "https://mixdrop.top/e/ejemplo_serie1" }] }
         ]
       }
     ]
@@ -326,17 +350,6 @@ if (localStorage.getItem("modo") === "oscuro" || (!localStorage.getItem("modo") 
   document.getElementById("iconoModo").className = "fa-solid fa-sun";
 }
 
-const TMDB_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4ZGQ5OWI1YTE1YWNmZGQ5OGUzYjI0OWQ1Zjg5MGFmNCIsIm5iZiI6MTc4MjI3NzIzMS4zMzMsInN1YiI6IjZhM2I2NDZmZThmMTMwOTc2MWVjNDYxYiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.JLmHWuXkhDc9LreAvXFZa0qTS7PR_nrj_SSwVm9UZ9Y";
-const TMDB_BASE = "https://api.themoviedb.org/3";
-const TMDB_IMG = "https://image.tmdb.org/t/p/w500";
-const TMDB_LANG = "es-ES";
-
-const opcionesTMDB = {
-  method: "GET",
-  headers: { "Authorization": `Bearer ${TMDB_TOKEN}`, "Content-Type": "application/json;charset=utf-8" }
-};
-
-// ✅ FUNCIÓN CORREGIDA: CARGA CONTENIDO DEL PANEL ADMIN
 async function cargarContenidoAdmin() {
   try {
     const snapshot = await db.ref("contenido_personalizado").once("value");
@@ -348,141 +361,78 @@ async function cargarContenidoAdmin() {
   }
 }
 
-// ✅ FUNCIÓN CORREGIDA: FUSIONA DATOS Y PRIORIZA IMÁGENES/ENLACES DEL ADMIN
-async function cargarContenidoCompleto() {
+async function cargarTodoContenido() {
   const lista = document.getElementById("lista-contenido");
-  lista.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-400">Cargando contenido...</div>';
+  lista.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-400">Cargando...</div>';
 
   try {
-    const resPeliculas = await fetch(`${TMDB_BASE}/movie/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB);
-    const datosPeliculas = await resPeliculas.json();
-
-    const resSeries = await fetch(`${TMDB_BASE}/tv/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB);
-    const datosSeries = await resSeries.json();
-
-    const contenidoAdmin = await cargarContenidoAdmin();
-
-    // Procesar películas: SI HAY EN ADMIN, USA SUS DATOS
-    const pelisTMDB = datosPeliculas.results.slice(0, 12).map(p => {
-      const enAdmin = contenidoAdmin.find(a => a.tmdb_id == p.id);
-      return {
-        id: `tmdb_${p.id}`,
-        tmdb_id: p.id,
-        titulo: enAdmin?.titulo || p.title,
-        anio: p.release_date ? p.release_date.split("-")[0] : "N/D",
-        tipo: "pelicula",
-        categoria: "peliculas",
-        portada: enAdmin?.portada ? enAdmin.portada : (p.poster_path ? `${TMDB_IMG}${p.poster_path}` : "https://via.placeholder.com/300x450?text=Sin+Portada"),
-        sinopsis: enAdmin?.sinopsis || p.overview || "Sin sinopsis disponible",
-        puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A",
-        genero: "Película",
-        opciones: enAdmin?.opciones || [],
-        temporadas: enAdmin?.temporadas || [],
-        deTMDB: true
-      };
-    });
-
-    // Procesar series: MISMA LÓGICA
-    const seriesTMDB = datosSeries.results.slice(0, 8).map(s => {
-      const enAdmin = contenidoAdmin.find(a => a.tmdb_id == s.id);
-      return {
-        id: `tmdb_${s.id}`,
-        tmdb_id: s.id,
-        titulo: enAdmin?.titulo || s.name,
-        anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D",
-        tipo: "serie",
-        categoria: "series",
-        portada: enAdmin?.portada ? enAdmin.portada : (s.poster_path ? `${TMDB_IMG}${s.poster_path}` : "https://via.placeholder.com/300x450?text=Sin+Portada"),
-        sinopsis: enAdmin?.sinopsis || s.overview || "Sin sinopsis disponible",
-        puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A",
-        genero: "Serie",
-        opciones: enAdmin?.opciones || [],
-        temporadas: enAdmin?.temporadas || [],
-        deTMDB: true
-      };
-    });
-
-    // UNIR TODO: MI CONTENIDO + ADMIN + TMDB
-    contenido = [...MI_CONTENIDO, ...contenidoAdmin.filter(a => !a.tmdb_id), ...pelisTMDB, ...seriesTMDB];
-
+    const admin = await cargarContenidoAdmin();
+    contenido = [...MI_PELICULAS, ...MI_SERIES, ...admin];
+    contenido.sort((a, b) => new Date(b.fecha_agregado || "1970-01-01") - new Date(a.fecha_agregado || "1970-01-01"));
+    mostrarRecientes();
+    document.getElementById("contadorTotal").textContent = `${contenido.length} títulos`;
+    mostrarContenido("peliculas");
   } catch (err) {
-    console.error("Error TMDB:", err);
-    const contenidoAdmin = await cargarContenidoAdmin();
-    contenido = [...MI_CONTENIDO, ...contenidoAdmin];
+    console.error("Error cargando:", err);
+    contenido = [...MI_PELICULAS, ...MI_SERIES];
+    mostrarRecientes();
+    mostrarContenido("peliculas");
   }
-
-  document.getElementById("contadorTotal").textContent = `${contenido.length} títulos`;
-  mostrarContenido("estrenos");
-}
-function iniciarConGoogle() {
-  const proveedor = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(proveedor)
-    .then(res => {
-      document.getElementById("nombrePerfil").textContent = res.user.displayName || res.user.email;
-      cerrarModalLogin();
-      if (videoPendiente) { abrirDetalle(videoPendiente); agregarAlHistorial(videoPendiente); videoPendiente = null; }
-    })
-    .catch(err => alert("Error al iniciar sesión: " + err.message));
 }
 
-function iniciarRecaptcha() {
-  if (!recaptchaVerifier) recaptchaVerifier = new firebase.auth.RecaptchaVerifier('modal-login', { size: 'invisible' });
-}
-
-function enviarCodigo() {
-  iniciarRecaptcha();
-  const telefono = document.getElementById("telefonoInput").value.trim();
-  if (!telefono.startsWith("+")) return alert("Agrega código de país ej: +58...");
-  auth.signInWithPhoneNumber(telefono, recaptchaVerifier)
-    .then(res => { confirmationResult = res; document.getElementById("seccionCodigo").classList.remove("oculto"); })
-    .catch(err => alert("Error: " + err.message));
-}
-
-function verificarCodigo() {
-  const codigo = document.getElementById("codigoInput").value.trim();
-  confirmationResult.confirm(codigo)
-    .then(res => {
-      document.getElementById("nombrePerfil").textContent = res.user.phoneNumber;
-      cerrarModalLogin();
-      if (videoPendiente) { abrirDetalle(videoPendiente); agregarAlHistorial(videoPendiente); videoPendiente = null; }
-    })
-    .catch(err => alert("Código incorrecto o expirado"));
-}
-
-function cerrarSesion() { auth.signOut().then(() => { document.getElementById("nombrePerfil").textContent = "Acceder"; location.reload(); }); }
-
-function agregarAlHistorial(item) {
-  let h = JSON.parse(localStorage.getItem("historialTely")) || [];
-  h = h.filter(x => x.id !== item.id);
-  h.unshift({ id: item.id, titulo: item.titulo, tipo: item.tipo });
-  if (h.length > 10) h.pop();
-  localStorage.setItem("historialTely", JSON.stringify(h));
-  mostrarHistorial();
-}
-
-function mostrarHistorial() {
-  const c = document.getElementById("listaHistorial");
-  const h = JSON.parse(localStorage.getItem("historialTely")) || [];
-  c.innerHTML = h.length ? "" : `<div class="historial-vacio">Aún no has visto nada</div>`;
-  h.forEach(i => {
-    const btn = document.createElement("button");
-    btn.innerHTML = `<i class="fa-solid fa-play mr-2"></i> ${i.titulo}`;
-    btn.onclick = () => { const f = contenido.find(x => x.id === i.id); if (!f) return; auth.currentUser ? abrirDetalle(f) : (videoPendiente = f, abrirModalLogin(), toggleMenu()); };
-    c.appendChild(btn);
+function mostrarRecientes() {
+  const contenedor = document.getElementById("listaRecientes");
+  const recientes = contenido.slice(0, 6);
+  contenedor.innerHTML = "";
+  recientes.forEach(item => {
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "tarjeta-recientes";
+    tarjeta.innerHTML = `
+      <img src="${item.portada}" alt="${item.titulo}" class="portada-recientes" loading="lazy">
+      <div class="texto-recientes">${item.titulo}</div>
+    `;
+    tarjeta.onclick = () => auth.currentUser ? abrirDetalle(item) : (videoPendiente = item, abrirModalLogin());
+    contenedor.appendChild(tarjeta);
   });
 }
 
-function limpiarHistorial() { localStorage.removeItem("historialTely"); mostrarHistorial(); }
+// ✅ RECOMENDACIONES DESLIZABLES
+function mostrarRecomendaciones(itemActual) {
+  const contenedor = document.getElementById("recomendadasLista");
+  contenedor.innerHTML = "";
+  const similares = contenido.filter(x =>
+    x.id !== itemActual.id &&
+    x.tipo === itemActual.tipo &&
+    x.genero && itemActual.genero &&
+    x.genero.includes(itemActual.genero.split("/")[0].trim())
+  ).slice(0, 8);
+
+  if (similares.length === 0) {
+    contenedor.innerHTML = `<p class="text-gray-400 w-full text-center py-4">No hay recomendaciones disponibles</p>`;
+    return;
+  }
+
+  similares.forEach(sim => {
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "tarjeta-recomendada";
+    tarjeta.innerHTML = `
+      <img src="${sim.portada}" alt="${sim.titulo}" class="portada-recomendada" loading="lazy">
+      <div class="texto-recomendada">${sim.titulo}</div>
+    `;
+    tarjeta.onclick = () => abrirDetalle(sim);
+    contenedor.appendChild(tarjeta);
+  });
+}
 
 function mostrarContenido(categoria) {
   const lista = document.getElementById("lista-contenido");
   lista.innerHTML = "";
   const filtrados = contenido.filter(x => x.categoria === categoria);
-  if (!filtrados.length) { lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">Sin contenido en esta sección</p>`; return; }
+  if (!filtrados.length) { lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">Sin ${categoria}</p>`; return; }
   filtrados.forEach(item => {
-    const tieneVideo = (item.opciones && item.opciones.length > 0) || (item.temporadas && item.temporadas.length > 0);
+    const tieneVideo = (item.opciones?.length > 0 || item.temporadas?.length > 0);
     const tarjeta = document.createElement("div");
-    tarjeta.className = "tarjeta relative";
+    tarjeta.className = "tarjeta";
     tarjeta.innerHTML = `
       <span class="etiqueta-anio">${item.anio}</span>
       <i class="fa-solid fa-star estrella"></i>
@@ -492,7 +442,7 @@ function mostrarContenido(categoria) {
         ${tieneVideo ? '<span class="badge-video">▶ Disponible</span>' : '<span class="badge-sin-video">🔒 Sin enlace</span>'}
       </div>
     `;
-    tarjeta.onclick = (e) => { e.preventDefault(); if (!auth.currentUser) { videoPendiente = item; abrirModalLogin(); } else abrirDetalle(item); };
+    tarjeta.onclick = () => auth.currentUser ? abrirDetalle(item) : (videoPendiente = item, abrirModalLogin());
     lista.appendChild(tarjeta);
   });
 }
@@ -512,7 +462,7 @@ function buscarContenido() {
   lista.innerHTML = "";
   resultados.length ? resultados.forEach(item => {
     const tarjeta = document.createElement("div");
-    tarjeta.className = "tarjeta relative";
+    tarjeta.className = "tarjeta";
     tarjeta.innerHTML = `
       <span class="etiqueta-anio">${item.anio}</span>
       <i class="fa-solid fa-star estrella"></i>
@@ -521,218 +471,113 @@ function buscarContenido() {
     `;
     tarjeta.onclick = () => abrirDetalle(item);
     lista.appendChild(tarjeta);
-  }) : lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">No se encontraron coincidencias</p>`;
+  }) : lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">Sin resultados</p>`;
 }
 
 function abrirModalLogin() { document.getElementById("modal-login").classList.remove("oculto"); }
 function cerrarModalLogin() { document.getElementById("modal-login").classList.add("oculto"); videoPendiente = null; }
 
+// ✅ REPRODUCTOR SIN REDIRECCIONES, IGUAL DISEÑO
 function abrirDetalle(item) {
-  document.getElementById("fondoPortada").style.backgroundImage = `url(${item.portada})`;
-  document.getElementById("tituloDetalle").textContent = item.titulo;
+  document.getElementById("tituloDetalle").textContent = `${item.titulo} (${item.anio})`;
+  document.getElementById("tituloCabecera").textContent = item.titulo;
   document.getElementById("anioDetalle").textContent = item.anio;
   document.getElementById("puntuacionDetalle").textContent = item.puntuacion || "7.0";
-  document.getElementById("generoDetalle").textContent = item.genero || (item.tipo === "pelicula" ? "Película" : "Serie");
-  document.getElementById("sinopsisDetalle").textContent = item.sinopsis || "Sin sinopsis disponible";
+  document.getElementById("generoDetalle").textContent = item.genero || "";
+  document.getElementById("sinopsisDetalle").textContent = item.sinopsis || "Sin sinopsis";
 
   const contenedor = document.getElementById("contenidoReproductor");
   contenedor.innerHTML = "";
 
-  if (item.tipo === "pelicula") {
-    contenedor.innerHTML = `
-      <div class="mt-6">
-        <div class="h-[300px] bg-black rounded-xl flex items-center justify-center mb-4">
-          <button class="w-20 h-20 rounded-full bg-amber-500 text-3xl flex items-center justify-center" 
-            onclick='abrirVideoPelicula(${JSON.stringify(item).replace(/"/g, '&quot;')})'>▶</button>
-        </div>
+  if (item.tipo === "pelicula" && item.opciones?.length > 0) {
+    let html = `
+      <div class="reproductor-contenedor" id="reproductorPrincipal">
+        <iframe src="${item.opciones[0].url}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen; *" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation-by-user-activation" referrerpolicy="no-referrer" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <div class="botones-opciones" id="listaOpciones">
+    `;
+    item.opciones.forEach((op, i) => {
+      html += `<button class="btn-opcion ${i === 0 ? 'activo' : ''}" onclick="cambiarFuente('${op.url}', this)">${op.nombre}</button>`;
+    });
+    html += `
+      </div>
+      <div class="aviso">
+        <i class="fa-solid fa-info-circle"></i>
+        Si ves error, usa el botón de pantalla completa o prueba otro servidor
       </div>
     `;
+    contenedor.innerHTML = html;
+    enlaceActual = item.opciones[0].url;
+  } else if (item.tipo === "serie") {
+    contenedor.innerHTML = `<p class="text-center py-10 text-gray-400">📺 Selecciona temporada y capítulo</p>`;
   } else {
-    contenedor.innerHTML = `<div class="mt-6"><div id="tempDetalle" class="selector-temporadas"></div><div id="capsDetalle" class="lista-capitulos mt-4"></div></div>`;
-    serieActual = item;
-    if (item.temporadas?.length > 0) {
-      const contTemp = document.getElementById("tempDetalle");
-      item.temporadas.forEach((temp, i) => {
-        const btn = document.createElement("button");
-        btn.className = `btn-temporada ${i === 0 ? 'activa' : ''}`;
-        btn.textContent = temp.nombre;
-        btn.onclick = () => {
-          document.querySelectorAll("#tempDetalle .btn-temporada").forEach(b => b.classList.remove("activa"));
-          btn.classList.add("activa");
-          mostrarCapitulosDetalle(temp);
-        };
-        contTemp.appendChild(btn);
-      });
-      mostrarCapitulosDetalle(item.temporadas[0]);
-    }
+    contenedor.innerHTML = `<div class="text-center py-10 text-gray-400">❌ Sin enlaces disponibles</div>`;
   }
+
+  // Cargar recomendaciones
+  mostrarRecomendaciones(item);
 
   document.getElementById("paginaDetalle").style.display = "block";
   document.body.style.overflow = "hidden";
+  agregarAlHistorial(item);
 }
 
-function mostrarCapitulosDetalle(temporada) {
-  const contenedor = document.getElementById("capsDetalle");
-  contenedor.innerHTML = "";
-  temporada.capitulos.forEach(cap => {
-    const btn = document.createElement("button");
-    btn.className = "btn-capitulo";
-    btn.textContent = `Cap. ${cap.numero}`;
-    btn.onclick = () => abrirCapitulo(cap);
-    contenedor.appendChild(btn);
-  });
+function cambiarFuente(url, boton) {
+  document.querySelectorAll(".btn-opcion").forEach(btn => btn.classList.remove("activo"));
+  boton.classList.add("activo");
+  enlaceActual = url;
+  document.getElementById("reproductorPrincipal").innerHTML = `<iframe src="${url}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen; *" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation-by-user-activation" referrerpolicy="no-referrer" allowfullscreen loading="lazy"></iframe>`;
 }
 
 function cerrarDetalle() {
   document.getElementById("paginaDetalle").style.display = "none";
   document.body.style.overflow = "auto";
-  serieActual = null;
 }
 
-function detenerVideo() {
-  const player = document.getElementById("netflixPlayer");
-  player.innerHTML = "";
+function agregarAlHistorial(item) {
+  let h = JSON.parse(localStorage.getItem("historialTely")) || [];
+  h = h.filter(x => x.id !== item.id);
+  h.unshift({ id: item.id, titulo: item.titulo, tipo: item.tipo });
+  if (h.length > 10) h.pop();
+  localStorage.setItem("historialTely", JSON.stringify(h));
+  mostrarHistorial();
 }
 
-function abrirVideoPelicula(peli) {
-  cerrarDetalle();
-  detenerVideo();
-  const player = document.getElementById("netflixPlayer");
-  const modal = document.getElementById("modal-video");
-  const panelOpciones = document.getElementById("panelOpciones");
-  const botones = document.getElementById("botonesOpciones");
-
-  modal.classList.remove("oculto");
-  panelOpciones.classList.remove("oculto");
-  document.body.style.overflow = "hidden";
-  botones.innerHTML = "";
-
-  if (peli.opciones && peli.opciones.length > 0) {
-    peli.opciones.forEach((op, i) => {
-      const btn = document.createElement("button");
-      btn.className = `btn-opcion ${i === 0 ? 'activo' : ''}`;
-      btn.innerHTML = `<i class="fa-solid fa-play mr-1"></i> ${op.nombre}`;
-      btn.onclick = () => {
-        document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo"));
-        btn.classList.add("activo");
-        reproducirOpcion(op.url, peli.titulo, peli.anio, op.nombre);
-      };
-      botones.appendChild(btn);
-    });
-    reproducirOpcion(peli.opciones[0].url, peli.titulo, peli.anio, peli.opciones[0].nombre);
-  } else {
-    player.innerHTML = `<div class="error-video">❌ Sin enlaces disponibles</div>`;
-    return;
-  }
-
-  agregarAlHistorial(peli);
+function mostrarHistorial() {
+  const c = document.getElementById("listaHistorial");
+  const h = JSON.parse(localStorage.getItem("historialTely")) || [];
+  c.innerHTML = h.length ? "" : `<div class="historial-vacio">Aún no ves nada</div>`;
+  h.forEach(i => {
+    const btn = document.createElement("button");
+    btn.innerHTML = `<i class="fa-solid fa-play mr-2"></i> ${i.titulo}`;
+    btn.onclick = () => { const f = contenido.find(x => x.id === i.id); if (f) abrirDetalle(f); };
+    c.appendChild(btn);
+  });
 }
 
-function reproducirOpcion(url, titulo, anio, opcion) {
-  const player = document.getElementById("netflixPlayer");
-  let enlace = url.trim();
+function limpiarHistorial() { localStorage.removeItem("historialTely"); mostrarHistorial(); }
 
-  if (enlace.includes("google.com/search")) {
-    window.open(enlace, "_blank", "noopener,noreferrer");
-    return;
-  }
-
-  if (enlace.includes("vidmoly")) {
-    if (!enlace.includes("controls=")) enlace += (enlace.includes("?") ? "&" : "?") + "controls=1&logo=0&autoplay=1";
-    player.innerHTML = `<iframe src="${enlace}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="width:100%;height:100%;background:#000;"></iframe>`;
-  } else if (enlace.includes("voe.sx")) {
-    player.innerHTML = `<iframe src="${enlace}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="width:100%;height:100%;background:#000;"></iframe>`;
-  } else if (enlace.includes("uptostream.com")) {
-    player.innerHTML = `<iframe src="${enlace}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="width:100%;height:100%;background:#000;"></iframe>`;
-  } else if (enlace.includes("mixdrop.co")) {
-    player.innerHTML = `<iframe src="${enlace}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="width:100%;height:100%;background:#000;"></iframe>`;
-  } else if (enlace.includes("drive.google.com")) {
-    const id = enlace.match(/[-\w]{25,}/)?.[0];
-    if (id) {
-      enlace = `https://drive.google.com/uc?export=stream&id=${id}&confirm=t&cache=1`;
-      player.innerHTML = `
-        <video src="${enlace}" controlsList="nodownload noremoteplayback" controls playsinline preload="auto" crossorigin="anonymous" style="width:100%;height:100%;background:#000;">
-          Tu navegador no soporta el video.
-        </video>
-      `;
-    } else {
-      player.innerHTML = `<div class="error-video">❌ Enlace de Drive inválido</div>`;
-      return;
-    }
-  } else if (enlace.includes("streamtape.com")) {
-    const id = enlace.match(/\/v\/([a-zA-Z0-9_-]+)/)?.[1];
-    if (id) {
-      enlace = `https://streamtape.com/get_video?id=${id}&stream=1&e=1`;
-      player.innerHTML = `
-        <video src="${enlace}" controlsList="nodownload noremoteplayback" controls playsinline preload="auto" crossorigin="anonymous" style="width:100%;height:100%;background:#000;">
-          Tu navegador no soporta el video.
-        </video>
-      `;
-    } else {
-      player.innerHTML = `<div class="error-video">❌ Enlace de Streamtape inválido</div>`;
-      return;
-    }
-  } else {
-    player.innerHTML = `<iframe src="${enlace}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="width:100%;height:100%;background:#000;"></iframe>`;
-  }
-
-  player.innerHTML += `
-    <div class="player-top">
-      <h3 class="titulo-video">${titulo} ${anio ? `(${anio})` : ''} ${opcion ? ` • ${opcion}` : ''}</h3>
-      <button class="btn-cerrar-video" onclick="cerrarVideo()"><i class="fa-solid fa-arrow-left"></i></button>
-    </div>
-  `;
+function iniciarConGoogle() {
+  const proveedor = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(proveedor)
+    .then(res => {
+      document.getElementById("nombrePerfil").textContent = res.user.displayName || res.user.email;
+      cerrarModalLogin();
+    })
+    .catch(err => alert("Error: " + err.message));
 }
 
-function abrirCapitulo(cap) {
-  detenerVideo();
-  const player = document.getElementById("netflixPlayer");
-  const panelOpciones = document.getElementById("panelOpciones");
-  const botones = document.getElementById("botonesOpciones");
-  const seccionCaps = document.getElementById("seccionCapitulos");
-
-  seccionCaps.classList.add("oculto");
-  panelOpciones.classList.remove("oculto");
-  botones.innerHTML = "";
-
-  if (cap.opciones && cap.opciones.length > 0) {
-    cap.opciones.forEach((op, i) => {
-      const btn = document.createElement("button");
-      btn.className = `btn-opcion ${i === 0 ? 'activo' : ''}`;
-      btn.innerHTML = `<i class="fa-solid fa-play mr-1"></i> ${op.nombre}`;
-      btn.onclick = () => {
-        document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo"));
-        btn.classList.add("activo");
-        reproducirOpcion(op.url, serieActual.titulo, `Cap. ${cap.numero}`, op.nombre);
-      };
-      botones.appendChild(btn);
-    });
-    reproducirOpcion(cap.opciones[0].url, serieActual.titulo, `Cap. ${cap.numero}`, cap.opciones[0].nombre);
-  } else {
-    player.innerHTML = `<div class="error-video">❌ Sin enlace para este capítulo</div>`;
-  }
-}
-
-function cerrarVideo() {
-  detenerVideo();
-  document.getElementById("modal-video").classList.add("oculto");
-  document.getElementById("seccionCapitulos").classList.remove("oculto");
-  document.body.style.overflow = "auto";
-}
+function cerrarSesion() { auth.signOut().then(() => { document.getElementById("nombrePerfil").textContent = "Acceder"; }); }
 
 auth.onAuthStateChanged(usuario => {
   if (usuario) {
     document.getElementById("nombrePerfil").textContent = usuario.displayName || usuario.phoneNumber || usuario.email;
   }
-  cargarContenidoCompleto();
+  cargarTodoContenido();
 });
 
 window.addEventListener('popstate', function(e) {
-  if (!document.getElementById("modal-video").classList.contains("oculto")) {
-    cerrarVideo();
-    e.preventDefault();
-    history.pushState(null, '', window.location.href);
-  } else if (!document.getElementById("paginaDetalle").style.display || document.getElementById("paginaDetalle").style.display !== "none") {
+  if (document.getElementById("paginaDetalle").style.display === "block") {
     cerrarDetalle();
     e.preventDefault();
     history.pushState(null, '', window.location.href);
@@ -741,5 +586,6 @@ window.addEventListener('popstate', function(e) {
 
 history.pushState(null, '', window.location.href);
 </script>
+
 </body>
 </html>

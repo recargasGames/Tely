@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin - TELY 🎬</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panel Admin TELY 🎬</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -12,11 +12,20 @@
             theme: {
                 extend: {
                     colors: {
-                        fondo: '#0F172A',
-                        tarjeta: '#1E293B',
-                        acento: '#60A5FA',
-                        alerta: '#EF4444',
-                        exito: '#10B981'
+                        fondo: '#0A0A0F',
+                        tarjeta: '#151520',
+                        tarjetaClara: '#1A1A2E',
+                        acento: '#7C3AED',
+                        acentoClaro: '#A78BFA',
+                        texto: '#E2E8F0',
+                        textoClaro: '#94A3B8',
+                        exito: '#10B981',
+                        advertencia: '#F59E0B',
+                        peligro: '#E50914',
+                        borde: '#2A2A3A'
+                    },
+                    fontFamily: {
+                        sans: ['Segoe UI', 'Roboto', 'sans-serif']
                     }
                 }
             }
@@ -24,269 +33,482 @@
     </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #0F172A; color: #F8FAFC; font-family: 'Segoe UI', Roboto, sans-serif; min-height: 100vh; padding: 1rem; }
-        .form-group { margin-bottom: 1.2rem; }
-        label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
-        input, select, textarea { width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #334155; background: #1E293B; color: #F8FAFC; font-size: 1rem; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: #60A5FA; box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2); }
-        .btn { padding: 0.9rem 1.5rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .btn-guardar { background: #10B981; color: white; }
-        .btn-guardar:hover { background: #059669; }
-        .btn-limpiar { background: #475569; color: white; }
-        .btn-limpiar:hover { background: #334155; }
-        .btn-eliminar { background: #EF4444; color: white; }
-        .opcion { display: flex; gap: 0.8rem; align-items: center; margin-bottom: 0.8rem; }
-        .opcion input { flex: 1; }
+        body { background-color: #0A0A0F; color: #E2E8F0; font-family: 'Segoe UI', Roboto, sans-serif; min-height: 100vh; padding: 1rem; }
+
+        .header { background: #151520; padding: 1.2rem; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+        .header h1 { color: #7C3AED; font-size: 1.5rem; font-weight: 700; }
+
+        .aviso { padding: 0.9rem; background: #1E1B4B; border-radius: 8px; color: #C7D2FE; margin-bottom: 1.2rem; font-size: 0.9rem; }
+
+        .tabs { display: flex; gap: 0.6rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .tab { padding: 0.6rem 1.3rem; border: none; border-radius: 8px; background: #1A1A2E; color: #94A3B8; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .tab.activo { background: #7C3AED; color: #FFFFFF; }
+        .tab:hover:not(.activo) { background: #2A2A3A; }
+
+        .card { background: #151520; border-radius: 12px; padding: 1.3rem; margin-bottom: 1.2rem; }
+        .card h3 { color: #A78BFA; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600; }
+
+        input, select, textarea { width: 100%; padding: 0.8rem; margin-bottom: 0.9rem; border-radius: 8px; border: 1px solid #2A2A3A; background: #1A1A2E; color: #FFFFFF; font-size: 0.95rem; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #7C3AED; box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2); }
+
+        .btn { padding: 0.8rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.95rem; }
+        .btn-sm { padding: 0.5rem 1rem; font-size: 0.85rem; }
+        .btn-primary { background: #7C3AED; color: #FFFFFF; }
+        .btn-primary:hover { background: #6D28D9; transform: translateY(-1px); }
+        .btn-success { background: #10B981; color: #FFFFFF; }
+        .btn-success:hover { background: #059669; }
+        .btn-warning { background: #F59E0B; color: #000000; }
+        .btn-warning:hover { background: #D97706; }
+        .btn-danger { background: #E50914; color: #FFFFFF; }
+        .btn-danger:hover { background: #B80712; }
+        .btn-agregar { background: transparent; border: 1px dashed #4B4B63; color: #A78BFA; width: 100%; padding: 0.7rem; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .btn-agregar:hover { border-color: #7C3AED; background: rgba(124, 58, 237, 0.08); }
+
+        .grid-lista { display: grid; gap: 0.9rem; }
+        .item-card { background: #1A1A2E; border-radius: 8px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #7C3AED; flex-wrap: wrap; gap: 0.8rem; }
+        .info-item h4 { font-size: 1rem; margin-bottom: 0.3rem; }
+        .info-item p { font-size: 0.85rem; color: #94A3B8; }
+        .acciones { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+        .grupo-opcion { background: #1A1A2E; border-radius: 8px; padding: 0.9rem; margin-bottom: 0.8rem; display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+        .grupo-opcion input { margin-bottom: 0; flex: 1; min-width: 120px; }
+
+        .temporada { background: #1A1A2E; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+        .capitulo { display: flex; gap: 0.6rem; align-items: center; margin-bottom: 0.7rem; flex-wrap: wrap; }
+        .capitulo input { margin-bottom: 0; flex: 1; min-width: 100px; }
+
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem; }
+        .modal-contenido { background: #151520; border-radius: 12px; padding: 1.5rem; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        .cerrar-modal { float: right; background: none; border: none; color: #E50914; font-size: 1.5rem; cursor: pointer; }
+
         .oculto { display: none !important; }
+        .badge { padding: 0.25rem 0.7rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .badge-peli { background: #7C3AED; color: #FFFFFF; }
+        .badge-serie { background: #10B981; color: #FFFFFF; }
+
+        @media (max-width: 500px) {
+            .item-card { flex-direction: column; align-items: flex-start; }
+            .acciones { width: 100%; justify-content: flex-end; }
+        }
     </style>
 </head>
-<body class="dark">
-    <div class="max-w-3xl mx-auto">
-        <header class="mb-6 pb-4 border-b border-gray-700">
-            <h1 class="text-2xl font-bold flex items-center gap-2">
-                <i class="fa fa-film"></i> Panel de Administración TELY
-            </h1>
-            <p class="text-gray-400 mt-1">Agrega, edita o elimina contenido personalizado</p>
-        </header>
+<body>
 
-        <form id="formulario" class="bg-tarjeta p-5 rounded-xl shadow-lg mb-8" data-id="">
-            <div class="form-group">
-                <label>Título</label>
-                <input type="text" id="titulo" required placeholder="Ej: John Wick">
-            </div>
+<!-- ENCABEZADO -->
+<div class="header">
+    <h1><i class="fa-solid fa-cog mr-2"></i> Panel Admin TELY</h1>
+    <div>
+        <button class="btn btn-success btn-sm" onclick="exportarDatos()"><i class="fa-solid fa-download mr-1"></i> Respaldar</button>
+        <button class="btn btn-warning btn-sm ml-2" onclick="document.getElementById('archivoImportar').click()"><i class="fa-solid fa-upload mr-1"></i> Cargar</button>
+    </div>
+</div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="form-group">
-                    <label>Año</label>
-                    <input type="text" id="anio" placeholder="Ej: 2014">
+<div class="aviso">
+    <i class="fa-solid fa-info-circle mr-2"></i>
+    ✅ Enlaces compatibles: <strong>Mixdrop, Streamtape, VOE, Uptostream, Firebase</strong>
+</div>
+
+<!-- PESTAÑAS -->
+<div class="tabs">
+    <button class="tab activo" onclick="cambiarPestana('lista')"><i class="fa-solid fa-list mr-1"></i> Contenido</button>
+    <button class="tab" onclick="cambiarPestana('agregar')"><i class="fa-solid fa-plus mr-1"></i> Agregar Nuevo</button>
+</div>
+
+<!-- PESTAÑA: LISTA DE CONTENIDO -->
+<div id="pestana-lista" class="card">
+    <h3><i class="fa-solid fa-database mr-2"></i> Contenido Guardado</h3>
+    <div id="lista-contenido" class="grid-lista">
+        <p class="text-center text-gray-400 py-6">Cargando...</p>
+    </div>
+</div>
+
+<!-- PESTAÑA: AGREGAR CONTENIDO -->
+<div id="pestana-agregar" class="card oculto">
+    <h3><i class="fa-solid fa-plus-circle mr-2"></i> Agregar Película o Serie</h3>
+    <form id="formAgregar" onsubmit="guardarContenido(event)">
+        <select id="tipoContenido" required onchange="cambiarTipo()">
+            <option value="pelicula">Película</option>
+            <option value="serie">Serie</option>
+        </select>
+
+        <input type="text" id="titulo" placeholder="Título completo *" required>
+        <input type="number" id="anio" placeholder="Año de estreno *" required>
+        <input type="text" id="portada" placeholder="URL de portada o nombre de archivo (ej: rambo1.png)">
+        <input type="text" id="puntuacion" placeholder="Calificación (ej: 7.7)">
+        <input type="text" id="tmdbId" placeholder="ID de TMDb (opcional)">
+        <textarea id="sinopsis" placeholder="Sinopsis breve" rows="3"></textarea>
+
+        <!-- OPCIONES PARA PELÍCULAS -->
+        <div id="camposPelicula">
+            <h4 class="text-sm text-gray-300 mt-2 mb-2">🎬 Enlaces de reproducción</h4>
+            <div id="contenedorOpciones">
+                <div class="grupo-opcion">
+                    <input type="text" class="nombre-opcion" placeholder="Servidor" value="Mixdrop" required>
+                    <input type="url" class="url-opcion" placeholder="Enlace: https://mixdrop.top/e/XXXXXX" required>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="quitarOpcion(this)"><i class="fa-solid fa-trash"></i></button>
                 </div>
-                <div class="form-group">
-                    <label>Tipo</label>
-                    <select id="tipo">
-                        <option value="pelicula">Película</option>
-                        <option value="serie">Serie</option>
-                    </select>
-                </div>
             </div>
+            <button type="button" class="btn-agregar mt-2" onclick="agregarOpcion()"><i class="fa-solid fa-plus mr-1"></i> Agregar otro servidor</button>
+        </div>
 
-            <div class="form-group">
-                <label>URL de Portada / Imagen</label>
-                <input type="text" id="portada" placeholder="Ej: https://dominio.com/imagen.png o john-wick.png">
-            </div>
+        <!-- OPCIONES PARA SERIES -->
+        <div id="camposSerie" class="oculto">
+            <h4 class="text-sm text-gray-300 mt-2 mb-2">📺 Temporadas y capítulos</h4>
+            <div id="contenedorTemporadas"></div>
+            <button type="button" class="btn-agregar mt-2" onclick="agregarTemporada()"><i class="fa-solid fa-plus mr-1"></i> Agregar temporada</button>
+        </div>
 
-            <div class="form-group">
-                <label>Sinopsis</label>
-                <textarea id="sinopsis" rows="3" placeholder="Breve descripción del contenido..."></textarea>
-            </div>
+        <button type="submit" class="btn btn-primary w-full mt-4">💾 Guardar en Firebase</button>
+    </form>
+</div>
 
-            <div class="form-group">
-                <label>ID de TMDB (opcional)</label>
-                <input type="text" id="tmdb_id" placeholder="Para vincular con datos automáticos">
-            </div>
+<!-- MODAL EDITAR -->
+<div id="modalEditar" class="modal oculto">
+    <div class="modal-contenido">
+        <button class="cerrar-modal" onclick="cerrarModal()">&times;</button>
+        <h3 class="text-xl font-bold text-acento mb-4">✏️ Editar Contenido</h3>
+        <form id="formEditar" onsubmit="guardarCambios(event)">
+            <input type="hidden" id="editId">
+            <input type="hidden" id="editTipo">
 
-            <div class="form-group">
-                <label>Opciones de reproducción</label>
-                <div id="contenedor-opciones">
-                    <div class="opcion">
-                        <input type="text" class="nombre-opcion" placeholder="Nombre ej: Opción 1">
-                        <input type="url" class="url-opcion" placeholder="Enlace de video">
-                        <button type="button" class="text-alerta text-xl" onclick="eliminarOpcion(this)"><i class="fa fa-times"></i></button>
-                    </div>
-                </div>
-                <button type="button" onclick="agregarOpcion()" class="text-acento mt-2 text-sm">
-                    <i class="fa fa-plus mr-1"></i> Agregar otra opción
-                </button>
-            </div>
+            <input type="text" id="editTitulo" placeholder="Título" required>
+            <input type="number" id="editAnio" placeholder="Año" required>
+            <input type="text" id="editPortada" placeholder="Portada">
+            <input type="text" id="editPuntuacion" placeholder="Calificación">
+            <input type="text" id="editTmdbId" placeholder="ID TMDb">
+            <textarea id="editSinopsis" placeholder="Sinopsis" rows="3"></textarea>
 
-            <div class="flex gap-3 mt-6">
-                <button type="submit" class="btn btn-guardar flex items-center gap-2">
-                    <i class="fa fa-save"></i> Guardar contenido
-                </button>
-                <button type="button" onclick="limpiarFormulario()" class="btn btn-limpiar flex items-center gap-2">
-                    <i class="fa fa-refresh"></i> Limpiar
-                </button>
+            <div id="editOpcionesContenedor"></div>
+            <button type="button" class="btn-agregar mt-2" onclick="agregarOpcionEditar()">+ Agregar servidor</button>
+
+            <div class="flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary w-full">Guardar Cambios</button>
+                <button type="button" class="btn btn-danger w-full" onclick="eliminarDefinitivo()">Eliminar</button>
             </div>
         </form>
-
-        <div class="bg-tarjeta p-5 rounded-xl shadow-lg">
-            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
-                <i class="fa fa-list"></i> Contenido Guardado
-            </h2>
-            <div id="lista-contenido-propio"></div>
-        </div>
     </div>
+</div>
 
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<!-- INPUT OCULTO PARA IMPORTAR -->
+<input type="file" id="archivoImportar" accept=".json" class="oculto" onchange="procesarImportacion(this)">
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
-    <script>
-        // Configuración de Firebase (la misma que usas en tu app)
-        const firebaseConfig = {
-            apiKey: "AIzaSyCYetRSA0nsZsGiqABbTtjq-5a4bz5-oDk",
-            authDomain: "tely-675c0.firebaseapp.com",
-            databaseURL: "https://tely-675c0-default-rtdb.firebaseio.com",
-            projectId: "tely-675c0",
-            storageBucket: "tely-675c0.appspot.com",
-            messagingSenderId: "375009551428",
-            appId: "1:375009551428:web:33846891b7641f97a20811"
-        };
+<script>
+// CONFIGURACIÓN DE FIREBASE (IGUAL A TU SITIO PRINCIPAL)
+const firebaseConfig = {
+  apiKey: "AIzaSyCYetRSA0nsZsGiqABbTtjq-5a4bz5-oDk",
+  authDomain: "tely-675c0.firebaseapp.com",
+  databaseURL: "https://tely-675c0-default-rtdb.firebaseio.com",
+  projectId: "tely-675c0",
+  storageBucket: "tely-675c0.appspot.com",
+  messagingSenderId: "375009551428",
+  appId: "1:375009551428:web:33846891b7641f97a20811",
+  measurementId: "G-V1HFDG2366"
+};
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const refContenido = db.ref("contenido_personalizado");
 
-        // ✅ FUNCIÓN QUE FALTABA (causaba el error)
-        function listarContenidoPropio() {
-            const contenedor = document.getElementById("lista-contenido-propio");
-            contenedor.innerHTML = "<p class='text-gray-400 text-center py-6'>Cargando contenido...</p>";
+// ----------------------
+// CAMBIO DE PESTAÑAS
+// ----------------------
+function cambiarPestana(nombre) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'));
+    document.querySelectorAll('[id^="pestana-"]').forEach(p => p.classList.add('oculto'));
+    document.querySelector(`.tab[onclick*="${nombre}"]`).classList.add('activo');
+    document.getElementById(`pestana-${nombre}`).classList.remove('oculto');
+    if (nombre === 'lista') cargarLista();
+}
 
-            db.ref("contenido_personalizado").once("value")
-                .then(snapshot => {
-                    const datos = snapshot.val();
-                    contenedor.innerHTML = "";
+function cambiarTipo() {
+    const tipo = document.getElementById('tipoContenido').value;
+    document.getElementById('camposPelicula').classList.toggle('oculto', tipo !== 'pelicula');
+    document.getElementById('camposSerie').classList.toggle('oculto', tipo !== 'serie');
+}
 
-                    if (!datos) {
-                        contenedor.innerHTML = "<p class='text-gray-400 text-center py-6'>Aún no hay contenido guardado</p>";
-                        return;
-                    }
+// ----------------------
+// OPCIONES DE REPRODUCCIÓN
+// ----------------------
+function agregarOpcion() {
+    const contenedor = document.getElementById('contenedorOpciones');
+    const nuevo = document.createElement('div');
+    nuevo.className = 'grupo-opcion';
+    nuevo.innerHTML = `
+        <input type="text" class="nombre-opcion" placeholder="Servidor" value="Opción ${contenedor.children.length + 1}">
+        <input type="url" class="url-opcion" placeholder="Enlace del video">
+        <button type="button" class="btn btn-danger btn-sm" onclick="quitarOpcion(this)"><i class="fa-solid fa-trash"></i></button>
+    `;
+    contenedor.appendChild(nuevo);
+}
 
-                    Object.entries(datos).forEach(([id, item]) => {
-                        const tarjeta = document.createElement("div");
-                        tarjeta.className = "bg-gray-800 p-4 rounded-lg mb-3 flex flex-wrap justify-between items-center gap-3";
-                        tarjeta.innerHTML = `
-                            <div>
-                                <h3 class="font-bold text-lg">${item.titulo || "Sin título"}</h3>
-                                <p class="text-gray-300 text-sm">${item.tipo === "pelicula" ? "Película" : "Serie"} • ${item.anio || "N/D"}</p>
-                                <p class="text-gray-400 text-xs mt-1">ID TMDB: ${item.tmdb_id || "No asignado"}</p>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="cargarParaEditar('${id}')" class="text-acento p-2 rounded hover:bg-gray-700" title="Editar">
-                                    <i class="fa fa-pen"></i>
-                                </button>
-                                <button onclick="eliminarContenido('${id}')" class="text-alerta p-2 rounded hover:bg-gray-700" title="Eliminar">
-                                    <i class="fa fa-trash"></i>
-                                </button>
-                            </div>
-                        `;
-                        contenedor.appendChild(tarjeta);
-                    });
-                })
-                .catch(err => {
-                    contenedor.innerHTML = `<p class="text-alerta text-center py-4">Error: ${err.message}</p>`;
-                });
-        }
+function quitarOpcion(boton) {
+    const grupo = boton.closest('.grupo-opcion');
+    if (document.querySelectorAll('#contenedorOpciones .grupo-opcion').length > 1) {
+        if (confirm('¿Eliminar este servidor?')) grupo.remove();
+    } else {
+        alert('Debe quedar al menos un servidor');
+    }
+}
 
-        // Funciones auxiliares
-        function agregarOpcion() {
-            const contenedor = document.getElementById("contenedor-opciones");
-            const nueva = document.createElement("div");
-            nueva.className = "opcion";
-            nueva.innerHTML = `
-                <input type="text" class="nombre-opcion" placeholder="Nombre ej: Opción 2">
-                <input type="url" class="url-opcion" placeholder="Enlace de video">
-                <button type="button" class="text-alerta text-xl" onclick="eliminarOpcion(this)"><i class="fa fa-times"></i></button>
-            `;
-            contenedor.appendChild(nueva);
-        }
+// ----------------------
+// TEMPORADAS Y CAPÍTULOS
+// ----------------------
+function agregarTemporada() {
+    const contenedor = document.getElementById('contenedorTemporadas');
+    const numero = contenedor.children.length + 1;
+    const temp = document.createElement('div');
+    temp.className = 'temporada';
+    temp.innerHTML = `
+        <div class="flex justify-between items-center mb-3">
+            <h5 class="font-semibold text-gray-200">Temporada ${numero}</h5>
+            <button type="button" class="btn btn-danger btn-sm" onclick="quitarTemporada(this)"><i class="fa-solid fa-trash"></i></button>
+        </div>
+        <div class="capitulos-contenedor">
+            <div class="capitulo">
+                <input type="text" placeholder="N°" value="1" style="max-width: 60px;">
+                <input type="text" placeholder="Título del capítulo" value="Capítulo 1">
+                <input type="url" placeholder="Enlace Mixdrop">
+                <button type="button" class="btn btn-danger btn-sm" onclick="quitarCapitulo(this)"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        </div>
+        <button type="button" class="btn-agregar mt-2" onclick="agregarCapitulo(this)">+ Agregar capítulo</button>
+    `;
+    contenedor.appendChild(temp);
+}
 
-        function eliminarOpcion(boton) {
-            boton.parentElement.remove();
-        }
+function agregarCapitulo(boton) {
+    const contenedor = boton.parentElement.querySelector('.capitulos-contenedor');
+    const num = contenedor.children.length + 1;
+    const cap = document.createElement('div');
+    cap.className = 'capitulo';
+    cap.innerHTML = `
+        <input type="text" placeholder="N°" value="${num}" style="max-width: 60px;">
+        <input type="text" placeholder="Título del capítulo" value="Capítulo ${num}">
+        <input type="url" placeholder="Enlace Mixdrop">
+        <button type="button" class="btn btn-danger btn-sm" onclick="quitarCapitulo(this)"><i class="fa-solid fa-trash"></i></button>
+    `;
+    contenedor.appendChild(cap);
+}
 
-        function limpiarFormulario() {
-            document.getElementById("formulario").reset();
-            document.getElementById("formulario").dataset.id = "";
-            document.getElementById("contenedor-opciones").innerHTML = `
-                <div class="opcion">
-                    <input type="text" class="nombre-opcion" placeholder="Nombre ej: Opción 1">
-                    <input type="url" class="url-opcion" placeholder="Enlace de video">
-                    <button type="button" class="text-alerta text-xl" onclick="eliminarOpcion(this)"><i class="fa fa-times"></i></button>
-                </div>
-            `;
-        }
+function quitarTemporada(boton) {
+    const temp = boton.closest('.temporada');
+    if (document.querySelectorAll('#contenedorTemporadas .temporada').length > 1) {
+        if (confirm('¿Eliminar esta temporada?')) temp.remove();
+    }
+}
 
-        function cargarParaEditar(id) {
-            db.ref(`contenido_personalizado/${id}`).once("value")
-                .then(snap => {
-                    const item = snap.val();
-                    if (!item) return;
+function quitarCapitulo(boton) {
+    const cap = boton.closest('.capitulo');
+    const lista = cap.parentElement;
+    if (lista.children.length > 1) {
+        if (confirm('¿Eliminar este capítulo?')) cap.remove();
+    }
+}
 
-                    document.getElementById("formulario").dataset.id = id;
-                    document.getElementById("titulo").value = item.titulo || "";
-                    document.getElementById("anio").value = item.anio || "";
-                    document.getElementById("tipo").value = item.tipo || "pelicula";
-                    document.getElementById("portada").value = item.portada || "";
-                    document.getElementById("sinopsis").value = item.sinopsis || "";
-                    document.getElementById("tmdb_id").value = item.tmdb_id || "";
+// ----------------------
+// GUARDAR EN FIREBASE
+// ----------------------
+function guardarContenido(e) {
+    e.preventDefault();
 
-                    const contenedor = document.getElementById("contenedor-opciones");
-                    contenedor.innerHTML = "";
-                    if (item.opciones && item.opciones.length > 0) {
-                        item.opciones.forEach(op => {
-                            const div = document.createElement("div");
-                            div.className = "opcion";
-                            div.innerHTML = `
-                                <input type="text" class="nombre-opcion" value="${op.nombre || ""}" placeholder="Nombre">
-                                <input type="url" class="url-opcion" value="${op.url || ""}" placeholder="Enlace">
-                                <button type="button" class="text-alerta text-xl" onclick="eliminarOpcion(this)"><i class="fa fa-times"></i></button>
-                            `;
-                            contenedor.appendChild(div);
-                        });
-                    } else {
-                        agregarOpcion();
-                    }
+    const tipo = document.getElementById('tipoContenido').value;
+    const datos = {
+        id: 'item_' + Date.now(),
+        titulo: document.getElementById('titulo').value.trim(),
+        anio: parseInt(document.getElementById('anio').value),
+        tipo: tipo,
+        categoria: tipo === 'pelicula' ? 'peliculas' : 'series',
+        portada: document.getElementById('portada').value.trim() || 'portada-default.png',
+        puntuacion: document.getElementById('puntuacion').value.trim() || 'N/D',
+        tmdb_id: document.getElementById('tmdbId').value.trim() || '',
+        sinopsis: document.getElementById('sinopsis').value.trim() || 'Sin descripción',
+        fecha_agregado: new Date().toISOString().split('T')[0]
+    };
 
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                });
-        }
-
-        function eliminarContenido(id) {
-            if (!confirm("¿Seguro que quieres eliminar este contenido? No se puede deshacer.")) return;
-            db.ref(`contenido_personalizado/${id}`).remove()
-                .then(() => {
-                    listarContenidoPropio();
-                    alert("Contenido eliminado correctamente");
-                })
-                .catch(err => alert("Error al eliminar: " + err.message));
-        }
-
-        // Guardar al enviar el formulario
-        document.getElementById("formulario").addEventListener("submit", function(e) {
-            e.preventDefault();
-
-            const opciones = [];
-            document.querySelectorAll(".opcion").forEach(op => {
-                const nombre = op.querySelector(".nombre-opcion").value.trim();
-                const url = op.querySelector(".url-opcion").value.trim();
-                if (nombre && url) opciones.push({ nombre, url });
-            });
-
-            const datos = {
-                titulo: document.getElementById("titulo").value.trim(),
-                anio: document.getElementById("anio").value.trim(),
-                tipo: document.getElementById("tipo").value,
-                categoria: document.getElementById("tipo").value === "pelicula" ? "peliculas" : "series",
-                portada: document.getElementById("portada").value.trim(),
-                sinopsis: document.getElementById("sinopsis").value.trim(),
-                tmdb_id: document.getElementById("tmdb_id").value.trim() || null,
-                opciones: opciones,
-                fecha_creacion: new Date().toISOString()
-            };
-
-            const idActual = this.dataset.id;
-            const ref = idActual ? db.ref(`contenido_personalizado/${idActual}`) : db.ref("contenido_personalizado").push();
-
-            ref.set(datos)
-                .then(() => {
-                    limpiarFormulario();
-                    listarContenidoPropio();
-                    alert("✅ Contenido guardado correctamente");
-                })
-                .catch(err => alert("❌ Error al guardar: " + err.message));
+    if (tipo === 'pelicula') {
+        const opciones = [];
+        document.querySelectorAll('#contenedorOpciones .grupo-opcion').forEach(g => {
+            const n = g.querySelector('.nombre-opcion').value.trim();
+            const u = g.querySelector('.url-opcion').value.trim();
+            if (n && u) opciones.push({ nombre: n, url: u });
         });
+        if (opciones.length === 0) return alert('Agrega al menos un enlace');
+        datos.opciones = opciones;
+    } else {
+        const temporadas = [];
+        document.querySelectorAll('#contenedorTemporadas .temporada').forEach((t, i) => {
+            const caps = [];
+            t.querySelectorAll('.capitulo').forEach(c => {
+                const num = c.children[0].value.trim();
+                const tit = c.children[1].value.trim();
+                const url = c.children[2].value.trim();
+                if (num && tit && url) caps.push({ numero: num, titulo: tit, opciones: [{ nombre: 'Mixdrop', url }] });
+            });
+            if (caps.length) temporadas.push({ numero: i + 1, capitulos: caps });
+        });
+        if (temporadas.length === 0) return alert('Agrega temporadas con capítulos');
+        datos.temporadas = temporadas;
+    }
 
-        // Cargar lista al abrir la página
-        window.onload = listarContenidoPropio;
-    </script>
+    refContenido.child(datos.id).set(datos)
+        .then(() => {
+            alert('✅ Guardado correctamente');
+            document.getElementById('formAgregar').reset();
+            cambiarPestana('lista');
+        })
+        .catch(err => alert('❌ Error: ' + err.message));
+}
+
+// ----------------------
+// CARGAR LISTA
+// ----------------------
+function cargarLista() {
+    const contenedor = document.getElementById('lista-contenido');
+    refContenido.once('value').then(snap => {
+        const datos = snap.val() || {};
+        const lista = Object.values(datos).sort((a, b) => new Date(b.fecha_agregado || 0) - new Date(a.fecha_agregado || 0));
+        if (lista.length === 0) {
+            contenedor.innerHTML = '<p class="text-center text-gray-400 py-6">No hay contenido agregado aún</p>';
+            return;
+        }
+        contenedor.innerHTML = lista.map(item => `
+            <div class="item-card">
+                <div class="info-item">
+                    <h4>${item.titulo} <span class="badge ${item.tipo === 'pelicula' ? 'badge-peli' : 'badge-serie'}">${item.tipo}</span></h4>
+                    <p>${item.anio} | ${item.fecha_agregado || 'Sin fecha'}</p>
+                </div>
+                <div class="acciones">
+                    <button class="btn btn-warning btn-sm" onclick="abrirEditar('${item.id}')"><i class="fa-solid fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="eliminarItem('${item.id}')"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+        `).join('');
+    });
+}
+
+// ----------------------
+// EDITAR Y ELIMINAR
+// ----------------------
+function abrirEditar(id) {
+    refContenido.child(id).once('value').then(snap => {
+        const item = snap.val();
+        document.getElementById('editId').value = id;
+        document.getElementById('editTipo').value = item.tipo;
+        document.getElementById('editTitulo').value = item.titulo;
+        document.getElementById('editAnio').value = item.anio;
+        document.getElementById('editPortada').value = item.portada || '';
+        document.getElementById('editPuntuacion').value = item.puntuacion || '';
+        document.getElementById('editTmdbId').value = item.tmdb_id || '';
+        document.getElementById('editSinopsis').value = item.sinopsis || '';
+
+        const contenedor = document.getElementById('editOpcionesContenedor');
+        contenedor.innerHTML = '';
+        if (item.tipo === 'pelicula' && item.opciones) {
+            item.opciones.forEach(op => {
+                contenedor.innerHTML += `
+                    <div class="grupo-opcion">
+                        <input type="text" class="edit-nombre" value="${op.nombre}">
+                        <input type="url" class="edit-url" value="${op.url}">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+            });
+        } else {
+            contenedor.innerHTML = '<p class="text-gray-400 text-sm">Las series se editan eliminando y volviendo a agregar</p>';
+        }
+        document.getElementById('modalEditar').classList.remove('oculto');
+    });
+}
+
+function agregarOpcionEditar() {
+    const c = document.getElementById('editOpcionesContenedor');
+    c.innerHTML += `
+        <div class="grupo-opcion">
+            <input type="text" class="edit-nombre" placeholder="Servidor">
+            <input type="url" class="edit-url" placeholder="Enlace">
+            <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()"><i class="fa-solid fa-trash"></i></button>
+        </div>
+    `;
+}
+
+function guardarCambios(e) {
+    e.preventDefault();
+    const id = document.getElementById('editId').value;
+    const tipo = document.getElementById('editTipo').value;
+    const datos = {
+        titulo: document.getElementById('editTitulo').value.trim(),
+        anio: parseInt(document.getElementById('editAnio').value),
+        portada: document.getElementById('editPortada').value.trim(),
+        puntuacion: document.getElementById('editPuntuacion').value.trim(),
+        tmdb_id: document.getElementById('editTmdbId').value.trim(),
+        sinopsis: document.getElementById('editSinopsis').value.trim()
+    };
+    if (tipo === 'pelicula') {
+        const opciones = [];
+        document.querySelectorAll('.edit-nombre').forEach((n, i) => {
+            const u = document.querySelectorAll('.edit-url')[i];
+            if (n.value.trim() && u.value.trim()) opciones.push({ nombre: n.value.trim(), url: u.value.trim() });
+        });
+        datos.opciones = opciones;
+    }
+    refContenido.child(id).update(datos)
+        .then(() => { cerrarModal(); cargarLista(); alert('✅ Actualizado'); });
+}
+
+function eliminarItem(id) {
+    if (confirm('¿Eliminar definitivamente?')) {
+        refContenido.child(id).remove().then(cargarLista);
+    }
+}
+
+function eliminarDefinitivo() {
+    const id = document.getElementById('editId').value;
+    cerrarModal();
+    eliminarItem(id);
+}
+
+function cerrarModal() {
+    document.getElementById('modalEditar').classList.add('oculto');
+}
+
+// ----------------------
+// RESPALDO Y CARGA
+// ----------------------
+function exportarDatos() {
+    refContenido.once('value').then(snap => {
+        const datos = snap.val() || {};
+        const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `respaldo_tely_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+}
+
+function procesarImportacion(input) {
+    const archivo = input.files[0];
+    if (!archivo) return;
+    const lector = new FileReader();
+    lector.onload = e => {
+        try {
+            const datos = JSON.parse(e.target.result);
+            if (confirm('¿Importar estos datos?')) {
+                Object.values(datos).forEach(item => refContenido.child(item.id).set(item));
+                alert('✅ Importado');
+                cargarLista();
+            }
+        } catch { alert('❌ Archivo inválido'); }
+    };
+    lector.readAsText(archivo);
+}
+
+// INICIO
+window.onload = cargarLista;
+</script>
+
 </body>
 </html>
