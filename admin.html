@@ -70,7 +70,9 @@
         .tarjeta:hover { transform: translateY(-4px); }
         .portada { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
         .etiqueta-anio { position: absolute; top: 0.7rem; left: 0.7rem; background: rgba(0,0,0,0.8); color: #fff; padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; }
-        .acciones-tarjeta { position: absolute; top: 0.7rem; right: 0.7rem; display: flex; gap: 0.4rem; }
+        .etiqueta-origen { position: absolute; top: 0.7rem; right: 0.7rem; background: #2563EB; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.7rem; }
+        .etiqueta-origen.tmdb { background: #10B981; }
+        .acciones-tarjeta { position: absolute; bottom: 0.7rem; right: 0.7rem; display: flex; gap: 0.4rem; }
         .btn-editar { background: #10B981; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; }
         .btn-eliminar { background: #EF4444; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; }
         .info-tarjeta { padding: 0.8rem; }
@@ -107,10 +109,11 @@
     <button class="btn-pestana activa" onclick="cambiarCategoriaAdmin('peliculas')">Películas</button>
     <button class="btn-pestana inactiva" onclick="cambiarCategoriaAdmin('series')">Series</button>
     <button class="btn-pestana inactiva" onclick="cambiarCategoriaAdmin('anime')">Anime</button>
+    <button class="btn-pestana inactiva" onclick="cambiarCategoriaAdmin('todos')">Ver Todo</button>
 </div>
 
 <div class="buscador">
-    <input type="text" class="input-buscar" placeholder="Buscar en mi contenido..." id="buscadorAdmin">
+    <input type="text" class="input-buscar" placeholder="Buscar..." id="buscadorAdmin">
     <button class="btn-buscar" onclick="buscarAdmin()"><i class="fa-solid fa-magnifying-glass"></i></button>
     <div class="contador" id="contadorAdmin">0 elementos</div>
 </div>
@@ -186,9 +189,18 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+
+// Configuración TMDB para cargar contenido público
+const TMDB_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4ZGQ5OWI1YTE1YWNmZGQ5OGUzYjI0OWQ1Zjg5MGFmNCIsIm5iZiI6MTc4MjI3NzIzMS4zMzMsInN1YiI6IjZhM2I2NDZmZThmMTMwOTc2MWVjNDYxYiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.JLmHWuXkhDc9LreAvXFZa0qTS7PR_nrj_SSwVm9UZ9Y";
+const TMDB_BASE = "https://api.themoviedb.org/3";
+const TMDB_IMG = "https://image.tmdb.org/t/p/w500";
+const TMDB_LANG = "es-ES";
+
 let listaContenidoAdmin = [];
 let modoEdicion = false;
 let idEdicion = null;
+</script>
+<script>
 function cambiarModo() {
   const body = document.body;
   const icono = document.getElementById("iconoModo");
@@ -238,27 +250,81 @@ function cambiarTipoForm() {
   }
 }
 
+// Cargar contenido de Firebase + TMDB
 async function cargarContenidoAdmin() {
   const lista = document.getElementById("listaAdmin");
-  lista.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-400">Cargando...</div>';
+  lista.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-400">Cargando contenido...</div>';
+
   try {
+    // 1. Cargar tu contenido personalizado
     const snapshot = await db.ref("contenido_personalizado").once("value");
-    const datos = snapshot.val();
-    listaContenidoAdmin = datos ? Object.entries(datos).map(([id, valor]) => ({ id, ...valor })) : [];
+    const datosAdmin = snapshot.val();
+    const contenidoPropio = datosAdmin 
+      ? Object.entries(datosAdmin).map(([id, valor]) => ({ id, ...valor, origen: "propio" })) 
+      : [];
+
+    // 2. Cargar contenido de TMDB
+    const resPelis = await fetch(`${TMDB_BASE}/movie/popular?language=${TMDB_LANG}&page=1`, {
+      headers: { Authorization: `Bearer ${TMDB_TOKEN}` }
+    });
+    const datosPelis = await resPelis.json();
+    const pelisTMDB = datosPelis.results.slice(0, 15).map(p => ({
+      id: `tmdb_${p.id}`,
+      titulo: p.title,
+      anio: p.release_date ? p.release_date.split("-")[0] : "N/D",
+      tipo: "pelicula",
+      categoria: "peliculas",
+      portada: p.poster_path ? `${TMDB_IMG}${p.poster_path}` : "https://via.placeholder.com/300x450?text=Sin+Portada",
+      sinopsis: p.overview || "Sin sinopsis",
+      puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A",
+      genero: "Película",
+      opciones: [],
+      origen: "tmdb"
+    }));
+
+    const resSeries = await fetch(`${TMDB_BASE}/tv/popular?language=${TMDB_LANG}&page=1`, {
+      headers: { Authorization: `Bearer ${TMDB_TOKEN}` }
+    });
+    const datosSeries = await resSeries.json();
+    const seriesTMDB = datosSeries.results.slice(0, 10).map(s => ({
+      id: `tmdb_${s.id}`,
+      titulo: s.name,
+      anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D",
+      tipo: "serie",
+      categoria: "series",
+      portada: s.poster_path ? `${TMDB_IMG}${s.poster_path}` : "https://via.placeholder.com/300x450?text=Sin+Portada",
+      sinopsis: s.overview || "Sin sinopsis",
+      puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A",
+      genero: "Serie",
+      temporadas: [],
+      origen: "tmdb"
+    }));
+
+    // Unir todo
+    listaContenidoAdmin = [...contenidoPropio, ...pelisTMDB, ...seriesTMDB];
     document.getElementById("contadorAdmin").textContent = `${listaContenidoAdmin.length} elementos`;
     mostrarListaAdmin("peliculas");
+
   } catch (err) {
-    lista.innerHTML = '<div class="col-span-3 text-center py-10 text-red-500">Error al cargar</div>';
+    console.error("Error cargando contenido:", err);
+    lista.innerHTML = '<div class="col-span-3 text-center py-10 text-red-500">❌ Error al cargar contenido</div>';
   }
 }
-
+</script>
+<script>
 function mostrarListaAdmin(categoria) {
   const lista = document.getElementById("listaAdmin");
   lista.innerHTML = "";
-  const filtrados = listaContenidoAdmin.filter(i => i.categoria === categoria);
+  let filtrados = [];
+
+  if (categoria === "todos") {
+    filtrados = listaContenidoAdmin;
+  } else {
+    filtrados = listaContenidoAdmin.filter(i => i.categoria === categoria);
+  }
 
   if (filtrados.length === 0) {
-    lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">No hay contenido en esta categoría</p>`;
+    lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">No hay contenido en esta sección</p>`;
     return;
   }
 
@@ -267,10 +333,14 @@ function mostrarListaAdmin(categoria) {
     tarjeta.className = "tarjeta";
     tarjeta.innerHTML = `
       <span class="etiqueta-anio">${item.anio}</span>
+      <span class="etiqueta-origen ${item.origen === 'tmdb' ? 'tmdb' : ''}">
+        ${item.origen === 'tmdb' ? 'TMDB' : 'Mío'}
+      </span>
+      ${item.origen === 'propio' ? `
       <div class="acciones-tarjeta">
         <button class="btn-editar" onclick="editarContenido('${item.id}')"><i class="fa-solid fa-pen"></i></button>
         <button class="btn-eliminar" onclick="eliminarContenido('${item.id}')"><i class="fa-solid fa-trash"></i></button>
-      </div>
+      </div>` : ''}
       <img src="${item.portada || 'https://via.placeholder.com/300x450?text=Sin+Portada'}" alt="${item.titulo}" class="portada">
       <div class="info-tarjeta">
         <h3>${item.titulo}</h3>
@@ -304,10 +374,14 @@ function buscarAdmin() {
     tarjeta.className = "tarjeta";
     tarjeta.innerHTML = `
       <span class="etiqueta-anio">${item.anio}</span>
+      <span class="etiqueta-origen ${item.origen === 'tmdb' ? 'tmdb' : ''}">
+        ${item.origen === 'tmdb' ? 'TMDB' : 'Mío'}
+      </span>
+      ${item.origen === 'propio' ? `
       <div class="acciones-tarjeta">
         <button class="btn-editar" onclick="editarContenido('${item.id}')"><i class="fa-solid fa-pen"></i></button>
         <button class="btn-eliminar" onclick="eliminarContenido('${item.id}')"><i class="fa-solid fa-trash"></i></button>
-      </div>
+      </div>` : ''}
       <img src="${item.portada || 'https://via.placeholder.com/300x450?text=Sin+Portada'}" alt="${item.titulo}" class="portada">
       <div class="info-tarjeta">
         <h3>${item.titulo}</h3>
@@ -317,6 +391,7 @@ function buscarAdmin() {
     lista.appendChild(tarjeta);
   });
 }
+
 async function guardarContenido() {
   const tipo = document.getElementById("tipoContenido").value;
   const titulo = document.getElementById("tituloInput").value.trim();
@@ -327,7 +402,7 @@ async function guardarContenido() {
   const opc2 = document.getElementById("opc2Input").value.trim();
 
   if (!titulo || !anio || !portada) {
-    alert("Completa título, año y portada como mínimo");
+    alert("⚠️ Completa título, año y portada como mínimo");
     return;
   }
 
@@ -335,11 +410,12 @@ async function guardarContenido() {
     titulo,
     anio,
     portada,
-    sinopsis: sinopsis || "Sin sinopsis",
+    sinopsis: sinopsis || "Sin sinopsis disponible",
     tipo,
     categoria: tipo === "pelicula" ? "peliculas" : "series",
     puntuacion: "7.0",
-    genero: tipo === "pelicula" ? "Película" : "Serie"
+    genero: tipo === "pelicula" ? "Película" : "Serie",
+    origen: "propio"
   };
 
   if (tipo === "pelicula") {
@@ -361,13 +437,18 @@ async function guardarContenido() {
     cerrarModalForm();
     cargarContenidoAdmin();
   } catch (err) {
-    alert("❌ Error: " + err.message);
+    console.error("Error:", err);
+    if (err.code === "PERMISSION_DENIED") {
+      alert("❌ Recuerda: esto funciona subido a la web (https), no abierto como archivo local");
+    } else {
+      alert("❌ Error: " + err.message);
+    }
   }
 }
 
 async function editarContenido(id) {
   const item = listaContenidoAdmin.find(i => i.id === id);
-  if (!item) return;
+  if (!item || item.origen === "tmdb") return;
 
   modoEdicion = true;
   idEdicion = id;
@@ -388,10 +469,13 @@ async function editarContenido(id) {
 }
 
 async function eliminarContenido(id) {
+  const item = listaContenidoAdmin.find(i => i.id === id);
+  if (!item || item.origen === "tmdb") return;
   if (!confirm("¿Seguro que quieres borrarlo? No se puede recuperar")) return;
+
   try {
     await db.ref(`contenido_personalizado/${id}`).remove();
-    alert("🗑️ Eliminado");
+    alert("🗑️ Eliminado correctamente");
     cargarContenidoAdmin();
   } catch (err) {
     alert("❌ Error al borrar: " + err.message);

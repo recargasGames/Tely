@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tu Plataforma 🎬</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TELY 🎬</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -38,11 +38,39 @@
         }
     </script>
     <style>
+        /* ✅ BLOQUEO TOTAL DE DESLIZAMIENTO LATERAL */
         * { margin: 0; padding: 0; box-sizing: border-box; transition: background 0.3s, color 0.3s; }
+        html, body {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden !important;
+            overflow-y: auto;
+            position: relative;
+        }
         body { background: #FFFFFF; color: #111827; min-height: 100vh; }
         body.dark { background: #0F172A; color: #F8FAFC; }
 
-        header { padding: 1.2rem; background: #fff; border-bottom: 1px solid #E5E7EB; position: sticky; top: 0; z-index: 50; }
+        /* ✅ ESTILOS PARA LOGO + TÍTULO */
+        .logo-contenedor {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .logo {
+            height: 42px;
+            width: auto;
+            object-fit: contain;
+        }
+        @media (max-width: 480px) {
+            .logo {
+                height: 34px;
+            }
+            .titulo-app {
+                font-size: 1.4rem;
+            }
+        }
+
+        header { padding: 1.2rem; background: #fff; border-bottom: 1px solid #E5E7EB; position: sticky; top: 0; z-index: 50; width: 100%; max-width: 100%; }
         body.dark header { background: #1E293B; border-color: #334155; }
         .titulo-app { font-size: 1.8rem; font-weight: 700; color: #111827; }
         body.dark .titulo-app { color: #F8FAFC; }
@@ -50,23 +78,23 @@
         .btn-menu { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #111827; }
         body.dark .btn-menu { color: #F8FAFC; }
 
-        .pestanas { display: flex; gap: 0.8rem; padding: 0 1.2rem 1rem; margin-top: 1rem; }
-        .btn-pestana { padding: 0.7rem 1.4rem; border-radius: 9999px; border: none; font-weight: 500; cursor: pointer; transition: 0.2s; }
+        .pestanas { display: flex; gap: 0.8rem; padding: 0 1.2rem 1rem; margin-top: 1rem; flex-wrap: wrap; width: 100%; max-width: 100%; }
+        .btn-pestana { padding: 0.7rem 1.4rem; border-radius: 9999px; border: none; font-weight: 500; cursor: pointer; transition: 0.2s; white-space: nowrap; }
         .btn-pestana.inactiva { background: #E5E7EB; color: #374151; }
         body.dark .btn-pestana.inactiva { background: #334155; color: #CBD5E1; }
         .btn-pestana.activa { background: #1F2937; color: #FFFFFF; }
         body.dark .btn-pestana.activa { background: #60A5FA; color: #0F172A; }
 
-        .buscador { display: flex; align-items: center; gap: 0.8rem; padding: 0 1.2rem 1.5rem; flex-wrap: wrap; }
-        .input-buscar { flex: 1; padding: 0.9rem 1.2rem; border-radius: 9999px; border: 1px solid #E5E7EB; font-size: 1rem; background: #fff; color: #111827; min-width: 200px; }
+        .buscador { display: flex; align-items: center; gap: 0.8rem; padding: 0 1.2rem 1.5rem; flex-wrap: wrap; width: 100%; max-width: 100%; }
+        .input-buscar { flex: 1; padding: 0.9rem 1.2rem; border-radius: 9999px; border: 1px solid #E5E7EB; font-size: 1rem; background: #fff; color: #111827; min-width: 200px; width: 100%; }
         body.dark .input-buscar { background: #1E293B; border-color: #334155; color: #F8FAFC; }
         .btn-buscar { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #6B7280; padding: 0.5rem; }
         body.dark .btn-buscar { color: #94A3B8; }
         .contador { background: #E5E7EB; padding: 0.7rem 1rem; border-radius: 9999px; font-weight: 500; font-size: 0.9rem; }
         body.dark .contador { background: #334155; color: #CBD5E1; }
 
-        .grid-contenido { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; padding: 0 1.2rem 2rem; }
-        .tarjeta { border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; position: relative; }
+        .grid-contenido { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; padding: 0 1.2rem 2rem; width: 100%; max-width: 100%; }
+        .tarjeta { border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; position: relative; width: 100%; }
         body.dark .tarjeta { background: #1E293B; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
         .tarjeta:hover { transform: translateY(-4px); }
         .portada { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
@@ -78,16 +106,16 @@
         .badge-video { font-size: 0.8rem; color: #10B981; font-weight: 500; }
         .badge-sin-video { font-size: 0.8rem; color: #9CA3AF; font-weight: 500; }
 
-        .pagina-detalle { display: none; position: fixed; inset: 0; background: #fff; z-index: 999; overflow-y: auto; }
+        .pagina-detalle { display: none; position: fixed; inset: 0; background: #fff; z-index: 999; overflow-y: auto; overflow-x: hidden; width: 100%; max-width: 100%; }
         body.dark .pagina-detalle { background: #0F172A; }
-        .encabezado-detalle { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem; border-bottom: 1px solid #E5E7EB; }
+        .encabezado-detalle { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem; border-bottom: 1px solid #E5E7EB; width: 100%; max-width: 100%; }
         body.dark .encabezado-detalle { border-color: #334155; }
         .btn-volver { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #111827; }
         body.dark .btn-volver { color: #F8FAFC; }
         .fondo-portada { width: 100%; height: 250px; background-size: cover; background-position: center; position: relative; }
         .fondo-portada::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(255,255,255,0.2), #FFFFFF); }
         body.dark .fondo-portada::after { background: linear-gradient(to bottom, rgba(0,0,0,0.2), #0F172A); }
-        .contenido-detalle { padding: 1.5rem; }
+        .contenido-detalle { padding: 1.5rem; width: 100%; max-width: 100%; }
         .titulo-detalle { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
         .datos-detalle { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
         .anio-detalle { background: #E5E7EB; padding: 0.4rem 0.9rem; border-radius: 6px; }
@@ -96,36 +124,36 @@
         .sinopsis { line-height: 1.6; color: #4B5563; margin-bottom: 2rem; }
         body.dark .sinopsis { color: #94A3B8; }
 
-        .modal-video { position: fixed; inset: 0; background: #000; z-index: 9998; display: flex; flex-direction: column; }
+        .modal-video { position: fixed; inset: 0; background: #000; z-index: 9998; display: flex; flex-direction: column; overflow-x: hidden; width: 100%; max-width: 100%; }
         .netflix-player { width: 100%; height: 65vh; position: relative; background: #000; overflow: hidden; }
-        iframe { width: 100%; height: 100%; border: none; background: #000; /* ❌ BLOQUEADO PANTALLA COMPLETA */ allowfullscreen="false"; }
+        iframe { width: 100%; height: 100%; border: none; background: #000; allowfullscreen="false"; }
         .player-top { position: absolute; top: 0; left: 0; right: 0; padding: 1.5rem; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); display: flex; justify-content: space-between; align-items: center; z-index: 10; }
         .btn-cerrar-video { background: rgba(255,255,255,0.2); border: none; color: #fff; font-size: 1.5rem; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .titulo-video { font-size: 1.3rem; font-weight: 600; color: #fff; }
 
-        .panel-inferior { height: 35vh; background: #F9FAFB; border-top: 1px solid #E5E7EB; padding: 1.2rem; overflow-y: auto; }
+        .panel-inferior { height: 35vh; background: #F9FAFB; border-top: 1px solid #E5E7EB; padding: 1.2rem; overflow-y: auto; overflow-x: hidden; width: 100%; max-width: 100%; }
         body.dark .panel-inferior { background: #1E293B; border-color: #334155; }
-        .selector-temporadas { display: flex; gap: 0.8rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+        .selector-temporadas { display: flex; gap: 0.8rem; margin-bottom: 1.2rem; flex-wrap: wrap; width: 100%; max-width: 100%; }
         .btn-temporada { padding: 0.6rem 1.2rem; border-radius: 8px; border: 1px solid #D1D5DB; background: #fff; cursor: pointer; font-weight: 500; }
         body.dark .btn-temporada { background: #334155; border-color: #475569; color: #F8FAFC; }
         .btn-temporada.activa { background: #1F2937; color: #fff; border-color: #1F2937; }
         body.dark .btn-temporada.activa { background: #60A5FA; color: #0F172A; border-color: #60A5FA; }
-        .lista-capitulos { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.8rem; margin-bottom: 1.5rem; }
+        .lista-capitulos { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.8rem; margin-bottom: 1.5rem; width: 100%; max-width: 100%; }
         .btn-capitulo { padding: 0.7rem; border-radius: 8px; border: 1px solid #D1D5DB; background: #fff; cursor: pointer; text-align: center; font-weight: 500; }
         body.dark .btn-capitulo { background: #334155; border-color: #475569; color: #F8FAFC; }
         .btn-capitulo.activo { background: #1F2937; color: #fff; border-color: #1F2937; }
         body.dark .btn-capitulo.activo { background: #60A5FA; color: #0F172A; border-color: #60A5FA; }
 
-        .botones-opciones { display: flex; gap: 1rem; margin-bottom: 1.2rem; justify-content: center; flex-wrap: wrap; }
+        .botones-opciones { display: flex; gap: 1rem; margin-bottom: 1.2rem; justify-content: center; flex-wrap: wrap; width: 100%; max-width: 100%; }
         .btn-opcion { flex: 0 1 auto; min-width: 120px; padding: 0.9rem 1.2rem; border-radius: 8px; border: 1px solid #D1D5DB; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 500; text-align: center; }
         body.dark .btn-opcion { background: #334155; border-color: #475569; color: #F8FAFC; }
         .btn-opcion.activo { background: #1F2937; color: #fff; border-color: #1F2937; }
         body.dark .btn-opcion.activo { background: #60A5FA; color: #0F172A; border-color: #60A5FA; }
-        .aviso { display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem; background: #FEF3C7; border-radius: 8px; color: #92400E; font-size: 0.9rem; margin-top: 1rem; }
+        .aviso { display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem; background: #FEF3C7; border-radius: 8px; color: #92400E; font-size: 0.9rem; margin-top: 1rem; width: 100%; max-width: 100%; }
         body.dark .aviso { background: #78350F; color: #FBBF24; }
         .error-video { color: #EF4444; text-align: center; padding: 4rem; font-size: 1.2rem; }
         .menu-perfil { position: relative; }
-        .dropdown { position: absolute; right: 0; top: 120%; background: #fff; border-radius: 10px; width: 260px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: none; z-index: 100; border: 1px solid #E5E7EB; }
+        .dropdown { position: absolute; right: 0; top: 120%; background: #fff; border-radius: 10px; width: 260px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: none; z-index: 100; border: 1px solid #E5E7EB; overflow-x: hidden; }
         body.dark .dropdown { background: #1E293B; border-color: #334155; }
         .dropdown.mostrar { display: block; }
         .dropdown-header { padding: 1rem; border-bottom: 1px solid #E5E7EB; font-weight: 600; }
@@ -136,13 +164,23 @@
         body.dark .dropdown button:hover { background: #334155; }
         .historial-vacio { padding: 1.2rem; text-align: center; color: #9CA3AF; }
         .oculto { display: none !important; }
+
+        @media (max-width: 480px) {
+            .grid-contenido { grid-template-columns: repeat(2, 1fr); }
+            .pestanas { gap: 0.5rem; }
+            .btn-pestana { padding: 0.6rem 1rem; font-size: 0.9rem; }
+        }
     </style>
 </head>
 <body>
-
 <header>
     <div class="flex justify-between items-center">
-        <h1 class="titulo-app">Tu Plataforma</h1>
+        <!-- ✅ LOGO + TÍTULO - USA TU ARCHIVO logo.png -->
+        <div class="logo-contenedor">
+            <img src="logo.png" alt="Logo TELY" class="logo">
+            <h1 class="titulo-app">TELY</h1>
+        </div>
+
         <div class="flex items-center gap-3">
             <button class="btn-menu" onclick="cambiarModo()"><i class="fa-solid fa-moon" id="iconoModo"></i></button>
             <div class="menu-perfil">
@@ -159,11 +197,11 @@
     </div>
 </header>
 
+<!-- ✅ QUITADO EL BOTÓN DE ANIME -->
 <div class="pestanas">
-    <button class="btn-pestana inactiva" onclick="cambiarCategoria('estrenos')">Estrenos</button>
-    <button class="btn-pestana activa" onclick="cambiarCategoria('peliculas')">Películas</button>
+    <button class="btn-pestana activa" onclick="cambiarCategoria('estrenos')">Estrenos</button>
+    <button class="btn-pestana inactiva" onclick="cambiarCategoria('peliculas')">Películas</button>
     <button class="btn-pestana inactiva" onclick="cambiarCategoria('series')">Series</button>
-    <button class="btn-pestana inactiva" onclick="cambiarCategoria('anime')">Anime</button>
 </div>
 
 <div class="buscador">
@@ -215,7 +253,7 @@
     </div>
 </div>
 
-<!-- MODAL DE INICIO DE SESIÓN (SOLO GOOGLE + TELÉFONO) -->
+<!-- MODAL DE INICIO DE SESIÓN -->
 <div id="modal-login" class="modal-login oculto fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]">
     <div class="bg-white dark:bg-gray-800 p-8 rounded-xl w-full max-w-md mx-auto shadow-xl">
         <h2 class="text-2xl font-bold text-center mb-4 dark:text-white">Iniciar Sesión</h2>
@@ -322,7 +360,7 @@ async function cargarContenidoCompleto() {
     const pelisTMDB = datosPeliculas.results.slice(0, 8).map(p => ({
       id: `tmdb_${p.id}`,
       titulo: p.title,
-      anio: p.release_date ? p.release_date.split("-")[0] : "N/D",
+ anio: p.release_date ? p.release_date.split("-")[0] : "N/D",
       tipo: "pelicula",
       categoria: "peliculas",
       portada: p.poster_path ? `${TMDB_IMG}${p.poster_path}` : "https://via.placeholder.com/300x450?text=Sin+Portada",
@@ -358,7 +396,6 @@ async function cargarContenidoCompleto() {
   mostrarContenido("estrenos");
 }
 
-// ✅ INICIO CON GOOGLE
 function iniciarConGoogle() {
   const proveedor = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(proveedor)
@@ -370,7 +407,6 @@ function iniciarConGoogle() {
     .catch(err => alert("Error Google: " + err.message));
 }
 
-// ✅ INICIO CON TELÉFONO
 function iniciarRecaptcha() {
   if (!recaptchaVerifier) {
     recaptchaVerifier = new firebase.auth.RecaptchaVerifier('modal-login', {
@@ -441,6 +477,7 @@ function limpiarHistorial() {
   localStorage.removeItem("historialTely");
   mostrarHistorial();
 }
+
 function mostrarContenido(categoria) {
   const lista = document.getElementById("lista-contenido");
   lista.innerHTML = "";
@@ -450,7 +487,7 @@ function mostrarContenido(categoria) {
     return;
   }
   filtrados.forEach(item => {
-    const tieneVideo = (item.opciones && item.opciones.some(o => o.url)) || (item.temporadas && item.temporadas.some(t => t.capitulos.some(c => c.opciones.some(o => o.url))));
+    const tieneVideo = (item.opciones && item.opciones.some(o => o.url)) || (item.temporadas && item.temporadas.some(t => t.capitulos && t.capitulos.some(c => c.opciones && c.opciones.some(o => o.url))));
     const tarjeta = document.createElement("div");
     tarjeta.className = "tarjeta relative";
     tarjeta.innerHTML = `
@@ -531,6 +568,7 @@ function abrirDetalle(item) {
         <div id="capsDetalle" class="lista-capitulos mt-4"></div>
       </div>
     `;
+    serieActual = item;
     if (item.temporadas?.length > 0) {
       const tempCont = document.getElementById("tempDetalle");
       tempCont.innerHTML = "";
@@ -608,7 +646,6 @@ function abrirVideoPelicula(peli) {
   agregarAlHistorial(peli);
 }
 
-// ✅ REPRODUCTOR LIMPIO - SIN AMPLIAR PANTALLA
 function reproducirOpcion(url, titulo, anio, opcion) {
   const player = document.getElementById("netflixPlayer");
   let src = url.trim();
@@ -666,7 +703,7 @@ function abrirCapitulo(cap) {
     botones.appendChild(btn);
   });
 
-  if (cap.opciones[0]?.url) reproducirOpcion(cap.opciones[0].url, serieActual.titulo, `Cap. ${cap.numero}`, cap.opciones[0].nombre);
+  if (cap.opciones[0]?.url) reproducirOpcion(cap.opciones[0].url, serieActual.titulo, `Cap. ${cap.numero}`, op.nombre);
 }
 
 function cerrarVideo() {
