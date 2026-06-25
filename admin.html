@@ -1,250 +1,351 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel Admin - TELY</title>
-  <!-- Estilos y librerías -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <!-- Firebase (misma configuración que tu index.html) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-
-  <style>
-    /* Eliminar desplazamiento lateral */
-    html, body {
-      margin: 0;
-      padding: 0;
-      background-color: #0f1115;
-      overflow-x: hidden !important;
-      width: 100%;
-    }
-    * {
-      box-sizing: border-box;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin TELY 🛠️</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        fondo: '#0F172A',
+                        tarjeta: '#1E293B',
+                        acento: '#3B82F6',
+                        exito: '#10B981',
+                        alerta: '#F59E0B',
+                        error: '#EF4444'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background: #0F172A; color: #F8FAFC; min-height: 100vh; }
+        .input-form { background: #1E293B; border: 1px solid #334155; color: #F8FAFC; }
+        .input-form:focus { outline: none; border-color: #3B82F6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); }
+        .btn-guardar { background: #10B981; }
+        .btn-guardar:hover { background: #059669; }
+        .btn-buscar { background: #3B82F6; }
+        .btn-buscar:hover { background: #2563EB; }
+    </style>
 </head>
-<body class="text-gray-200 font-sans">
+<body class="p-4 md:p-6">
 
-  <div class="w-full max-w-6xl mx-auto p-4 sm:p-6">
+    <header class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-acento">🛠️ Panel de Administración TELY</h1>
+        <p class="text-gray-400 mt-1">Gestiona tu contenido fácilmente</p>
+    </header>
 
-    <!-- Encabezado -->
-    <div class="flex flex-wrap justify-between items-center mb-6 pb-4 border-b border-gray-700 gap-3">
-      <h1 class="text-2xl sm:text-3xl font-bold text-white">⚙️ Panel de Administración TELY</h1>
-      <a href="/" class="text-blue-400 hover:text-blue-300 flex items-center gap-2">
-        <i class="fa-solid fa-arrow-left"></i> Volver al sitio
-      </a>
+    <!-- 🔹 NAVEGACIÓN ENTRE SECCIONES -->
+    <div class="flex gap-3 mb-6 overflow-x-auto pb-2">
+        <button onclick="cambiarSeccion('tmdb')" id="tabTmdb" class="px-5 py-2 rounded-lg bg-acento font-medium">🎬 Contenido TMDB</button>
+        <button onclick="cambiarSeccion('propio')" id="tabPropio" class="px-5 py-2 rounded-lg bg-tarjeta hover:bg-gray-700 font-medium">➕ Agregar Contenido Propio</button>
     </div>
 
-    <!-- Formulario de agregar contenido -->
-    <div class="bg-gray-800 p-5 sm:p-6 rounded-xl shadow-lg mb-8">
-      <h2 class="text-xl sm:text-2xl font-semibold text-white mb-5">➕ Agregar Película o Serie</h2>
+    <!-- ====================================== -->
+    <!-- SECCIÓN 1: GESTIONAR CONTENIDO TMDB -->
+    <!-- ====================================== -->
+    <div id="seccionTmdb" class="block">
+        <div class="bg-tarjeta rounded-xl p-5 mb-6 shadow-lg">
+            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-film"></i> Películas/Series de TMDB
+            </h2>
+            <p class="text-gray-300 mb-4">
+                Ingresa el ID de TMDB para agregar imagen personalizada y enlaces de reproducción.
+            </p>
 
-      <form id="formContenido" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block mb-1 text-sm text-gray-300">ID de TMDB</label>
+                    <input type="text" id="tmdbId" placeholder="Ej: 245891 (John Wick 1)" class="input-form w-full p-3 rounded-lg">
+                </div>
+                <div>
+                    <label class="block mb-1 text-sm text-gray-300">URL de Imagen / Portada</label>
+                    <input type="text" id="tmdbPortada" placeholder="https://image.tmdb.org/t/p/w500/..." class="input-form w-full p-3 rounded-lg">
+                </div>
+            </div>
 
-        <!-- Tipo de contenido -->
-        <div>
-          <label class="block text-gray-300 mb-2 text-sm">Tipo</label>
-          <select id="tipoContenido" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-blue-500">
-            <option value="pelicula">Película</option>
-            <option value="serie">Serie</option>
-          </select>
+            <div class="mb-4">
+                <label class="block mb-1 text-sm text-gray-300">Título</label>
+                <input type="text" id="tmdbTitulo" placeholder="Ej: John Wick: Capítulo 2" class="input-form w-full p-3 rounded-lg">
+            </div>
+
+            <div class="mb-4">
+                <label class="block mb-1 text-sm text-gray-300">Enlaces de reproducción</label>
+                <div id="enlacesTmdbContainer">
+                    <div class="flex gap-2 mb-2">
+                        <input type="text" placeholder="Nombre opción" class="input-form w-1/3 p-2 rounded-lg">
+                        <input type="text" placeholder="URL del video" class="input-form w-2/3 p-2 rounded-lg">
+                    </div>
+                </div>
+                <button onclick="agregarCampoEnlace('tmdb')" class="text-acento text-sm mt-1 hover:underline">
+                    <i class="fa-solid fa-plus"></i> Agregar otra opción
+                </button>
+            </div>
+
+            <button onclick="guardarContenidoTMDB()" class="btn-guardar text-white px-6 py-2.5 rounded-lg font-medium">
+                💾 Guardar en Firebase
+            </button>
         </div>
 
-        <!-- Categoría -->
-        <div>
-          <label class="block text-gray-300 mb-2 text-sm">Categoría</label>
-          <select id="categoriaContenido" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-blue-500">
-            <option value="estrenos">Estrenos</option>
-            <option value="peliculas">Películas</option>
-            <option value="series">Series</option>
-          </select>
+        <!-- Lista de contenido TMDB ya guardado -->
+        <div class="bg-tarjeta rounded-xl p-5 shadow-lg">
+            <h3 class="text-lg font-semibold mb-3">📋 Contenido TMDB Guardado</h3>
+            <div id="listaTmdb" class="space-y-2 text-sm"></div>
         </div>
-
-        <!-- Título -->
-        <div class="md:col-span-2">
-          <label class="block text-gray-300 mb-2 text-sm">Título</label>
-          <input type="text" id="tituloContenido" placeholder="Ej: El Padrino" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-blue-500" required>
-        </div>
-
-        <!-- Año -->
-        <div>
-          <label class="block text-gray-300 mb-2 text-sm">Año</label>
-          <input type="text" id="anioContenido" placeholder="Ej: 1972" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white">
-        </div>
-
-        <!-- Género -->
-        <div>
-          <label class="block text-gray-300 mb-2 text-sm">Género</label>
-          <input type="text" id="generoContenido" placeholder="Ej: Crimen / Drama" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white">
-        </div>
-
-        <!-- Puntuación -->
-        <div>
-          <label class="block text-gray-300 mb-2 text-sm">Puntuación (0.0 - 10.0)</label>
-          <input type="number" step="0.1" min="0" max="10" id="puntuacionContenido" placeholder="Ej: 9.2" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white">
-        </div>
-
-        <!-- Ruta de imagen PNG -->
-        <div class="md:col-span-2">
-          <label class="block text-gray-300 mb-2 text-sm">Ruta de la portada (formato PNG)</label>
-          <input type="text" id="portadaContenido" placeholder="Ej: /imagenes/portadas/el-padrino.png" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-blue-500" required>
-          <small class="text-gray-400">Funciona directamente en tu dominio Vercel / GitHub</small>
-        </div>
-
-        <!-- Sinopsis -->
-        <div class="md:col-span-2">
-          <label class="block text-gray-300 mb-2 text-sm">Sinopsis</label>
-          <textarea id="sinopsisContenido" rows="3" placeholder="Resumen de la historia..." class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-blue-500"></textarea>
-        </div>
-
-        <!-- Enlaces de reproducción -->
-        <div class="md:col-span-2">
-          <h4 class="text-white font-medium mb-3">🔗 Enlaces de reproducción</h4>
-          <div id="listaEnlaces" class="space-y-3 mb-4 w-full"></div>
-          <button type="button" onclick="agregarCampoEnlace()" class="bg-blue-600 px-4 py-2 rounded-lg text-sm text-white hover:bg-blue-700 transition">
-            + Agregar otro enlace
-          </button>
-        </div>
-
-        <!-- Botón Guardar -->
-        <div class="md:col-span-2 mt-2">
-          <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition text-lg">
-            💾 Guardar Contenido
-          </button>
-        </div>
-      </form>
     </div>
 
-    <!-- Lista de contenido agregado -->
-    <div class="bg-gray-800 p-5 sm:p-6 rounded-xl shadow-lg w-full">
-      <h3 class="text-xl sm:text-2xl font-semibold text-white mb-5">📚 Contenido Agregado</h3>
-      <div id="listaContenidoAdmin" class="space-y-3 text-gray-200 w-full">
-        <p class="text-gray-400 text-center py-6">Cargando contenido...</p>
-      </div>
+    <!-- ====================================== -->
+    <!-- SECCIÓN 2: AGREGAR CONTENIDO PROPIO -->
+    <!-- ====================================== -->
+    <div id="seccionPropio" class="hidden">
+        <div class="bg-tarjeta rounded-xl p-5 mb-6 shadow-lg">
+            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle"></i> Agregar Contenido Propio
+            </h2>
+            <p class="text-gray-300 mb-4">
+                Completa todos los datos para agregar películas o series que no estén en TMDB.
+            </p>
+
+            <div class="grid md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block mb-1 text-sm text-gray-300">Título</label>
+                    <input type="text" id="propioTitulo" class="input-form w-full p-3 rounded-lg">
+                </div>
+                <div>
+                    <label class="block mb-1 text-sm text-gray-300">Año</label>
+                    <input type="text" id="propioAnio" class="input-form w-full p-3 rounded-lg">
+                </div>
+                <div>
+                    <label class="block mb-1 text-sm text-gray-300">Tipo</label>
+                    <select id="propioTipo" class="input-form w-full p-3 rounded-lg">
+                        <option value="pelicula">Película</option>
+                        <option value="serie">Serie</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block mb-1 text-sm text-gray-300">Categoría</label>
+                    <select id="propioCategoria" class="input-form w-full p-3 rounded-lg">
+                        <option value="peliculas">Películas</option>
+                        <option value="series">Series</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block mb-1 text-sm text-gray-300">URL de Portada / Imagen</label>
+                <input type="text" id="propioPortada" class="input-form w-full p-3 rounded-lg">
+            </div>
+
+            <div class="mb-4">
+                <label class="block mb-1 text-sm text-gray-300">Sinopsis</label>
+                <textarea id="propioSinopsis" rows="3" class="input-form w-full p-3 rounded-lg"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label class="block mb-1 text-sm text-gray-300">Enlaces de reproducción</label>
+                <div id="enlacesPropioContainer">
+                    <div class="flex gap-2 mb-2">
+                        <input type="text" placeholder="Nombre opción" class="input-form w-1/3 p-2 rounded-lg">
+                        <input type="text" placeholder="URL del video" class="input-form w-2/3 p-2 rounded-lg">
+                    </div>
+                </div>
+                <button onclick="agregarCampoEnlace('propio')" class="text-acento text-sm mt-1 hover:underline">
+                    <i class="fa-solid fa-plus"></i> Agregar otra opción
+                </button>
+            </div>
+
+            <button onclick="guardarContenidoPropio()" class="btn-guardar text-white px-6 py-2.5 rounded-lg font-medium">
+                💾 Guardar en Firebase
+            </button>
+        </div>
+
+        <div class="bg-tarjeta rounded-xl p-5 shadow-lg">
+            <h3 class="text-lg font-semibold mb-3">📋 Contenido Propio Guardado</h3>
+            <div id="listaPropio" class="space-y-2 text-sm"></div>
+        </div>
     </div>
 
-  </div>
+    <script>
+        // ----------------------
+        // CONFIGURACIÓN FIREBASE
+        // ----------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYetRSA0nsZsGiqABbTtjq-5a4bz5-oDk",
+            authDomain: "tely-675c0.firebaseapp.com",
+            databaseURL: "https://tely-675c0-default-rtdb.firebaseio.com",
+            projectId: "tely-675c0",
+            storageBucket: "tely-675c0.appspot.com",
+            messagingSenderId: "375009551428",
+            appId: "1:375009551428:web:33846891b7641f97a20811"
+        };
 
-  <script>
-    // CONFIGURACIÓN FIREBASE (IGUAL A TU index.html)
-    const firebaseConfig = {
-      apiKey: "AIzaSyCYetRSA0nsZsGiqABbTtjq-5a4bz5-oDk",
-      authDomain: "tely-675c0.firebaseapp.com",
-      databaseURL: "https://tely-675c0-default-rtdb.firebaseio.com",
-      projectId: "tely-675c0",
-      storageBucket: "tely-675c0.appspot.com",
-      messagingSenderId: "375009551428",
-      appId: "1:375009551428:web:33846891b7641f97a20811",
-      measurementId: "G-V1HFDG2366"
-    };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    // Agregar campos dinámicos para enlaces
-    function agregarCampoEnlace() {
-      const contenedor = document.getElementById("listaEnlaces");
-      const div = document.createElement("div");
-      div.className = "flex flex-wrap sm:flex-row gap-2 items-center w-full";
-      div.innerHTML = `
-        <input type="text" placeholder="Nombre de la opción" class="flex-1 min-w-[120px] p-2 rounded bg-gray-700 border border-gray-600 text-white" data-nombre>
-        <input type="url" placeholder="URL del video" class="flex-[2] min-w-[200px] p-2 rounded bg-gray-700 border border-gray-600 text-white" data-url>
-        <button type="button" onclick="this.parentElement.remove()" class="text-red-400 text-xl hover:text-red-500 px-2">×</button>
-      `;
-      contenedor.appendChild(div);
-    }
-
-    // Guardar en Firebase
-    document.getElementById("formContenido").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const enlaces = [];
-      document.querySelectorAll("#listaEnlaces > div").forEach(div => {
-        const nombre = div.querySelector("[data-nombre]").value.trim();
-        const url = div.querySelector("[data-url]").value.trim();
-        if (nombre && url) enlaces.push({ nombre, url });
-      });
-
-      const nuevoContenido = {
-        id: `admin_${Date.now()}`,
-        titulo: document.getElementById("tituloContenido").value.trim(),
-        anio: document.getElementById("anioContenido").value.trim() || "N/D",
-        tipo: document.getElementById("tipoContenido").value,
-        categoria: document.getElementById("categoriaContenido").value,
-        portada: document.getElementById("portadaContenido").value.trim(),
-        sinopsis: document.getElementById("sinopsisContenido").value.trim() || "Sin sinopsis disponible",
-        puntuacion: document.getElementById("puntuacionContenido").value.trim() || "7.0",
-        genero: document.getElementById("generoContenido").value.trim() || "Sin clasificar",
-        opciones: enlaces,
-        temporadas: [],
-        deAdmin: true
-      };
-
-      try {
-        await db.ref("contenido_personalizado/" + nuevoContenido.id).set(nuevoContenido);
-        alert("✅ Contenido guardado correctamente");
-        document.getElementById("formContenido").reset();
-        document.getElementById("listaEnlaces").innerHTML = "";
-        agregarCampoEnlace();
-        cargarListaContenido();
-      } catch (error) {
-        alert("❌ Error al guardar: " + error.message);
-      }
-    });
-
-    // Cargar lista de contenido guardado
-    async function cargarListaContenido() {
-      const lista = document.getElementById("listaContenidoAdmin");
-      lista.innerHTML = "<p class='text-gray-400 text-center py-6'>Cargando...</p>";
-
-      try {
-        const snapshot = await db.ref("contenido_personalizado").once("value");
-        const datos = snapshot.val() ? Object.values(snapshot.val()) : [];
-
-        if (!datos.length) {
-          lista.innerHTML = "<p class='text-gray-400 text-center py-6'>Aún no has agregado contenido.</p>";
-          return;
+        // ----------------------
+        // FUNCIONES DE NAVEGACIÓN
+        // ----------------------
+        function cambiarSeccion(seccion) {
+            document.getElementById('seccionTmdb').classList.toggle('hidden', seccion !== 'tmdb');
+            document.getElementById('seccionPropio').classList.toggle('hidden', seccion !== 'propio');
+            document.getElementById('tabTmdb').classList.toggle('bg-acento', seccion === 'tmdb');
+            document.getElementById('tabTmdb').classList.toggle('bg-tarjeta', seccion !== 'tmdb');
+            document.getElementById('tabPropio').classList.toggle('bg-acento', seccion === 'propio');
+            document.getElementById('tabPropio').classList.toggle('bg-tarjeta', seccion !== 'propio');
         }
 
-        lista.innerHTML = "";
-        datos.forEach(item => {
-          const fila = document.createElement("div");
-          fila.className = "flex flex-wrap justify-between items-center bg-gray-700 p-3 rounded-lg gap-3 w-full";
-          fila.innerHTML = `
-            <div class="flex-1">
-              <strong class="text-white">${item.titulo}</strong> <span class="text-gray-300">(${item.anio})</span>
-              <br>
-              <small class="text-gray-400">Tipo: ${item.tipo.toUpperCase()} | Portada: ${item.portada}</small>
-            </div>
-            <button onclick="eliminarContenido('${item.id}')" class="text-red-400 hover:text-red-500 p-1" title="Eliminar">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          `;
-          lista.appendChild(fila);
-        });
-      } catch (error) {
-        lista.innerHTML = "<p class='text-red-400 text-center py-6'>Error al cargar contenido</p>";
-      }
-    }
+        // ----------------------
+        // AGREGAR CAMPOS DE ENLACES
+        // ----------------------
+        function agregarCampoEnlace(tipo) {
+            const contenedor = document.getElementById(`enlaces${tipo.charAt(0).toUpperCase() + tipo.slice(1)}Container`);
+            const nuevo = document.createElement('div');
+            nuevo.className = 'flex gap-2 mb-2';
+            nuevo.innerHTML = `
+                <input type="text" placeholder="Nombre opción" class="input-form w-1/3 p-2 rounded-lg">
+                <input type="text" placeholder="URL del video" class="input-form w-2/3 p-2 rounded-lg">
+                <button onclick="this.parentElement.remove()" class="text-red-500 px-2">✕</button>
+            `;
+            contenedor.appendChild(nuevo);
+        }
 
-    // Eliminar contenido
-    async function eliminarContenido(id) {
-      if (!confirm("¿Estás seguro de eliminar este contenido? No se puede recuperar.")) return;
-      try {
-        await db.ref("contenido_personalizado/" + id).remove();
-        cargarListaContenido();
-      } catch (error) {
-        alert("❌ Error al eliminar: " + error.message);
-      }
-    }
+        // ----------------------
+        // GUARDAR CONTENIDO TMDB
+        // ----------------------
+        async function guardarContenidoTMDB() {
+            const tmdb_id = document.getElementById('tmdbId').value.trim();
+            const titulo = document.getElementById('tmdbTitulo').value.trim();
+            const portada = document.getElementById('tmdbPortada').value.trim();
 
-    // Inicializar
-    window.addEventListener("load", () => {
-      agregarCampoEnlace();
-      cargarListaContenido();
-    });
-  </script>
+            if (!tmdb_id || !titulo) return alert('Completa al menos ID y Título');
+
+            // Recopilar enlaces
+            const opciones = [];
+            const campos = document.querySelectorAll('#enlacesTmdbContainer > div');
+            campos.forEach(campo => {
+                const nombre = campo.children[0].value.trim();
+                const url = campo.children[1].value.trim();
+                if (nombre && url) opciones.push({ nombre, url });
+            });
+
+            const datos = {
+                tmdb_id,
+                titulo,
+                portada,
+                tipo: 'pelicula',
+                categoria: 'peliculas',
+                opciones
+            };
+
+            try {
+                await db.ref(`contenido_personalizado/tmdb_${tmdb_id}`).set(datos);
+                alert('✅ Contenido TMDB guardado correctamente');
+                listarContenidoTMDB();
+            } catch (err) {
+                alert('❌ Error: ' + err.message);
+            }
+        }
+
+        // ----------------------
+        // GUARDAR CONTENIDO PROPIO
+        // ----------------------
+        async function guardarContenidoPropio() {
+            const titulo = document.getElementById('propioTitulo').value.trim();
+            const anio = document.getElementById('propioAnio').value.trim();
+            const tipo = document.getElementById('propioTipo').value;
+            const categoria = document.getElementById('propioCategoria').value;
+            const portada = document.getElementById('propioPortada').value.trim();
+            const sinopsis = document.getElementById('propioSinopsis').value.trim();
+
+            if (!titulo || !anio || !portada) return alert('Completa los campos obligatorios');
+
+            const opciones = [];
+            const campos = document.querySelectorAll('#enlacesPropioContainer > div');
+            campos.forEach(campo => {
+                const nombre = campo.children[0].value.trim();
+                const url = campo.children[1].value.trim();
+                if (nombre && url) opciones.push({ nombre, url });
+            });
+
+            const id = `propio_${Date.now()}`;
+            const datos = {
+                id,
+                titulo,
+                anio,
+                tipo,
+                categoria,
+                portada,
+                sinopsis,
+                opciones
+            };
+
+            try {
+                await db.ref(`contenido_personalizado/${id}`).set(datos);
+                alert('✅ Contenido propio guardado correctamente');
+                listarContenidoPropio();
+            } catch (err) {
+                alert('❌ Error: ' + err.message);
+            }
+        }
+
+        // ----------------------
+        // LISTAR CONTENIDO GUARDADO
+        // ----------------------
+        async function listarContenidoTMDB() {
+            const lista = document.getElementById('listaTmdb');
+            lista.innerHTML = 'Cargando...';
+            const snapshot = await db.ref('contenido_personalizado').orderByChild('tmdb_id').startAt('1').once('value');
+            const datos = snapshot.val() || {};
+            lista.innerHTML = '';
+            for (const key in datos) {
+                if (datos[key].tmdb_id) {
+                    const item = datos[key];
+                    lista.innerHTML += `<div class="p-2 bg-gray-700 rounded flex justify-between items-center">
+                        <span>🎬 ${item.titulo} (ID: ${item.tmdb_id})</span>
+                        <button onclick="eliminar('${key}')" class="text-red-400">Borrar</button>
+                    </div>`;
+                }
+            }
+        }
+
+        async function listarContenidoPropio() {
+            const lista = document.getElementById('listaPropio');
+            lista.innerHTML = 'Cargando...';
+            const snapshot = await db.ref('contenido_personalizado').once('value');
+            const datos = snapshot.val() || {};
+            lista.innerHTML = '';
+            for (const key in datos) {
+                if (!datos[key].tmdb_id) {
+                    const item = datos[key];
+                    lista.innerHTML += `<div class="p-2 bg-gray-700 rounded flex justify-between items-center">
+                        <span>➕ ${item.titulo} (${item.anio})</span>
+                        <button onclick="eliminar('${key}')" class="text-red-400">Borrar</button>
+                    </div>`;
+                }
+            }
+        }
+
+        async function eliminar(clave) {
+            if (confirm('¿Seguro que quieres borrar este contenido?')) {
+                await db.ref(`contenido_personalizado/${clave}`).remove();
+                listarContenidoTMDB();
+                listarContenidoPropio();
+            }
+        }
+
+        // Cargar listas al abrir
+        window.onload = () => {
+            listarContenidoTMDB();
+            listarContenidoPropio();
+        };
+    </script>
 </body>
 </html>
