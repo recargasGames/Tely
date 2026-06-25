@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TELY 🎬 Películas y Series</title>
-    <!-- Seguridad para reproductores -->
     <meta http-equiv="X-Frame-Options" content="ALLOWALL">
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self' data: blob:;
@@ -248,7 +247,7 @@ const db = firebase.database();
 
 let recaptchaVerifier, confirmationResult, videoPendiente = null, contenido = [], enlaceActual = "";
 
-// ✅ CONTENIDO DE EJEMPLO LISTO PARA CARGAR
+// ✅ CONTENIDO DE EJEMPLO
 const MI_PELICULAS = [
   {
     id: "rambo_001",
@@ -320,30 +319,7 @@ const MI_SERIES = [
   }
 ];
 
-// ✅ Funciones rápidas para no trabar la carga
-function cambiarModo() {
-  const body = document.body;
-  const icono = document.getElementById("iconoModo");
-  const icono2 = document.getElementById("iconoModo2");
-  if (body.classList.contains("dark")) {
-    body.classList.remove("dark");
-    icono.className = "fa-solid fa-moon";
-    if (icono2) icono2.className = "fa-solid fa-moon";
-    localStorage.setItem("modo", "claro");
-  } else {
-    body.classList.add("dark");
-    icono.className = "fa-solid fa-sun";
-    if (icono2) icono2.className = "fa-solid fa-sun";
-    localStorage.setItem("modo", "oscuro");
-  }
-}
-
-if (localStorage.getItem("modo") === "oscuro" || (!localStorage.getItem("modo") && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-  document.body.classList.add("dark");
-  document.getElementById("iconoModo").className = "fa-solid fa-sun";
-}
-
-// ✅ Carga rápida SIN depender de Firebase al inicio
+// ✅ Carga rápida SIN esperar a Firebase
 async function cargarContenidoAdmin() {
   try {
     const snapshot = await db.ref("contenido_personalizado").once("value");
@@ -356,13 +332,11 @@ async function cargarContenidoAdmin() {
 }
 
 async function cargarTodoContenido() {
-  // Carga primero el contenido local para que no se quede "Cargando..."
   contenido = [...MI_PELICULAS, ...MI_SERIES];
   document.getElementById("contadorTotal").textContent = `${contenido.length} títulos`;
   mostrarRecientes();
   mostrarContenido("peliculas");
 
-  // Luego agrega el de Firebase sin bloquear
   const admin = await cargarContenidoAdmin();
   if (admin.length > 0) {
     contenido = [...contenido, ...admin];
@@ -384,7 +358,14 @@ function mostrarRecientes() {
       <img src="${item.portada}" alt="${item.titulo}" class="portada-recientes" loading="lazy">
       <div class="texto-recientes">${item.titulo}</div>
     `;
-    tarjeta.onclick = () => auth.currentUser ? abrirDetalle(item) : (videoPendiente = item, abrirModalLogin());
+    tarjeta.onclick = () => {
+      // ✅ Permitir ver SIN iniciar sesión mientras pruebas
+      if (window.location.protocol === "file:") {
+        abrirDetalle(item);
+      } else {
+        auth.currentUser ? abrirDetalle(item) : (videoPendiente = item, abrirModalLogin());
+      }
+    };
     contenedor.appendChild(tarjeta);
   });
 }
@@ -407,9 +388,37 @@ function mostrarContenido(categoria) {
         ${tieneVideo ? '<span class="badge-video">▶ Disponible</span>' : '<span class="badge-sin-video">🔒 Sin enlace</span>'}
       </div>
     `;
-    tarjeta.onclick = () => auth.currentUser ? abrirDetalle(item) : (videoPendiente = item, abrirModalLogin());
+    tarjeta.onclick = () => {
+      if (window.location.protocol === "file:") {
+        abrirDetalle(item);
+      } else {
+        auth.currentUser ? abrirDetalle(item) : (videoPendiente = item, abrirModalLogin());
+      }
+    };
     lista.appendChild(tarjeta);
   });
+}
+
+function cambiarModo() {
+  const body = document.body;
+  const icono = document.getElementById("iconoModo");
+  const icono2 = document.getElementById("iconoModo2");
+  if (body.classList.contains("dark")) {
+    body.classList.remove("dark");
+    icono.className = "fa-solid fa-moon";
+    if (icono2) icono2.className = "fa-solid fa-moon";
+    localStorage.setItem("modo", "claro");
+  } else {
+    body.classList.add("dark");
+    icono.className = "fa-solid fa-sun";
+    if (icono2) icono2.className = "fa-solid fa-sun";
+    localStorage.setItem("modo", "oscuro");
+  }
+}
+
+if (localStorage.getItem("modo") === "oscuro" || (!localStorage.getItem("modo") && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+  document.body.classList.add("dark");
+  document.getElementById("iconoModo").className = "fa-solid fa-sun";
 }
 function cambiarCategoria(cat) {
   document.querySelectorAll(".btn-pestana").forEach(b => { b.classList.remove("activa"); b.classList.add("inactiva"); });
@@ -433,7 +442,13 @@ function buscarContenido() {
       <img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy">
       <div class="info-tarjeta"><h3>${item.titulo}</h3></div>
     `;
-    tarjeta.onclick = () => auth.currentUser ? abrirDetalle(item) : (videoPendiente = item, abrirModalLogin());
+    tarjeta.onclick = () => {
+      if (window.location.protocol === "file:") {
+        abrirDetalle(item);
+      } else {
+        auth.currentUser ? abrirDetalle(item) : (videoPendiente = item, abrirModalLogin());
+      }
+    };
     lista.appendChild(tarjeta);
   }) : lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">Sin resultados</p>`;
 }
@@ -441,7 +456,13 @@ function buscarContenido() {
 function abrirModalLogin() { document.getElementById("modal-login").classList.remove("oculto"); }
 function cerrarModalLogin() { document.getElementById("modal-login").classList.add("oculto"); videoPendiente = null; }
 
+// ✅ Error corregido: no intenta iniciar en modo archivo
 function iniciarConGoogle() {
+  if (window.location.protocol === "file:") {
+    alert("⚠️ Inicia sesión solo desde el enlace de Vercel, no desde archivo local");
+    cerrarModalLogin();
+    return;
+  }
   const proveedor = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(proveedor)
     .then(res => {
@@ -450,9 +471,8 @@ function iniciarConGoogle() {
       if (videoPendiente) abrirDetalle(videoPendiente);
     })
     .catch(err => {
-      if (err.code !== "auth/popup-closed-by-user") {
-        alert("Error al iniciar sesión: " + err.message);
-      }
+      console.error("Error inicio:", err);
+      alert(`⚠️ Error: ${err.message}\nSube el código a Vercel para que funcione bien`);
     });
 }
 
