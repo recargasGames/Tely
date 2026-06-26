@@ -418,7 +418,7 @@
         <!-- REPRODUCTOR CENTRADO -->
         <div class="netflix-player" id="netflixPlayer"></div>
 
-        <!-- SOLO BOTÓN DE CERRAR (sin pantalla completa) -->
+        <!-- SOLO BOTÓN DE CERRAR -->
         <div class="controles-superior" id="controlesSuperior">
             <button class="btn-control btn-cerrar-modal" onclick="cerrarVideo()">
                 <i class="fa-solid fa-xmark"></i> Cerrar
@@ -514,7 +514,7 @@ const MI_CONTENIDO = [
     puntuacion: "7.7",
     genero: "Acción / Aventura",
     tmdb_id: "1136",
-    url: "https://vidmoly.biz/embed-zpqaemei0ljl.html"
+    url:"https://vidmoly.biz/embed-zpqaemei0ljl.html"
   },
   {
     id: "johnwick_001",
@@ -522,12 +522,12 @@ const MI_CONTENIDO = [
     anio: "2014",
     tipo: "pelicula",
     categoria: "peliculas",
-    portada: "john wick.png",
+    portada: "john.png",
     sinopsis: "Un exasesino a sueldo vuelve a la acción para vengar a su perro.",
     puntuacion: "7.4",
     genero: "Acción / Suspenso",
     tmdb_id: "245891",
-    url: "https://vidmoly.biz/embed-as1c23137iks.html"
+    url: "https://vidmoly.me/v/as1c23137iks"
   },
   {
     id: "demonio_001",
@@ -873,7 +873,7 @@ window.addEventListener('popstate', function(e) {
 });
 
 history.pushState(null, '', window.location.href);// ==============================================
-// 🎬 REPRODUCTOR CENTRADO
+// 🎬 REPRODUCTOR CENTRADO CON ORIENTACIÓN HORIZONTAL
 // ==============================================
 function abrirVideoPelicula(peli) {
     detenerVideo();
@@ -887,16 +887,11 @@ function abrirVideoPelicula(peli) {
     modal.classList.add("abierto");
     document.body.style.overflow = "hidden";
     
-    // 🔥 GIRAR LA PANTALLA AUTOMÁTICAMENTE A HORIZONTAL
+    // 🔥 FORZAR ORIENTACIÓN HORIZONTAL
     if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('landscape').catch(function() {
-            // Si no se puede bloquear, intentar con pantalla completa
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(function() {});
-            }
+        screen.orientation.lock('landscape').catch(function(err) {
+            console.log("No se pudo bloquear la orientación:", err);
         });
-    } else if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen().catch(function() {});
     }
     
     // ACTUALIZAR TÍTULO Y SINOPSIS ARRIBA
@@ -1148,8 +1143,6 @@ function cerrarVideo() {
     // 🔥 VOLVER A LA ORIENTACIÓN NORMAL (vertical)
     if (screen.orientation && screen.orientation.unlock) {
         screen.orientation.unlock();
-    } else if (document.exitFullscreen) {
-        document.exitFullscreen().catch(function() {});
     }
 }
 
