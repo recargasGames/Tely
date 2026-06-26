@@ -4,17 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TELY 🎬</title>
-    <!-- CSP AMPLIADA PARA QUE NO BLOQUEE NADA -->
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self' data: blob:;
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://www.gstatic.com https://www.googleapis.com https://api.themoviedb.org;
-        style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com;
-        font-src 'self' https://cdnjs.cloudflare.com;
-        img-src 'self' data: blob: https://image.tmdb.org https://via.placeholder.com;
-        frame-src 'self' https://www.youtube.com https://vidmoly.to https://mixdrop.co https://drive.google.com https://streamtape.com https://transtime.io;
-        media-src 'self' https://www.youtube.com https://vidmoly.to https://mixdrop.co https://drive.google.com https://streamtape.com https://transtime.io;
-        connect-src 'self' https://*.firebaseio.com https://www.googleapis.com https://www.gstatic.com https://api.themoviedb.org;
-    ">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -38,7 +27,9 @@
                         textoOscuro: '#F8FAFC',
                         grisOscuro: '#1E293B'
                     },
-                    fontFamily: { sans: ['Segoe UI', 'Roboto', 'sans-serif'] }
+                    fontFamily: {
+                        sans: ['Segoe UI', 'Roboto', 'sans-serif']
+                    }
                 }
             }
         }
@@ -107,61 +98,204 @@
         .tarjeta-reciente .info-reciente h4 { font-size: 0.7rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         body.dark .tarjeta-reciente .info-reciente h4 { color: #F8FAFC; }
 
-        .modal-video { position: fixed; inset: 0; background: #000; z-index: 9998; display: none; flex-direction: column; overflow: hidden; }
+        /* ========================================== */
+        /* REPRODUCTOR - CENTRADO (NO PANTALLA COMPLETA) */
+        /* ========================================== */
+        .modal-video { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.85); 
+            z-index: 9998; 
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
         .modal-video.abierto { display: flex; }
-        
-        .netflix-player { width: 100%; height: 62vh; position: relative; background: #000; overflow: hidden; flex-shrink: 0; }
-        .netflix-player iframe, .netflix-player object, .netflix-player embed, .netflix-player video { width: 100%; height: 100%; border: none; background: #000; position: absolute; top: 0; left: 0; }
-        
-        .player-top { position: absolute; top: 0; left: 0; right: 0; padding: 1.5rem; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); display: flex; justify-content: space-between; align-items: center; z-index: 10; pointer-events: none; }
-        .btn-cerrar-video { background: rgba(255,255,255,0.15); border: none; color: #fff; font-size: 1.5rem; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; transition: 0.3s; }
-        .btn-cerrar-video:hover { background: rgba(255,0,0,0.7); transform: scale(1.1); }
-        .titulo-video { font-size: 1.2rem; font-weight: 600; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.8); pointer-events: auto; }
 
-        .panel-inferior { flex: 1; overflow-y: auto; background: #F9FAFB; padding: 1.2rem; }
-        body.dark .panel-inferior { background: #1E293B; }
-        
-        .panel-inferior .info-pelicula { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 1rem; }
-        .panel-inferior .info-pelicula h2 { font-size: 1.3rem; font-weight: 700; }
-        body.dark .panel-inferior .info-pelicula h2 { color: #F8FAFC; }
-        .panel-inferior .info-pelicula .detalles { display: flex; gap: 1rem; align-items: center; font-size: 0.9rem; color: #6B7280; flex-wrap: wrap; }
-        body.dark .panel-inferior .info-pelicula .detalles { color: #94A3B8; }
-        .panel-inferior .info-pelicula .detalles .anio { background: #E5E7EB; padding: 0.1rem 0.6rem; border-radius: 4px; }
-        body.dark .panel-inferior .info-pelicula .detalles .anio { background: #334155; }
-        .panel-inferior .info-pelicula .detalles .rating { color: #F59E0B; }
-        .panel-inferior .sinopsis { font-size: 0.9rem; color: #4B5563; line-height: 1.5; margin-bottom: 1rem; }
-        body.dark .panel-inferior .sinopsis { color: #94A3B8; }
+        .reproductor-contenedor {
+            background: #0A0A0F;
+            border-radius: 16px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 95vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            padding: 1.5rem;
+        }
 
-        .botones-opciones { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1rem; }
-        .btn-opcion { padding: 0.7rem 1.5rem; border-radius: 8px; border: 2px solid #D1D5DB; background: #FFFFFF; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.9rem; transition: 0.2s; }
-        body.dark .btn-opcion { background: #334155; border-color: #475569; color: #F8FAFC; }
-        .btn-opcion.activo { background: #1F2937; color: #FFFFFF; border-color: #1F2937; }
-        body.dark .btn-opcion.activo { background: #60A5FA; color: #0F172A; border-color: #60A5FA; }
-        .btn-opcion:hover { transform: scale(1.03); }
-        .btn-nueva-ventana { border-color: #EF4444 !important; color: #EF4444 !important; }
-        .btn-nueva-ventana:hover { background: #EF4444 !important; color: #fff !important; }
-        body.dark .btn-nueva-ventana { border-color: #EF4444 !important; color: #EF4444 !important; }
-        body.dark .btn-nueva-ventana:hover { background: #EF4444 !important; color: #fff !important; }
+        /* TÍTULO Y SINOPSIS ARRIBA */
+        .info-arriba {
+            margin-bottom: 1rem;
+        }
+        .info-arriba h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .info-arriba .detalles-arriba {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #94A3B8;
+            flex-wrap: wrap;
+            margin-top: 0.2rem;
+        }
+        .info-arriba .detalles-arriba .anio-arriba {
+            background: #1E293B;
+            padding: 0.1rem 0.6rem;
+            border-radius: 4px;
+        }
+        .info-arriba .detalles-arriba .rating-arriba {
+            color: #F59E0B;
+        }
+        .info-arriba .sinopsis-arriba {
+            font-size: 0.85rem;
+            color: #94A3B8;
+            margin-top: 0.3rem;
+            line-height: 1.4;
+        }
 
-        .aviso { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem 1rem; background: #FEF3C7; border-radius: 8px; color: #92400E; font-size: 0.9rem; margin-bottom: 1rem; }
-        body.dark .aviso { background: #78350F; color: #FBBF24; }
+        /* REPRODUCTOR CENTRADO */
+        .netflix-player {
+            width: 100%;
+            aspect-ratio: 16/9;
+            position: relative;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .netflix-player iframe,
+        .netflix-player object,
+        .netflix-player embed {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #000;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
 
-        .botones-extras { display: flex; gap: 1.5rem; justify-content: center; margin-top: 0.5rem; margin-bottom: 1rem; }
-        .botones-extras button { background: none; border: none; color: #9CA3AF; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; transition: 0.2s; }
-        .botones-extras button:hover { color: #6B7280; }
-        body.dark .botones-extras button { color: #64748B; }
-        body.dark .botones-extras button:hover { color: #94A3B8; }
+        /* BOTÓN DE CERRAR Y PANTALLA COMPLETA */
+        .controles-superior {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.8rem;
+            margin-top: 0.8rem;
+        }
+        .btn-control {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            transition: 0.3s;
+        }
+        .btn-control:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .btn-cerrar-modal {
+            background: rgba(255,0,0,0.2);
+            color: #EF4444;
+        }
+        .btn-cerrar-modal:hover {
+            background: rgba(255,0,0,0.4);
+        }
+        .btn-fullscreen {
+            background: rgba(124,58,237,0.2);
+            color: #A78BFA;
+        }
+        .btn-fullscreen:hover {
+            background: rgba(124,58,237,0.4);
+        }
 
-        .seccion-recomendadas { border-top: 1px solid #E5E7EB; padding-top: 1rem; margin-top: 0.5rem; }
-        body.dark .seccion-recomendadas { border-color: #334155; }
-        .titulo-recomendadas { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.8rem; }
-        body.dark .titulo-recomendadas { color: #F8FAFC; }
-        .lista-recomendadas { display: flex; gap: 0.8rem; overflow-x: auto; padding-bottom: 0.5rem; }
-        .tarjeta-recomendada { flex: 0 0 auto; width: 110px; cursor: pointer; transition: transform 0.2s; }
-        .tarjeta-recomendada:hover { transform: scale(1.05); }
-        .portada-recomendada { width: 100%; height: 165px; border-radius: 6px; object-fit: cover; }
-        .texto-recomendada { font-size: 0.75rem; text-align: center; margin-top: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        body.dark .texto-recomendada { color: #94A3B8; }
+        /* BOTONES DE OPCIÓN ABAJO */
+        .botones-opciones {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        .btn-opcion {
+            padding: 0.5rem 1.2rem;
+            border-radius: 8px;
+            border: 2px solid #334155;
+            background: transparent;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        .btn-opcion.activo {
+            border-color: #7C3AED;
+            background: #7C3AED;
+            color: #fff;
+        }
+        .btn-opcion:hover {
+            border-color: #7C3AED;
+        }
+        .btn-nueva-ventana {
+            border-color: #EF4444 !important;
+            color: #EF4444 !important;
+        }
+        .btn-nueva-ventana:hover {
+            background: #EF4444 !important;
+            color: #fff !important;
+        }
+
+        /* TE PODRÍA GUSTAR */
+        .seccion-recomendadas {
+            border-top: 1px solid #1E293B;
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+        .titulo-recomendadas {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.6rem;
+        }
+        .lista-recomendadas {
+            display: flex;
+            gap: 0.8rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+        .tarjeta-recomendada {
+            flex: 0 0 auto;
+            width: 100px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .tarjeta-recomendada:hover {
+            transform: scale(1.05);
+        }
+        .portada-recomendada {
+            width: 100%;
+            height: 150px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+        .texto-recomendada {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 0.2rem;
+            color: #94A3B8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         .menu-perfil { position: relative; }
         .dropdown { position: absolute; right: 0; top: 120%; background: #FFFFFF; border-radius: 10px; width: 260px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: none; z-index: 100; border: 1px solid #E5E7EB; }
@@ -191,7 +325,7 @@
         <div class="menu-derecha">
             <button class="btn-menu" onclick="cambiarModo()"><i class="fa-solid fa-moon" id="iconoModo"></i></button>
             <div class="menu-perfil">
-                <button class="btn-menu" onclick="toggleMenu()"><i class="fa-solid fa-user-circle"></i></button>
+                <button class="btn-perfil" onclick="toggleMenu()"><i class="fa-solid fa-user-circle"></i></button>
                 <div class="dropdown" id="menuPerfil">
                     <div class="dropdown-header" id="nombrePerfil">Acceder</div>
                     <div class="dropdown-header">📺 Visto recientemente</div>
@@ -205,7 +339,8 @@
 </header>
 
 <div class="pestanas">
-    <button class="btn-pestana activa" onclick="cambiarCategoria('peliculas')">Películas</button>
+    <button class="btn-pestana activa" onclick="cambiarCategoria('estrenos')">Estrenos</button>
+    <button class="btn-pestana inactiva" onclick="cambiarCategoria('peliculas')">Películas</button>
     <button class="btn-pestana inactiva" onclick="cambiarCategoria('series')">Series</button>
 </div>
 
@@ -222,58 +357,68 @@
     <div class="scroll-recientes" id="scrollRecientes"></div>
 </div>
 
-<div class="grid-contenido" id="lista-contenido"></div>
-
-<!-- MODAL REPRODUCTOR -->
+<div class="grid-contenido" id="lista-contenido"></div><!-- REPRODUCTOR CENTRADO -->
 <div id="modal-video" class="modal-video">
-    <div class="netflix-player" id="netflixPlayer"></div>
-    <div class="panel-inferior">
-        <div class="info-pelicula">
-            <h2 id="tituloPanel"></h2>
-            <div class="detalles">
-                <span class="anio" id="anioPanel"></span>
-                <span class="rating"><i class="fa-solid fa-star"></i> <span id="ratingPanel"></span></span>
-                <span id="generoPanel"></span>
+    <div class="reproductor-contenedor">
+        <!-- TÍTULO Y SINOPSIS ARRIBA -->
+        <div class="info-arriba">
+            <h2 id="tituloReproductor">Título</h2>
+            <div class="detalles-arriba">
+                <span class="anio-arriba" id="anioPanel">2024</span>
+                <span class="rating-arriba">⭐ <span id="ratingPanel">7.3</span></span>
+                <span id="generoPanel">Acción</span>
             </div>
-            <p class="sinopsis" id="sinopsisPanel"></p>
+            <div class="sinopsis-arriba" id="sinopsisPanel">Sinopsis de la película...</div>
         </div>
-        <div class="botones-opciones" id="botonesOpciones"></div>
-        <div class="aviso">
-            <i class="fa-solid fa-info-circle"></i>
-            <span>Si no carga, prueba cambiar de servidor o usar abrir en ventana nueva</span>
+
+        <!-- REPRODUCTOR CENTRADO -->
+        <div class="netflix-player" id="netflixPlayer"></div>
+
+        <!-- CONTROLES: CERRAR Y PANTALLA COMPLETA -->
+        <div class="controles-superior">
+            <button class="btn-control btn-fullscreen" onclick="toggleFullscreen()">
+                <i class="fa-solid fa-expand"></i> Pantalla completa
+            </button>
+            <button class="btn-control btn-cerrar-modal" onclick="cerrarVideo()">
+                <i class="fa-solid fa-xmark"></i> Cerrar
+            </button>
         </div>
-        <div class="botones-extras">
-            <button onclick="reportarContenido()"><i class="fa-solid fa-flag"></i> Reportar</button>
-            <button onclick="trofeosContenido()"><i class="fa-solid fa-trophy"></i> Trofeos</button>
-            <button onclick="ayudaContenido()"><i class="fa-solid fa-question-circle"></i> Ayuda</button>
+
+        <!-- BOTONES DE OPCIÓN -->
+        <div class="botones-opciones" id="botonesOpciones">
+            <!-- Se generan con JavaScript -->
         </div>
-        <div class="seccion-recomendadas">
-            <h3 class="titulo-recomendadas">También te puede interesar</h3>
-            <div class="lista-recomendadas" id="recomendadasLista"></div>
+
+        <!-- TE PODRÍA GUSTAR -->
+        <div class="seccion-recomendadas" id="seccionRecomendadas">
+            <h4 class="titulo-recomendadas">Te podría gustar</h4>
+            <div class="lista-recomendadas" id="recomendadasLista">
+                <p class="text-gray-400 text-center py-3 w-full">Cargando recomendaciones...</p>
+            </div>
         </div>
     </div>
-    <button class="btn-cerrar-video" onclick="cerrarVideo()"><i class="fa-solid fa-times"></i></button>
 </div>
 
 <!-- MODAL LOGIN -->
 <div id="modal-login" class="modal-login oculto">
     <div class="contenedor-login">
-        <h3 class="text-xl font-bold mb-4 text-center">Iniciar Sesión</h3>
-        <button id="btnGoogleLogin" onclick="iniciarConGoogle()" class="w-full bg-blue-600 text-white p-2 rounded mb-3">
-            <i class="fa-brands fa-google mr-2"></i> Continuar con Google
+        <h2 class="text-2xl font-bold text-center mb-4">Iniciar Sesión</h2>
+        <p class="text-center text-gray-500 mb-6">Accede para ver todo el contenido</p>
+        <button class="w-full py-3 bg-blue-600 text-white rounded-lg font-medium flex items-center justify-center gap-2 mb-4" id="btnGoogleLogin" onclick="iniciarConGoogle()">
+            <i class="fa-brands fa-google"></i> Continuar con Google
         </button>
-        <div id="seccionTelefono">
-            <input type="text" id="telefonoInput" placeholder="+58 412 1234567" class="w-full border p-2 rounded mb-2">
-            <button onclick="enviarCodigo()" class="w-full bg-gray-700 text-white p-2 rounded">Enviar código</button>
+        <div class="mb-4">
+            <p class="text-sm text-gray-500 mb-2">O con número de teléfono</p>
+            <input type="tel" id="telefonoInput" placeholder="+58 412 1234567" class="w-full p-3 border rounded-lg mb-2">
+            <button class="w-full py-2 bg-green-600 text-white rounded-lg" onclick="enviarCodigo()">Enviar código</button>
         </div>
-        <div id="seccionCodigo" class="oculto mt-3">
-            <input type="text" id="codigoInput" placeholder="Código de 6 dígitos" class="w-full border p-2 rounded mb-2">
-            <button onclick="verificarCodigo()" class="w-full bg-green-600 text-white p-2 rounded">Verificar</button>
+        <div id="seccionCodigo" class="oculto mb-4">
+            <input type="text" id="codigoInput" placeholder="Código de 6 dígitos" class="w-full p-3 border rounded-lg mb-2">
+            <button class="w-full py-2 bg-green-600 text-white rounded-lg" onclick="verificarCodigo()">Verificar</button>
         </div>
-        <button onclick="cerrarModalLogin()" class="w-full mt-3 text-gray-500">Cerrar</button>
+        <button class="w-full text-gray-500 mt-4" onclick="cerrarModalLogin()">Cerrar</button>
     </div>
-</div>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+</div><script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
@@ -298,10 +443,9 @@ const db = firebase.database();
 
 let recaptchaVerifier, confirmationResult, videoPendiente = null, serieActual = null, contenido = [];
 let peliculaActual = null;
-let contenidoCargado = false;
 
 // ==============================================
-// 🔑 TMDB (CON RESPALDO SI FALLA)
+// 🔑 CONFIGURACIÓN TMDB
 // ==============================================
 const TMDB_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4ZGQ5OWI1YTE1YWNmZGQ5OGUzYjI0OWQ1Zjg5MGFmNCIsIm5iZiI6MTc4MjI3NzIzMS4zMzMsInN1YiI6IjZhM2I2NDZmZThmMTMwOTc2MWVjNDYxYiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.JLmHWuXkhDc9LreAvXFZa0qTS7PR_nrj_SSwVm9UZ9Y";
 const TMDB_BASE = "https://api.themoviedb.org/3";
@@ -317,7 +461,7 @@ const opcionesTMDB = {
 };
 
 // ==============================================
-// 📦 TU CONTENIDO PROPIO (SE CARGA SIEMPRE)
+// 📦 CONTENIDO PERSONALIZADO
 // ==============================================
 const MI_CONTENIDO = [
   {
@@ -331,7 +475,7 @@ const MI_CONTENIDO = [
     puntuacion: "7.7",
     genero: "Acción / Aventura",
     tmdb_id: "1136",
-    url: "https://streamtape.com/get_video?id=TU_CODIGO&stream=1&e=1" // <-- Pones tu enlace
+    url: "https://www.youtube.com/embed/pqql03l9b30?autoplay=1"
   },
   {
     id: "johnwick_001",
@@ -344,7 +488,7 @@ const MI_CONTENIDO = [
     puntuacion: "7.4",
     genero: "Acción / Suspenso",
     tmdb_id: "245891",
-    url: "https://transtime.io/embed/TU_CODIGO" // <-- Pones tu enlace
+    url: "https://www.youtube.com/embed/C0BMx-qxsP4?autoplay=1"
   },
   {
     id: "demonio_001",
@@ -357,25 +501,38 @@ const MI_CONTENIDO = [
     puntuacion: "6.8",
     genero: "Terror / Leyenda",
     tmdb_id: "",
-    url: ""
+    url: "https://www.youtube.com/embed/Fi9sTAbRwp4?autoplay=1"
   }
 ];
 
 // ==============================================
-// 📥 CARGA SEGURA: SI FALLA TMDB, CARGA TU CONTENIDO
+// 📥 CARGAR CONTENIDO
 // ==============================================
+async function cargarContenidoAdmin() {
+  try {
+    const snapshot = await db.ref("contenido_personalizado").once("value");
+    const datosAdmin = snapshot.val();
+    return datosAdmin ? Object.values(datosAdmin) : [];
+  } catch (err) {
+    console.log("Sin contenido del panel:", err);
+    return [];
+  }
+}
+
 async function cargarContenidoCompleto() {
-  if (contenidoCargado) return;
-  
   const lista = document.getElementById("lista-contenido");
-  lista.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-400">Cargando...</div>';
+  lista.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-400">Cargando contenido...</div>';
 
   try {
-    // Intentar TMDB
     const resPeliculas = await fetch(`${TMDB_BASE}/movie/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB);
     const datosPeliculas = await resPeliculas.json();
     
-    const pelisTMDB = datosPeliculas.results ? datosPeliculas.results.slice(0, 8).map(p => ({
+    const resSeries = await fetch(`${TMDB_BASE}/tv/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB);
+    const datosSeries = await resSeries.json();
+    
+    const contenidoAdmin = await cargarContenidoAdmin();
+
+    const pelisTMDB = datosPeliculas.results ? datosPeliculas.results.slice(0, 12).map(p => ({
       id: `tmdb_${p.id}`,
       tmdb_id: p.id,
       titulo: p.title || "Sin título",
@@ -389,17 +546,35 @@ async function cargarContenidoCompleto() {
       url: ""
     })) : [];
 
-    contenido = [...MI_CONTENIDO, ...pelisTMDB];
-    contenidoCargado = true;
+    const seriesTMDB = datosSeries.results ? datosSeries.results.slice(0, 8).map(s => ({
+      id: `tmdb_${s.id}`,
+      tmdb_id: s.id,
+      titulo: s.name || "Sin título",
+      anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D",
+      tipo: "serie",
+      categoria: "series",
+      portada: s.poster_path ? `${TMDB_IMG}${s.poster_path}` : "https://via.placeholder.com/300x450?text=Sin+Portada",
+      sinopsis: s.overview || "Sin sinopsis",
+      puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A",
+      genero: "Serie",
+      url: "",
+      temporadas: []
+    })) : [];
+
+    contenido = [...MI_CONTENIDO, ...contenidoAdmin, ...pelisTMDB, ...seriesTMDB];
+    
+    if (contenido.length === 0) {
+      contenido = [...MI_CONTENIDO, ...contenidoAdmin];
+    }
 
   } catch (err) {
-    console.warn("TMDB falló, cargando solo contenido propio:", err);
-    contenido = [...MI_CONTENIDO];
-    contenidoCargado = true;
+    console.error("Error TMDB:", err);
+    const contenidoAdmin = await cargarContenidoAdmin();
+    contenido = [...MI_CONTENIDO, ...contenidoAdmin];
   }
 
   document.getElementById("contadorTotal").textContent = `${contenido.length} títulos`;
-  mostrarContenido("peliculas");
+  mostrarContenido("estrenos");
   mostrarRecientes();
 }
 
@@ -409,6 +584,7 @@ async function cargarContenidoCompleto() {
 function iniciarConGoogle() {
   const btn = document.getElementById('btnGoogleLogin');
   const textoOriginal = btn.innerHTML;
+  
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Esperando...';
   btn.disabled = true;
   
@@ -421,17 +597,58 @@ function iniciarConGoogle() {
       cerrarModalLogin();
       btn.innerHTML = textoOriginal;
       btn.disabled = false;
-      if (!contenidoCargado) cargarContenidoCompleto();
-      if (videoPendiente) { abrirVideoPelicula(videoPendiente); agregarAlHistorial(videoPendiente); videoPendiente = null; }
+      if (videoPendiente) { 
+        abrirVideoPelicula(videoPendiente);
+        agregarAlHistorial(videoPendiente);
+        videoPendiente = null; 
+      }
     })
     .catch((error) => {
       btn.innerHTML = textoOriginal;
       btn.disabled = false;
-      alert("Login: " + error.message);
+      
+      if (error.code === 'auth/popup-closed-by-user') {
+        alert("⚠️ Cerraste la ventana de Google antes de terminar.\n\nVuelve a intentarlo.");
+      } else {
+        alert("Error: " + error.message);
+      }
     });
 }
 
-function cerrarSesion() { auth.signOut().then(() => { document.getElementById("nombrePerfil").textContent = "Acceder"; videoPendiente = null; }); }
+function iniciarRecaptcha() {
+  if (!recaptchaVerifier) recaptchaVerifier = new firebase.auth.RecaptchaVerifier('modal-login', { size: 'invisible' });
+}
+
+function enviarCodigo() {
+  iniciarRecaptcha();
+  const telefono = document.getElementById("telefonoInput").value.trim();
+  if (!telefono.startsWith("+")) return alert("Agrega código de país ej: +58...");
+  auth.signInWithPhoneNumber(telefono, recaptchaVerifier)
+    .then(res => { confirmationResult = res; document.getElementById("seccionCodigo").classList.remove("oculto"); })
+    .catch(err => alert("Error: " + err.message));
+}
+
+function verificarCodigo() {
+  const codigo = document.getElementById("codigoInput").value.trim();
+  confirmationResult.confirm(codigo)
+    .then(res => {
+      document.getElementById("nombrePerfil").textContent = res.user.phoneNumber;
+      cerrarModalLogin();
+      if (videoPendiente) { 
+        abrirVideoPelicula(videoPendiente);
+        agregarAlHistorial(videoPendiente);
+        videoPendiente = null; 
+      }
+    })
+    .catch(err => alert("Código incorrecto o expirado"));
+}
+
+function cerrarSesion() { 
+  auth.signOut().then(() => { 
+    document.getElementById("nombrePerfil").textContent = "Acceder"; 
+    videoPendiente = null;
+  }); 
+}
 
 // ==============================================
 // 📋 FUNCIONES GENERALES
@@ -439,13 +656,16 @@ function cerrarSesion() { auth.signOut().then(() => { document.getElementById("n
 function cambiarModo() {
   const body = document.body;
   const icono = document.getElementById("iconoModo");
+  const icono2 = document.getElementById("iconoModo2");
   if (body.classList.contains("dark")) {
     body.classList.remove("dark");
     icono.className = "fa-solid fa-moon";
+    if (icono2) icono2.className = "fa-solid fa-moon";
     localStorage.setItem("modo", "claro");
   } else {
     body.classList.add("dark");
     icono.className = "fa-solid fa-sun";
+    if (icono2) icono2.className = "fa-solid fa-sun";
     localStorage.setItem("modo", "oscuro");
   }
 }
@@ -472,7 +692,11 @@ function mostrarHistorial() {
   h.forEach(i => {
     const btn = document.createElement("button");
     btn.innerHTML = `<i class="fa-solid fa-play mr-2"></i> ${i.titulo}`;
-    btn.onclick = () => { const f = contenido.find(x => x.id === i.id); if (!f) return; auth.currentUser ? abrirVideoPelicula(f) : (videoPendiente = f, abrirModalLogin(), toggleMenu()); };
+    btn.onclick = () => { 
+      const f = contenido.find(x => x.id === i.id); 
+      if (!f) return; 
+      auth.currentUser ? abrirVideoPelicula(f) : (videoPendiente = f, abrirModalLogin(), toggleMenu()); 
+    };
     c.appendChild(btn);
   });
 }
@@ -480,15 +704,28 @@ function mostrarHistorial() {
 function mostrarRecientes() {
   const contenedor = document.getElementById("scrollRecientes");
   const historial = JSON.parse(localStorage.getItem("historialTely")) || [];
-  if (historial.length === 0) { contenedor.innerHTML = `<p class="text-gray-400 text-sm py-2">No has visto nada aún</p>`; return; }
+  
+  if (historial.length === 0) {
+    contenedor.innerHTML = `<p class="text-gray-400 text-sm py-2">No has visto nada aún</p>`;
+    return;
+  }
+  
   contenedor.innerHTML = "";
   historial.forEach(item => {
     const encontrado = contenido.find(c => c.id === item.id);
     if (!encontrado) return;
+    
     const tarjeta = document.createElement("div");
     tarjeta.className = "tarjeta-reciente";
-    tarjeta.innerHTML = `<img src="${encontrado.portada}" alt="${encontrado.titulo}" class="portada-reciente" loading="lazy" onerror="this.src='https://via.placeholder.com/120x180?text=Sin+Portada'"><div class="info-reciente"><h4>${encontrado.titulo}</h4></div>`;
-    tarjeta.onclick = () => { auth.currentUser ? abrirVideoPelicula(encontrado) : (videoPendiente = encontrado, abrirModalLogin()); };
+    tarjeta.innerHTML = `
+      <img src="${encontrado.portada}" alt="${encontrado.titulo}" class="portada-reciente" loading="lazy" onerror="this.src='https://via.placeholder.com/120x180?text=Sin+Portada'">
+      <div class="info-reciente">
+        <h4>${encontrado.titulo}</h4>
+      </div>
+    `;
+    tarjeta.onclick = () => {
+      auth.currentUser ? abrirVideoPelicula(encontrado) : (videoPendiente = encontrado, abrirModalLogin());
+    };
     contenedor.appendChild(tarjeta);
   });
 }
@@ -499,25 +736,61 @@ function mostrarContenido(categoria) {
   const lista = document.getElementById("lista-contenido");
   lista.innerHTML = "";
   const filtrados = contenido.filter(x => x.categoria === categoria);
-  if (!filtrados.length) { lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">Sin contenido</p>`; return; }
+  if (!filtrados.length) { 
+    lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">Sin contenido en esta sección</p>`; 
+    return; 
+  }
   filtrados.forEach(item => {
-    const tieneVideo = !!item.url;
+    const tieneVideo = item.url || (item.temporadas && item.temporadas.length > 0);
     const tarjeta = document.createElement("div");
     tarjeta.className = "tarjeta";
-    tarjeta.innerHTML = `<span class="etiqueta-anio">${item.anio}</span><i class="fa-solid fa-star estrella"></i><img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=Sin+Portada'"><div class="info-tarjeta"><h3>${item.titulo}</h3>${tieneVideo ? '<span class="badge-video">▶ Disponible</span>' : '<span class="badge-sin-video">🔒 Sin enlace</span>'}</div>`;
-    tarjeta.onclick = () => { auth.currentUser ? abrirVideoPelicula(item) : (videoPendiente = item, abrirModalLogin()); };
+    tarjeta.innerHTML = `
+      <span class="etiqueta-anio">${item.anio}</span>
+      <i class="fa-solid fa-star estrella"></i>
+      <img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=Sin+Portada'">
+      <div class="info-tarjeta">
+        <h3>${item.titulo}</h3>
+        ${tieneVideo ? '<span class="badge-video">▶ Disponible</span>' : '<span class="badge-sin-video">🔒 Sin enlace</span>'}
+      </div>
+    `;
+    tarjeta.onclick = () => { 
+      auth.currentUser ? abrirVideoPelicula(item) : (videoPendiente = item, abrirModalLogin()); 
+    };
     lista.appendChild(tarjeta);
   });
 }
 
 function cambiarCategoria(cat) {
-  document.querySelectorAll(".btn-pestana").forEach(b => { b.classList.remove("activa"); b.classList.add("inactiva"); });
-  document.querySelectorAll(".btn-pestana").forEach(b => { if (b.textContent.includes(cat === 'peliculas' ? 'Películas' : 'Series')) { b.classList.remove("inactiva"); b.classList.add("activa"); } });
+  document.querySelectorAll(".btn-pestana").forEach(b => { 
+    b.classList.remove("activa"); 
+    b.classList.add("inactiva"); 
+  });
+  const botones = document.querySelectorAll(".btn-pestana");
+  botones.forEach(b => {
+    if (b.textContent.toLowerCase().includes(cat) || 
+        (cat === 'estrenos' && b.textContent.includes('Estrenos')) ||
+        (cat === 'peliculas' && b.textContent.includes('Películas')) ||
+        (cat === 'series' && b.textContent.includes('Series'))) {
+      b.classList.remove("inactiva");
+      b.classList.add("activa");
+    }
+  });
   mostrarContenido(cat);
 }
 
-function toggleMenu() { const menu = document.getElementById("menuPerfil"); menu.classList.toggle("mostrar"); mostrarHistorial(); }
-document.addEventListener('click', function(e) { const menu = document.getElementById("menuPerfil"); if (menu && !menu.contains(e.target)) menu.classList.remove("mostrar"); });
+function toggleMenu() { 
+  const menu = document.getElementById("menuPerfil");
+  menu.classList.toggle("mostrar");
+  mostrarHistorial();
+}
+
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById("menuPerfil");
+  const btn = document.querySelector(".btn-perfil");
+  if (menu && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.classList.remove("mostrar");
+  }
+});
 
 function buscarContenido() {
   const texto = document.getElementById("buscadorInput").value.trim().toLowerCase();
@@ -527,7 +800,12 @@ function buscarContenido() {
   resultados.length ? resultados.forEach(item => {
     const tarjeta = document.createElement("div");
     tarjeta.className = "tarjeta";
-    tarjeta.innerHTML = `<span class="etiqueta-anio">${item.anio}</span><i class="fa-solid fa-star estrella"></i><img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=Sin+Portada'"><div class="info-tarjeta"><h3>${item.titulo}</h3></div>`;
+    tarjeta.innerHTML = `
+      <span class="etiqueta-anio">${item.anio}</span>
+      <i class="fa-solid fa-star estrella"></i>
+      <img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=Sin+Portada'">
+      <div class="info-tarjeta"><h3>${item.titulo}</h3></div>
+    `;
     tarjeta.onclick = () => abrirVideoPelicula(item);
     lista.appendChild(tarjeta);
   }) : lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">No se encontraron coincidencias</p>`;
@@ -535,102 +813,155 @@ function buscarContenido() {
 
 function abrirModalLogin() { document.getElementById("modal-login").classList.remove("oculto"); }
 function cerrarModalLogin() { document.getElementById("modal-login").classList.add("oculto"); videoPendiente = null; }
+
 // ==============================================
-// 🎬 REPRODUCTOR COMPATIBLE
+// ⚡ INICIO
+// ==============================================
+cargarContenidoCompleto();
+
+auth.onAuthStateChanged(usuario => {
+    if (usuario) {
+        document.getElementById("nombrePerfil").textContent = usuario.displayName || usuario.phoneNumber || usuario.email;
+    }
+});
+
+window.addEventListener('popstate', function(e) {
+    if (document.getElementById("modal-video").classList.contains("abierto")) {
+        cerrarVideo();
+        e.preventDefault();
+        history.pushState(null, '', window.location.href);
+    }
+});
+
+history.pushState(null, '', window.location.href);// ==============================================
+// ==============================================
+// 🎬 REPRODUCTOR CENTRADO
 // ==============================================
 function abrirVideoPelicula(peli) {
     detenerVideo();
+    
     const modal = document.getElementById("modal-video");
     const player = document.getElementById("netflixPlayer");
     const botones = document.getElementById("botonesOpciones");
+    
     peliculaActual = peli;
-
+    
     modal.classList.add("abierto");
     document.body.style.overflow = "hidden";
-
-    document.getElementById("tituloPanel").textContent = peli.titulo;
-    document.getElementById("anioPanel").textContent = peli.anio || "N/D";
-    document.getElementById("ratingPanel").textContent = peli.puntuacion || "N/A";
-    document.getElementById("generoPanel").textContent = peli.genero || "Película";
+    
+    // ACTUALIZAR TÍTULO Y SINOPSIS ARRIBA
+    document.getElementById("tituloReproductor").textContent = peli.titulo;
+    document.getElementById("anioPanel").textContent = peli.anio || "2024";
+    document.getElementById("ratingPanel").textContent = peli.puntuacion || "7.0";
+    document.getElementById("generoPanel").textContent = peli.genero || (peli.tipo === "pelicula" ? "Película" : "Serie");
     document.getElementById("sinopsisPanel").textContent = peli.sinopsis || "Sin sinopsis disponible";
-
+    
+    // CREAR BOTONES DE OPCIÓN
     botones.innerHTML = "";
-
+    
     const btnPrincipal = document.createElement("button");
     btnPrincipal.className = "btn-opcion activo";
-    btnPrincipal.innerHTML = `<i class="fa-solid fa-play mr-2"></i> Principal`;
+    btnPrincipal.innerHTML = `<i class="fa-solid fa-play mr-2"></i> Opción 1`;
     btnPrincipal.onclick = function() {
         document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo"));
         this.classList.add("activo");
-        if (peli.url) reproducirOpcion(peli.url, peli.titulo, peli.anio);
+        if (peli.url) {
+            reproducirOpcion(peli.url);
+        }
     };
     botones.appendChild(btnPrincipal);
-
+    
+    if (peli.opcion2) {
+        const btnOpcion2 = document.createElement("button");
+        btnOpcion2.className = "btn-opcion";
+        btnOpcion2.innerHTML = `<i class="fa-solid fa-play mr-2"></i> Opción 2`;
+        btnOpcion2.onclick = function() {
+            document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo"));
+            this.classList.add("activo");
+            if (peli.opcion2) {
+                reproducirOpcion(peli.opcion2);
+            }
+        };
+        botones.appendChild(btnOpcion2);
+    }
+    
     const btnNuevaVentana = document.createElement("button");
     btnNuevaVentana.className = "btn-opcion btn-nueva-ventana";
-    btnNuevaVentana.innerHTML = `<i class="fa-solid fa-external-link-alt mr-2"></i> Abrir en ventana`;
-    btnNuevaVentana.onclick = () => peli.url ? window.open(peli.url, '_blank') : alert("❌ No hay enlace disponible");
+    btnNuevaVentana.innerHTML = `<i class="fa-solid fa-external-link-alt mr-2"></i> Abrir en ventana nueva`;
+    btnNuevaVentana.onclick = function() {
+        if (peli.url) {
+            window.open(peli.url, '_blank');
+        } else {
+            alert("❌ No hay enlace disponible");
+        }
+    };
     botones.appendChild(btnNuevaVentana);
 
-    if (peli.url) setTimeout(() => reproducirOpcion(peli.url, peli.titulo, peli.anio), 300);
-    else player.innerHTML = `<div class="error-video" style="color:#EF4444;text-align:center;padding:4rem;font-size:1.2rem;">❌ Agrega el enlace para reproducir</div>`;
+    // REPRODUCIR AUTOMÁTICAMENTE
+    if (peli.url) {
+        reproducirOpcion(peli.url);
+    } else {
+        player.innerHTML = `<div class="error-video" style="color:#EF4444;text-align:center;padding:4rem;font-size:1.2rem;">❌ Agrega enlaces desde el panel de administración</div>`;
+    }
 
     agregarAlHistorial(peli);
     cargarRecomendadas(peli.tmdb_id);
 }
 
-function reproducirOpcion(url, titulo, anio) {
+function reproducirOpcion(url) {
     const player = document.getElementById("netflixPlayer");
     let enlace = url.trim();
 
-    // ✅ STREAMTAPE
-    if (enlace.includes("streamtape.com")) {
-        const id = enlace.match(/\/v\/([a-zA-Z0-9_-]+)/)?.[1];
-        if (id) enlace = `https://streamtape.com/e/${id}/`;
-        player.innerHTML = `<iframe src="${enlace}" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;position:absolute;top:0;left:0;"></iframe>`;
-    }
-
-    // ✅ TRANSTIME / OTROS EMBEDS
-    else if (enlace.includes("transtime.io") || enlace.includes("embed")) {
-        player.innerHTML = `<iframe src="${enlace}" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;position:absolute;top:0;left:0;"></iframe>`;
-    }
-
-    // ✅ YOUTUBE
-    else if (enlace.includes("youtube.com") || enlace.includes("youtu.be")) {
-        if (!enlace.includes("autoplay")) enlace += (enlace.includes("?") ? "&" : "?") + "autoplay=1";
-        player.innerHTML = `<iframe src="${enlace}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;position:absolute;top:0;left:0;"></iframe>`;
-    }
-
-    // ✅ VIDMOLY
-    else if (enlace.includes("vidmoly.to") || enlace.includes("vidmoly.me")) {
-        if (!enlace.includes("controls=")) enlace += (enlace.includes("?") ? "&" : "?") + "controls=1&logo=0&autoplay=1";
-        player.innerHTML = `<iframe src="${enlace}" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;position:absolute;top:0;left:0;"></iframe>`;
-    }
-
-    // ✅ MIXDROP
-    else if (enlace.includes("mixdrop.co") || enlace.includes("mixdrop.ch")) {
-        if (!enlace.includes("autoplay")) enlace += (enlace.includes("?") ? "&" : "?") + "autoplay=1";
-        player.innerHTML = `<iframe src="${enlace}" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;position:absolute;top:0;left:0;"></iframe>`;
-    }
-
-    // ✅ GOOGLE DRIVE
-    else if (enlace.includes("drive.google.com")) {
+    if (enlace.includes('youtube.com') || enlace.includes('youtu.be')) {
+        player.innerHTML = `
+            <iframe src="${enlace}" frameborder="0" 
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen" 
+                allowfullscreen 
+                style="width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;">
+            </iframe>
+        `;
+    } else if (enlace.includes('vidmoly')) {
+        if (!enlace.includes('controls=')) {
+            enlace += (enlace.includes('?') ? '&' : '?') + 'controls=1&logo=0&autoplay=1';
+        }
+        player.innerHTML = `
+            <object data="${enlace}" type="text/html" 
+                style="width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;">
+            </object>
+        `;
+    } else if (enlace.includes('mixdrop')) {
+        if (!enlace.includes('autoplay')) {
+            enlace += (enlace.includes('?') ? '&' : '?') + 'autoplay=1';
+        }
+        player.innerHTML = `
+            <iframe src="${enlace}" frameborder="0" 
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen" 
+                allowfullscreen 
+                style="width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;">
+            </iframe>
+        `;
+    } else if (enlace.includes('drive.google.com')) {
         const id = enlace.match(/[-\w]{25,}/)?.[0];
         if (id) {
             const driveUrl = `https://drive.google.com/uc?export=stream&id=${id}&confirm=t&cache=1`;
-            player.innerHTML = `<video src="${driveUrl}" controlsList="nodownload noremoteplayback" controls playsinline preload="auto" crossorigin="anonymous" autoplay style="width:100%;height:100%;background:#000;position:absolute;top:0;left:0;">Tu navegador no soporta este video</video>`;
+            player.innerHTML = `
+                <video src="${driveUrl}" controlsList="nodownload noremoteplayback" controls playsinline preload="auto" crossorigin="anonymous" style="width:100%;height:100%;background:#000;position:absolute;top:0;left:0;" autoplay>
+                    Tu navegador no soporta el video.
+                </video>
+            `;
         } else {
-            player.innerHTML = `<div class="error-video" style="color:#EF4444;text-align:center;padding:4rem;">❌ Enlace de Drive inválido</div>`;
+            player.innerHTML = `<div class="error-video" style="color:#EF4444;text-align:center;padding:4rem;font-size:1.2rem;">❌ Enlace de Drive inválido</div>`;
             return;
         }
+    } else {
+        player.innerHTML = `
+            <iframe src="${enlace}" frameborder="0" 
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen" 
+                allowfullscreen 
+                style="width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;">
+            </iframe>
+        `;
     }
-
-    // ✅ CUALQUIER OTRO ENLACE
-    else {
-        player.innerHTML = `<iframe src="${enlace}" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;position:absolute;top:0;left:0;"></iframe>`;
-    }
-
-    document.getElementById("tituloReproductor").textContent = `${titulo} ${anio ? `(${anio})` : ''}`;
 }
 
 // ==============================================
@@ -660,26 +991,29 @@ async function cargarRecomendadas(tmdbId) {
             tarjeta.className = "tarjeta-recomendada";
             tarjeta.innerHTML = `
                 <img src="${pelicula.poster_path ? TMDB_IMG + pelicula.poster_path : 'https://via.placeholder.com/110x165?text=Sin+Imagen'}" 
-                     alt="${pelicula.title}" class="portada-recomendada" loading="lazy">
+                     alt="${pelicula.title}" class="portada-recomendada">
                 <p class="texto-recomendada">${pelicula.title}</p>
             `;
             tarjeta.onclick = () => {
                 cerrarVideo();
-                const encontrado = contenido.find(c => c.tmdb_id == pelicula.id);
-                if (encontrado) abrirVideoPelicula(encontrado);
-                else abrirVideoPelicula({
-                    id: `tmdb_${pelicula.id}`,
-                    tmdb_id: pelicula.id,
-                    titulo: pelicula.title,
-                    anio: pelicula.release_date ? pelicula.release_date.split("-")[0] : "N/D",
-                    tipo: "pelicula",
-                    categoria: "peliculas",
-                    portada: pelicula.poster_path ? TMDB_IMG + pelicula.poster_path : "",
-                    sinopsis: pelicula.overview || "Sin sinopsis",
-                    puntuacion: pelicula.vote_average ? pelicula.vote_average.toFixed(1) : "N/A",
-                    genero: "Película",
-                    url: ""
-                });
+                const completo = contenido.find(c => c.tmdb_id == pelicula.id);
+                if (completo) {
+                    abrirVideoPelicula(completo);
+                } else {
+                    abrirVideoPelicula({
+                        id: `tmdb_${pelicula.id}`,
+                        tmdb_id: pelicula.id,
+                        titulo: pelicula.title,
+                        anio: pelicula.release_date ? pelicula.release_date.split("-")[0] : "N/D",
+                        tipo: "pelicula",
+                        categoria: "peliculas",
+                        portada: pelicula.poster_path ? TMDB_IMG + pelicula.poster_path : "",
+                        sinopsis: pelicula.overview || "Sin sinopsis",
+                        puntuacion: pelicula.vote_average ? pelicula.vote_average.toFixed(1) : "N/A",
+                        genero: "Película",
+                        url: ""
+                    });
+                }
             };
             contenedor.appendChild(tarjeta);
         });
@@ -690,13 +1024,76 @@ async function cargarRecomendadas(tmdbId) {
 }
 
 // ==============================================
-// 🎬 CERRAR Y DETENER REPRODUCCIÓN
+// ABRIR CAPÍTULO (para series)
+// ==============================================
+function abrirCapitulo(cap) {
+    detenerVideo();
+    const player = document.getElementById("netflixPlayer");
+    const botones = document.getElementById("botonesOpciones");
+    
+    botones.innerHTML = "";
+    
+    document.getElementById("tituloReproductor").textContent = `${serieActual.titulo} - Cap. ${cap.numero}`;
+    document.getElementById("anioPanel").textContent = serieActual.anio || "2024";
+    document.getElementById("ratingPanel").textContent = serieActual.puntuacion || "7.0";
+    document.getElementById("generoPanel").textContent = "Serie";
+    document.getElementById("sinopsisPanel").textContent = cap.titulo || `Capítulo ${cap.numero}`;
+
+    const btnPrincipal = document.createElement("button");
+    btnPrincipal.className = "btn-opcion activo";
+    btnPrincipal.innerHTML = `<i class="fa-solid fa-play mr-2"></i> Opción 1`;
+    btnPrincipal.onclick = () => {
+        document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo"));
+        btnPrincipal.classList.add("activo");
+        if (cap.url) {
+            reproducirOpcion(cap.url);
+        }
+    };
+    botones.appendChild(btnPrincipal);
+    
+    if (cap.opcion2) {
+        const btnOpcion2 = document.createElement("button");
+        btnOpcion2.className = "btn-opcion";
+        btnOpcion2.innerHTML = `<i class="fa-solid fa-play mr-2"></i> Opción 2`;
+        btnOpcion2.onclick = () => {
+            document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo"));
+            btnOpcion2.classList.add("activo");
+            if (cap.opcion2) {
+                reproducirOpcion(cap.opcion2);
+            }
+        };
+        botones.appendChild(btnOpcion2);
+    }
+    
+    const btnNuevaVentana = document.createElement("button");
+    btnNuevaVentana.className = "btn-opcion btn-nueva-ventana";
+    btnNuevaVentana.innerHTML = `<i class="fa-solid fa-external-link-alt mr-2"></i> Abrir en ventana nueva`;
+    btnNuevaVentana.onclick = () => {
+        if (cap.url) {
+            window.open(cap.url, '_blank');
+        } else {
+            alert("❌ No hay enlace disponible");
+        }
+    };
+    botones.appendChild(btnNuevaVentana);
+
+    if (cap.url) {
+        reproducirOpcion(cap.url);
+    } else {
+        player.innerHTML = `<div class="error-video" style="color:#EF4444;text-align:center;padding:4rem;font-size:1.2rem;">❌ Sin enlace para este capítulo</div>`;
+    }
+}
+
+// ==============================================
+// CERRAR VIDEO
 // ==============================================
 function cerrarVideo() {
     detenerVideo();
     document.getElementById("modal-video").classList.remove("abierto");
     document.body.style.overflow = "auto";
     peliculaActual = null;
+    // 🔥 Agregar un estado al historial para que el botón atrás funcione
+    history.pushState(null, '', window.location.href);
 }
 
 function detenerVideo() {
@@ -705,40 +1102,54 @@ function detenerVideo() {
 }
 
 // ==============================================
-// 🛠️ FUNCIONES AUXILIARES
+// PANTALLA COMPLETA
 // ==============================================
-function reportarContenido() {
-    alert("🚩 Reportar contenido\n\nSi el video no carga o tiene errores, repórtalo para revisarlo.");
-}
-
-function trofeosContenido() {
-    alert("🏆 Trofeos\n\nComparte TELY con tus amigos y obtén recompensas.");
-}
-
-function ayudaContenido() {
-    alert("❓ Ayuda\n\n• Si no carga, cambia de servidor\n• Usa 'Abrir en ventana' si falla\n• Verifica tu conexión");
-}
-
-// ==============================================
-// ⚡ INICIO AUTOMÁTICO
-// ==============================================
-cargarContenidoCompleto();
-
-auth.onAuthStateChanged(usuario => {
-    if (usuario) {
-        document.getElementById("nombrePerfil").textContent = usuario.displayName || usuario.phoneNumber || usuario.email;
+function toggleFullscreen() {
+    const modal = document.getElementById("modal-video");
+    const contenedor = document.querySelector(".reproductor-contenedor");
+    
+    if (!document.fullscreenElement) {
+        if (modal.requestFullscreen) {
+            modal.requestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
     }
-});
+}
 
+// ==============================================
+// 🔙 CAPTURAR BOTÓN ATRÁS - SOLO CIERRA REPRODUCTOR
+// ==============================================
 window.addEventListener('popstate', function(e) {
-    if (document.getElementById("modal-video").classList.contains("abierto")) {
+    const modal = document.getElementById("modal-video");
+    // Si el reproductor está abierto, solo lo cerramos
+    if (modal && modal.classList.contains("abierto")) {
         cerrarVideo();
         e.preventDefault();
+        // No permitimos que el navegador vaya atrás
         history.pushState(null, '', window.location.href);
     }
 });
 
+// Guardar el estado inicial
 history.pushState(null, '', window.location.href);
+
+// ==============================================
+// EXTRAS
+// ==============================================
+function reportarContenido() {
+    alert("🚩 Reportar contenido\n\nSi encuentras un problema con este video, por favor repórtalo para que podamos solucionarlo.");
+}
+
+function trofeosContenido() {
+    alert("🏆 Trofeos\n\nComparte este contenido con tus amigos y gana trofeos en la comunidad de TELY.");
+}
+
+function ayudaContenido() {
+    alert("❓ Ayuda\n\n1. Si el video no carga, prueba con otra opción.\n2. Si sigue fallando, usa 'Abrir en ventana nueva'.\n3. Verifica tu conexión a internet.");
+}
 </script>
 </body>
 </html>
