@@ -3,512 +3,437 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Panel Admin TELY 🎬</title>
+    <title>Admin TELY - Enlaces</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        fondo: '#0A0A0F',
-                        tarjeta: '#151520',
-                        tarjetaClara: '#1A1A2E',
-                        acento: '#7C3AED',
-                        acentoClaro: '#A78BFA',
-                        texto: '#E2E8F0',
-                        textoClaro: '#94A3B8',
-                        exito: '#10B981',
-                        advertencia: '#F59E0B',
-                        peligro: '#E50914',
-                        borde: '#2A2A3A'
-                    },
-                    fontFamily: {
-                        sans: ['Segoe UI', 'Roboto', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: #0A0A0F; color: #E2E8F0; font-family: 'Segoe UI', Roboto, sans-serif; min-height: 100vh; padding: 1rem; }
-
-        .header { background: #151520; padding: 1.2rem; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
-        .header h1 { color: #7C3AED; font-size: 1.5rem; font-weight: 700; }
-
-        .aviso { padding: 0.9rem; background: #1E1B4B; border-radius: 8px; color: #C7D2FE; margin-bottom: 1.2rem; font-size: 0.9rem; }
-
-        .tabs { display: flex; gap: 0.6rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-        .tab { padding: 0.6rem 1.3rem; border: none; border-radius: 8px; background: #1A1A2E; color: #94A3B8; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .tab.activo { background: #7C3AED; color: #FFFFFF; }
-        .tab:hover:not(.activo) { background: #2A2A3A; }
-
-        .card { background: #151520; border-radius: 12px; padding: 1.3rem; margin-bottom: 1.2rem; }
-        .card h3 { color: #A78BFA; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600; }
-
-        input, select, textarea { width: 100%; padding: 0.8rem; margin-bottom: 0.9rem; border-radius: 8px; border: 1px solid #2A2A3A; background: #1A1A2E; color: #FFFFFF; font-size: 0.95rem; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: #7C3AED; box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2); }
-
-        .btn { padding: 0.8rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.95rem; }
-        .btn-sm { padding: 0.5rem 1rem; font-size: 0.85rem; }
-        .btn-primary { background: #7C3AED; color: #FFFFFF; }
-        .btn-primary:hover { background: #6D28D9; transform: translateY(-1px); }
-        .btn-success { background: #10B981; color: #FFFFFF; }
-        .btn-success:hover { background: #059669; }
-        .btn-warning { background: #F59E0B; color: #000000; }
-        .btn-warning:hover { background: #D97706; }
-        .btn-danger { background: #E50914; color: #FFFFFF; }
-        .btn-danger:hover { background: #B80712; }
-        .btn-agregar { background: transparent; border: 1px dashed #4B4B63; color: #A78BFA; width: 100%; padding: 0.7rem; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-        .btn-agregar:hover { border-color: #7C3AED; background: rgba(124, 58, 237, 0.08); }
-
-        .grid-lista { display: grid; gap: 0.9rem; }
-        .item-card { background: #1A1A2E; border-radius: 8px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #7C3AED; flex-wrap: wrap; gap: 0.8rem; }
-        .info-item h4 { font-size: 1rem; margin-bottom: 0.3rem; }
-        .info-item p { font-size: 0.85rem; color: #94A3B8; }
-        .acciones { display: flex; gap: 0.6rem; flex-wrap: wrap; }
-
-        .grupo-opcion { background: #1A1A2E; border-radius: 8px; padding: 0.9rem; margin-bottom: 0.8rem; display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
-        .grupo-opcion input { margin-bottom: 0; flex: 1; min-width: 120px; }
-
-        .temporada { background: #1A1A2E; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
-        .capitulo { display: flex; gap: 0.6rem; align-items: center; margin-bottom: 0.7rem; flex-wrap: wrap; }
-        .capitulo input { margin-bottom: 0; flex: 1; min-width: 100px; }
-
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem; }
-        .modal-contenido { background: #151520; border-radius: 12px; padding: 1.5rem; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
-        .cerrar-modal { float: right; background: none; border: none; color: #E50914; font-size: 1.5rem; cursor: pointer; }
-
+        body { background: #0F172A; color: #F8FAFC; font-family: 'Segoe UI', Roboto, sans-serif; min-height: 100vh; padding: 1rem; }
+        .card { background: #1E293B; border-radius: 12px; padding: 1.2rem; margin-bottom: 1rem; }
+        .card h3 { color: #60A5FA; margin-bottom: 0.8rem; font-size: 1.1rem; }
+        input { width: 100%; padding: 0.7rem; border-radius: 8px; border: 1px solid #334155; background: #0F172A; color: #F8FAFC; font-size: 0.95rem; margin-bottom: 0.5rem; }
+        input:focus { outline: none; border-color: #60A5FA; }
+        .btn { padding: 0.6rem 1.2rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+        .btn-guardar { background: #10B981; color: white; }
+        .btn-guardar:hover { background: #059669; }
+        .btn-danger { background: #EF4444; color: white; }
+        .btn-danger:hover { background: #DC2626; }
+        .btn-refresh { background: #60A5FA; color: white; }
+        .btn-refresh:hover { background: #3B82F6; }
+        .btn-small { padding: 0.3rem 0.8rem; font-size: 0.8rem; }
+        .btn-probar { background: #8B5CF6; color: white; }
+        .btn-probar:hover { background: #7C3AED; }
+        .grid-peliculas { display: grid; grid-template-columns: 1fr; gap: 0.8rem; max-height: 65vh; overflow-y: auto; padding-right: 0.5rem; }
+        .grid-peliculas::-webkit-scrollbar { width: 6px; }
+        .grid-peliculas::-webkit-scrollbar-track { background: transparent; }
+        .grid-peliculas::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .pelicula-item { background: #1E293B; padding: 0.8rem 1rem; border-radius: 10px; border-left: 4px solid #60A5FA; display: flex; flex-direction: column; gap: 0.5rem; }
+        .pelicula-item .info { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .pelicula-item .info .titulo { font-weight: 600; font-size: 1rem; }
+        .pelicula-item .info .anio { color: #94A3B8; font-size: 0.85rem; }
+        .pelicula-item .enlaces { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+        .pelicula-item .enlaces input { flex: 1; min-width: 120px; margin-bottom: 0; padding: 0.4rem 0.6rem; font-size: 0.8rem; }
+        .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.65rem; font-weight: 600; }
+        .badge-peli { background: #60A5FA; color: #0F172A; }
+        .badge-sin-enlace { background: #EF4444; color: white; }
+        .badge-con-enlace { background: #10B981; color: white; }
+        .badge-firebase { background: #F59E0B; color: #0F172A; }
         .oculto { display: none !important; }
-        .badge { padding: 0.25rem 0.7rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
-        .badge-peli { background: #7C3AED; color: #FFFFFF; }
-        .badge-serie { background: #10B981; color: #FFFFFF; }
-
-        @media (max-width: 500px) {
-            .item-card { flex-direction: column; align-items: flex-start; }
-            .acciones { width: 100%; justify-content: flex-end; }
-        }
+        .cargando { text-align: center; color: #94A3B8; padding: 2rem; }
+        .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #334155; }
+        .header h1 { font-size: 1.8rem; font-weight: 700; }
+        .header h1 i { color: #60A5FA; }
+        .contador { color: #94A3B8; font-size: 0.9rem; }
+        .error-msg { color: #EF4444; text-align: center; padding: 1rem; }
+        .portada-mini { width: 40px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 0.5rem; }
+        .info-peli { display: flex; align-items: center; gap: 0.5rem; }
+        .status-firebase { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.65rem; font-weight: 600; background: #10B981; color: white; }
+        .status-firebase.error { background: #EF4444; }
+        .modal-video { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 1rem; }
+        .modal-video.abierto { display: flex; }
+        .modal-video .modal-content { background: #000; border-radius: 12px; max-width: 900px; width: 100%; aspect-ratio: 16/9; position: relative; overflow: hidden; }
+        .modal-video .modal-content iframe, .modal-video .modal-content object { width: 100%; height: 100%; border: none; background: #000; }
+        .modal-video .btn-cerrar-modal { position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(255,0,0,0.3); border: none; color: #fff; font-size: 1.5rem; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; z-index: 10; }
+        .modal-video .btn-cerrar-modal:hover { background: rgba(255,0,0,0.6); }
     </style>
 </head>
 <body>
-
-<!-- ENCABEZADO -->
-<div class="header">
-    <h1><i class="fa-solid fa-cog mr-2"></i> Panel Admin TELY</h1>
-    <div>
-        <button class="btn btn-success btn-sm" onclick="exportarDatos()"><i class="fa-solid fa-download mr-1"></i> Respaldar</button>
-        <button class="btn btn-warning btn-sm ml-2" onclick="document.getElementById('archivoImportar').click()"><i class="fa-solid fa-upload mr-1"></i> Cargar</button>
-    </div>
-</div>
-
-<div class="aviso">
-    <i class="fa-solid fa-info-circle mr-2"></i>
-    ✅ Enlaces compatibles: <strong>Mixdrop, Streamtape, VOE, Uptostream, Firebase</strong>
-</div>
-
-<!-- PESTAÑAS -->
-<div class="tabs">
-    <button class="tab activo" onclick="cambiarPestana('lista')"><i class="fa-solid fa-list mr-1"></i> Contenido</button>
-    <button class="tab" onclick="cambiarPestana('agregar')"><i class="fa-solid fa-plus mr-1"></i> Agregar Nuevo</button>
-</div>
-
-<!-- PESTAÑA: LISTA DE CONTENIDO -->
-<div id="pestana-lista" class="card">
-    <h3><i class="fa-solid fa-database mr-2"></i> Contenido Guardado</h3>
-    <div id="lista-contenido" class="grid-lista">
-        <p class="text-center text-gray-400 py-6">Cargando...</p>
-    </div>
-</div>
-
-<!-- PESTAÑA: AGREGAR CONTENIDO -->
-<div id="pestana-agregar" class="card oculto">
-    <h3><i class="fa-solid fa-plus-circle mr-2"></i> Agregar Película o Serie</h3>
-    <form id="formAgregar" onsubmit="guardarContenido(event)">
-        <select id="tipoContenido" required onchange="cambiarTipo()">
-            <option value="pelicula">Película</option>
-            <option value="serie">Serie</option>
-        </select>
-
-        <input type="text" id="titulo" placeholder="Título completo *" required>
-        <input type="number" id="anio" placeholder="Año de estreno *" required>
-        <input type="text" id="portada" placeholder="URL de portada o nombre de archivo (ej: rambo1.png)">
-        <input type="text" id="puntuacion" placeholder="Calificación (ej: 7.7)">
-        <input type="text" id="tmdbId" placeholder="ID de TMDb (opcional)">
-        <textarea id="sinopsis" placeholder="Sinopsis breve" rows="3"></textarea>
-
-        <!-- OPCIONES PARA PELÍCULAS -->
-        <div id="camposPelicula">
-            <h4 class="text-sm text-gray-300 mt-2 mb-2">🎬 Enlaces de reproducción</h4>
-            <div id="contenedorOpciones">
-                <div class="grupo-opcion">
-                    <input type="text" class="nombre-opcion" placeholder="Servidor" value="Mixdrop" required>
-                    <input type="url" class="url-opcion" placeholder="Enlace: https://mixdrop.top/e/XXXXXX" required>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="quitarOpcion(this)"><i class="fa-solid fa-trash"></i></button>
-                </div>
+    <div class="max-w-4xl mx-auto">
+        <!-- HEADER -->
+        <div class="header">
+            <div>
+                <h1><i class="fa fa-link"></i> Admin TELY</h1>
+                <span style="font-size:0.8rem; color:#94A3B8;">
+                    <i class="fa fa-database"></i> Firebase: <span id="statusFirebase" class="status-firebase">Conectando...</span>
+                </span>
             </div>
-            <button type="button" class="btn-agregar mt-2" onclick="agregarOpcion()"><i class="fa-solid fa-plus mr-1"></i> Agregar otro servidor</button>
-        </div>
-
-        <!-- OPCIONES PARA SERIES -->
-        <div id="camposSerie" class="oculto">
-            <h4 class="text-sm text-gray-300 mt-2 mb-2">📺 Temporadas y capítulos</h4>
-            <div id="contenedorTemporadas"></div>
-            <button type="button" class="btn-agregar mt-2" onclick="agregarTemporada()"><i class="fa-solid fa-plus mr-1"></i> Agregar temporada</button>
-        </div>
-
-        <button type="submit" class="btn btn-primary w-full mt-4">💾 Guardar en Firebase</button>
-    </form>
-</div>
-
-<!-- MODAL EDITAR -->
-<div id="modalEditar" class="modal oculto">
-    <div class="modal-contenido">
-        <button class="cerrar-modal" onclick="cerrarModal()">&times;</button>
-        <h3 class="text-xl font-bold text-acento mb-4">✏️ Editar Contenido</h3>
-        <form id="formEditar" onsubmit="guardarCambios(event)">
-            <input type="hidden" id="editId">
-            <input type="hidden" id="editTipo">
-
-            <input type="text" id="editTitulo" placeholder="Título" required>
-            <input type="number" id="editAnio" placeholder="Año" required>
-            <input type="text" id="editPortada" placeholder="Portada">
-            <input type="text" id="editPuntuacion" placeholder="Calificación">
-            <input type="text" id="editTmdbId" placeholder="ID TMDb">
-            <textarea id="editSinopsis" placeholder="Sinopsis" rows="3"></textarea>
-
-            <div id="editOpcionesContenedor"></div>
-            <button type="button" class="btn-agregar mt-2" onclick="agregarOpcionEditar()">+ Agregar servidor</button>
-
-            <div class="flex gap-2 mt-4">
-                <button type="submit" class="btn btn-primary w-full">Guardar Cambios</button>
-                <button type="button" class="btn btn-danger w-full" onclick="eliminarDefinitivo()">Eliminar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- INPUT OCULTO PARA IMPORTAR -->
-<input type="file" id="archivoImportar" accept=".json" class="oculto" onchange="procesarImportacion(this)">
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-
-<script>
-// CONFIGURACIÓN DE FIREBASE (IGUAL A TU SITIO PRINCIPAL)
-const firebaseConfig = {
-  apiKey: "AIzaSyCYetRSA0nsZsGiqABbTtjq-5a4bz5-oDk",
-  authDomain: "tely-675c0.firebaseapp.com",
-  databaseURL: "https://tely-675c0-default-rtdb.firebaseio.com",
-  projectId: "tely-675c0",
-  storageBucket: "tely-675c0.appspot.com",
-  messagingSenderId: "375009551428",
-  appId: "1:375009551428:web:33846891b7641f97a20811",
-  measurementId: "G-V1HFDG2366"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const refContenido = db.ref("contenido_personalizado");
-
-// ----------------------
-// CAMBIO DE PESTAÑAS
-// ----------------------
-function cambiarPestana(nombre) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'));
-    document.querySelectorAll('[id^="pestana-"]').forEach(p => p.classList.add('oculto'));
-    document.querySelector(`.tab[onclick*="${nombre}"]`).classList.add('activo');
-    document.getElementById(`pestana-${nombre}`).classList.remove('oculto');
-    if (nombre === 'lista') cargarLista();
-}
-
-function cambiarTipo() {
-    const tipo = document.getElementById('tipoContenido').value;
-    document.getElementById('camposPelicula').classList.toggle('oculto', tipo !== 'pelicula');
-    document.getElementById('camposSerie').classList.toggle('oculto', tipo !== 'serie');
-}
-
-// ----------------------
-// OPCIONES DE REPRODUCCIÓN
-// ----------------------
-function agregarOpcion() {
-    const contenedor = document.getElementById('contenedorOpciones');
-    const nuevo = document.createElement('div');
-    nuevo.className = 'grupo-opcion';
-    nuevo.innerHTML = `
-        <input type="text" class="nombre-opcion" placeholder="Servidor" value="Opción ${contenedor.children.length + 1}">
-        <input type="url" class="url-opcion" placeholder="Enlace del video">
-        <button type="button" class="btn btn-danger btn-sm" onclick="quitarOpcion(this)"><i class="fa-solid fa-trash"></i></button>
-    `;
-    contenedor.appendChild(nuevo);
-}
-
-function quitarOpcion(boton) {
-    const grupo = boton.closest('.grupo-opcion');
-    if (document.querySelectorAll('#contenedorOpciones .grupo-opcion').length > 1) {
-        if (confirm('¿Eliminar este servidor?')) grupo.remove();
-    } else {
-        alert('Debe quedar al menos un servidor');
-    }
-}
-
-// ----------------------
-// TEMPORADAS Y CAPÍTULOS
-// ----------------------
-function agregarTemporada() {
-    const contenedor = document.getElementById('contenedorTemporadas');
-    const numero = contenedor.children.length + 1;
-    const temp = document.createElement('div');
-    temp.className = 'temporada';
-    temp.innerHTML = `
-        <div class="flex justify-between items-center mb-3">
-            <h5 class="font-semibold text-gray-200">Temporada ${numero}</h5>
-            <button type="button" class="btn btn-danger btn-sm" onclick="quitarTemporada(this)"><i class="fa-solid fa-trash"></i></button>
-        </div>
-        <div class="capitulos-contenedor">
-            <div class="capitulo">
-                <input type="text" placeholder="N°" value="1" style="max-width: 60px;">
-                <input type="text" placeholder="Título del capítulo" value="Capítulo 1">
-                <input type="url" placeholder="Enlace Mixdrop">
-                <button type="button" class="btn btn-danger btn-sm" onclick="quitarCapitulo(this)"><i class="fa-solid fa-trash"></i></button>
+            <div style="display:flex; gap:0.8rem; align-items:center; flex-wrap:wrap;">
+                <span class="contador" id="contador">0 películas</span>
+                <button class="btn btn-refresh btn-small" onclick="cargarPeliculas()"><i class="fa fa-sync"></i> Recargar</button>
+                <button class="btn btn-small" onclick="exportarDatos()" style="background:#F59E0B; color:#0F172A;"><i class="fa fa-download"></i> Exportar</button>
             </div>
         </div>
-        <button type="button" class="btn-agregar mt-2" onclick="agregarCapitulo(this)">+ Agregar capítulo</button>
-    `;
-    contenedor.appendChild(temp);
-}
 
-function agregarCapitulo(boton) {
-    const contenedor = boton.parentElement.querySelector('.capitulos-contenedor');
-    const num = contenedor.children.length + 1;
-    const cap = document.createElement('div');
-    cap.className = 'capitulo';
-    cap.innerHTML = `
-        <input type="text" placeholder="N°" value="${num}" style="max-width: 60px;">
-        <input type="text" placeholder="Título del capítulo" value="Capítulo ${num}">
-        <input type="url" placeholder="Enlace Mixdrop">
-        <button type="button" class="btn btn-danger btn-sm" onclick="quitarCapitulo(this)"><i class="fa-solid fa-trash"></i></button>
-    `;
-    contenedor.appendChild(cap);
-}
+        <!-- CONTENIDO -->
+        <div class="card">
+            <h3><i class="fa fa-film"></i> Películas de TMDB</h3>
+            <p class="text-gray-400 text-sm mb-3">Agrega enlaces de video (Opción 1 y Opción 2) a cada película</p>
+            <div id="lista-peliculas" class="grid-peliculas">
+                <div class="cargando"><i class="fa-solid fa-spinner fa-spin"></i> Cargando películas...</div>
+            </div>
+        </div>
+    </div>
 
-function quitarTemporada(boton) {
-    const temp = boton.closest('.temporada');
-    if (document.querySelectorAll('#contenedorTemporadas .temporada').length > 1) {
-        if (confirm('¿Eliminar esta temporada?')) temp.remove();
-    }
-}
+    <!-- MODAL PARA PROBAR VIDEO -->
+    <div id="modalVideo" class="modal-video">
+        <div class="modal-content" id="modalVideoContent">
+            <button class="btn-cerrar-modal" onclick="cerrarModalVideo()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>    <script>
+        // ==============================================
+        // 🔧 CONFIGURACIÓN FIREBASE
+        // ==============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCwLATDpQN1RWv3rLPjJXbNnIBkyo_BUfI",
+            authDomain: "tely-ap.firebaseapp.com",
+            databaseURL: "https://tely-ap-default-rtdb.firebaseio.com",
+            projectId: "tely-ap",
+            storageBucket: "tely-ap.firebasestorage.app",
+            messagingSenderId: "760862940967",
+            appId: "1:760862940967:web:69bbbbfee0de40f68a1302",
+            measurementId: "G-1MVRN8QNLG"
+        };
 
-function quitarCapitulo(boton) {
-    const cap = boton.closest('.capitulo');
-    const lista = cap.parentElement;
-    if (lista.children.length > 1) {
-        if (confirm('¿Eliminar este capítulo?')) cap.remove();
-    }
-}
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-// ----------------------
-// GUARDAR EN FIREBASE
-// ----------------------
-function guardarContenido(e) {
-    e.preventDefault();
+        // ==============================================
+        // 🔑 CONFIGURACIÓN TMDB
+        // ==============================================
+        const TMDB_API_KEY = "8dd99b5a15acfdd98e3b249d5f890af4";
+        const TMDB_BASE = "https://api.themoviedb.org/3";
+        const TMDB_IMG = "https://image.tmdb.org/t/p/w500";
+        const TMDB_LANG = "es-ES";
 
-    const tipo = document.getElementById('tipoContenido').value;
-    const datos = {
-        id: 'item_' + Date.now(),
-        titulo: document.getElementById('titulo').value.trim(),
-        anio: parseInt(document.getElementById('anio').value),
-        tipo: tipo,
-        categoria: tipo === 'pelicula' ? 'peliculas' : 'series',
-        portada: document.getElementById('portada').value.trim() || 'portada-default.png',
-        puntuacion: document.getElementById('puntuacion').value.trim() || 'N/D',
-        tmdb_id: document.getElementById('tmdbId').value.trim() || '',
-        sinopsis: document.getElementById('sinopsis').value.trim() || 'Sin descripción',
-        fecha_agregado: new Date().toISOString().split('T')[0]
-    };
+        let peliculas = [];
+        let peliculasAdmin = [];
+        let peliculasCargadas = false;
 
-    if (tipo === 'pelicula') {
-        const opciones = [];
-        document.querySelectorAll('#contenedorOpciones .grupo-opcion').forEach(g => {
-            const n = g.querySelector('.nombre-opcion').value.trim();
-            const u = g.querySelector('.url-opcion').value.trim();
-            if (n && u) opciones.push({ nombre: n, url: u });
-        });
-        if (opciones.length === 0) return alert('Agrega al menos un enlace');
-        datos.opciones = opciones;
-    } else {
-        const temporadas = [];
-        document.querySelectorAll('#contenedorTemporadas .temporada').forEach((t, i) => {
-            const caps = [];
-            t.querySelectorAll('.capitulo').forEach(c => {
-                const num = c.children[0].value.trim();
-                const tit = c.children[1].value.trim();
-                const url = c.children[2].value.trim();
-                if (num && tit && url) caps.push({ numero: num, titulo: tit, opciones: [{ nombre: 'Mixdrop', url }] });
+        // ==============================================
+        // 🔥 VERIFICAR CONEXIÓN FIREBASE
+        // ==============================================
+        function verificarFirebase() {
+            const status = document.getElementById("statusFirebase");
+            db.ref(".info/connected").on("value", (snap) => {
+                if (snap.val() === true) {
+                    status.textContent = "Conectado";
+                    status.className = "status-firebase";
+                } else {
+                    status.textContent = "Desconectado";
+                    status.className = "status-firebase error";
+                }
             });
-            if (caps.length) temporadas.push({ numero: i + 1, capitulos: caps });
-        });
-        if (temporadas.length === 0) return alert('Agrega temporadas con capítulos');
-        datos.temporadas = temporadas;
-    }
-
-    refContenido.child(datos.id).set(datos)
-        .then(() => {
-            alert('✅ Guardado correctamente');
-            document.getElementById('formAgregar').reset();
-            cambiarPestana('lista');
-        })
-        .catch(err => alert('❌ Error: ' + err.message));
-}
-
-// ----------------------
-// CARGAR LISTA
-// ----------------------
-function cargarLista() {
-    const contenedor = document.getElementById('lista-contenido');
-    refContenido.once('value').then(snap => {
-        const datos = snap.val() || {};
-        const lista = Object.values(datos).sort((a, b) => new Date(b.fecha_agregado || 0) - new Date(a.fecha_agregado || 0));
-        if (lista.length === 0) {
-            contenedor.innerHTML = '<p class="text-center text-gray-400 py-6">No hay contenido agregado aún</p>';
-            return;
         }
-        contenedor.innerHTML = lista.map(item => `
-            <div class="item-card">
-                <div class="info-item">
-                    <h4>${item.titulo} <span class="badge ${item.tipo === 'pelicula' ? 'badge-peli' : 'badge-serie'}">${item.tipo}</span></h4>
-                    <p>${item.anio} | ${item.fecha_agregado || 'Sin fecha'}</p>
-                </div>
-                <div class="acciones">
-                    <button class="btn btn-warning btn-sm" onclick="abrirEditar('${item.id}')"><i class="fa-solid fa-edit"></i></button>
-                    <button class="btn btn-danger btn-sm" onclick="eliminarItem('${item.id}')"><i class="fa-solid fa-trash"></i></button>
-                </div>
-            </div>
-        `).join('');
-    });
-}
 
-// ----------------------
-// EDITAR Y ELIMINAR
-// ----------------------
-function abrirEditar(id) {
-    refContenido.child(id).once('value').then(snap => {
-        const item = snap.val();
-        document.getElementById('editId').value = id;
-        document.getElementById('editTipo').value = item.tipo;
-        document.getElementById('editTitulo').value = item.titulo;
-        document.getElementById('editAnio').value = item.anio;
-        document.getElementById('editPortada').value = item.portada || '';
-        document.getElementById('editPuntuacion').value = item.puntuacion || '';
-        document.getElementById('editTmdbId').value = item.tmdb_id || '';
-        document.getElementById('editSinopsis').value = item.sinopsis || '';
+        // ==============================================
+        // 📥 CARGAR PELÍCULAS
+        // ==============================================
+        async function cargarPeliculas() {
+            const contenedor = document.getElementById("lista-peliculas");
+            contenedor.innerHTML = '<div class="cargando"><i class="fa-solid fa-spinner fa-spin"></i> Cargando películas...</div>';
 
-        const contenedor = document.getElementById('editOpcionesContenedor');
-        contenedor.innerHTML = '';
-        if (item.tipo === 'pelicula' && item.opciones) {
-            item.opciones.forEach(op => {
-                contenedor.innerHTML += `
-                    <div class="grupo-opcion">
-                        <input type="text" class="edit-nombre" value="${op.nombre}">
-                        <input type="url" class="edit-url" value="${op.url}">
-                        <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()"><i class="fa-solid fa-trash"></i></button>
+            try {
+                // 1. Cargar películas de TMDB
+                const res = await fetch(`${TMDB_BASE}/movie/popular?api_key=${TMDB_API_KEY}&language=${TMDB_LANG}&page=1`);
+                
+                if (!res.ok) throw new Error(`Error ${res.status}`);
+                
+                const datos = await res.json();
+                
+                if (!datos.results || datos.results.length === 0) {
+                    throw new Error("No se encontraron películas");
+                }
+
+                const pelisTMDB = datos.results.slice(0, 20);
+
+                // 2. Cargar datos guardados en Firebase
+                const snapshot = await db.ref("contenido_personalizado").once("value");
+                const datosAdmin = snapshot.val();
+                peliculasAdmin = datosAdmin ? Object.values(datosAdmin) : [];
+
+                // 3. Combinar
+                peliculas = pelisTMDB.map(p => {
+                    const enAdmin = peliculasAdmin.find(a => a.tmdb_id == p.id);
+                    return {
+                        id: p.id,
+                        tmdb_id: p.id,
+                        titulo: p.title || "Sin título",
+                        anio: p.release_date ? p.release_date.split("-")[0] : "N/D",
+                        portada: p.poster_path ? `${TMDB_IMG}${p.poster_path}` : "",
+                        sinopsis: p.overview || "Sin sinopsis",
+                        puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A",
+                        genero: "Película",
+                        url: enAdmin?.url || "",
+                        opcion2: enAdmin?.opcion2 || "",
+                        adminId: enAdmin?.id || null
+                    };
+                });
+
+                peliculasCargadas = true;
+                mostrarPeliculas();
+
+            } catch (err) {
+                console.error("Error:", err);
+                contenedor.innerHTML = `
+                    <div class="error-msg">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Error: ${err.message}
+                        <br><br>
+                        <button class="btn btn-refresh btn-small" onclick="cargarPeliculas()">
+                            <i class="fa fa-sync"></i> Reintentar
+                        </button>
                     </div>
                 `;
-            });
-        } else {
-            contenedor.innerHTML = '<p class="text-gray-400 text-sm">Las series se editan eliminando y volviendo a agregar</p>';
-        }
-        document.getElementById('modalEditar').classList.remove('oculto');
-    });
-}
-
-function agregarOpcionEditar() {
-    const c = document.getElementById('editOpcionesContenedor');
-    c.innerHTML += `
-        <div class="grupo-opcion">
-            <input type="text" class="edit-nombre" placeholder="Servidor">
-            <input type="url" class="edit-url" placeholder="Enlace">
-            <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()"><i class="fa-solid fa-trash"></i></button>
-        </div>
-    `;
-}
-
-function guardarCambios(e) {
-    e.preventDefault();
-    const id = document.getElementById('editId').value;
-    const tipo = document.getElementById('editTipo').value;
-    const datos = {
-        titulo: document.getElementById('editTitulo').value.trim(),
-        anio: parseInt(document.getElementById('editAnio').value),
-        portada: document.getElementById('editPortada').value.trim(),
-        puntuacion: document.getElementById('editPuntuacion').value.trim(),
-        tmdb_id: document.getElementById('editTmdbId').value.trim(),
-        sinopsis: document.getElementById('editSinopsis').value.trim()
-    };
-    if (tipo === 'pelicula') {
-        const opciones = [];
-        document.querySelectorAll('.edit-nombre').forEach((n, i) => {
-            const u = document.querySelectorAll('.edit-url')[i];
-            if (n.value.trim() && u.value.trim()) opciones.push({ nombre: n.value.trim(), url: u.value.trim() });
-        });
-        datos.opciones = opciones;
-    }
-    refContenido.child(id).update(datos)
-        .then(() => { cerrarModal(); cargarLista(); alert('✅ Actualizado'); });
-}
-
-function eliminarItem(id) {
-    if (confirm('¿Eliminar definitivamente?')) {
-        refContenido.child(id).remove().then(cargarLista);
-    }
-}
-
-function eliminarDefinitivo() {
-    const id = document.getElementById('editId').value;
-    cerrarModal();
-    eliminarItem(id);
-}
-
-function cerrarModal() {
-    document.getElementById('modalEditar').classList.add('oculto');
-}
-
-// ----------------------
-// RESPALDO Y CARGA
-// ----------------------
-function exportarDatos() {
-    refContenido.once('value').then(snap => {
-        const datos = snap.val() || {};
-        const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `respaldo_tely_${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-    });
-}
-
-function procesarImportacion(input) {
-    const archivo = input.files[0];
-    if (!archivo) return;
-    const lector = new FileReader();
-    lector.onload = e => {
-        try {
-            const datos = JSON.parse(e.target.result);
-            if (confirm('¿Importar estos datos?')) {
-                Object.values(datos).forEach(item => refContenido.child(item.id).set(item));
-                alert('✅ Importado');
-                cargarLista();
             }
-        } catch { alert('❌ Archivo inválido'); }
-    };
-    lector.readAsText(archivo);
-}
+        }
 
-// INICIO
-window.onload = cargarLista;
-</script>
+        // ==============================================
+        // 📋 MOSTRAR PELÍCULAS
+        // ==============================================
+        function mostrarPeliculas() {
+            const contenedor = document.getElementById("lista-peliculas");
+            const contador = document.getElementById("contador");
+            
+            if (peliculas.length === 0) {
+                contenedor.innerHTML = '<div class="cargando">No hay películas disponibles</div>';
+                contador.textContent = "0 películas";
+                return;
+            }
 
+            contador.textContent = `${peliculas.length} películas`;
+
+            contenedor.innerHTML = peliculas.map(p => {
+                const tieneEnlace = p.url || p.opcion2;
+                return `
+                    <div class="pelicula-item" data-id="${p.id}">
+                        <div class="info">
+                            <div class="info-peli">
+                                ${p.portada ? `<img src="${p.portada}" class="portada-mini" loading="lazy" onerror="this.style.display='none'">` : ''}
+                                <div>
+                                    <span class="titulo">${p.titulo}</span>
+                                    <span class="anio">${p.anio}</span>
+                                </div>
+                            </div>
+                            <div>
+                                ${tieneEnlace ? '<span class="badge badge-con-enlace">✅ Con enlace</span>' : '<span class="badge badge-sin-enlace">❌ Sin enlace</span>'}
+                                ${p.adminId ? '<span class="badge badge-firebase">☁️ Firebase</span>' : ''}
+                                <span class="badge badge-peli">TMDB</span>
+                            </div>
+                        </div>
+                        <div class="enlaces">
+                            <input type="text" class="input-opcion1" placeholder="Opción 1 (URL)" value="${p.url || ''}">
+                            <input type="text" class="input-opcion2" placeholder="Opción 2 (URL)" value="${p.opcion2 || ''}">
+                            <button class="btn btn-guardar btn-small" onclick="guardarEnlaces('${p.id}')">
+                                <i class="fa fa-save"></i> Guardar
+                            </button>
+                            ${p.url || p.opcion2 ? `<button class="btn btn-probar btn-small" onclick="probarVideo('${p.id}')"><i class="fa fa-play"></i> Probar</button>` : ''}
+                            ${p.adminId ? `<button class="btn btn-danger btn-small" onclick="eliminarEnlaces('${p.adminId}', '${p.id}')"><i class="fa fa-trash"></i></button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==============================================
+        // 💾 GUARDAR ENLACES EN FIREBASE
+        // ==============================================
+        function guardarEnlaces(tmdbId) {
+            const item = document.querySelector(`.pelicula-item[data-id="${tmdbId}"]`);
+            if (!item) return;
+
+            const url = item.querySelector('.input-opcion1').value.trim();
+            const opcion2 = item.querySelector('.input-opcion2').value.trim();
+
+            if (!url && !opcion2) {
+                alert("⚠️ Debes agregar al menos un enlace (Opción 1 o Opción 2)");
+                return;
+            }
+
+            const peli = peliculas.find(p => p.id == tmdbId);
+            if (!peli) return;
+
+            const existe = peliculasAdmin.find(a => a.tmdb_id == tmdbId);
+
+            const datos = {
+                tmdb_id: tmdbId,
+                titulo: peli.titulo,
+                anio: peli.anio,
+                tipo: "pelicula",
+                categoria: "peliculas",
+                portada: peli.portada,
+                sinopsis: peli.sinopsis,
+                puntuacion: peli.puntuacion,
+                genero: peli.genero,
+                url: url,
+                opcion2: opcion2,
+                fecha_actualizacion: new Date().toISOString()
+            };
+
+            const ref = existe ? db.ref(`contenido_personalizado/${existe.id}`) : db.ref("contenido_personalizado").push();
+
+            ref.set(datos)
+                .then(() => {
+                    alert("✅ Enlaces guardados en Firebase correctamente");
+                    
+                    if (!existe) {
+                        datos.id = ref.key;
+                        peliculasAdmin.push(datos);
+                    } else {
+                        const index = peliculasAdmin.findIndex(a => a.id === existe.id);
+                        if (index !== -1) peliculasAdmin[index] = { ...datos, id: existe.id };
+                    }
+                    
+                    peli.url = url;
+                    peli.opcion2 = opcion2;
+                    peli.adminId = existe ? existe.id : ref.key;
+                    
+                    mostrarPeliculas();
+                })
+                .catch(err => {
+                    alert("❌ Error al guardar en Firebase: " + err.message);
+                });
+        }
+
+        // ==============================================
+        // 🗑️ ELIMINAR ENLACES DE FIREBASE
+        // ==============================================
+        function eliminarEnlaces(adminId, tmdbId) {
+            if (!confirm("¿Eliminar los enlaces de esta película de Firebase?")) return;
+
+            db.ref(`contenido_personalizado/${adminId}`).remove()
+                .then(() => {
+                    alert("✅ Enlaces eliminados de Firebase");
+                    peliculasAdmin = peliculasAdmin.filter(a => a.id !== adminId);
+                    
+                    const peli = peliculas.find(p => p.id == tmdbId);
+                    if (peli) {
+                        peli.url = "";
+                        peli.opcion2 = "";
+                        peli.adminId = null;
+                    }
+                    
+                    mostrarPeliculas();
+                })
+                .catch(err => {
+                    alert("❌ Error al eliminar: " + err.message);
+                });
+        }
+
+        // ==============================================
+        // 🎬 PROBAR VIDEO
+        // ==============================================
+        function probarVideo(tmdbId) {
+            const peli = peliculas.find(p => p.id == tmdbId);
+            if (!peli) return;
+
+            const url = peli.url || peli.opcion2;
+            if (!url) {
+                alert("❌ Esta película no tiene enlace");
+                return;
+            }
+
+            const modal = document.getElementById("modalVideo");
+            const content = document.getElementById("modalVideoContent");
+            
+            // Limpiar contenido anterior
+            content.innerHTML = `
+                <button class="btn-cerrar-modal" onclick="cerrarModalVideo()"><i class="fa-solid fa-xmark"></i></button>
+                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000;">
+                    <div style="color:#94A3B8;text-align:center;">
+                        <i class="fa-solid fa-spinner fa-spin" style="font-size:2rem;"></i>
+                        <p style="margin-top:1rem;">Cargando video...</p>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.add("abierto");
+            document.body.style.overflow = "hidden";
+
+            // Cargar el video después de un momento
+            setTimeout(() => {
+                let enlace = url.trim();
+                let html = '';
+
+                if (enlace.includes('youtube.com') || enlace.includes('youtu.be')) {
+                    html = `<iframe src="${enlace}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;background:#000;"></iframe>`;
+                } else if (enlace.includes('vidmoly')) {
+                    if (!enlace.includes('controls=')) {
+                        enlace += (enlace.includes('?') ? '&' : '?') + 'controls=1&logo=0&autoplay=1';
+                    }
+                    html = `<object data="${enlace}" type="text/html" style="width:100%;height:100%;border:none;background:#000;"></object>`;
+                } else if (enlace.includes('mixdrop')) {
+                    if (!enlace.includes('autoplay')) {
+                        enlace += (enlace.includes('?') ? '&' : '?') + 'autoplay=1';
+                    }
+                    html = `<iframe src="${enlace}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;background:#000;"></iframe>`;
+                } else if (enlace.includes('drive.google.com')) {
+                    const id = enlace.match(/[-\w]{25,}/)?.[0];
+                    if (id) {
+                        const driveUrl = `https://drive.google.com/uc?export=stream&id=${id}&confirm=t&cache=1`;
+                        html = `<video src="${driveUrl}" controls playsinline preload="auto" style="width:100%;height:100%;background:#000;" autoplay>Tu navegador no soporta el video.</video>`;
+                    } else {
+                        html = `<div style="color:#EF4444;text-align:center;padding:2rem;">❌ Enlace de Drive inválido</div>`;
+                    }
+                } else {
+                    html = `<iframe src="${enlace}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;background:#000;"></iframe>`;
+                }
+
+                content.innerHTML = `
+                    <button class="btn-cerrar-modal" onclick="cerrarModalVideo()"><i class="fa-solid fa-xmark"></i></button>
+                    ${html}
+                `;
+            }, 500);
+        }
+
+        function cerrarModalVideo() {
+            document.getElementById("modalVideo").classList.remove("abierto");
+            document.body.style.overflow = "auto";
+            document.getElementById("modalVideoContent").innerHTML = `
+                <button class="btn-cerrar-modal" onclick="cerrarModalVideo()"><i class="fa-solid fa-xmark"></i></button>
+            `;
+        }
+
+        // ==============================================
+        // 📤 EXPORTAR DATOS
+        // ==============================================
+        function exportarDatos() {
+            if (peliculasAdmin.length === 0) {
+                alert("No hay datos guardados en Firebase para exportar");
+                return;
+            }
+
+            const blob = new Blob([JSON.stringify(peliculasAdmin, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tely_enlaces_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ==============================================
+        // ⚡ INICIO
+        // ==============================================
+        verificarFirebase();
+        cargarPeliculas();
+
+        // Cerrar modal con ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                cerrarModalVideo();
+            }
+        });
+    </script>
 </body>
 </html>
