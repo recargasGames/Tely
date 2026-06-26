@@ -99,34 +99,34 @@
         body.dark .tarjeta-reciente .info-reciente h4 { color: #F8FAFC; }
 
         /* ========================================== */
-        /* REPRODUCTOR - VENTANA EMERGENTE CON FONDO OSCURO */
+        /* REPRODUCTOR - VENTANA EMERGENTE COMPLETA */
         /* ========================================== */
         .modal-video { 
             position: fixed; 
             inset: 0; 
-            background: rgba(0,0,0,0.92); 
+            background: rgba(0,0,0,0.95); 
             z-index: 9998; 
             display: none; 
             align-items: center;
             justify-content: center;
-            padding: 1.5rem;
+            padding: 0;
             overflow-y: auto;
         }
         .modal-video.abierto { display: flex; }
 
         .reproductor-contenedor {
             background: #0A0A0F;
-            border-radius: 16px;
-            max-width: 900px;
             width: 100%;
-            max-height: 98vh;
+            height: 100vh;
+            max-height: 100vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+            box-shadow: none;
             padding: 1.5rem;
-            margin: auto;
+            margin: 0;
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
-        /* Ocultar el scrollbar para que se vea limpio */
         .reproductor-contenedor::-webkit-scrollbar {
             width: 4px;
         }
@@ -141,6 +141,7 @@
         /* TÍTULO Y SINOPSIS ARRIBA */
         .info-arriba {
             margin-bottom: 1rem;
+            flex-shrink: 0;
         }
         .info-arriba h2 {
             font-size: 1.5rem;
@@ -171,7 +172,7 @@
             line-height: 1.4;
         }
 
-        /* REPRODUCTOR CENTRADO */
+        /* REPRODUCTOR - OCUPA ESPACIO FLEXIBLE */
         .netflix-player {
             width: 100%;
             aspect-ratio: 16/9;
@@ -179,6 +180,7 @@
             background: #000;
             border-radius: 12px;
             overflow: hidden;
+            flex-shrink: 0;
         }
         .netflix-player iframe,
         .netflix-player object,
@@ -198,6 +200,7 @@
             justify-content: flex-end;
             gap: 0.8rem;
             margin-top: 0.8rem;
+            flex-shrink: 0;
         }
         .btn-control {
             background: rgba(255,255,255,0.08);
@@ -236,6 +239,7 @@
             gap: 0.6rem;
             flex-wrap: wrap;
             margin-top: 1rem;
+            flex-shrink: 0;
         }
         .btn-opcion {
             padding: 0.5rem 1.2rem;
@@ -273,6 +277,7 @@
             border-top: 1px solid #1E293B;
             padding-top: 1rem;
             margin-top: 1rem;
+            flex-shrink: 0;
         }
         .titulo-recomendadas {
             font-size: 1rem;
@@ -286,7 +291,6 @@
             overflow-x: auto;
             padding-bottom: 0.5rem;
         }
-        /* Ocultar scrollbar en recomendaciones */
         .lista-recomendadas::-webkit-scrollbar {
             height: 4px;
         }
@@ -320,6 +324,56 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        /* ========================================== */
+        /* PANTALLA COMPLETA - HORIZONTAL */
+        /* ========================================== */
+        .modal-video.fullscreen {
+            padding: 0 !important;
+            background: #000 !important;
+        }
+        .modal-video.fullscreen .reproductor-contenedor {
+            padding: 0 !important;
+            background: #000 !important;
+            overflow: hidden !important;
+        }
+        .modal-video.fullscreen .info-arriba,
+        .modal-video.fullscreen .controles-superior,
+        .modal-video.fullscreen .botones-opciones,
+        .modal-video.fullscreen .seccion-recomendadas {
+            display: none !important;
+        }
+        .modal-video.fullscreen .netflix-player {
+            border-radius: 0 !important;
+            aspect-ratio: auto !important;
+            height: 100vh !important;
+            width: 100vw !important;
+        }
+
+        /* Para cuando el usuario gira el teléfono horizontalmente */
+        @media (orientation: landscape) {
+            .modal-video.abierto .reproductor-contenedor {
+                padding: 0 !important;
+                background: #000 !important;
+                overflow: hidden !important;
+            }
+            .modal-video.abierto .info-arriba,
+            .modal-video.abierto .controles-superior,
+            .modal-video.abierto .botones-opciones,
+            .modal-video.abierto .seccion-recomendadas {
+                display: none !important;
+            }
+            .modal-video.abierto .netflix-player {
+                border-radius: 0 !important;
+                aspect-ratio: auto !important;
+                height: 100vh !important;
+                width: 100vw !important;
+            }
+            .modal-video.abierto {
+                padding: 0 !important;
+                background: #000 !important;
+            }
         }
 
         .menu-perfil { position: relative; }
@@ -382,11 +436,11 @@
     <div class="scroll-recientes" id="scrollRecientes"></div>
 </div>
 
-<div class="grid-contenido" id="lista-contenido"></div><!-- REPRODUCTOR - VENTANA EMERGENTE CON FONDO OSCURO -->
+<div class="grid-contenido" id="lista-contenido"></div><!-- REPRODUCTOR - VENTANA EMERGENTE COMPLETA -->
 <div id="modal-video" class="modal-video">
-    <div class="reproductor-contenedor">
+    <div class="reproductor-contenedor" id="reproductorContenedor">
         <!-- TÍTULO Y SINOPSIS ARRIBA -->
-        <div class="info-arriba">
+        <div class="info-arriba" id="infoArriba">
             <h2 id="tituloReproductor">Título</h2>
             <div class="detalles-arriba">
                 <span class="anio-arriba" id="anioPanel">2024</span>
@@ -400,7 +454,7 @@
         <div class="netflix-player" id="netflixPlayer"></div>
 
         <!-- CONTROLES: PANTALLA COMPLETA Y CERRAR -->
-        <div class="controles-superior">
+        <div class="controles-superior" id="controlesSuperior">
             <button class="btn-control btn-fullscreen" onclick="toggleFullscreen()">
                 <i class="fa-solid fa-expand"></i> Pantalla completa
             </button>
@@ -506,12 +560,12 @@ const MI_CONTENIDO = [
     anio: "2014",
     tipo: "pelicula",
     categoria: "peliculas",
-    portada: "john wick.png",
+    portada: "john-wick.png",
     sinopsis: "Un exasesino a sueldo vuelve a la acción para vengar a su perro.",
     puntuacion: "7.4",
     genero: "Acción / Suspenso",
     tmdb_id: "245891",
-    url: "https://www.youtube.com/embed/C0BMx-qxsP4?autoplay=1"
+    url: "https://vidmoly.biz/embed-as1c23137iks.html"
   },
   {
     id: "demonio_001",
@@ -928,6 +982,9 @@ function abrirVideoPelicula(peli) {
 
     agregarAlHistorial(peli);
     cargarRecomendadas(peli.tmdb_id);
+    
+    // 🔥 DETECTAR ORIENTACIÓN AL ABRIR
+    setTimeout(detectarOrientacion, 300);
 }
 
 function reproducirOpcion(url) {
@@ -1111,9 +1168,17 @@ function abrirCapitulo(cap) {
 // ==============================================
 function cerrarVideo() {
     detenerVideo();
-    document.getElementById("modal-video").classList.remove("abierto");
+    const modal = document.getElementById("modal-video");
+    modal.classList.remove("abierto");
+    modal.classList.remove("fullscreen");
     document.body.style.overflow = "auto";
     peliculaActual = null;
+    
+    if (document.fullscreenElement) {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
 }
 
 function detenerVideo() {
@@ -1122,22 +1187,59 @@ function detenerVideo() {
 }
 
 // ==============================================
-// PANTALLA COMPLETA
+// 🔲 PANTALLA COMPLETA MEJORADA
 // ==============================================
 function toggleFullscreen() {
     const modal = document.getElementById("modal-video");
-    const contenedor = document.querySelector(".reproductor-contenedor");
+    const contenedor = document.getElementById("reproductorContenedor");
     
-    if (!document.fullscreenElement) {
-        if (modal.requestFullscreen) {
-            modal.requestFullscreen();
-        }
-    } else {
+    if (document.fullscreenElement) {
         if (document.exitFullscreen) {
             document.exitFullscreen();
         }
+        modal.classList.remove("fullscreen");
+        return;
+    }
+    
+    if (modal.requestFullscreen) {
+        modal.requestFullscreen().then(() => {
+            modal.classList.add("fullscreen");
+        }).catch(() => {
+            modal.classList.add("fullscreen");
+        });
+    } else {
+        modal.classList.add("fullscreen");
     }
 }
+
+// ==============================================
+// 🔄 DETECTAR CAMBIO DE ORIENTACIÓN
+// ==============================================
+function detectarOrientacion() {
+    const modal = document.getElementById("modal-video");
+    if (!modal.classList.contains("abierto")) return;
+    
+    if (window.innerWidth > window.innerHeight) {
+        modal.classList.add("fullscreen");
+    } else {
+        modal.classList.remove("fullscreen");
+    }
+}
+
+// Escuchar cambios de orientación
+window.addEventListener('resize', detectarOrientacion);
+window.addEventListener('orientationchange', function() {
+    setTimeout(detectarOrientacion, 300);
+});
+
+// Detectar cuando el usuario sale del fullscreen nativo
+document.addEventListener('fullscreenchange', function() {
+    const modal = document.getElementById("modal-video");
+    if (!document.fullscreenElement) {
+        modal.classList.remove("fullscreen");
+        setTimeout(detectarOrientacion, 300);
+    }
+});
 
 // ==============================================
 // EXTRAS
