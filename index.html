@@ -303,7 +303,7 @@ let recaptchaVerifier, confirmationResult, videoPendiente = null, serieActual = 
 let peliculaActual = null;
 
 // ==============================================
-// 🔑 CONFIGURACIÓN TMDB - CON TOKEN PARA VERCEL
+// 🔑 CONFIGURACIÓN TMDB
 // ==============================================
 const TMDB_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4ZGQ5OWI1YTE1YWNmZGQ5OGUzYjI0OWQ1Zjg5MGFmNCIsIm5iZiI6MTc4MjI3NzIzMS4zMzMsInN1YiI6IjZhM2I2NDZmZThmMTMwOTc2MWVjNDYxYiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.JLmHWuXkhDc9LreAvXFZa0qTS7PR_nrj_SSwVm9UZ9Y";
 const TMDB_BASE = "https://api.themoviedb.org/3";
@@ -450,7 +450,7 @@ async function cargarContenidoCompleto() {
 }
 
 // ==============================================
-// 🔐 AUTENTICACIÓN
+// 🔐 AUTENTICACIÓN CON REDIRECT (para Vercel)
 // ==============================================
 function iniciarConGoogle() {
   const btn = document.getElementById('btnGoogleLogin');
@@ -462,31 +462,34 @@ function iniciarConGoogle() {
   const proveedor = new firebase.auth.GoogleAuthProvider();
   proveedor.setCustomParameters({ 'prompt': 'select_account' });
   
-  auth.signInWithPopup(proveedor)
-    .then(res => {
-      document.getElementById("nombrePerfil").textContent = res.user.displayName || res.user.email;
+  // 🔥 REDIRECT EN VEZ DE POPUP
+  auth.signInWithRedirect(proveedor);
+  
+  setTimeout(() => {
+    btn.innerHTML = textoOriginal;
+    btn.disabled = false;
+  }, 5000);
+}
+
+// 🔥 MANEJAR RESULTADO DEL REDIRECT
+auth.getRedirectResult()
+  .then((result) => {
+    if (result.user) {
+      document.getElementById("nombrePerfil").textContent = result.user.displayName || result.user.email;
       cerrarModalLogin();
       if (videoPendiente) { 
         abrirVideoPelicula(videoPendiente);
         agregarAlHistorial(videoPendiente);
         videoPendiente = null; 
       }
-      btn.innerHTML = textoOriginal;
-      btn.disabled = false;
-    })
-    .catch(err => {
-      btn.innerHTML = textoOriginal;
-      btn.disabled = false;
-      
-      if (err.code === 'auth/popup-closed-by-user') {
-        alert("⚠️ Cerraste la ventana de Google antes de terminar.\n\nVuelve a intentarlo y espera a que se cierre automáticamente.");
-      } else if (err.code === 'auth/cancelled-popup-request') {
-        // Ignorar
-      } else {
-        alert("Error: " + err.message);
-      }
-    });
-}
+    }
+  })
+  .catch((error) => {
+    console.error("Error en redirect:", error);
+    if (error.code === 'auth/unauthorized-domain') {
+      alert("⚠️ El dominio no está autorizado en Firebase.\n\nVe a Firebase Console → Authentication → Settings → Authorized domains y agrega: " + window.location.hostname);
+    }
+  });
 
 function iniciarRecaptcha() {
   if (!recaptchaVerifier) recaptchaVerifier = new firebase.auth.RecaptchaVerifier('modal-login', { size: 'invisible' });
@@ -641,7 +644,6 @@ function toggleMenu() {
   mostrarHistorial();
 }
 
-// CERRAR MENÚ AL HACER CLIC FUERA
 document.addEventListener('click', function(e) {
   const menu = document.getElementById("menuPerfil");
   const btn = document.querySelector(".btn-perfil");
