@@ -3,17 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TELY 🎬 Películas y Series</title>
-    <meta http-equiv="X-Frame-Options" content="ALLOWALL">
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self' data: blob:;
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com https://api.themoviedb.org;
-        style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com;
-        font-src 'self' https://cdnjs.cloudflare.com;
-        frame-src 'self' https://mixdrop.top https://mixdrop.ag https://*.vidmoly.to https://*.voe.sx;
-        media-src 'self' https://mixdrop.top https://mixdrop.ag https://*.vidmoly.to;
-        connect-src 'self' https://*.firebaseio.com https://www.googleapis.com https://www.gstatic.com https://api.themoviedb.org;
-    ">
+    <title>TELY 🎬</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -22,222 +12,286 @@
             theme: {
                 extend: {
                     colors: {
-                        fondoOscuro: '#0F172A',
-                        grisOscuro: '#1E293B',
-                        grisMedio: '#334155',
-                        textoOscuro: '#F8FAFC',
-                        acento: '#3B82F6',
+                        fondo: '#FFFFFF',
+                        texto: '#111827',
+                        grisClaro: '#F3F4F6',
+                        grisMedio: '#9CA3AF',
+                        oscuro: '#1F2937',
+                        acento: '#1F2937',
+                        botonActivo: '#1F2937',
+                        botonInactivo: '#E5E7EB',
                         naranja: '#F59E0B',
                         rojo: '#EF4444',
-                        verde: '#10B981'
+                        verde: '#10B981',
+                        fondoOscuro: '#0F172A',
+                        textoOscuro: '#F8FAFC',
+                        grisOscuro: '#1E293B'
                     },
-                    fontFamily: { sans: ['Segoe UI', 'Roboto', 'Arial', 'sans-serif'] }
+                    fontFamily: {
+                        sans: ['Segoe UI', 'Roboto', 'sans-serif']
+                    }
                 }
             }
         }
     </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; transition: background 0.2s, color 0.2s; }
-        html, body { width: 100%; max-width: 100%; overflow-x: hidden; min-height: 100vh; font-family: sans-serif; }
-        body { background: #0F172A; color: #F8FAFC; }
+        html, body { width: 100%; max-width: 100%; overflow-x: hidden; min-height: 100vh; }
+        body { background: #FFFFFF; color: #111827; }
+        body.dark { background: #0F172A; color: #F8FAFC; }
 
-        header { padding: 1.2rem; background: #1E293B; border-bottom: 1px solid #334155; position: sticky; top: 0; z-index: 100; }
+        header { padding: 1.2rem; background: #FFFFFF; border-bottom: 1px solid #E5E7EB; position: sticky; top: 0; z-index: 50; }
+        body.dark header { background: #1E293B; border-color: #334155; }
+
         .logo-contenedor { display: flex; align-items: center; gap: 0.8rem; }
-        .logo { height: 48px; width: auto; object-fit: contain; }
-        .titulo-app { font-size: 2rem; font-weight: 700; margin: 0; }
+        .logo { height: 42px; width: auto; object-fit: contain; }
+        .titulo-app { font-size: 1.8rem; font-weight: 700; }
         .menu-derecha { display: flex; align-items: center; gap: 1rem; }
-        .btn-menu { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #F8FAFC; padding: 0.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .btn-menu:hover { background: #334155; }
-
-        .seccion-recientes { padding: 0 1.2rem 1.5rem; margin-top: 1rem; }
-        .titulo-seccion { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-        .etiqueta-new { background: #3B82F6; color: white; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
-        .lista-recientes, .lista-recomendadas {
-            display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.8rem;
-            scroll-behavior: smooth; scroll-snap-type: x mandatory;
-        }
-        .lista-recientes::-webkit-scrollbar, .lista-recomendadas::-webkit-scrollbar { height: 6px; }
-        .lista-recientes::-webkit-scrollbar-thumb, .lista-recomendadas::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
-        .tarjeta-recientes, .tarjeta-recomendada {
-            flex: 0 0 auto; width: 120px; cursor: pointer; transition: transform 0.2s;
-            scroll-snap-align: start;
-        }
-        .tarjeta-recientes:hover, .tarjeta-recomendada:hover { transform: scale(1.05); }
-        .portada-recientes, .portada-recomendada { width: 100%; height: 180px; border-radius: 8px; object-fit: cover; background: #1E293B; }
-        .texto-recientes, .texto-recomendada { font-size: 0.85rem; text-align: center; margin-top: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #F8FAFC; }
+        .btn-menu { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #111827; padding: 0.5rem; border-radius: 50%; }
+        body.dark .btn-menu { color: #F8FAFC; }
 
         .pestanas { display: flex; gap: 0.8rem; padding: 1rem 1.2rem; flex-wrap: wrap; }
-        .btn-pestana { padding: 0.7rem 1.4rem; border-radius: 9999px; border: none; font-weight: 500; cursor: pointer; font-size: 1rem; transition: 0.2s; }
-        .btn-pestana.inactiva { background: #334155; color: #CBD5E1; }
-        .btn-pestana.activa { background: #3B82F6; color: #FFFFFF; }
+        .btn-pestana { padding: 0.7rem 1.4rem; border-radius: 9999px; border: none; font-weight: 500; cursor: pointer; font-size: 1rem; }
+        .btn-pestana.inactiva { background: #E5E7EB; color: #374151; }
+        .btn-pestana.activa { background: #1F2937; color: #FFFFFF; }
+        body.dark .btn-pestana.inactiva { background: #334155; color: #CBD5E1; }
+        body.dark .btn-pestana.activa { background: #60A5FA; color: #0F172A; }
 
         .buscador { display: flex; align-items: center; gap: 0.8rem; padding: 0 1.2rem 1.5rem; flex-wrap: wrap; }
-        .input-buscar { flex: 1; min-width: 200px; padding: 0.9rem 1.2rem; border-radius: 9999px; border: 1px solid #334155; background: #1E293B; color: #F8FAFC; font-size: 1rem; outline: none; }
-        .input-buscar:focus { border-color: #3B82F6; }
-        .btn-buscar { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #94A3B8; padding: 0.5rem; }
-        .contador { background: #334155; padding: 0.7rem 1rem; border-radius: 9999px; font-weight: 500; font-size: 0.9rem; color: #CBD5E1; }
+        .input-buscar { flex: 1; min-width: 200px; padding: 0.9rem 1.2rem; border-radius: 9999px; border: 1px solid #E5E7EB; background: #FFFFFF; color: #111827; font-size: 1rem; }
+        body.dark .input-buscar { background: #1E293B; border-color: #334155; color: #F8FAFC; }
+        .btn-buscar { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #6B7280; padding: 0.5rem; }
+        body.dark .btn-buscar { color: #94A3B8; }
+        .contador { background: #E5E7EB; padding: 0.7rem 1rem; border-radius: 9999px; font-weight: 500; font-size: 0.9rem; }
+        body.dark .contador { background: #334155; color: #CBD5E1; }
 
-        .grid-contenido { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; padding: 0 1.2rem 2rem; }
-        @media (max-width: 480px) { .grid-contenido { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; } }
-        .tarjeta { border-radius: 12px; overflow: hidden; background: #1E293B; box-shadow: 0 2px 8px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.2s; position: relative; }
-        .tarjeta:hover { transform: translateY(-4px); }
-        .portada { width: 100%; aspect-ratio: 2/3; object-fit: cover; background: #1E293B; }
-        .etiqueta-anio { position: absolute; top: 0.7rem; left: 0.7rem; background: rgba(0,0,0,0.8); color: #fff; padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; }
-        .estrella { position: absolute; top: 0.7rem; right: 0.7rem; color: #F59E0B; font-size: 1.3rem; }
-        .info-tarjeta { padding: 0.8rem; }
-        .info-tarjeta h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.2rem; line-height: 1.3; color: #F8FAFC; }
-        .badge-video { font-size: 0.8rem; color: #10B981; font-weight: 500; }
-        .badge-sin-video { font-size: 0.8rem; color: #9CA3AF; font-weight: 500; }
+        .grid-contenido { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; padding: 0 1.2rem 2rem; }
+        @media (max-width: 480px) { .grid-contenido { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; } }
+        
+        .tarjeta { border-radius: 10px; overflow: hidden; background: #FFFFFF; box-shadow: 0 1px 4px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.2s; position: relative; }
+        body.dark .tarjeta { background: #1E293B; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+        .tarjeta:hover { transform: translateY(-3px); }
+        .portada { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
+        .etiqueta-anio { position: absolute; top: 0.4rem; left: 0.4rem; background: rgba(0,0,0,0.75); color: #fff; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
+        .estrella { position: absolute; top: 0.4rem; right: 0.4rem; color: #F59E0B; font-size: 0.9rem; }
+        .info-tarjeta { padding: 0.5rem; }
+        .info-tarjeta h3 { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.1rem; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        body.dark .info-tarjeta h3 { color: #F8FAFC; }
+        .badge-video { font-size: 0.65rem; color: #10B981; font-weight: 500; }
+        .badge-sin-video { font-size: 0.65rem; color: #9CA3AF; font-weight: 500; }
 
-        .pagina-detalle { display: none; position: fixed; inset: 0; background: #0F172A; z-index: 999; overflow-y: auto; }
-        .encabezado-detalle { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem; border-bottom: 1px solid #334155; position: sticky; top: 0; background: #1E293B; z-index: 10; }
-        .btn-volver { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #F8FAFC; display: flex; align-items: center; }
-        .titulo-detalle { font-size: 1.5rem; font-weight: 700; margin: 1rem 0; color: #F8FAFC; }
-        .datos-detalle { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
-        .anio-detalle { background: #334155; padding: 0.4rem 0.9rem; border-radius: 20px; font-size: 0.9rem; color: #CBD5E1; }
-        .puntuacion { display: flex; align-items: center; gap: 0.4rem; color: #F59E0B; font-weight: 600; }
-        .sinopsis { line-height: 1.6; color: #94A3B8; margin-bottom: 2rem; font-size: 1rem; }
+        .seccion-recientes { padding: 0 1.2rem 1.5rem; }
+        .seccion-recientes .titulo-seccion { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
+        .seccion-recientes .titulo-seccion i { color: #F59E0B; }
+        .scroll-recientes { display: flex; gap: 0.8rem; overflow-x: auto; padding-bottom: 0.5rem; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+        .scroll-recientes::-webkit-scrollbar { height: 4px; }
+        .scroll-recientes::-webkit-scrollbar-track { background: #E5E7EB; border-radius: 4px; }
+        .scroll-recientes::-webkit-scrollbar-thumb { background: #9CA3AF; border-radius: 4px; }
+        body.dark .scroll-recientes::-webkit-scrollbar-track { background: #334155; }
+        body.dark .scroll-recientes::-webkit-scrollbar-thumb { background: #64748B; }
+        
+        .tarjeta-reciente { flex: 0 0 auto; width: 120px; border-radius: 10px; overflow: hidden; background: #FFFFFF; box-shadow: 0 1px 4px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.2s; scroll-snap-align: start; }
+        body.dark .tarjeta-reciente { background: #1E293B; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+        .tarjeta-reciente:hover { transform: scale(1.05); }
+        .tarjeta-reciente .portada-reciente { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
+        .tarjeta-reciente .info-reciente { padding: 0.4rem; text-align: center; }
+        .tarjeta-reciente .info-reciente h4 { font-size: 0.7rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        body.dark .tarjeta-reciente .info-reciente h4 { color: #F8FAFC; }
 
-        .reproductor-contenedor { 
-            width: 100%; 
-            background: #000; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            margin-bottom: 1.5rem; 
-            position: relative; 
-            aspect-ratio: 16/9;
-            min-height: 220px;
-        }
-        .reproductor-contenedor iframe {
-            width: 100%; 
-            height: 100%; 
-            border: none; 
-            background: #000;
-            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation-by-user-activation"
-            referrerpolicy="no-referrer-when-downgrade"
-            loading="lazy"
-        }
-        .botones-opciones { display: flex; gap: 0.8rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
-        .btn-opcion { padding: 0.8rem 1.5rem; border-radius: 8px; border: none; background: #334155; color: #F8FAFC; font-weight: 500; cursor: pointer; transition: 0.2s; }
-        .btn-opcion.activo { background: #3B82F6; color: #FFFFFF; }
-        .aviso { display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem; background: #78350F; border-radius: 8px; color: #FBBF24; font-size: 0.9rem; margin-bottom: 2rem; }
+        .modal-video { position: fixed; inset: 0; background: #000; z-index: 9998; display: none; flex-direction: column; overflow: hidden; }
+        .modal-video.abierto { display: flex; }
+        
+        .netflix-player { width: 100%; height: 62vh; position: relative; background: #000; overflow: hidden; flex-shrink: 0; }
+        .netflix-player iframe, .netflix-player object, .netflix-player embed { width: 100%; height: 100%; border: none; background: #000; position: absolute; top: 0; left: 0; }
+        
+        .player-top { position: absolute; top: 0; left: 0; right: 0; padding: 1.5rem; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); display: flex; justify-content: space-between; align-items: center; z-index: 10; pointer-events: none; }
+        .btn-cerrar-video { background: rgba(255,255,255,0.15); border: none; color: #fff; font-size: 1.5rem; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; transition: 0.3s; }
+        .btn-cerrar-video:hover { background: rgba(255,0,0,0.7); transform: scale(1.1); }
+        .titulo-video { font-size: 1.2rem; font-weight: 600; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.8); pointer-events: auto; }
 
-        .seccion-recomendadas { border-top: 1px solid #334155; padding-top: 1.5rem; margin-top: 1rem; }
-        .titulo-recomendadas { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #F8FAFC; }
+        .panel-inferior { flex: 1; overflow-y: auto; background: #F9FAFB; padding: 1.2rem; }
+        body.dark .panel-inferior { background: #1E293B; }
+        
+        .panel-inferior .info-pelicula { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 1rem; }
+        .panel-inferior .info-pelicula h2 { font-size: 1.3rem; font-weight: 700; }
+        body.dark .panel-inferior .info-pelicula h2 { color: #F8FAFC; }
+        .panel-inferior .info-pelicula .detalles { display: flex; gap: 1rem; align-items: center; font-size: 0.9rem; color: #6B7280; flex-wrap: wrap; }
+        body.dark .panel-inferior .info-pelicula .detalles { color: #94A3B8; }
+        .panel-inferior .info-pelicula .detalles .anio { background: #E5E7EB; padding: 0.1rem 0.6rem; border-radius: 4px; }
+        body.dark .panel-inferior .info-pelicula .detalles .anio { background: #334155; }
+        .panel-inferior .info-pelicula .detalles .rating { color: #F59E0B; }
+        .panel-inferior .sinopsis { font-size: 0.9rem; color: #4B5563; line-height: 1.5; margin-bottom: 1rem; }
+        body.dark .panel-inferior .sinopsis { color: #94A3B8; }
+
+        /* SOLO DOS BOTONES: Principal y Abrir en ventana nueva */
+        .botones-opciones { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .btn-opcion { padding: 0.7rem 1.5rem; border-radius: 8px; border: 2px solid #D1D5DB; background: #FFFFFF; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.9rem; transition: 0.2s; }
+        body.dark .btn-opcion { background: #334155; border-color: #475569; color: #F8FAFC; }
+        .btn-opcion.activo { background: #1F2937; color: #FFFFFF; border-color: #1F2937; }
+        body.dark .btn-opcion.activo { background: #60A5FA; color: #0F172A; border-color: #60A5FA; }
+        .btn-opcion:hover { transform: scale(1.03); }
+        .btn-nueva-ventana { border-color: #EF4444 !important; color: #EF4444 !important; }
+        .btn-nueva-ventana:hover { background: #EF4444 !important; color: #fff !important; }
+        body.dark .btn-nueva-ventana { border-color: #EF4444 !important; color: #EF4444 !important; }
+        body.dark .btn-nueva-ventana:hover { background: #EF4444 !important; color: #fff !important; }
+
+        .aviso { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem 1rem; background: #FEF3C7; border-radius: 8px; color: #92400E; font-size: 0.9rem; margin-bottom: 1rem; }
+        body.dark .aviso { background: #78350F; color: #FBBF24; }
+
+        /* Reportar, Trofeos, Ayuda - IGUAL QUE LA IMAGEN */
+        .botones-extras { display: flex; gap: 1.5rem; justify-content: center; margin-top: 0.5rem; margin-bottom: 1rem; }
+        .botones-extras button { background: none; border: none; color: #9CA3AF; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; transition: 0.2s; }
+        .botones-extras button:hover { color: #6B7280; }
+        body.dark .botones-extras button { color: #64748B; }
+        body.dark .botones-extras button:hover { color: #94A3B8; }
+
+        .seccion-recomendadas { border-top: 1px solid #E5E7EB; padding-top: 1rem; margin-top: 0.5rem; }
+        body.dark .seccion-recomendadas { border-color: #334155; }
+        .titulo-recomendadas { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.8rem; }
+        body.dark .titulo-recomendadas { color: #F8FAFC; }
+        .lista-recomendadas { display: flex; gap: 0.8rem; overflow-x: auto; padding-bottom: 0.5rem; }
+        .tarjeta-recomendada { flex: 0 0 auto; width: 110px; cursor: pointer; transition: transform 0.2s; }
+        .tarjeta-recomendada:hover { transform: scale(1.05); }
+        .portada-recomendada { width: 100%; height: 165px; border-radius: 6px; object-fit: cover; }
+        .texto-recomendada { font-size: 0.75rem; text-align: center; margin-top: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        body.dark .texto-recomendada { color: #94A3B8; }
 
         .menu-perfil { position: relative; }
-        .dropdown { position: absolute; right: 0; top: calc(100% + 10px); background: #1E293B; border-radius: 10px; width: 280px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); display: none; z-index: 200; border: 1px solid #334155; overflow: hidden; }
-        .dropdown.mostrar { display: block; animation: aparecer 0.2s ease; }
-        @keyframes aparecer { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-        .dropdown-header { padding: 1rem; border-bottom: 1px solid #334155; font-weight: 600; color: #F8FAFC; }
-        .dropdown-item { display: flex; align-items: center; gap: 0.5rem; width: 100%; padding: 0.9rem 1rem; text-align: left; border: none; background: none; cursor: pointer; font-size: 0.95rem; color: #CBD5E1; transition: all 0.2s; }
-        .dropdown-item:hover { background: #334155; color: #F8FAFC; padding-left: 1.2rem; }
-        .divisor { height: 1px; background: #334155; margin: 0.5rem 0; }
-        .historial-vacio { padding: 1.5rem; text-align: center; color: #9CA3AF; font-size: 0.9rem; }
-
-        .modal-login { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(4px); }
-        .contenedor-login { background: #1E293B; border-radius: 16px; padding: 2rem; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #334155; animation: subir 0.3s ease; }
-        @keyframes subir { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .dropdown { position: absolute; right: 0; top: 120%; background: #FFFFFF; border-radius: 10px; width: 260px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: none; z-index: 100; border: 1px solid #E5E7EB; }
+        body.dark .dropdown { background: #1E293B; border-color: #334155; }
+        .dropdown.mostrar { display: block; }
+        .dropdown-header { padding: 1rem; border-bottom: 1px solid #E5E7EB; font-weight: 600; }
+        body.dark .dropdown-header { border-color: #334155; color: #F8FAFC; }
+        .dropdown button { display: block; width: 100%; padding: 0.9rem 1rem; text-align: left; border: none; background: none; cursor: pointer; font-size: 0.95rem; color: #374151; }
+        body.dark .dropdown button { color: #CBD5E1; }
+        .dropdown button:hover { background: #F3F4F6; }
+        body.dark .dropdown button:hover { background: #334155; }
+        .historial-vacio { padding: 1.2rem; text-align: center; color: #9CA3AF; }
         .oculto { display: none !important; }
+
+        .modal-login { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+        .contenedor-login { background: #FFFFFF; border-radius: 12px; padding: 2rem; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        body.dark .contenedor-login { background: #1E293B; }
     </style>
 </head>
 <body>
 <header>
     <div class="flex justify-between items-center">
         <div class="logo-contenedor">
-            <img src="logo.png" alt="Logo TELY" class="logo" loading="lazy" onerror="this.style.display='none'">
+            <img src="logo.png" alt="Logo TELY" class="logo">
             <h1 class="titulo-app">TELY 🎬</h1>
         </div>
         <div class="menu-derecha">
-            <button class="btn-menu" onclick="cambiarModo()" title="Cambiar modo"><i class="fa-solid fa-moon" id="iconoModo"></i></button>
+            <button class="btn-menu" onclick="cambiarModo()"><i class="fa-solid fa-moon" id="iconoModo"></i></button>
             <div class="menu-perfil">
-                <button class="btn-menu" onclick="toggleMenu()" title="Perfil"><i class="fa-solid fa-user-circle"></i></button>
+                <button class="btn-menu" onclick="toggleMenu()"><i class="fa-solid fa-user-circle"></i></button>
                 <div class="dropdown" id="menuPerfil">
-                    <div class="dropdown-header" id="nombrePerfil">🔑 Acceder a tu cuenta</div>
-                    <div class="divisor"></div>
+                    <div class="dropdown-header" id="nombrePerfil">Acceder</div>
                     <div class="dropdown-header">📺 Visto recientemente</div>
                     <div id="listaHistorial"></div>
-                    <div class="divisor"></div>
-                    <button class="dropdown-item text-amber-400" onclick="limpiarHistorial()">🗑️ Limpiar historial</button>
-                    <button class="dropdown-item text-blue-400" onclick="abrirModalLogin()">🔑 Iniciar sesión</button>
-                    <button class="dropdown-item text-red-400" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
-                    <button class="dropdown-item text-green-400 oculto" id="btnAdmin" onclick="irAlPanelAdmin()">⚙️ Panel Admin</button>
+                    <button onclick="limpiarHistorial()" class="text-amber-500">🗑️ Limpiar historial</button>
+                    <button onclick="cerrarSesion()" class="text-red-500 border-t border-gray-200 mt-2 pt-2">🚪 Cerrar sesión</button>
                 </div>
             </div>
         </div>
     </div>
 </header>
 
-<div class="seccion-recientes">
-    <h2 class="titulo-seccion"><span class="etiqueta-new">NEW</span> Agregados recientemente</h2>
-    <div class="lista-recientes" id="listaRecientes"></div>
-</div>
-
 <div class="pestanas">
-    <button class="btn-pestana activa" onclick="cambiarCategoria('peliculas')">Películas</button>
+    <button class="btn-pestana activa" onclick="cambiarCategoria('estrenos')">Estrenos</button>
+    <button class="btn-pestana inactiva" onclick="cambiarCategoria('peliculas')">Películas</button>
     <button class="btn-pestana inactiva" onclick="cambiarCategoria('series')">Series</button>
 </div>
 
 <div class="buscador">
-    <input type="text" class="input-buscar" placeholder="Buscar..." id="buscadorInput">
+    <input type="text" class="input-buscar" placeholder="Buscar título..." id="buscadorInput">
     <button class="btn-buscar" onclick="buscarContenido()"><i class="fa-solid fa-magnifying-glass"></i></button>
     <div class="contador" id="contadorTotal">0 títulos</div>
 </div>
 
-<div class="grid-contenido" id="lista-contenido">
-    <div class="col-span-3 text-center py-16 text-gray-400 text-lg">Cargando contenido...</div>
+<div class="seccion-recientes">
+    <div class="titulo-seccion">
+        <i class="fa-solid fa-clock-rotate-left"></i> Visto recientemente
+    </div>
+    <div class="scroll-recientes" id="scrollRecientes"></div>
 </div>
 
-<div class="pagina-detalle" id="paginaDetalle">
-    <div class="encabezado-detalle">
-        <button class="btn-volver" onclick="cerrarDetalle()"><i class="fa-solid fa-arrow-left"></i></button>
-        <h2 class="font-bold text-lg text-white" id="tituloCabecera"></h2>
-        <button class="btn-menu" onclick="cambiarModo()"><i class="fa-solid fa-moon" id="iconoModo2"></i></button>
-    </div>
-    <div class="contenido-detalle" style="padding: 1.2rem;">
-        <h2 class="titulo-detalle" id="tituloDetalle"></h2>
-        <div class="datos-detalle">
-            <div class="anio-detalle" id="anioDetalle"></div>
-            <div class="puntuacion"><i class="fa-solid fa-star"></i> <span id="puntuacionDetalle">7.0</span></div>
-            <div class="text-gray-300" id="generoDetalle"></div>
+<div class="grid-contenido" id="lista-contenido"></div><!-- REPRODUCTOR ESTILO UNIVERSO GEEK -->
+<div id="modal-video" class="modal-video">
+    <div class="netflix-player" id="netflixPlayer">
+        <div class="player-top">
+            <span class="titulo-video" id="tituloReproductor">Título</span>
+            <button class="btn-cerrar-video" onclick="cerrarVideo()">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
         </div>
-        <p class="sinopsis" id="sinopsisDetalle"></p>
-        <div id="contenidoReproductor"></div>
-
+    </div>
+    
+    <div class="panel-inferior" id="panelInferior">
+        <!-- Título, año, rating y género -->
+        <div class="info-pelicula">
+            <h2 id="tituloPanel">Título</h2>
+            <div class="detalles">
+                <span class="anio" id="anioPanel">2024</span>
+                <span class="rating">⭐ <span id="ratingPanel">7.3</span></span>
+                <span id="generoPanel">Acción</span>
+            </div>
+        </div>
+        <!-- Sinopsis -->
+        <div class="sinopsis" id="sinopsisPanel">Sinopsis de la película...</div>
+        
+        <!-- SOLO DOS BOTONES: Principal y Abrir en ventana nueva -->
+        <div class="botones-opciones" id="botonesOpciones"></div>
+        
+        <!-- Aviso -->
+        <div class="aviso">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Si falla la reproducción, usa el botón <strong>"Abrir en ventana nueva"</strong>.</span>
+        </div>
+        
+        <!-- Reportar, Trofeos, Ayuda -->
+        <div class="botones-extras">
+            <button onclick="reportarContenido()"><i class="fa-solid fa-flag"></i> Reportar</button>
+            <button onclick="trofeosContenido()"><i class="fa-solid fa-trophy"></i> Trofeos</button>
+            <button onclick="ayudaContenido()"><i class="fa-solid fa-circle-question"></i> Ayuda</button>
+        </div>
+        
+        <!-- Te podría gustar -->
         <div class="seccion-recomendadas" id="seccionRecomendadas">
-            <h4 class="titulo-recomendadas">🎯 Te podría gustar</h4>
-            <div class="lista-recomendadas" id="recomendadasLista"></div>
+            <h4 class="titulo-recomendadas">Te podría gustar</h4>
+            <div class="lista-recomendadas" id="recomendadasLista">
+                <p class="text-gray-400 text-center py-3 w-full">Cargando recomendaciones...</p>
+            </div>
         </div>
     </div>
 </div>
 
 <div id="modal-login" class="modal-login oculto">
     <div class="contenedor-login">
-        <h2 class="text-2xl font-bold text-center mb-4 text-white">Iniciar Sesión</h2>
-        <p class="text-center text-gray-300 mb-6">Accede para ver todo el contenido</p>
-        <button class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium flex items-center justify-center gap-2 mb-4 transition" onclick="iniciarConGoogle()">
+        <h2 class="text-2xl font-bold text-center mb-4">Iniciar Sesión</h2>
+        <p class="text-center text-gray-500 mb-6">Accede para ver todo el contenido</p>
+        <button class="w-full py-3 bg-blue-600 text-white rounded-lg font-medium flex items-center justify-center gap-2 mb-4" id="btnGoogleLogin" onclick="iniciarConGoogle()">
             <i class="fa-brands fa-google"></i> Continuar con Google
         </button>
         <div class="mb-4">
-            <p class="text-sm text-gray-300 mb-2">O con número de teléfono</p>
-            <input type="tel" id="telefonoInput" placeholder="+58 412 1234567" class="w-full p-3 border border-gray-600 rounded-lg mb-2 bg-gray-800 text-white outline-none focus:border-green-500">
-            <button class="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition" onclick="enviarCodigo()">Enviar código</button>
+            <p class="text-sm text-gray-500 mb-2">O con número de teléfono</p>
+            <input type="tel" id="telefonoInput" placeholder="+58 412 1234567" class="w-full p-3 border rounded-lg mb-2">
+            <button class="w-full py-2 bg-green-600 text-white rounded-lg" onclick="enviarCodigo()">Enviar código</button>
         </div>
         <div id="seccionCodigo" class="oculto mb-4">
-            <input type="text" id="codigoInput" placeholder="Código de 6 dígitos" class="w-full p-3 border border-gray-600 rounded-lg mb-2 bg-gray-800 text-white outline-none focus:border-green-500">
-            <button class="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition" onclick="verificarCodigo()">Verificar</button>
+            <input type="text" id="codigoInput" placeholder="Código de 6 dígitos" class="w-full p-3 border rounded-lg mb-2">
+            <button class="w-full py-2 bg-green-600 text-white rounded-lg" onclick="verificarCodigo()">Verificar</button>
         </div>
-        <button class="w-full text-gray-300 hover:text-white mt-4 transition" onclick="cerrarModalLogin()">Cerrar</button>
+        <button class="w-full text-gray-500 mt-4" onclick="cerrarModalLogin()">Cerrar</button>
     </div>
-</div>
-
-<!-- Firebase CDN -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+</div><script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
 <script>
-// ✅ TU CONFIGURACIÓN FIREBASE NUEVA + PANEL ADMIN
+// ==============================================
+// 🔧 CONFIGURACIÓN FIREBASE
+// ==============================================
 const firebaseConfig = {
   apiKey: "AIzaSyCwLATDpQN1RWv3rLPjJXbNnIBkyo_BUfI",
   authDomain: "tely-ap.firebaseapp.com",
@@ -253,132 +307,332 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ✅ API TMDB - pon aquí tu clave real cuando la tengas
-const TMDB_API_KEY = "TU_CLAVE_TMDB_AQUI";
-const TMDB_IMG_URL = "https://image.tmdb.org/t/p/w500";
+let recaptchaVerifier, confirmationResult, videoPendiente = null, serieActual = null, contenido = [];
+let peliculaActual = null;
 
-let recaptchaVerifier, confirmationResult, videoPendiente = null, contenido = [], enlaceActual = "";
-const ADMIN_UIDS = ["ID_DE_TU_USUARIO_AQUI"]; // Agrega tu UID aquí para ser admin
+// ==============================================
+// 🔑 CONFIGURACIÓN TMDB
+// ==============================================
+const TMDB_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4ZGQ5OWI1YTE1YWNmZGQ5OGUzYjI0OWQ1Zjg5MGFmNCIsIm5iZiI6MTc4MjI3NzIzMS4zMzMsInN1YiI6IjZhM2I2NDZmZThmMTMwOTc2MWVjNDYxYiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.JLmHWuXkhDc9LreAvXFZa0qTS7PR_nrj_SSwVm9UZ9Y";
+const TMDB_BASE = "https://api.themoviedb.org/3";
+const TMDB_IMG = "https://image.tmdb.org/t/p/w500";
+const TMDB_LANG = "es-ES";
+const opcionesTMDB = {
+  method: "GET",
+  headers: { "Authorization": `Bearer ${TMDB_TOKEN}`, "Content-Type": "application/json;charset=utf-8" }
+};
 
-// ✅ CONTENIDO BASE
-const MI_PELICULAS = [
+// ==============================================
+// 📦 CONTENIDO - SOLO VIDMOLY
+// ==============================================
+const MI_CONTENIDO = [
   {
     id: "rambo_001",
     titulo: "Rambo 1",
     anio: "1982",
     tipo: "pelicula",
     categoria: "peliculas",
-    tmdb_id: "1370",
+    portada: "rambo1.png",
     sinopsis: "Un ex soldado de élite regresa a su pueblo natal y se enfrenta a la hostilidad de las autoridades locales.",
     puntuacion: "7.7",
     genero: "Acción / Aventura",
-    fecha_agregado: "2026-06-25",
-    opciones: [{ nombre: "Mixdrop", url: "https://mixdrop.top/e/nl1k1k66ad8n3z" }]
-  }
-];
-
-const MI_SERIES = [
+    tmdb_id: "1136",
+    url: "https://vidmoly.biz/embed-zpqaemei0ljl.html?controls=1&logo=0&autoplay=1"
+  },
   {
-    id: "breaking_bad_001",
-    titulo: "Breaking Bad",
-    anio: "2008",
-    tipo: "serie",
-    categoria: "series",
-    tmdb_id: "1396",
-    sinopsis: "Un profesor de química con cáncer empieza a fabricar metanfetamina.",
-    puntuacion: "9.2",
-    genero: "Drama / Crimen",
-    fecha_agregado: "2026-06-21",
-    temporadas: [{ numero: 1, capitulos: [{ numero: 1, titulo: "El principio", opciones: [{ nombre: "Mixdrop", url: "https://mixdrop.top/e/ejemplo" }] }] }]
+    id: "johnwick_001",
+    titulo: "John Wick",
+    anio: "2014",
+    tipo: "pelicula",
+    categoria: "peliculas",
+    portada: "John-wick.png",
+    sinopsis: "Un exasesino a sueldo vuelve a la acción para vengar a su perro.",
+    puntuacion: "7.4",
+    genero: "Acción / Suspenso",
+    tmdb_id: "245891",
+    url: "https://vidmoly.me/embed-CODIGO.html?controls=1&logo=0&autoplay=1"
+  },
+  {
+    id: "demonio_001",
+    titulo: "Demonio Negro",
+    anio: "1982",
+    tipo: "pelicula",
+    categoria: "peliculas",
+    portada: "dm.png",
+    sinopsis: "Basada en la leyenda mexicana, un demonio aterroriza a un pueblo.",
+    puntuacion: "6.8",
+    genero: "Terror / Leyenda",
+    tmdb_id: "",
+    url: "https://vidmoly.me/embed-vw401s1vxe6r.html?controls=1&logo=0&autoplay=1"
+  },
+  {
+    id: "tmdb_49018",
+    titulo: "La noche del demonio",
+    anio: "2010",
+    tipo: "pelicula",
+    categoria: "peliculas",
+    portada: "https://image.tmdb.org/t/p/w500/8m0xT6JZv9t8qKf0rL9XyM7nP2a.jpg",
+    sinopsis: "Una familia descubre que los espíritus oscuros han invadido su hogar.",
+    puntuacion: "6.9",
+    genero: "Terror / Suspenso",
+    tmdb_id: "49018",
+    url: "https://vidmoly.me/embed-CODIGO.html?controls=1&logo=0&autoplay=1"
   }
 ];
 
-// ✅ Funciones TMDB
-async function obtenerDatosTMDB(tmdbId, tipo) {
-  if (!TMDB_API_KEY || TMDB_API_KEY === "TU_CLAVE_TMDB_AQUI") return null;
-  try {
-    const res = await fetch(`https://api.themoviedb.org/3/${tipo}/${tmdbId}?api_key=${TMDB_API_KEY}&language=es-ES`);
-    return res.ok ? await res.json() : null;
-  } catch (err) {
-    console.log("Error TMDB:", err);
-    return null;
-  }
-}
-
-// ✅ Cargar todo el contenido
-async function cargarTodoContenido() {
-  contenido = [...MI_PELICULAS, ...MI_SERIES];
-  const admin = await cargarContenidoAdmin();
-  if (admin.length) contenido = [...contenido, ...admin];
-  contenido.sort((a,b) => new Date(b.fecha_agregado||"1970") - new Date(a.fecha_agregado||"1970"));
-  document.getElementById("contadorTotal").textContent = `${contenido.length} títulos`;
-  mostrarRecientes();
-  mostrarContenido("peliculas");
-}
-
+// ==============================================
+// 📥 CARGAR CONTENIDO
+// ==============================================
 async function cargarContenidoAdmin() {
   try {
-    const snap = await db.ref("contenido_admin").once("value");
-    return snap.val() ? Object.values(snap.val()) : [];
-  } catch { return []; }
+    const snapshot = await db.ref("contenido_personalizado").once("value");
+    const datosAdmin = snapshot.val();
+    return datosAdmin ? Object.values(datosAdmin) : [];
+  } catch (err) {
+    console.log("Sin contenido del panel:", err);
+    return [];
+  }
 }
 
-function mostrarRecientes() {
-  const cont = document.getElementById("listaRecientes");
-  cont.innerHTML = "";
-  contenido.slice(0,6).forEach(async item => {
-    let portada = item.portada;
-    if (item.tmdb_id && TMDB_API_KEY !== "TU_CLAVE_TMDB_AQUI") {
-      const datos = await obtenerDatosTMDB(item.tmdb_id, item.tipo);
-      if (datos?.poster_path) portada = TMDB_IMG_URL + datos.poster_path;
-    }
-    const div = document.createElement("div");
-    div.className = "tarjeta-recientes";
-    div.innerHTML = `<img src="${portada||'logo.png'}" class="portada-recientes" loading="lazy"><div class="texto-recientes">${item.titulo}</div>`;
-    div.onclick = () => auth.currentUser ? abrirDetalle(item) : (videoPendiente = item, abrirModalLogin());
-    cont.appendChild(div);
-  });
-}
-
-function mostrarContenido(cat) {
+async function cargarContenidoCompleto() {
   const lista = document.getElementById("lista-contenido");
-  lista.innerHTML = "";
-  const filtrados = contenido.filter(x => x.categoria === cat);
-  if (!filtrados.length) { lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-16">Sin contenido</p>`; return; }
-  filtrados.forEach(async item => {
-    let portada = item.portada;
-    if (item.tmdb_id && TMDB_API_KEY !== "TU_CLAVE_TMDB_AQUI") {
-      const datos = await obtenerDatosTMDB(item.tmdb_id, item.tipo);
-      if (datos?.poster_path) portada = TMDB_IMG_URL + datos.poster_path;
-    }
-    const tiene = item.opciones?.length || item.temporadas?.length;
-    const div = document.createElement("div");
-    div.className = "tarjeta";
-    div.innerHTML = `
-      <span class="etiqueta-anio">${item.anio}</span>
-      <i class="fa-solid fa-star estrella"></i>
-      <img src="${portada||'logo.png'}" class="portada" loading="lazy">
-      <div class="info-tarjeta"><h3>${item.titulo}</h3><span class="${tiene?'badge-video':'badge-sin-video'}">${tiene?'▶ Disponible':'🔒 Sin enlace'}</span></div>
-    `;
-    div.onclick = () => auth.currentUser ? abrirDetalle(item) : (videoPendiente = item, abrirModalLogin());
-    lista.appendChild(div);
-  });
+  lista.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-400">Cargando contenido...</div>';
+
+  try {
+    const resPeliculas = await fetch(`${TMDB_BASE}/movie/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB);
+    const datosPeliculas = await resPeliculas.json();
+    const resSeries = await fetch(`${TMDB_BASE}/tv/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB);
+    const datosSeries = await resSeries.json();
+    const contenidoAdmin = await cargarContenidoAdmin();
+
+    const pelisTMDB = datosPeliculas.results.slice(0, 12).map(p => {
+      const enAdmin = contenidoAdmin.find(a => a.tmdb_id == p.id);
+      return {
+        id: `tmdb_${p.id}`,
+        tmdb_id: p.id,
+        titulo: enAdmin?.titulo || p.title,
+        anio: p.release_date ? p.release_date.split("-")[0] : "N/D",
+        tipo: "pelicula",
+        categoria: "peliculas",
+        portada: enAdmin?.portada || (p.poster_path ? `${TMDB_IMG}${p.poster_path}` : "https://via.placeholder.com/300x450?text=Sin+Portada"),
+        sinopsis: enAdmin?.sinopsis || p.overview || "Sin sinopsis",
+        puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A",
+        genero: "Película",
+        url: enAdmin?.url || ""
+      };
+    });
+
+    const seriesTMDB = datosSeries.results.slice(0, 8).map(s => {
+      const enAdmin = contenidoAdmin.find(a => a.tmdb_id == s.id);
+      return {
+        id: `tmdb_${s.id}`,
+        tmdb_id: s.id,
+        titulo: enAdmin?.titulo || s.name,
+        anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D",
+        tipo: "serie",
+        categoria: "series",
+        portada: enAdmin?.portada || (s.poster_path ? `${TMDB_IMG}${s.poster_path}` : "https://via.placeholder.com/300x450?text=Sin+Portada"),
+        sinopsis: enAdmin?.sinopsis || s.overview || "Sin sinopsis",
+        puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A",
+        genero: "Serie",
+        url: enAdmin?.url || "",
+        temporadas: enAdmin?.temporadas || []
+      };
+    });
+
+    contenido = [...MI_CONTENIDO, ...contenidoAdmin, ...pelisTMDB, ...seriesTMDB];
+  } catch (err) {
+    console.error("Error TMDB:", err);
+    const contenidoAdmin = await cargarContenidoAdmin();
+    contenido = [...MI_CONTENIDO, ...contenidoAdmin];
+  }
+
+  document.getElementById("contadorTotal").textContent = `${contenido.length} títulos`;
+  mostrarContenido("estrenos");
+  mostrarRecientes();
 }
 
+// ==============================================
+// 🔐 AUTENTICACIÓN
+// ==============================================
+function iniciarConGoogle() {
+  const btn = document.getElementById('btnGoogleLogin');
+  const textoOriginal = btn.innerHTML;
+  
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Esperando...';
+  btn.disabled = true;
+  
+  const proveedor = new firebase.auth.GoogleAuthProvider();
+  proveedor.setCustomParameters({ 'prompt': 'select_account' });
+  
+  auth.signInWithPopup(proveedor)
+    .then(res => {
+      document.getElementById("nombrePerfil").textContent = res.user.displayName || res.user.email;
+      cerrarModalLogin();
+      if (videoPendiente) { 
+        abrirVideoPelicula(videoPendiente);
+        agregarAlHistorial(videoPendiente);
+        videoPendiente = null; 
+      }
+      btn.innerHTML = textoOriginal;
+      btn.disabled = false;
+    })
+    .catch(err => {
+      btn.innerHTML = textoOriginal;
+      btn.disabled = false;
+      
+      if (err.code === 'auth/popup-closed-by-user') {
+        alert("⚠️ Cerraste la ventana de Google antes de terminar.\n\nVuelve a intentarlo y espera a que se cierre automáticamente.");
+      } else if (err.code === 'auth/cancelled-popup-request') {
+        // Ignorar
+      } else {
+        alert("Error: " + err.message);
+      }
+    });
+}
+
+function iniciarRecaptcha() {
+  if (!recaptchaVerifier) recaptchaVerifier = new firebase.auth.RecaptchaVerifier('modal-login', { size: 'invisible' });
+}
+
+function enviarCodigo() {
+  iniciarRecaptcha();
+  const telefono = document.getElementById("telefonoInput").value.trim();
+  if (!telefono.startsWith("+")) return alert("Agrega código de país ej: +58...");
+  auth.signInWithPhoneNumber(telefono, recaptchaVerifier)
+    .then(res => { confirmationResult = res; document.getElementById("seccionCodigo").classList.remove("oculto"); })
+    .catch(err => alert("Error: " + err.message));
+}
+
+function verificarCodigo() {
+  const codigo = document.getElementById("codigoInput").value.trim();
+  confirmationResult.confirm(codigo)
+    .then(res => {
+      document.getElementById("nombrePerfil").textContent = res.user.phoneNumber;
+      cerrarModalLogin();
+      if (videoPendiente) { 
+        abrirVideoPelicula(videoPendiente);
+        agregarAlHistorial(videoPendiente);
+        videoPendiente = null; 
+      }
+    })
+    .catch(err => alert("Código incorrecto o expirado"));
+}
+
+function cerrarSesion() { 
+  auth.signOut().then(() => { 
+    document.getElementById("nombrePerfil").textContent = "Acceder"; 
+    location.reload(); 
+  }); 
+}
+
+// ==============================================
+// 📋 FUNCIONES GENERALES
+// ==============================================
 function cambiarModo() {
   const body = document.body;
   const icono = document.getElementById("iconoModo");
   const icono2 = document.getElementById("iconoModo2");
-  const activo = body.classList.toggle("dark");
-  icono.className = activo ? "fa-solid fa-sun" : "fa-solid fa-moon";
-  if (icono2) icono2.className = activo ? "fa-solid fa-sun" : "fa-solid fa-moon";
-  localStorage.setItem("modo", activo ? "oscuro" : "claro");
+  if (body.classList.contains("dark")) {
+    body.classList.remove("dark");
+    icono.className = "fa-solid fa-moon";
+    if (icono2) icono2.className = "fa-solid fa-moon";
+    localStorage.setItem("modo", "claro");
+  } else {
+    body.classList.add("dark");
+    icono.className = "fa-solid fa-sun";
+    if (icono2) icono2.className = "fa-solid fa-sun";
+    localStorage.setItem("modo", "oscuro");
+  }
 }
 
 if (localStorage.getItem("modo") === "oscuro" || (!localStorage.getItem("modo") && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
   document.body.classList.add("dark");
   document.getElementById("iconoModo").className = "fa-solid fa-sun";
 }
+
+function agregarAlHistorial(item) {
+  let h = JSON.parse(localStorage.getItem("historialTely")) || [];
+  h = h.filter(x => x.id !== item.id);
+  h.unshift({ id: item.id, titulo: item.titulo, tipo: item.tipo });
+  if (h.length > 10) h.pop();
+  localStorage.setItem("historialTely", JSON.stringify(h));
+  mostrarHistorial();
+  mostrarRecientes();
+}
+
+function mostrarHistorial() {
+  const c = document.getElementById("listaHistorial");
+  const h = JSON.parse(localStorage.getItem("historialTely")) || [];
+  c.innerHTML = h.length ? "" : `<div class="historial-vacio">Aún no has visto nada</div>`;
+  h.forEach(i => {
+    const btn = document.createElement("button");
+    btn.innerHTML = `<i class="fa-solid fa-play mr-2"></i> ${i.titulo}`;
+    btn.onclick = () => { 
+      const f = contenido.find(x => x.id === i.id); 
+      if (!f) return; 
+      auth.currentUser ? abrirVideoPelicula(f) : (videoPendiente = f, abrirModalLogin(), toggleMenu()); 
+    };
+    c.appendChild(btn);
+  });
+}
+
+function mostrarRecientes() {
+  const contenedor = document.getElementById("scrollRecientes");
+  const historial = JSON.parse(localStorage.getItem("historialTely")) || [];
+  
+  if (historial.length === 0) {
+    contenedor.innerHTML = `<p class="text-gray-400 text-sm py-2">No has visto nada aún</p>`;
+    return;
+  }
+  
+  contenedor.innerHTML = "";
+  historial.forEach(item => {
+    const encontrado = contenido.find(c => c.id === item.id);
+    if (!encontrado) return;
+    
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "tarjeta-reciente";
+    tarjeta.innerHTML = `
+      <img src="${encontrado.portada}" alt="${encontrado.titulo}" class="portada-reciente" loading="lazy" onerror="this.src='https://via.placeholder.com/120x180?text=Sin+Portada'">
+      <div class="info-reciente">
+        <h4>${encontrado.titulo}</h4>
+      </div>
+    `;
+    tarjeta.onclick = () => {
+      auth.currentUser ? abrirVideoPelicula(encontrado) : (videoPendiente = encontrado, abrirModalLogin());
+    };
+    contenedor.appendChild(tarjeta);
+  });
+}
+
+function limpiarHistorial() { localStorage.removeItem("historialTely"); mostrarHistorial(); mostrarRecientes(); }
+
+function mostrarContenido(categoria) {
+  const lista = document.getElementById("lista-contenido");
+  lista.innerHTML = "";
+  const filtrados = contenido.filter(x => x.categoria === categoria);
+  if (!filtrados.length) { lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">Sin contenido en esta sección</p>`; return; }
+  filtrados.forEach(item => {
+    const tieneVideo = item.url || (item.temporadas && item.temporadas.length > 0);
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "tarjeta";
+    tarjeta.innerHTML = `
+      <span class="etiqueta-anio">${item.anio}</span>
+      <i class="fa-solid fa-star estrella"></i>
+      <img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=Sin+Portada'">
+      <div class="info-tarjeta">
+        <h3>${item.titulo}</h3>
+        ${tieneVideo ? '<span class="badge-video">▶ Disponible</span>' : '<span class="badge-sin-video">🔒 Sin enlace</span>'}
+      </div>
+    `;
+    tarjeta.onclick = () => { 
+      auth.currentUser ? abrirVideoPelicula(item) : (videoPendiente = item, abrirModalLogin()); 
+    };
+    lista.appendChild(tarjeta);
+  });
+}
+
 function cambiarCategoria(cat) {
   document.querySelectorAll(".btn-pestana").forEach(b => { b.classList.remove("activa"); b.classList.add("inactiva"); });
   event.target.classList.remove("inactiva"); event.target.classList.add("activa"); mostrarContenido(cat);
@@ -389,140 +643,276 @@ window.onclick = e => { if (!e.target.matches(".btn-menu, .btn-menu *")) documen
 
 function buscarContenido() {
   const texto = document.getElementById("buscadorInput").value.trim().toLowerCase();
-  const res = contenido.filter(x => x.titulo.toLowerCase().includes(texto));
+  const resultados = contenido.filter(x => x.titulo.toLowerCase().includes(texto));
   const lista = document.getElementById("lista-contenido");
   lista.innerHTML = "";
-  res.length ? res.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "tarjeta";
-    div.innerHTML = `<span class="etiqueta-anio">${item.anio}</span><i class="fa-solid fa-star estrella"></i><img src="${item.portada||'logo.png'}" class="portada"><div class="info-tarjeta"><h3>${item.titulo}</h3></div>`;
-    div.onclick = () => auth.currentUser ? abrirDetalle(item) : (videoPendiente = item, abrirModalLogin());
-    lista.appendChild(div);
-  }) : lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-16">Sin resultados</p>`;
+  resultados.length ? resultados.forEach(item => {
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "tarjeta";
+    tarjeta.innerHTML = `
+      <span class="etiqueta-anio">${item.anio}</span>
+      <i class="fa-solid fa-star estrella"></i>
+      <img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=Sin+Portada'">
+      <div class="info-tarjeta"><h3>${item.titulo}</h3></div>
+    `;
+    tarjeta.onclick = () => abrirVideoPelicula(item);
+    lista.appendChild(tarjeta);
+  }) : lista.innerHTML = `<p class="col-span-3 text-center text-gray-400 py-10">No se encontraron coincidencias</p>`;
 }
 
-function abrirModalLogin() { document.getElementById("modal-login").classList.remove("oculto"); toggleMenu(); }
-function cerrarModalLogin() { document.getElementById("modal-login").classList.add("oculto"); videoPendiente = null; }
+function abrirModalLogin() { document.getElementById("modal-login").classList.remove("oculto"); }
+function cerrarModalLogin() { document.getElementById("modal-login").classList.add("oculto"); videoPendiente = null; }// ==============================================
+// 🎬 REPRODUCTOR - SOLO PRINCIPAL Y ABRIR EN VENTANA NUEVA
+// ==============================================
+function abrirVideoPelicula(peli) {
+    detenerVideo();
+    
+    const modal = document.getElementById("modal-video");
+    const player = document.getElementById("netflixPlayer");
+    const botones = document.getElementById("botonesOpciones");
+    const recomen = document.getElementById("recomendadasLista");
+    
+    peliculaActual = peli;
+    
+    modal.classList.add("abierto");
+    document.body.style.overflow = "hidden";
+    
+    document.getElementById("tituloReproductor").textContent = peli.titulo + (peli.anio ? ` (${peli.anio})` : '');
+    document.getElementById("tituloPanel").textContent = peli.titulo;
+    document.getElementById("anioPanel").textContent = peli.anio || "2024";
+    document.getElementById("ratingPanel").textContent = peli.puntuacion || "7.0";
+    document.getElementById("generoPanel").textContent = peli.genero || (peli.tipo === "pelicula" ? "Película" : "Serie");
+    document.getElementById("sinopsisPanel").textContent = peli.sinopsis || "Sin sinopsis disponible";
+    
+    botones.innerHTML = "";
+    
+    // 🔥 BOTÓN "Principal"
+    const btnPrincipal = document.createElement("button");
+    btnPrincipal.className = "btn-opcion activo";
+    btnPrincipal.innerHTML = `<i class="fa-solid fa-play mr-2"></i> Principal`;
+    btnPrincipal.onclick = () => {
+        document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo"));
+        btnPrincipal.classList.add("activo");
+        if (peli.url) {
+            reproducirOpcion(peli.url, peli.titulo, peli.anio);
+        }
+    };
+    botones.appendChild(btnPrincipal);
+    
+    // 🔥 BOTÓN "Abrir en ventana nueva" - IGUAL QUE LA IMAGEN
+    const btnNuevaVentana = document.createElement("button");
+    btnNuevaVentana.className = "btn-opcion btn-nueva-ventana";
+    btnNuevaVentana.innerHTML = `<i class="fa-solid fa-external-link-alt mr-2"></i> Abrir en ventana nueva`;
+    btnNuevaVentana.onclick = () => {
+        if (peli.url) {
+            window.open(peli.url, '_blank');
+        } else {
+            alert("❌ No hay enlace disponible");
+        }
+    };
+    botones.appendChild(btnNuevaVentana);
 
-// ✅ Inicio de sesión Google
-function iniciarConGoogle() {
-  if (window.location.protocol === "file:") { alert("❌ Súbelo a Vercel primero"); return; }
-  const prov = new firebase.auth.GoogleAuthProvider();
-  prov.setCustomParameters({ prompt: "select_account" });
-  auth.signInWithPopup(prov)
-    .then(res => {
-      document.getElementById("nombrePerfil").textContent = `👤 ${res.user.displayName || res.user.email}`;
-      cerrarModalLogin();
-      if (ADMIN_UIDS.includes(res.user.uid)) document.getElementById("btnAdmin").classList.remove("oculto");
-      if (videoPendiente) abrirDetalle(videoPendiente);
-    })
-    .catch(err => {
-      if (err.code === "auth/unauthorized-domain") alert("❌ Agrega dominios en Firebase");
-      else alert(`❌ Error: ${err.message}`);
-    });
+    // REPRODUCIR AUTOMÁTICAMENTE
+    if (peli.url) {
+        setTimeout(() => {
+            reproducirOpcion(peli.url, peli.titulo, peli.anio);
+        }, 300);
+    } else {
+        player.innerHTML = `<div class="error-video" style="color:#EF4444;text-align:center;padding:4rem;font-size:1.2rem;">❌ Agrega enlaces desde el panel de administración</div>`;
+    }
+
+    agregarAlHistorial(peli);
+    cargarRecomendadas(peli.tmdb_id);
 }
 
-// ✅ Inicio de sesión por teléfono
-function enviarCodigo() {
-  const tel = document.getElementById("telefonoInput").value.trim();
-  if (!tel) return alert("Ingresa tu número con código +58");
-  if (!recaptchaVerifier) recaptchaVerifier = new firebase.auth.RecaptchaVerifier("telefonoInput", { size: "invisible" });
-  auth.signInWithPhoneNumber(tel, recaptchaVerifier)
-    .then(res => {
-      confirmationResult = res;
-      document.getElementById("seccionCodigo").classList.remove("oculto");
-      alert("Código enviado al teléfono");
-    })
-    .catch(err => alert(`Error: ${err.message}`));
+function reproducirOpcion(url, titulo, anio) {
+    const player = document.getElementById("netflixPlayer");
+    let enlace = url.trim();
+
+    if (enlace.includes('vidmoly')) {
+        if (!enlace.includes('controls=')) {
+            enlace += (enlace.includes('?') ? '&' : '?') + 'controls=1&logo=0&autoplay=1';
+        }
+        player.innerHTML = `
+            <object data="${enlace}" type="text/html" 
+                style="width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;">
+            </object>
+        `;
+    } else if (enlace.includes('youtube.com') || enlace.includes('youtu.be')) {
+        player.innerHTML = `
+            <iframe src="${enlace}" frameborder="0" 
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen" 
+                allowfullscreen 
+                style="width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;">
+            </iframe>
+        `;
+    } else {
+        player.innerHTML = `
+            <iframe src="${enlace}" frameborder="0" 
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen" 
+                allowfullscreen 
+                style="width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;">
+            </iframe>
+        `;
+    }
+
+    document.getElementById("tituloReproductor").textContent = `${titulo} ${anio ? `(${anio})` : ''}`;
 }
 
-function verificarCodigo() {
-  const cod = document.getElementById("codigoInput").value.trim();
-  if (!cod) return alert("Escribe el código");
-  confirmationResult.confirm(cod)
-    .then(res => {
-      document.getElementById("nombrePerfil").textContent = `👤 ${res.user.phoneNumber}`;
-      cerrarModalLogin();
-      if (ADMIN_UIDS.includes(res.user.uid)) document.getElementById("btnAdmin").classList.remove("oculto");
-    })
-    .catch(err => alert("Código incorrecto"));
+function abrirCapitulo(cap) {
+    detenerVideo();
+    const player = document.getElementById("netflixPlayer");
+    const botones = document.getElementById("botonesOpciones");
+    
+    botones.innerHTML = "";
+    
+    document.getElementById("tituloReproductor").textContent = `${serieActual.titulo} - Cap. ${cap.numero}`;
+    document.getElementById("tituloPanel").textContent = `${serieActual.titulo} - Cap. ${cap.numero}`;
+    document.getElementById("anioPanel").textContent = serieActual.anio || "2024";
+    document.getElementById("ratingPanel").textContent = serieActual.puntuacion || "7.0";
+    document.getElementById("generoPanel").textContent = "Serie";
+    document.getElementById("sinopsisPanel").textContent = cap.titulo || `Capítulo ${cap.numero}`;
+
+    // BOTÓN "Principal"
+    const btnPrincipal = document.createElement("button");
+    btnPrincipal.className = "btn-opcion activo";
+    btnPrincipal.innerHTML = `<i class="fa-solid fa-play mr-2"></i> Principal`;
+    btnPrincipal.onclick = () => {
+        document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo"));
+        btnPrincipal.classList.add("activo");
+        if (cap.url) {
+            reproducirOpcion(cap.url, serieActual.titulo, `Cap. ${cap.numero}`);
+        }
+    };
+    botones.appendChild(btnPrincipal);
+    
+    // BOTÓN "Abrir en ventana nueva"
+    const btnNuevaVentana = document.createElement("button");
+    btnNuevaVentana.className = "btn-opcion btn-nueva-ventana";
+    btnNuevaVentana.innerHTML = `<i class="fa-solid fa-external-link-alt mr-2"></i> Abrir en ventana nueva`;
+    btnNuevaVentana.onclick = () => {
+        if (cap.url) {
+            window.open(cap.url, '_blank');
+        } else {
+            alert("❌ No hay enlace disponible");
+        }
+    };
+    botones.appendChild(btnNuevaVentana);
+
+    if (cap.url) {
+        setTimeout(() => {
+            reproducirOpcion(cap.url, serieActual.titulo, `Cap. ${cap.numero}`);
+        }, 300);
+    } else {
+        player.innerHTML = `<div class="error-video" style="color:#EF4444;text-align:center;padding:4rem;font-size:1.2rem;">❌ Sin enlace para este capítulo</div>`;
+    }
 }
 
-function abrirDetalle(item) {
-  document.getElementById("tituloDetalle").textContent = `${item.titulo} (${item.anio})`;
-  document.getElementById("tituloCabecera").textContent = item.titulo;
-  document.getElementById("anioDetalle").textContent = item.anio;
-  document.getElementById("puntuacionDetalle").textContent = item.puntuacion;
-  document.getElementById("generoDetalle").textContent = item.genero;
-  document.getElementById("sinopsisDetalle").textContent = item.sinopsis;
-
-  const cont = document.getElementById("contenidoReproductor");
-  cont.innerHTML = "";
-  if (item.tipo === "pelicula" && item.opciones?.length) {
-    let html = `<div class="reproductor-contenedor"><iframe src="${item.opciones[0].url}" allowfullscreen></iframe></div><div class="botones-opciones">`;
-    item.opciones.forEach((o,i) => html += `<button class="btn-opcion ${i===0?'activo':''}" onclick="cambiarFuente('${o.url}', this)">${o.nombre}</button>`);
-    html += `</div>`;
-    cont.innerHTML = html;
-  } else {
-    cont.innerHTML = `<p class="text-center py-16 text-gray-400">Sin enlaces disponibles</p>`;
-  }
-
-  document.getElementById("paginaDetalle").style.display = "block";
-  document.body.style.overflow = "hidden";
-  agregarAlHistorial(item);
+function cerrarVideo() {
+    detenerVideo();
+    document.getElementById("modal-video").classList.remove("abierto");
+    document.body.style.overflow = "auto";
+    peliculaActual = null;
 }
 
-function cambiarFuente(url, btn) {
-  document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo"));
-  btn.classList.add("activo");
-  document.querySelector("#reproductorPrincipal iframe").src = url;
+function detenerVideo() {
+    const player = document.getElementById("netflixPlayer");
+    player.innerHTML = "";
 }
 
-function cerrarDetalle() {
-  document.getElementById("paginaDetalle").style.display = "none";
-  document.body.style.overflow = "auto";
+// ==============================================
+// 📥 RECOMENDACIONES
+// ==============================================
+async function cargarRecomendadas(tmdbId) {
+    const contenedor = document.getElementById("recomendadasLista");
+    contenedor.innerHTML = "<p class='text-gray-400 text-center py-3'>Cargando recomendaciones...</p>";
+
+    if (!tmdbId) {
+        contenedor.innerHTML = "<p class='text-gray-400 text-center py-3'>Sin recomendaciones disponibles</p>";
+        return;
+    }
+
+    try {
+        const res = await fetch(`${TMDB_BASE}/movie/${tmdbId}/recommendations?language=${TMDB_LANG}&page=1`, opcionesTMDB);
+        const datos = await res.json();
+        contenedor.innerHTML = "";
+
+        if (!datos.results || datos.results.length === 0) {
+            contenedor.innerHTML = "<p class='text-gray-400 text-center py-3'>No hay películas relacionadas</p>";
+            return;
+        }
+
+        datos.results.slice(0, 6).forEach(pelicula => {
+            const tarjeta = document.createElement("div");
+            tarjeta.className = "tarjeta-recomendada";
+            tarjeta.innerHTML = `
+                <img src="${pelicula.poster_path ? TMDB_IMG + pelicula.poster_path : 'https://via.placeholder.com/110x165?text=Sin+Imagen'}" 
+                     alt="${pelicula.title}" class="portada-recomendada">
+                <p class="texto-recomendada">${pelicula.title}</p>
+            `;
+            tarjeta.onclick = () => {
+                cerrarVideo();
+                const completo = contenido.find(c => c.tmdb_id == pelicula.id);
+                if (completo) {
+                    abrirVideoPelicula(completo);
+                } else {
+                    abrirVideoPelicula({
+                        id: `tmdb_${pelicula.id}`,
+                        tmdb_id: pelicula.id,
+                        titulo: pelicula.title,
+                        anio: pelicula.release_date ? pelicula.release_date.split("-")[0] : "N/D",
+                        tipo: "pelicula",
+                        categoria: "peliculas",
+                        portada: pelicula.poster_path ? TMDB_IMG + pelicula.poster_path : "",
+                        sinopsis: pelicula.overview || "Sin sinopsis",
+                        puntuacion: pelicula.vote_average ? pelicula.vote_average.toFixed(1) : "N/A",
+                        genero: "Película",
+                        url: ""
+                    });
+                }
+            };
+            contenedor.appendChild(tarjeta);
+        });
+
+    } catch (err) {
+        contenedor.innerHTML = "<p class='text-red-400 text-center py-3'>Error al cargar recomendaciones</p>";
+    }
 }
 
-function agregarAlHistorial(item) {
-  let h = JSON.parse(localStorage.getItem("historialTely")) || [];
-  h = h.filter(x => x.id !== item.id);
-  h.unshift({ id: item.id, titulo: item.titulo });
-  if (h.length > 10) h.pop();
-  localStorage.setItem("historialTely", JSON.stringify(h));
-  mostrarHistorial();
+// ==============================================
+// 🎮 EXTRAS (Reportar, Trofeos, Ayuda)
+// ==============================================
+function reportarContenido() {
+    alert("🚩 Reportar contenido\n\nSi encuentras un problema con este video, por favor repórtalo para que podamos solucionarlo.");
 }
 
-function mostrarHistorial() {
-  const c = document.getElementById("listaHistorial");
-  const h = JSON.parse(localStorage.getItem("historialTely")) || [];
-  c.innerHTML = h.length ? "" : `<div class="historial-vacio">Aún no has visto nada</div>`;
-  h.forEach(i => {
-    const btn = document.createElement("button");
-    btn.className = "dropdown-item";
-    btn.innerHTML = `<i class="fa-solid fa-play mr-2"></i> ${i.titulo}`;
-    btn.onclick = () => abrirDetalle(contenido.find(x => x.id === i.id));
-    c.appendChild(btn);
-  });
+function trofeosContenido() {
+    alert("🏆 Trofeos\n\nComparte este contenido con tus amigos y gana trofeos en la comunidad de TELY.");
 }
 
-function limpiarHistorial() { localStorage.removeItem("historialTely"); mostrarHistorial(); }
-
-function cerrarSesion() {
-  auth.signOut().then(() => {
-    document.getElementById("nombrePerfil").textContent = "🔑 Acceder a tu cuenta";
-    document.getElementById("btnAdmin").classList.add("oculto");
-    localStorage.removeItem("historialTely");
-    mostrarHistorial();
-    document.getElementById("menuPerfil").classList.remove("mostrar");
-  });
+function ayudaContenido() {
+    alert("❓ Ayuda\n\n1. Si el video no carga, prueba con la otra opción.\n2. Si sigue fallando, usa 'Abrir en ventana nueva'.\n3. Verifica tu conexión a internet.");
 }
 
-function irAlPanelAdmin() { window.location.href = "/admin.html"; }
-
+// ==============================================
+// ⚡ INICIO
+// ==============================================
 auth.onAuthStateChanged(usuario => {
-  if (usuario && ADMIN_UIDS.includes(usuario.uid)) document.getElementById("btnAdmin").classList.remove("oculto");
-  cargarTodoContenido();
+    if (usuario) {
+        document.getElementById("nombrePerfil").textContent = usuario.displayName || usuario.phoneNumber || usuario.email;
+    }
+    cargarContenidoCompleto();
 });
+
+window.addEventListener('popstate', function(e) {
+    if (document.getElementById("modal-video").classList.contains("abierto")) {
+        cerrarVideo();
+        e.preventDefault();
+        history.pushState(null, '', window.location.href);
+    }
+});
+
+history.pushState(null, '', window.location.href);
 </script>
 </body>
 </html>
