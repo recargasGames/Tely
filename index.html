@@ -99,17 +99,18 @@
         body.dark .tarjeta-reciente .info-reciente h4 { color: #F8FAFC; }
 
         /* ========================================== */
-        /* REPRODUCTOR - CENTRADO (NO PANTALLA COMPLETA) */
+        /* REPRODUCTOR - VENTANA EMERGENTE CON FONDO OSCURO */
         /* ========================================== */
         .modal-video { 
             position: fixed; 
             inset: 0; 
-            background: rgba(0,0,0,0.85); 
+            background: rgba(0,0,0,0.92); 
             z-index: 9998; 
             display: none; 
             align-items: center;
             justify-content: center;
             padding: 1.5rem;
+            overflow-y: auto;
         }
         .modal-video.abierto { display: flex; }
 
@@ -118,10 +119,23 @@
             border-radius: 16px;
             max-width: 900px;
             width: 100%;
-            max-height: 95vh;
+            max-height: 98vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
             padding: 1.5rem;
+            margin: auto;
+            position: relative;
+        }
+        /* Ocultar el scrollbar para que se vea limpio */
+        .reproductor-contenedor::-webkit-scrollbar {
+            width: 4px;
+        }
+        .reproductor-contenedor::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .reproductor-contenedor::-webkit-scrollbar-thumb {
+            background: #7C3AED;
+            border-radius: 4px;
         }
 
         /* TÍTULO Y SINOPSIS ARRIBA */
@@ -178,7 +192,7 @@
             left: 0;
         }
 
-        /* BOTÓN DE CERRAR Y PANTALLA COMPLETA */
+        /* CONTROLES: PANTALLA COMPLETA Y CERRAR */
         .controles-superior {
             display: flex;
             justify-content: flex-end;
@@ -186,7 +200,7 @@
             margin-top: 0.8rem;
         }
         .btn-control {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.08);
             border: none;
             color: #fff;
             padding: 0.5rem 1rem;
@@ -199,24 +213,24 @@
             transition: 0.3s;
         }
         .btn-control:hover {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.15);
         }
         .btn-cerrar-modal {
-            background: rgba(255,0,0,0.2);
+            background: rgba(255,0,0,0.15);
             color: #EF4444;
         }
         .btn-cerrar-modal:hover {
-            background: rgba(255,0,0,0.4);
+            background: rgba(255,0,0,0.3);
         }
         .btn-fullscreen {
-            background: rgba(124,58,237,0.2);
+            background: rgba(124,58,237,0.15);
             color: #A78BFA;
         }
         .btn-fullscreen:hover {
-            background: rgba(124,58,237,0.4);
+            background: rgba(124,58,237,0.3);
         }
 
-        /* BOTONES DE OPCIÓN ABAJO */
+        /* BOTONES DE OPCIÓN */
         .botones-opciones {
             display: flex;
             gap: 0.6rem;
@@ -271,6 +285,17 @@
             gap: 0.8rem;
             overflow-x: auto;
             padding-bottom: 0.5rem;
+        }
+        /* Ocultar scrollbar en recomendaciones */
+        .lista-recomendadas::-webkit-scrollbar {
+            height: 4px;
+        }
+        .lista-recomendadas::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .lista-recomendadas::-webkit-scrollbar-thumb {
+            background: #7C3AED;
+            border-radius: 4px;
         }
         .tarjeta-recomendada {
             flex: 0 0 auto;
@@ -357,7 +382,7 @@
     <div class="scroll-recientes" id="scrollRecientes"></div>
 </div>
 
-<div class="grid-contenido" id="lista-contenido"></div><!-- REPRODUCTOR CENTRADO -->
+<div class="grid-contenido" id="lista-contenido"></div><!-- REPRODUCTOR - VENTANA EMERGENTE CON FONDO OSCURO -->
 <div id="modal-video" class="modal-video">
     <div class="reproductor-contenedor">
         <!-- TÍTULO Y SINOPSIS ARRIBA -->
@@ -374,7 +399,7 @@
         <!-- REPRODUCTOR CENTRADO -->
         <div class="netflix-player" id="netflixPlayer"></div>
 
-        <!-- CONTROLES: CERRAR Y PANTALLA COMPLETA -->
+        <!-- CONTROLES: PANTALLA COMPLETA Y CERRAR -->
         <div class="controles-superior">
             <button class="btn-control btn-fullscreen" onclick="toggleFullscreen()">
                 <i class="fa-solid fa-expand"></i> Pantalla completa
@@ -385,15 +410,13 @@
         </div>
 
         <!-- BOTONES DE OPCIÓN -->
-        <div class="botones-opciones" id="botonesOpciones">
-            <!-- Se generan con JavaScript -->
-        </div>
+        <div class="botones-opciones" id="botonesOpciones"></div>
 
         <!-- TE PODRÍA GUSTAR -->
         <div class="seccion-recomendadas" id="seccionRecomendadas">
             <h4 class="titulo-recomendadas">Te podría gustar</h4>
             <div class="lista-recomendadas" id="recomendadasLista">
-                <p class="text-gray-400 text-center py-3 w-full">Cargando recomendaciones...</p>
+                <p class="text-gray-400 text-center py-3 w-full" style="color:#94A3B8;">Cargando recomendaciones...</p>
             </div>
         </div>
     </div>
@@ -475,7 +498,7 @@ const MI_CONTENIDO = [
     puntuacion: "7.7",
     genero: "Acción / Aventura",
     tmdb_id: "1136",
-    url: "https://www.youtube.com/embed/pqql03l9b30?autoplay=1"
+    url: "https://vidmoly.biz/embed-zpqaemei0ljl.html"
   },
   {
     id: "johnwick_001",
@@ -834,7 +857,6 @@ window.addEventListener('popstate', function(e) {
 });
 
 history.pushState(null, '', window.location.href);// ==============================================
-// ==============================================
 // 🎬 REPRODUCTOR CENTRADO
 // ==============================================
 function abrirVideoPelicula(peli) {
@@ -1092,8 +1114,6 @@ function cerrarVideo() {
     document.getElementById("modal-video").classList.remove("abierto");
     document.body.style.overflow = "auto";
     peliculaActual = null;
-    // 🔥 Agregar un estado al historial para que el botón atrás funcione
-    history.pushState(null, '', window.location.href);
 }
 
 function detenerVideo() {
@@ -1118,23 +1138,6 @@ function toggleFullscreen() {
         }
     }
 }
-
-// ==============================================
-// 🔙 CAPTURAR BOTÓN ATRÁS - SOLO CIERRA REPRODUCTOR
-// ==============================================
-window.addEventListener('popstate', function(e) {
-    const modal = document.getElementById("modal-video");
-    // Si el reproductor está abierto, solo lo cerramos
-    if (modal && modal.classList.contains("abierto")) {
-        cerrarVideo();
-        e.preventDefault();
-        // No permitimos que el navegador vaya atrás
-        history.pushState(null, '', window.location.href);
-    }
-});
-
-// Guardar el estado inicial
-history.pushState(null, '', window.location.href);
 
 // ==============================================
 // EXTRAS
