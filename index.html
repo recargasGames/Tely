@@ -319,7 +319,7 @@ const opcionesTMDB = {
 };
 
 // ==============================================
-// 📦 CONTENIDO - SOLO VIDMOLY
+// 📦 CONTENIDO - CON YOUTUBE (Funciona en Vercel)
 // ==============================================
 const MI_CONTENIDO = [
   {
@@ -333,7 +333,7 @@ const MI_CONTENIDO = [
     puntuacion: "7.7",
     genero: "Acción / Aventura",
     tmdb_id: "1136",
-    url: "https://vidmoly.biz/embed-zpqaemei0ljl.html?controls=1&logo=0&autoplay=1"
+    url: "https://www.youtube.com/embed/pqql03l9b30?autoplay=1"
   },
   {
     id: "johnwick_001",
@@ -346,7 +346,7 @@ const MI_CONTENIDO = [
     puntuacion: "7.4",
     genero: "Acción / Suspenso",
     tmdb_id: "245891",
-    url: "https://vidmoly.me/embed-CODIGO.html?controls=1&logo=0&autoplay=1"
+    url: "https://www.youtube.com/embed/C0BMx-qxsP4?autoplay=1"
   },
   {
     id: "demonio_001",
@@ -359,7 +359,7 @@ const MI_CONTENIDO = [
     puntuacion: "6.8",
     genero: "Terror / Leyenda",
     tmdb_id: "",
-    url: "https://vidmoly.me/embed-vw401s1vxe6r.html?controls=1&logo=0&autoplay=1"
+    url: "https://www.youtube.com/embed/Fi9sTAbRwp4?autoplay=1"
   },
   {
     id: "tmdb_49018",
@@ -372,7 +372,7 @@ const MI_CONTENIDO = [
     puntuacion: "6.9",
     genero: "Terror / Suspenso",
     tmdb_id: "49018",
-    url: "https://vidmoly.me/embed-CODIGO.html?controls=1&logo=0&autoplay=1"
+    url: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
   }
 ];
 
@@ -462,7 +462,6 @@ function iniciarConGoogle() {
   const proveedor = new firebase.auth.GoogleAuthProvider();
   proveedor.setCustomParameters({ 'prompt': 'select_account' });
   
-  // 🔥 REDIRECT EN VEZ DE POPUP
   auth.signInWithRedirect(proveedor);
   
   setTimeout(() => {
@@ -471,7 +470,6 @@ function iniciarConGoogle() {
   }, 5000);
 }
 
-// 🔥 MANEJAR RESULTADO DEL REDIRECT
 auth.getRedirectResult()
   .then((result) => {
     if (result.user) {
@@ -486,9 +484,6 @@ auth.getRedirectResult()
   })
   .catch((error) => {
     console.error("Error en redirect:", error);
-    if (error.code === 'auth/unauthorized-domain') {
-      alert("⚠️ El dominio no está autorizado en Firebase.\n\nVe a Firebase Console → Authentication → Settings → Authorized domains y agrega: " + window.location.hostname);
-    }
   });
 
 function iniciarRecaptcha() {
@@ -673,7 +668,7 @@ function buscarContenido() {
 
 function abrirModalLogin() { document.getElementById("modal-login").classList.remove("oculto"); }
 function cerrarModalLogin() { document.getElementById("modal-login").classList.add("oculto"); videoPendiente = null; }// ==============================================
-// 🎬 REPRODUCTOR - SOLO PRINCIPAL Y ABRIR EN VENTANA NUEVA
+// 🎬 REPRODUCTOR - EXACTAMENTE COMO EN LA IMAGEN
 // ==============================================
 function abrirVideoPelicula(peli) {
     detenerVideo();
@@ -696,7 +691,7 @@ function abrirVideoPelicula(peli) {
     
     botones.innerHTML = "";
     
-    // 🔥 BOTÓN "Principal"
+    // 🔥 BOTÓN "Principal" - IGUAL QUE LA IMAGEN
     const btnPrincipal = document.createElement("button");
     btnPrincipal.className = "btn-opcion activo";
     btnPrincipal.innerHTML = `<i class="fa-solid fa-play mr-2"></i> Principal`;
@@ -709,7 +704,7 @@ function abrirVideoPelicula(peli) {
     };
     botones.appendChild(btnPrincipal);
     
-    // 🔥 BOTÓN "Abrir en ventana nueva"
+    // 🔥 BOTÓN "Abrir en ventana nueva" - IGUAL QUE LA IMAGEN
     const btnNuevaVentana = document.createElement("button");
     btnNuevaVentana.className = "btn-opcion btn-nueva-ventana";
     btnNuevaVentana.innerHTML = `<i class="fa-solid fa-external-link-alt mr-2"></i> Abrir en ventana nueva`;
@@ -739,7 +734,18 @@ function reproducirOpcion(url, titulo, anio) {
     const player = document.getElementById("netflixPlayer");
     let enlace = url.trim();
 
-    if (enlace.includes('vidmoly')) {
+    // 🔥 SOPORTE PARA YOUTUBE
+    if (enlace.includes('youtube.com') || enlace.includes('youtu.be')) {
+        player.innerHTML = `
+            <iframe src="${enlace}" frameborder="0" 
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen" 
+                allowfullscreen 
+                style="width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;">
+            </iframe>
+        `;
+    } 
+    // 🔥 SOPORTE PARA VIDMOLY (si decides usarlo)
+    else if (enlace.includes('vidmoly')) {
         if (!enlace.includes('controls=')) {
             enlace += (enlace.includes('?') ? '&' : '?') + 'controls=1&logo=0&autoplay=1';
         }
@@ -748,7 +754,9 @@ function reproducirOpcion(url, titulo, anio) {
                 style="width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;">
             </object>
         `;
-    } else if (enlace.includes('youtube.com') || enlace.includes('youtu.be')) {
+    }
+    // 🔥 SOPORTE PARA MIXDROP
+    else if (enlace.includes('mixdrop')) {
         player.innerHTML = `
             <iframe src="${enlace}" frameborder="0" 
                 allow="autoplay; encrypted-media; picture-in-picture; fullscreen" 
@@ -756,7 +764,24 @@ function reproducirOpcion(url, titulo, anio) {
                 style="width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;">
             </iframe>
         `;
-    } else {
+    }
+    // 🔥 SOPORTE PARA GOOGLE DRIVE
+    else if (enlace.includes('drive.google.com')) {
+        const id = enlace.match(/[-\w]{25,}/)?.[0];
+        if (id) {
+            const driveUrl = `https://drive.google.com/uc?export=stream&id=${id}&confirm=t&cache=1`;
+            player.innerHTML = `
+                <video src="${driveUrl}" controlsList="nodownload noremoteplayback" controls playsinline preload="auto" crossorigin="anonymous" style="width:100%;height:100%;background:#000;position:absolute;top:0;left:0;" autoplay>
+                    Tu navegador no soporta el video.
+                </video>
+            `;
+        } else {
+            player.innerHTML = `<div class="error-video" style="color:#EF4444;text-align:center;padding:4rem;font-size:1.2rem;">❌ Enlace de Drive inválido</div>`;
+            return;
+        }
+    }
+    // 🔥 CUALQUIER OTRO ENLACE
+    else {
         player.innerHTML = `
             <iframe src="${enlace}" frameborder="0" 
                 allow="autoplay; encrypted-media; picture-in-picture; fullscreen" 
