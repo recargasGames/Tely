@@ -164,7 +164,7 @@
             </div>
         </div>
 
-        <!-- TAB SERIES -->
+        <!-- TAB SERIES (CORREGIDO) -->
         <div id="tab-series" class="oculto">
             <div class="card">
                 <h3><i class="fa fa-tv"></i> Series de TMDB</h3>
@@ -247,7 +247,7 @@
         </div>
     </div>
 
-    <!-- MODAL EDITOR DE SERIE -->
+    <!-- MODAL EDITOR DE SERIE (CORREGIDO) -->
     <div id="modalEditorSerie" class="modal-editor">
         <div class="modal-content" id="modalEditorContent">
             <h3 id="editorTitulo"><i class="fa fa-tv"></i> Editar Serie</h3>
@@ -413,7 +413,7 @@
         paginaActual = nuevaPagina;
         cargarPeliculas();
     }// ==============================================
-// 📋 MOSTRAR PELÍCULAS CON BOTONES DE ELIMINAR
+// 📋 MOSTRAR PELÍCULAS
 // ==============================================
 function mostrarPeliculas() {
     const contenedor = document.getElementById("lista-peliculas");
@@ -562,7 +562,7 @@ function guardarEnlacesPelicula(tmdbId) {
 }
 
 // ==============================================
-// ❌ ELIMINAR ENLACE INDIVIDUAL (Opción 1 o Opción 2)
+// ❌ ELIMINAR ENLACE INDIVIDUAL
 // ==============================================
 function eliminarEnlaceOpcion(tmdbId, opcion) {
     if (!confirm(`¿Eliminar el enlace de "${opcion === 'opcion1' ? 'Opción 1' : 'Opción 2'}"?`)) return;
@@ -573,14 +573,12 @@ function eliminarEnlaceOpcion(tmdbId, opcion) {
         return;
     }
     
-    // 🔥 ACTUALIZAR LOCALMENTE
     if (opcion === 'opcion1') {
         peli.url = '';
     } else if (opcion === 'opcion2') {
         peli.opcion2 = '';
     }
     
-    // 🔥 ACTUALIZAR EN FIREBASE
     if (peli.adminId) {
         const admin = peliculasAdmin.find(a => a.id === peli.adminId);
         if (admin) {
@@ -598,17 +596,15 @@ function eliminarEnlaceOpcion(tmdbId, opcion) {
                 })
                 .catch(err => alert('❌ Error al eliminar: ' + err.message));
         } else {
-            // Si no encuentra el admin, recargar
             cargarPeliculas();
         }
     } else {
-        // Si no tiene adminId, solo limpiar visualmente
         mostrarPeliculas();
     }
 }
 
 // ==============================================
-// 🧹 LIMPIAR TODOS LOS ENLACES DE UNA PELÍCULA
+// 🧹 LIMPIAR TODOS LOS ENLACES
 // ==============================================
 function limpiarEnlacesPelicula(adminId, tmdbId) {
     if (!confirm('¿Limpiar TODOS los enlaces de esta película?')) return;
@@ -636,7 +632,7 @@ function recargarTodo() {
         cargarSeries();
     }
 }// ==============================================
-// 🎬 SERIES
+// 🎬 SERIES (CORREGIDO)
 // ==============================================
 async function cargarSeries() {
     const contenedor = document.getElementById("lista-series");
@@ -778,7 +774,7 @@ function eliminarSerie(adminId) {
         })
         .catch(err => alert('❌ Error: ' + err.message));
 }// ==============================================
-// 📝 ABRIR EDITOR DE SERIE
+// 📝 EDITOR DE SERIES (CORREGIDO)
 // ==============================================
 let serieEditandoId = null;
 
@@ -842,7 +838,7 @@ function agregarTempEditUI(container, temp, idx) {
 }
 
 // ==============================================
-// 🗑️ ELIMINAR TEMPORADA (CORREGIDO - BORRA DE VERDAD)
+// 🗑️ ELIMINAR TEMPORADA
 // ==============================================
 function eliminarTemporadaEdit(btn) {
     const tempCard = btn.closest('.temp-card');
@@ -858,22 +854,18 @@ function eliminarTemporadaEdit(btn) {
     const tmdbId = serieEditandoId;
     const tempIndex = parseInt(tempCard.dataset.tempIndex);
     
-    // 🔥 ELIMINAR DEL HTML
     tempCard.remove();
     
-    // 🔥 ACTUALIZAR LOS DATOS EN LA VARIABLE LOCAL
     const serie = seriesAdmin.find(s => s.tmdb_id == tmdbId);
     if (serie && serie.temporadas) {
         if (tempIndex !== undefined && tempIndex < serie.temporadas.length) {
             serie.temporadas.splice(tempIndex, 1);
-            // Re-numerar temporadas
             serie.temporadas.forEach((temp, i) => {
                 temp.numero = i + 1;
             });
         }
     }
     
-    // 🔥 GUARDAR EN FIREBASE
     if (tmdbId) {
         guardarSerieFirebase(tmdbId);
     }
@@ -882,7 +874,7 @@ function eliminarTemporadaEdit(btn) {
 }
 
 // ==============================================
-// 🗑️ ELIMINAR CAPÍTULO (CORREGIDO - BORRA DE VERDAD)
+// 🗑️ ELIMINAR CAPÍTULO
 // ==============================================
 function eliminarCapituloEdit(btn) {
     const capItem = btn.closest('.capitulo-item');
@@ -900,16 +892,13 @@ function eliminarCapituloEdit(btn) {
     const tempIndex = parseInt(tempCard.dataset.tempIndex);
     const capIndex = parseInt(capItem.dataset.capIndex);
     
-    // 🔥 ELIMINAR DEL HTML
     capItem.remove();
     
-    // 🔥 ACTUALIZAR LOS DATOS EN LA VARIABLE LOCAL
     const serie = seriesAdmin.find(s => s.tmdb_id == tmdbId);
     if (serie && serie.temporadas) {
         if (tempIndex !== undefined && tempIndex < serie.temporadas.length) {
             if (capIndex !== undefined && capIndex < serie.temporadas[tempIndex].capitulos.length) {
                 serie.temporadas[tempIndex].capitulos.splice(capIndex, 1);
-                // Re-numerar capítulos
                 serie.temporadas[tempIndex].capitulos.forEach((cap, i) => {
                     cap.numero = i + 1;
                 });
@@ -917,7 +906,6 @@ function eliminarCapituloEdit(btn) {
         }
     }
     
-    // 🔥 GUARDAR EN FIREBASE
     if (tmdbId) {
         guardarSerieFirebase(tmdbId);
     }
@@ -940,7 +928,6 @@ function guardarSerieFirebase(tmdbId) {
         return;
     }
     
-    // Recoger los datos actualizados del HTML
     const temporadas = [];
     document.querySelectorAll('#editTemporadasContainer .temp-card').forEach(tempDiv => {
         const nombre = tempDiv.querySelector('.edit-temp-nombre').value.trim() || 'Temporada';
@@ -966,7 +953,6 @@ function guardarSerieFirebase(tmdbId) {
         }
     });
     
-    // Si no hay temporadas, crear una por defecto
     if (temporadas.length === 0) {
         temporadas.push({
             numero: 1,
@@ -1002,8 +988,10 @@ function guardarSerieFirebase(tmdbId) {
                 const index = seriesAdmin.findIndex(a => a.id === existe.id);
                 if (index !== -1) seriesAdmin[index] = { ...datos, id: existe.id };
             }
-            // Recargar la lista de series para actualizar la vista
+            // 🔥 RECARGAR LA LISTA DE SERIES
             cargarSeries();
+            // 🔥 CERRAR EL EDITOR
+            cerrarEditorSerie();
         })
         .catch(err => {
             console.error('❌ Error al guardar:', err);
@@ -1039,7 +1027,6 @@ function agregarTemporadaEdit() {
     `;
     container.appendChild(div);
     
-    // Agregar a los datos locales
     const serie = seriesAdmin.find(s => s.tmdb_id == tmdbId);
     if (serie) {
         if (!serie.temporadas) serie.temporadas = [];
@@ -1074,7 +1061,6 @@ function agregarCapituloEdit(btn) {
     `;
     container.appendChild(div);
     
-    // Agregar a los datos locales
     const tempCard = btn.closest('.temp-card');
     const tempIndex = parseInt(tempCard.dataset.tempIndex);
     const serie = seriesAdmin.find(s => s.tmdb_id == tmdbId);
@@ -1102,8 +1088,6 @@ function guardarSerieDesdeEditor() {
     
     guardarSerieFirebase(serieEditandoId);
     alert('✅ Serie guardada correctamente');
-    cerrarEditorSerie();
-    cargarSeries();
 }
 
 function cerrarEditorSerie() {
