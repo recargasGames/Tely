@@ -836,7 +836,7 @@ function agregarTempEditUI(container, temp, idx) {
                             <button class="btn btn-probar btn-xxs" onclick="probarVideo('${cap.opcion2}')"><i class="fa fa-play"></i> Probar</button>
                         ` : ''}
                     </div>
-                    <div style="margin-top:0.3rem;">
+                    <div style="margin-top:0.3rem; display:flex; gap:0.3rem; flex-wrap:wrap;">
                         <button class="btn btn-guardar btn-xxs" onclick="guardarCapitulo(this, '${serieEditandoId}')"><i class="fa fa-save"></i> Guardar capítulo</button>
                     </div>
                 </div>
@@ -867,7 +867,7 @@ function agregarTempEditUI(container, temp, idx) {
 }
 
 // ==============================================
-// 💾 GUARDAR CAPÍTULO INDIVIDUAL (NUEVO)
+// 💾 GUARDAR CAPÍTULO INDIVIDUAL (CORREGIDO)
 // ==============================================
 function guardarCapitulo(btn, tmdbId) {
     const capItem = btn.closest('.capitulo-item');
@@ -881,14 +881,14 @@ function guardarCapitulo(btn, tmdbId) {
     const opcion2 = capItem.querySelector('.edit-cap-url2').value.trim();
     
     if (!url && !opcion2) {
-        alert('⚠️ Debes agregar al menos un enlace');
+        alert('⚠️ Debes agregar al menos un enlace (URL 1 o URL 2)');
         return;
     }
     
     const urlCorregida = corregirEnlaceYouTube(url);
     const opcion2Corregida = corregirEnlaceYouTube(opcion2);
     
-    // Actualizar en seriesAdmin
+    // 🔥 ACTUALIZAR EN seriesAdmin
     const serie = seriesAdmin.find(s => s.tmdb_id == tmdbId);
     if (!serie) {
         alert('❌ Serie no encontrada');
@@ -897,32 +897,60 @@ function guardarCapitulo(btn, tmdbId) {
     
     if (!serie.temporadas) serie.temporadas = [];
     if (!serie.temporadas[tempIndex]) {
-        serie.temporadas[tempIndex] = { numero: tempIndex + 1, nombre: 'Temporada', capitulos: [] };
+        serie.temporadas[tempIndex] = { 
+            numero: tempIndex + 1, 
+            nombre: 'Temporada ' + (tempIndex + 1), 
+            capitulos: [] 
+        };
     }
     if (!serie.temporadas[tempIndex].capitulos) {
         serie.temporadas[tempIndex].capitulos = [];
     }
     
-    // Actualizar el capítulo
+    // 🔥 ACTUALIZAR O CREAR EL CAPÍTULO
+    const capituloData = {
+        numero: numero,
+        titulo: titulo,
+        url: urlCorregida,
+        opcion2: opcion2Corregida
+    };
+    
     if (capIndex !== undefined && capIndex < serie.temporadas[tempIndex].capitulos.length) {
-        serie.temporadas[tempIndex].capitulos[capIndex] = {
-            numero: numero,
-            titulo: titulo,
-            url: urlCorregida,
-            opcion2: opcion2Corregida
-        };
+        serie.temporadas[tempIndex].capitulos[capIndex] = capituloData;
     } else {
-        serie.temporadas[tempIndex].capitulos.push({
-            numero: numero,
-            titulo: titulo,
-            url: urlCorregida,
-            opcion2: opcion2Corregida
-        });
+        serie.temporadas[tempIndex].capitulos.push(capituloData);
     }
     
-    // Guardar en Firebase
+    // 🔥 ACTUALIZAR EL HTML CON LOS DATOS GUARDADOS
+    const urlInput = capItem.querySelector('.edit-cap-url');
+    const url2Input = capItem.querySelector('.edit-cap-url2');
+    urlInput.value = urlCorregida;
+    url2Input.value = opcion2Corregida;
+    
+    // 🔥 ACTUALIZAR LOS BOTONES DE PROBAR
+    const probarBtns = capItem.querySelectorAll('.btn-probar');
+    probarBtns.forEach(btn => btn.remove());
+    
+    if (urlCorregida) {
+        const btnProbar1 = document.createElement('button');
+        btnProbar1.className = 'btn btn-probar btn-xxs';
+        btnProbar1.innerHTML = '<i class="fa fa-play"></i> Probar';
+        btnProbar1.onclick = () => probarVideo(urlCorregida);
+        urlInput.parentNode.appendChild(btnProbar1);
+    }
+    
+    if (opcion2Corregida) {
+        const btnProbar2 = document.createElement('button');
+        btnProbar2.className = 'btn btn-probar btn-xxs';
+        btnProbar2.innerHTML = '<i class="fa fa-play"></i> Probar';
+        btnProbar2.onclick = () => probarVideo(opcion2Corregida);
+        url2Input.parentNode.appendChild(btnProbar2);
+    }
+    
+    // 🔥 GUARDAR EN FIREBASE
     guardarSerieFirebase(tmdbId);
-    alert('✅ Capítulo guardado');
+    
+    alert('✅ Capítulo guardado correctamente');
 }
 
 // ==============================================
@@ -1075,7 +1103,6 @@ function guardarSerieFirebase(tmdbId) {
                 if (index !== -1) seriesAdmin[index] = { ...datos, id: existe.id };
             }
             cargarSeries();
-            // No cerramos el editor para seguir editando
         })
         .catch(err => {
             console.error('❌ Error al guardar:', err);
