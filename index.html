@@ -338,7 +338,7 @@
             padding: 0.1rem 0.4rem;
             border-radius: 4px;
             margin-left: 0.3rem;
-        }            /* ===== REPRODUCTOR MODAL ===== */
+        }        /* ===== REPRODUCTOR MODAL ===== */
         .modal-video { 
             position: fixed; 
             inset: 0; 
@@ -859,7 +859,7 @@
     </button>
 </div>
 
-<!-- ===== REPRODUCTOR MODAL CON CAPÍTULOS ===== -->
+<!-- REPRODUCTOR MODAL CON CAPÍTULOS -->
 <div id="modal-video" class="modal-video">
     <div class="reproductor-contenedor" id="reproductorContenedor">
         <div class="info-arriba" id="infoArriba">
@@ -978,7 +978,7 @@ const MI_CONTENIDO = [
     puntuacion: "7.7",
     genero: "Acción / Aventura",
     tmdb_id: "1136",
-    url: "https://vidmoly.biz/embed-zpqaemei0ljl.html"
+    url: "https://www.youtube.com/embed/pqql03l9b30?autoplay=1"
   },
   {
     id: "johnwick_001",
@@ -986,12 +986,12 @@ const MI_CONTENIDO = [
     anio: "2014",
     tipo: "pelicula",
     categoria: "peliculas",
-    portada: "john.png",
+    portada: "john wick.png",
     sinopsis: "Un exasesino a sueldo vuelve a la acción para vengar a su perro.",
     puntuacion: "7.4",
     genero: "Acción / Suspenso",
     tmdb_id: "245891",
-    url: "https://vidmoly.biz/embed-as1c23137iks.html"
+    url: "https://www.youtube.com/embed/C0BMx-qxsP4?autoplay=1"
   }
 ];
 
@@ -1263,7 +1263,7 @@ document.addEventListener('click', function(e) {
 });
 
 // ==============================================
-// 🔍 BÚSQUEDA MEJORADA
+// 🔍 BÚSQUEDA
 // ==============================================
 async function buscarContenido() {
   const texto = document.getElementById("buscadorInput").value.trim();
@@ -1402,27 +1402,6 @@ function abrirModalLogin() { document.getElementById("modal-login").classList.re
 function cerrarModalLogin() { document.getElementById("modal-login").classList.add("oculto"); videoPendiente = null; }
 
 // ==============================================
-// ⚡ INICIO
-// ==============================================
-cargarContenidoCompleto();
-
-auth.onAuthStateChanged(usuario => {
-    if (usuario) {
-        document.getElementById("nombrePerfil").textContent = usuario.displayName || usuario.phoneNumber || usuario.email;
-    }
-});
-
-window.addEventListener('popstate', function(e) {
-    if (document.getElementById("modal-video").classList.contains("abierto")) {
-        cerrarVideo();
-        e.preventDefault();
-        history.pushState(null, '', window.location.href);
-    }
-});
-
-history.pushState(null, '', window.location.href);
-
-// ==============================================
 // 🔄 CARGAR MÁS
 // ==============================================
 let cargandoMas = false;
@@ -1527,50 +1506,66 @@ async function cargarMasContenido() {
 
   cargandoMas = false;
 }// ==============================================
-// 🎬 REPRODUCTOR CON SOPORTE PARA SERIES Y CARGA EN TIEMPO REAL
+// 🎬 REPRODUCTOR CORREGIDO - CONSULTA FIREBASE EN TIEMPO REAL
 // ==============================================
 function abrirVideoPelicula(peli) {
-    // 🔥 IMPORTANTE: CARGAR ENLACES DESDE FIREBASE EN TIEMPO REAL
+    // 🔥 PASO 1: CONSULTAR FIREBASE PARA OBTENER EL ENLACE MÁS RECIENTE
     if (peli.tmdb_id) {
-        // Buscar en contenido_personalizado (películas)
+        // Consulta a contenido_personalizado (películas)
         db.ref("contenido_personalizado").orderByChild("tmdb_id").equalTo(peli.tmdb_id).once("value", (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 const keys = Object.keys(data);
                 const adminItem = data[keys[0]];
                 if (adminItem) {
+                    // 🔥 ACTUALIZAR LA PELÍCULA CON LOS DATOS DE FIREBASE
                     peli.url = adminItem.url || '';
                     peli.opcion2 = adminItem.opcion2 || '';
                     peli.adminId = keys[0];
-                    console.log("✅ Enlaces cargados desde Firebase:", peli.url, peli.opcion2);
+                    console.log("✅ Enlace 1 desde Firebase:", peli.url);
+                    console.log("✅ Enlace 2 desde Firebase:", peli.opcion2);
+                } else {
+                    peli.url = '';
+                    peli.opcion2 = '';
                 }
+            } else {
+                // No hay datos en Firebase para esta película
+                peli.url = '';
+                peli.opcion2 = '';
+                peli.adminId = null;
+                console.log("⚠️ Sin enlaces en Firebase para:", peli.titulo);
             }
-            // Si no se encontró en películas, buscar en series_personalizadas
-            if (!peli.url && !peli.opcion2) {
-                db.ref("series_personalizadas").orderByChild("tmdb_id").equalTo(peli.tmdb_id).once("value", (snapshot) => {
-                    const dataSeries = snapshot.val();
+            
+            // 🔥 PASO 2: BUSCAR EN SERIES PERSONALIZADAS SI ES SERIE
+            if (peli.tipo === 'serie') {
+                db.ref("series_personalizadas").orderByChild("tmdb_id").equalTo(peli.tmdb_id).once("value", (snapSeries) => {
+                    const dataSeries = snapSeries.val();
                     if (dataSeries) {
                         const keys = Object.keys(dataSeries);
                         const adminItem = dataSeries[keys[0]];
                         if (adminItem && adminItem.temporadas) {
                             peli.temporadas = adminItem.temporadas;
                             peli.adminId = keys[0];
-                            console.log("✅ Temporadas cargadas desde Firebase:", peli.temporadas.length);
+                            console.log("✅ Temporadas desde Firebase:", peli.temporadas.length);
                         }
                     }
-                    // Continuar con la reproducción
-                    continuarAbrirVideo(peli);
+                    // 🔥 PASO 3: ABRIR EL REPRODUCTOR CON LOS DATOS ACTUALIZADOS
+                    abrirReproductor(peli);
                 });
             } else {
-                continuarAbrirVideo(peli);
+                // 🔥 PASO 3: ABRIR EL REPRODUCTOR CON LOS DATOS ACTUALIZADOS
+                abrirReproductor(peli);
             }
         });
     } else {
-        continuarAbrirVideo(peli);
+        abrirReproductor(peli);
     }
 }
 
-function continuarAbrirVideo(peli) {
+// ==============================================
+// 🎬 ABRIR REPRODUCTOR (CON LOS DATOS YA ACTUALIZADOS)
+// ==============================================
+function abrirReproductor(peli) {
     detenerVideo();
     
     const modal = document.getElementById("modal-video");
@@ -2008,6 +2003,27 @@ function cerrarSesion() {
     videoPendiente = null;
   }); 
 }
+
+// ==============================================
+// ⚡ INICIO
+// ==============================================
+cargarContenidoCompleto();
+
+auth.onAuthStateChanged(usuario => {
+    if (usuario) {
+        document.getElementById("nombrePerfil").textContent = usuario.displayName || usuario.phoneNumber || usuario.email;
+    }
+});
+
+window.addEventListener('popstate', function(e) {
+    if (document.getElementById("modal-video").classList.contains("abierto")) {
+        cerrarVideo();
+        e.preventDefault();
+        history.pushState(null, '', window.location.href);
+    }
+});
+
+history.pushState(null, '', window.location.href);
 
 // ==============================================
 // EXTRAS
