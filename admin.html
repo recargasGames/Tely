@@ -16,7 +16,7 @@
         .card h3 i { margin-right: 0.5rem; }
         input, select, textarea { width: 100%; padding: 0.7rem; border-radius: 8px; border: 1px solid #334155; background: #0F172A; color: #F8FAFC; font-size: 0.95rem; margin-bottom: 0.5rem; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: #60A5FA; }
-        .btn { padding: 0.5rem 1rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.3rem; }
+        .btn { padding: 0.4rem 0.8rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; }
         .btn-guardar { background: #10B981; color: white; }
         .btn-guardar:hover { background: #059669; }
         .btn-danger { background: #EF4444; color: white; }
@@ -29,8 +29,8 @@
         .btn-probar:hover { background: #7C3AED; }
         .btn-exportar { background: #F59E0B; color: #0F172A; }
         .btn-exportar:hover { background: #D97706; }
-        .btn-small { padding: 0.2rem 0.6rem; font-size: 0.7rem; }
-        .btn-xxs { padding: 0.1rem 0.4rem; font-size: 0.6rem; border-radius: 4px; }
+        .btn-small { padding: 0.15rem 0.5rem; font-size: 0.65rem; }
+        .btn-xxs { padding: 0.1rem 0.35rem; font-size: 0.55rem; border-radius: 4px; }
         .btn-buscar { background: #3B82F6; color: white; }
         .btn-buscar:hover { background: #2563EB; }
         .btn-abrir-pestana { background: #3B82F6; color: white; }
@@ -96,23 +96,22 @@
         .serie-item .temporadas .temp-card .temp-titulo { font-size: 0.75rem; font-weight: 600; color: #10B981; }
         .serie-item .temporadas .temp-card .capitulos { font-size: 0.7rem; color: #94A3B8; }
         .oculto { display: none !important; }
-        .capitulo-item { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; padding: 0.3rem; background: #0F172A; border-radius: 6px; margin-bottom: 0.3rem; }
-        .capitulo-item input { flex: 1; min-width: 80px; margin-bottom: 0; padding: 0.2rem 0.4rem; font-size: 0.7rem; }
-        .capitulo-item .btn-small { padding: 0.2rem 0.5rem; font-size: 0.65rem; }
+        .capitulo-item { display: flex; flex-direction: column; gap: 0.3rem; padding: 0.5rem; background: #0F172A; border-radius: 8px; border: 1px solid #334155; margin-bottom: 0.5rem; }
+        .capitulo-item .fila-cap { display: flex; align-items: center; gap: 0.3rem; flex-wrap: wrap; }
+        .capitulo-item .fila-cap input { flex: 1; min-width: 80px; margin-bottom: 0; padding: 0.2rem 0.4rem; font-size: 0.7rem; border-radius: 4px; border: 1px solid #334155; background: #0F172A; color: #F8FAFC; }
+        .capitulo-item .fila-cap .cap-num { width: 50px; flex: none; }
+        .capitulo-item .fila-cap label { font-size: 0.6rem; color: #94A3B8; min-width: 45px; }
         .btn-agregar-temp { background: #10B981; color: white; padding: 0.3rem 0.8rem; font-size: 0.75rem; border-radius: 6px; border: none; cursor: pointer; margin-top: 0.3rem; }
         .btn-agregar-temp:hover { background: #059669; }
         .btn-eliminar-temp { background: #EF4444; color: white; padding: 0.2rem 0.5rem; font-size: 0.65rem; border-radius: 4px; border: none; cursor: pointer; }
         .btn-eliminar-temp:hover { background: #DC2626; }
         .modal-editor { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 1rem; }
         .modal-editor.abierto { display: flex; }
-        .modal-editor .modal-content { background: #1E293B; border-radius: 12px; padding: 1.5rem; max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto; }
+        .modal-editor .modal-content { background: #1E293B; border-radius: 12px; padding: 1.5rem; max-width: 750px; width: 100%; max-height: 90vh; overflow-y: auto; }
         .modal-editor .modal-content h3 { color: #10B981; margin-bottom: 0.5rem; }
-        .modal-editor .modal-content .temp-card { margin-bottom: 0.8rem; padding: 0.8rem; background: #0F172A; border-radius: 8px; }
+        .modal-editor .modal-content .temp-card { margin-bottom: 0.8rem; padding: 0.8rem; background: #0F172A; border-radius: 8px; border: 1px solid #334155; }
         .modal-editor .modal-content .temp-card .temp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
         .modal-editor .modal-content .temp-card .temp-header input { flex: 1; margin-right: 0.5rem; padding: 0.4rem; border-radius: 6px; border: 1px solid #334155; background: #0F172A; color: #F8FAFC; }
-        .modal-editor .modal-content .temp-card .capitulo-item { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; padding: 0.3rem; background: #0F172A; border-radius: 6px; margin-bottom: 0.3rem; }
-        .modal-editor .modal-content .temp-card .capitulo-item input { flex: 1; min-width: 80px; margin-bottom: 0; padding: 0.2rem 0.4rem; font-size: 0.7rem; border-radius: 4px; border: 1px solid #334155; background: #0F172A; color: #F8FAFC; }
-        .modal-editor .modal-content .temp-card .capitulo-item .cap-num { width: 50px; }
         .modal-editor .modal-footer { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
     </style>
 </head><body>
@@ -164,7 +163,7 @@
             </div>
         </div>
 
-        <!-- TAB SERIES (CORREGIDO) -->
+        <!-- TAB SERIES -->
         <div id="tab-series" class="oculto">
             <div class="card">
                 <h3><i class="fa fa-tv"></i> Series de TMDB</h3>
@@ -247,15 +246,15 @@
         </div>
     </div>
 
-    <!-- MODAL EDITOR DE SERIE (CORREGIDO) -->
+    <!-- MODAL EDITOR DE SERIE -->
     <div id="modalEditorSerie" class="modal-editor">
         <div class="modal-content" id="modalEditorContent">
             <h3 id="editorTitulo"><i class="fa fa-tv"></i> Editar Serie</h3>
-            <p class="text-gray-400 text-sm mb-3">Agrega temporadas y capítulos con sus enlaces</p>
+            <p class="text-gray-400 text-sm mb-3">Agrega capítulos con sus enlaces (Opción 1 y Opción 2)</p>
             <div id="editTemporadasContainer"></div>
             <button class="btn-agregar-temp" onclick="agregarTemporadaEdit()"><i class="fa fa-plus"></i> Agregar temporada</button>
             <div class="modal-footer">
-                <button class="btn btn-guardar" id="btnGuardarSerie"><i class="fa fa-save"></i> Guardar en Firebase</button>
+                <button class="btn btn-refresh" onclick="cargarSeries()"><i class="fa fa-sync"></i> Recargar series</button>
                 <button class="btn btn-danger" onclick="cerrarEditorSerie()"><i class="fa fa-times"></i> Cerrar</button>
             </div>
         </div>
@@ -632,7 +631,7 @@ function recargarTodo() {
         cargarSeries();
     }
 }// ==============================================
-// 🎬 SERIES (CORREGIDO)
+// 🎬 SERIES
 // ==============================================
 async function cargarSeries() {
     const contenedor = document.getElementById("lista-series");
@@ -774,7 +773,7 @@ function eliminarSerie(adminId) {
         })
         .catch(err => alert('❌ Error: ' + err.message));
 }// ==============================================
-// 📝 EDITOR DE SERIES (CORREGIDO)
+// 📝 EDITOR DE SERIES CON GUARDADO INDIVIDUAL
 // ==============================================
 let serieEditandoId = null;
 
@@ -813,28 +812,117 @@ function agregarTempEditUI(container, temp, idx) {
     div.innerHTML = `
         <div class="temp-header">
             <input type="text" class="edit-temp-nombre" value="${temp ? temp.nombre : 'Temporada ' + num}" placeholder="Nombre temporada">
-            <button class="btn btn-danger btn-small" onclick="eliminarTemporadaEdit(this)"><i class="fa fa-trash"></i> Eliminar</button>
+            <button class="btn btn-danger btn-small" onclick="eliminarTemporadaEdit(this)"><i class="fa fa-trash"></i> Eliminar temp.</button>
         </div>
         <div class="edit-capitulos-container">
             ${temp && temp.capitulos && temp.capitulos.length > 0 ? temp.capitulos.map((cap, capIdx) => `
                 <div class="capitulo-item" data-cap-index="${capIdx}">
-                    <input type="text" class="edit-cap-num cap-num" value="${cap.numero}" placeholder="N°">
-                    <input type="text" class="edit-cap-titulo" value="${cap.titulo}" placeholder="Título">
-                    <input type="text" class="edit-cap-url" value="${cap.url || ''}" placeholder="URL del video">
-                    <button class="btn btn-danger btn-small" onclick="eliminarCapituloEdit(this)"><i class="fa fa-trash"></i></button>
+                    <div class="fila-cap">
+                        <input type="text" class="edit-cap-num cap-num" value="${cap.numero}" placeholder="N°">
+                        <input type="text" class="edit-cap-titulo" value="${cap.titulo}" placeholder="Título">
+                        <button class="btn btn-danger btn-xxs" onclick="eliminarCapituloEdit(this)"><i class="fa fa-trash"></i></button>
+                    </div>
+                    <div class="fila-cap">
+                        <label>URL 1:</label>
+                        <input type="text" class="edit-cap-url" value="${cap.url || ''}" placeholder="Opción 1">
+                        ${cap.url ? `
+                            <button class="btn btn-probar btn-xxs" onclick="probarVideo('${cap.url}')"><i class="fa fa-play"></i> Probar</button>
+                        ` : ''}
+                    </div>
+                    <div class="fila-cap">
+                        <label>URL 2:</label>
+                        <input type="text" class="edit-cap-url2" value="${cap.opcion2 || ''}" placeholder="Opción 2">
+                        ${cap.opcion2 ? `
+                            <button class="btn btn-probar btn-xxs" onclick="probarVideo('${cap.opcion2}')"><i class="fa fa-play"></i> Probar</button>
+                        ` : ''}
+                    </div>
+                    <div style="margin-top:0.3rem;">
+                        <button class="btn btn-guardar btn-xxs" onclick="guardarCapitulo(this, '${serieEditandoId}')"><i class="fa fa-save"></i> Guardar capítulo</button>
+                    </div>
                 </div>
             `).join('') : `
-                <div class="capitulo-item">
-                    <input type="text" class="edit-cap-num cap-num" value="1" placeholder="N°">
-                    <input type="text" class="edit-cap-titulo" value="Capítulo 1" placeholder="Título">
-                    <input type="text" class="edit-cap-url" placeholder="URL del video">
-                    <button class="btn btn-danger btn-small" onclick="eliminarCapituloEdit(this)"><i class="fa fa-trash"></i></button>
+                <div class="capitulo-item" data-cap-index="0">
+                    <div class="fila-cap">
+                        <input type="text" class="edit-cap-num cap-num" value="1" placeholder="N°">
+                        <input type="text" class="edit-cap-titulo" value="Capítulo 1" placeholder="Título">
+                        <button class="btn btn-danger btn-xxs" onclick="eliminarCapituloEdit(this)"><i class="fa fa-trash"></i></button>
+                    </div>
+                    <div class="fila-cap">
+                        <label>URL 1:</label>
+                        <input type="text" class="edit-cap-url" placeholder="Opción 1">
+                    </div>
+                    <div class="fila-cap">
+                        <label>URL 2:</label>
+                        <input type="text" class="edit-cap-url2" placeholder="Opción 2">
+                    </div>
+                    <div style="margin-top:0.3rem;">
+                        <button class="btn btn-guardar btn-xxs" onclick="guardarCapitulo(this, '${serieEditandoId}')"><i class="fa fa-save"></i> Guardar capítulo</button>
+                    </div>
                 </div>
             `}
         </div>
         <button class="btn-agregar-temp" onclick="agregarCapituloEdit(this)"><i class="fa fa-plus"></i> Agregar capítulo</button>
     `;
     container.appendChild(div);
+}
+
+// ==============================================
+// 💾 GUARDAR CAPÍTULO INDIVIDUAL (NUEVO)
+// ==============================================
+function guardarCapitulo(btn, tmdbId) {
+    const capItem = btn.closest('.capitulo-item');
+    const tempCard = capItem.closest('.temp-card');
+    const tempIndex = parseInt(tempCard.dataset.tempIndex);
+    const capIndex = parseInt(capItem.dataset.capIndex);
+    
+    const numero = parseInt(capItem.querySelector('.edit-cap-num').value) || 1;
+    const titulo = capItem.querySelector('.edit-cap-titulo').value.trim() || `Capítulo ${numero}`;
+    const url = capItem.querySelector('.edit-cap-url').value.trim();
+    const opcion2 = capItem.querySelector('.edit-cap-url2').value.trim();
+    
+    if (!url && !opcion2) {
+        alert('⚠️ Debes agregar al menos un enlace');
+        return;
+    }
+    
+    const urlCorregida = corregirEnlaceYouTube(url);
+    const opcion2Corregida = corregirEnlaceYouTube(opcion2);
+    
+    // Actualizar en seriesAdmin
+    const serie = seriesAdmin.find(s => s.tmdb_id == tmdbId);
+    if (!serie) {
+        alert('❌ Serie no encontrada');
+        return;
+    }
+    
+    if (!serie.temporadas) serie.temporadas = [];
+    if (!serie.temporadas[tempIndex]) {
+        serie.temporadas[tempIndex] = { numero: tempIndex + 1, nombre: 'Temporada', capitulos: [] };
+    }
+    if (!serie.temporadas[tempIndex].capitulos) {
+        serie.temporadas[tempIndex].capitulos = [];
+    }
+    
+    // Actualizar el capítulo
+    if (capIndex !== undefined && capIndex < serie.temporadas[tempIndex].capitulos.length) {
+        serie.temporadas[tempIndex].capitulos[capIndex] = {
+            numero: numero,
+            titulo: titulo,
+            url: urlCorregida,
+            opcion2: opcion2Corregida
+        };
+    } else {
+        serie.temporadas[tempIndex].capitulos.push({
+            numero: numero,
+            titulo: titulo,
+            url: urlCorregida,
+            opcion2: opcion2Corregida
+        });
+    }
+    
+    // Guardar en Firebase
+    guardarSerieFirebase(tmdbId);
+    alert('✅ Capítulo guardado');
 }
 
 // ==============================================
@@ -869,8 +957,6 @@ function eliminarTemporadaEdit(btn) {
     if (tmdbId) {
         guardarSerieFirebase(tmdbId);
     }
-    
-    console.log('✅ Temporada eliminada');
 }
 
 // ==============================================
@@ -909,8 +995,6 @@ function eliminarCapituloEdit(btn) {
     if (tmdbId) {
         guardarSerieFirebase(tmdbId);
     }
-    
-    console.log('✅ Capítulo eliminado');
 }
 
 // ==============================================
@@ -936,11 +1020,13 @@ function guardarSerieFirebase(tmdbId) {
             const numero = parseInt(capDiv.querySelector('.edit-cap-num').value) || 1;
             const tituloCap = capDiv.querySelector('.edit-cap-titulo').value.trim() || `Capítulo ${numero}`;
             const url = capDiv.querySelector('.edit-cap-url').value.trim();
-            if (url) {
+            const opcion2 = capDiv.querySelector('.edit-cap-url2').value.trim();
+            if (url || opcion2) {
                 capitulos.push({ 
                     numero, 
                     titulo: tituloCap, 
-                    url: corregirEnlaceYouTube(url) 
+                    url: corregirEnlaceYouTube(url),
+                    opcion2: corregirEnlaceYouTube(opcion2)
                 });
             }
         });
@@ -957,7 +1043,7 @@ function guardarSerieFirebase(tmdbId) {
         temporadas.push({
             numero: 1,
             nombre: 'Temporada 1',
-            capitulos: [{ numero: 1, titulo: 'Capítulo 1', url: '' }]
+            capitulos: [{ numero: 1, titulo: 'Capítulo 1', url: '', opcion2: '' }]
         });
     }
     
@@ -988,10 +1074,8 @@ function guardarSerieFirebase(tmdbId) {
                 const index = seriesAdmin.findIndex(a => a.id === existe.id);
                 if (index !== -1) seriesAdmin[index] = { ...datos, id: existe.id };
             }
-            // 🔥 RECARGAR LA LISTA DE SERIES
             cargarSeries();
-            // 🔥 CERRAR EL EDITOR
-            cerrarEditorSerie();
+            // No cerramos el editor para seguir editando
         })
         .catch(err => {
             console.error('❌ Error al guardar:', err);
@@ -1013,14 +1097,26 @@ function agregarTemporadaEdit() {
     div.innerHTML = `
         <div class="temp-header">
             <input type="text" class="edit-temp-nombre" value="Temporada ${num}" placeholder="Nombre temporada">
-            <button class="btn btn-danger btn-small" onclick="eliminarTemporadaEdit(this)"><i class="fa fa-trash"></i> Eliminar</button>
+            <button class="btn btn-danger btn-small" onclick="eliminarTemporadaEdit(this)"><i class="fa fa-trash"></i> Eliminar temp.</button>
         </div>
         <div class="edit-capitulos-container">
-            <div class="capitulo-item">
-                <input type="text" class="edit-cap-num cap-num" value="1" placeholder="N°">
-                <input type="text" class="edit-cap-titulo" value="Capítulo 1" placeholder="Título">
-                <input type="text" class="edit-cap-url" placeholder="URL del video">
-                <button class="btn btn-danger btn-small" onclick="eliminarCapituloEdit(this)"><i class="fa fa-trash"></i></button>
+            <div class="capitulo-item" data-cap-index="0">
+                <div class="fila-cap">
+                    <input type="text" class="edit-cap-num cap-num" value="1" placeholder="N°">
+                    <input type="text" class="edit-cap-titulo" value="Capítulo 1" placeholder="Título">
+                    <button class="btn btn-danger btn-xxs" onclick="eliminarCapituloEdit(this)"><i class="fa fa-trash"></i></button>
+                </div>
+                <div class="fila-cap">
+                    <label>URL 1:</label>
+                    <input type="text" class="edit-cap-url" placeholder="Opción 1">
+                </div>
+                <div class="fila-cap">
+                    <label>URL 2:</label>
+                    <input type="text" class="edit-cap-url2" placeholder="Opción 2">
+                </div>
+                <div style="margin-top:0.3rem;">
+                    <button class="btn btn-guardar btn-xxs" onclick="guardarCapitulo(this, '${tmdbId}')"><i class="fa fa-save"></i> Guardar capítulo</button>
+                </div>
             </div>
         </div>
         <button class="btn-agregar-temp" onclick="agregarCapituloEdit(this)"><i class="fa fa-plus"></i> Agregar capítulo</button>
@@ -1033,7 +1129,7 @@ function agregarTemporadaEdit() {
         serie.temporadas.push({
             numero: serie.temporadas.length + 1,
             nombre: `Temporada ${num}`,
-            capitulos: [{ numero: 1, titulo: 'Capítulo 1', url: '' }]
+            capitulos: [{ numero: 1, titulo: 'Capítulo 1', url: '', opcion2: '' }]
         });
     }
     
@@ -1054,10 +1150,22 @@ function agregarCapituloEdit(btn) {
     div.className = 'capitulo-item';
     div.dataset.capIndex = num - 1;
     div.innerHTML = `
-        <input type="text" class="edit-cap-num cap-num" value="${num}" placeholder="N°">
-        <input type="text" class="edit-cap-titulo" value="Capítulo ${num}" placeholder="Título">
-        <input type="text" class="edit-cap-url" placeholder="URL del video">
-        <button class="btn btn-danger btn-small" onclick="eliminarCapituloEdit(this)"><i class="fa fa-trash"></i></button>
+        <div class="fila-cap">
+            <input type="text" class="edit-cap-num cap-num" value="${num}" placeholder="N°">
+            <input type="text" class="edit-cap-titulo" value="Capítulo ${num}" placeholder="Título">
+            <button class="btn btn-danger btn-xxs" onclick="eliminarCapituloEdit(this)"><i class="fa fa-trash"></i></button>
+        </div>
+        <div class="fila-cap">
+            <label>URL 1:</label>
+            <input type="text" class="edit-cap-url" placeholder="Opción 1">
+        </div>
+        <div class="fila-cap">
+            <label>URL 2:</label>
+            <input type="text" class="edit-cap-url2" placeholder="Opción 2">
+        </div>
+        <div style="margin-top:0.3rem;">
+            <button class="btn btn-guardar btn-xxs" onclick="guardarCapitulo(this, '${tmdbId}')"><i class="fa fa-save"></i> Guardar capítulo</button>
+        </div>
     `;
     container.appendChild(div);
     
@@ -1068,26 +1176,14 @@ function agregarCapituloEdit(btn) {
         serie.temporadas[tempIndex].capitulos.push({
             numero: num,
             titulo: `Capítulo ${num}`,
-            url: ''
+            url: '',
+            opcion2: ''
         });
     }
     
     if (tmdbId) {
         guardarSerieFirebase(tmdbId);
     }
-}
-
-// ==============================================
-// 💾 GUARDAR SERIE DESDE EL EDITOR
-// ==============================================
-function guardarSerieDesdeEditor() {
-    if (!serieEditandoId) {
-        alert('❌ Error: No hay serie seleccionada');
-        return;
-    }
-    
-    guardarSerieFirebase(serieEditandoId);
-    alert('✅ Serie guardada correctamente');
 }
 
 function cerrarEditorSerie() {
@@ -1493,8 +1589,6 @@ function cerrarEditorSerie() {
     });
 
     toggleCamposContenido();
-
-    document.getElementById('btnGuardarSerie').addEventListener('click', guardarSerieDesdeEditor);
 </script>
 </body>
 </html>
