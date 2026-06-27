@@ -338,8 +338,7 @@
             padding: 0.1rem 0.4rem;
             border-radius: 4px;
             margin-left: 0.3rem;
-        }
-            /* ===== REPRODUCTOR MODAL ===== */
+        }            /* ===== REPRODUCTOR MODAL ===== */
         .modal-video { 
             position: fixed; 
             inset: 0; 
@@ -979,7 +978,7 @@ const MI_CONTENIDO = [
     puntuacion: "7.7",
     genero: "Acción / Aventura",
     tmdb_id: "1136",
-    url: "https://www.youtube.com/embed/pqql03l9b30?autoplay=1"
+    url: "https://vidmoly.biz/embed-zpqaemei0ljl.html"
   },
   {
     id: "johnwick_001",
@@ -987,12 +986,12 @@ const MI_CONTENIDO = [
     anio: "2014",
     tipo: "pelicula",
     categoria: "peliculas",
-    portada: "john wick.png",
+    portada: "john.png",
     sinopsis: "Un exasesino a sueldo vuelve a la acción para vengar a su perro.",
     puntuacion: "7.4",
     genero: "Acción / Suspenso",
     tmdb_id: "245891",
-    url: "https://www.youtube.com/embed/C0BMx-qxsP4?autoplay=1"
+    url: "https://vidmoly.biz/embed-as1c23137iks.html"
   }
 ];
 
@@ -1421,7 +1420,9 @@ window.addEventListener('popstate', function(e) {
     }
 });
 
-history.pushState(null, '', window.location.href);// ==============================================
+history.pushState(null, '', window.location.href);
+
+// ==============================================
 // 🔄 CARGAR MÁS
 // ==============================================
 let cargandoMas = false;
@@ -1525,12 +1526,51 @@ async function cargarMasContenido() {
   }
 
   cargandoMas = false;
-}
-
-// ==============================================
-// 🎬 REPRODUCTOR CON SOPORTE PARA SERIES
+}// ==============================================
+// 🎬 REPRODUCTOR CON SOPORTE PARA SERIES Y CARGA EN TIEMPO REAL
 // ==============================================
 function abrirVideoPelicula(peli) {
+    // 🔥 IMPORTANTE: CARGAR ENLACES DESDE FIREBASE EN TIEMPO REAL
+    if (peli.tmdb_id) {
+        // Buscar en contenido_personalizado (películas)
+        db.ref("contenido_personalizado").orderByChild("tmdb_id").equalTo(peli.tmdb_id).once("value", (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                const keys = Object.keys(data);
+                const adminItem = data[keys[0]];
+                if (adminItem) {
+                    peli.url = adminItem.url || '';
+                    peli.opcion2 = adminItem.opcion2 || '';
+                    peli.adminId = keys[0];
+                    console.log("✅ Enlaces cargados desde Firebase:", peli.url, peli.opcion2);
+                }
+            }
+            // Si no se encontró en películas, buscar en series_personalizadas
+            if (!peli.url && !peli.opcion2) {
+                db.ref("series_personalizadas").orderByChild("tmdb_id").equalTo(peli.tmdb_id).once("value", (snapshot) => {
+                    const dataSeries = snapshot.val();
+                    if (dataSeries) {
+                        const keys = Object.keys(dataSeries);
+                        const adminItem = dataSeries[keys[0]];
+                        if (adminItem && adminItem.temporadas) {
+                            peli.temporadas = adminItem.temporadas;
+                            peli.adminId = keys[0];
+                            console.log("✅ Temporadas cargadas desde Firebase:", peli.temporadas.length);
+                        }
+                    }
+                    // Continuar con la reproducción
+                    continuarAbrirVideo(peli);
+                });
+            } else {
+                continuarAbrirVideo(peli);
+            }
+        });
+    } else {
+        continuarAbrirVideo(peli);
+    }
+}
+
+function continuarAbrirVideo(peli) {
     detenerVideo();
     
     const modal = document.getElementById("modal-video");
@@ -1566,7 +1606,6 @@ function abrirVideoPelicula(peli) {
     if (peli.tipo === 'serie' && peli.temporadas && peli.temporadas.length > 0) {
         capitulosContainer.classList.remove("oculto");
         
-        let totalCapitulos = 0;
         let primerCap = null;
         
         peli.temporadas.forEach(temp => {
@@ -1576,7 +1615,6 @@ function abrirVideoPelicula(peli) {
                 tempDiv.innerHTML = `<div style="font-weight:600;color:#A78BFA;font-size:0.8rem;padding:0.2rem 0;">Temporada ${temp.numero}: ${temp.nombre || ''}</div>`;
                 
                 temp.capitulos.forEach(cap => {
-                    totalCapitulos++;
                     if (!primerCap) primerCap = cap;
                     
                     const capDiv = document.createElement("div");
@@ -1642,13 +1680,13 @@ function abrirVideoPelicula(peli) {
         agregarAlHistorial(peli);
         cargarRecomendadas(peli.tmdb_id);
         return;
-    }
-    
-    // ==============================================
+    }    // ==============================================
     // 🎬 PELÍCULAS - Opción 1 y Opción 2
     // ==============================================
     const tieneOp1 = peli.url && peli.url.trim() !== '';
     const tieneOp2 = peli.opcion2 && peli.opcion2.trim() !== '';
+    
+    console.log("🔍 Enlaces finales para reproducción:", { url: peli.url, opcion2: peli.opcion2 });
     
     if (tieneOp1) {
         const btn1 = document.createElement("button");
@@ -1711,7 +1749,9 @@ function abrirVideoPelicula(peli) {
 
     agregarAlHistorial(peli);
     cargarRecomendadas(peli.tmdb_id);
-}// ==============================================
+}
+
+// ==============================================
 // 🎬 REPRODUCIR OPCIÓN (CON BLOQUEO DE ANUNCIOS)
 // ==============================================
 function reproducirOpcion(url) {
@@ -1815,9 +1855,7 @@ function reproducirOpcion(url) {
             style="width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;">
         </iframe>
     `;
-}
-
-// ==============================================
+}// ==============================================
 // 📥 RECOMENDACIONES
 // ==============================================
 async function cargarRecomendadas(tmdbId) {
