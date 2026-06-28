@@ -76,12 +76,15 @@
         .btn-eliminar-temp:hover{background:#DC2626}
         .btn-remover-cap{background:#EF4444;color:white;border:none;border-radius:4px;padding:0.2rem 0.5rem;cursor:pointer;font-size:0.6rem}
         .btn-remover-cap:hover{background:#DC2626}
+        .selector-temp-editor button:disabled{opacity:0.3;cursor:not-allowed}
+        .temp-card-editor{display:none}
+        .temp-card-editor.activa{display:block}
         .modal-editor{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99999;display:none;align-items:center;justify-content:center;padding:1rem}
         .modal-editor.abierto{display:flex}.modal-editor .modal-content{background:#1E293B;border-radius:12px;padding:1.5rem;max-width:750px;width:100%;max-height:90vh;overflow-y:auto}
         .modal-editor .modal-content h3{color:#10B981;margin-bottom:0.5rem}
-        .modal-editor .modal-content .temp-card{margin-bottom:0.8rem;padding:0.8rem;background:#0F172A;border-radius:8px;border:1px solid #334155}
-        .modal-editor .modal-content .temp-card .temp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem}
-        .modal-editor .modal-content .temp-card .temp-header input{flex:1;margin-right:0.5rem;padding:0.4rem;border-radius:6px;border:1px solid #334155;background:#0F172A;color:#F8FAFC}
+        .modal-editor .modal-content .temp-card-editor{margin-bottom:0.8rem;padding:0.8rem;background:#0F172A;border-radius:8px;border:1px solid #334155}
+        .modal-editor .modal-content .temp-card-editor .temp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem}
+        .modal-editor .modal-content .temp-card-editor .temp-header input{flex:1;margin-right:0.5rem;padding:0.4rem;border-radius:6px;border:1px solid #334155;background:#0F172A;color:#F8FAFC}
         .modal-editor .modal-footer{display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem}
         .login-banner{background:#1E293B;border-radius:12px;padding:1rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;border:1px solid #334155}
         .login-banner .info{display:flex;align-items:center;gap:0.5rem}.login-banner .info i{font-size:1.2rem}
@@ -272,14 +275,26 @@
         </div>
     </div>
 
-    <!-- ===== MODAL EDITOR SERIE ===== -->
+    <!-- ===== MODAL EDITOR SERIE CON SELECTOR DE TEMPORADA ===== -->
     <div id="modalEditorSerie" class="modal-editor">
         <div class="modal-content" id="modalEditorContent">
             <h3 id="editorTitulo"><i class="fa fa-tv"></i> Editar Serie</h3>
-            <p class="text-gray-400 text-sm mb-3">Agrega capítulos con sus enlaces (URL)</p>
+            <p class="text-gray-400 text-sm mb-3">Selecciona una temporada para ver sus capítulos</p>
+            
+            <div class="selector-temp-editor" style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;background:#0F172A;padding:0.5rem 1rem;border-radius:8px;border:1px solid #334155;">
+                <button class="btn btn-refresh btn-small" onclick="cambiarTempEditor(-1)" id="btnTempAntEditor">
+                    <i class="fa fa-chevron-left"></i>
+                </button>
+                <span id="tempActualEditor" style="font-weight:600;color:#10B981;min-width:120px;text-align:center;">Temporada 1</span>
+                <button class="btn btn-refresh btn-small" onclick="cambiarTempEditor(1)" id="btnTempSigEditor">
+                    <i class="fa fa-chevron-right"></i>
+                </button>
+                <span style="color:#94A3B8;font-size:0.8rem;margin-left:0.5rem;" id="totalTempsEditor">de 1</span>
+            </div>
+            
             <div id="editTemporadasContainer"></div>
             <button class="btn-agregar-temp" onclick="agregarTemporadaEdit()"><i class="fa fa-plus"></i> Agregar temporada</button>
-            <div class="modal-footer">
+            <div class="modal-footer" style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
                 <button class="btn btn-refresh" onclick="cargarSeries()"><i class="fa fa-sync"></i> Recargar series</button>
                 <button class="btn btn-danger" onclick="cerrarEditorSerie()"><i class="fa fa-times"></i> Cerrar</button>
             </div>
@@ -522,7 +537,6 @@ function guardarEnlacesPelicula(tmdbId) {
     const peli = peliculas.find(p => p.id == tmdbId);
     if (!peli) return;
     
-    // 🔥 SI NO TIENE ENLACE, GENERAR UNO FALSO AUTOMÁTICO
     if (!url && !opcion2) {
         url = `https://vidsrc.in/embed/${peli.tmdb_id}`;
         alert(`✅ Enlace falso generado para "${peli.titulo}": ${url}\n\nLuego edítalo por el correcto.`);
@@ -626,68 +640,6 @@ function eliminarSerie(adminId) {
         cargarSeries();
     }).catch(err => alert('❌ Error: ' + err.message));
 }// ==============================================
-// 📝 ABRIR EDITOR DE SERIE - CREA TODAS LAS TEMPORADAS CON ENLACES FALSOS
-// ==============================================
-function abrirEditorSerie(tmdbId) {
-    const modal = document.getElementById('modalEditorSerie');
-    const container = document.getElementById('editTemporadasContainer');
-    const titulo = document.getElementById('editorTitulo');
-    serieEditandoId = tmdbId;
-    
-    const serieInfo = document.querySelector(`.serie-item[data-id="${tmdbId}"]`);
-    const nombreSerie = serieInfo ? serieInfo.querySelector('.titulo').textContent : 'Serie';
-    titulo.textContent = `📺 ${nombreSerie}`;
-    
-    let serie = seriesAdmin.find(s => s.tmdb_id == tmdbId);
-    
-    if (!serie) {
-        const anio = serieInfo ? serieInfo.querySelector('.anio').textContent : 'N/D';
-        const portada = serieInfo ? serieInfo.querySelector('.portada-mini')?.src : '';
-        
-        obtenerTemporadasDeTMDB(tmdbId, function(temporadas) {
-            serie = {
-                tmdb_id: tmdbId,
-                titulo: nombreSerie,
-                anio: anio || 'N/D',
-                tipo: 'serie',
-                categoria: 'series',
-                portada: portada || '',
-                sinopsis: 'Sin sinopsis',
-                puntuacion: 'N/A',
-                genero: 'Serie',
-                temporadas: temporadas,
-                id: null
-            };
-            seriesAdmin.push(serie);
-            
-            let totalCaps = 0;
-            temporadas.forEach(t => totalCaps += t.capitulos.length);
-            alert(`✅ Se creó "${nombreSerie}" con ${temporadas.length} temporadas y ${totalCaps} capítulos con enlaces falsos.\n\nLuego puedes editar los enlaces por los correctos.`);
-            
-            container.innerHTML = '';
-            temporadas.forEach((temp, idx) => {
-                agregarTempEditUI(container, temp, idx);
-            });
-            modal.classList.add('abierto');
-            document.body.style.overflow = 'hidden';
-        });
-        return;
-    }
-    
-    container.innerHTML = '';
-    if (serie.temporadas && serie.temporadas.length > 0) {
-        serie.temporadas.forEach((temp, idx) => {
-            agregarTempEditUI(container, temp, idx);
-        });
-    } else {
-        agregarTempEditUI(container, null, 0);
-    }
-    
-    modal.classList.add('abierto');
-    document.body.style.overflow = 'hidden';
-}
-
-// ==============================================
 // 🔥 OBTENER TEMPORADAS DE TMDB
 // ==============================================
 function obtenerTemporadasDeTMDB(tmdbId, callback) {
@@ -774,13 +726,91 @@ function obtenerTemporadasDeTMDB(tmdbId, callback) {
 }
 
 // ==============================================
+// 📝 VARIABLES PARA EL EDITOR
+// ==============================================
+let tempActualEditor = 0;
+let totalTempsEditor = 0;
+
+// ==============================================
+// 📝 ABRIR EDITOR DE SERIE - CON SELECTOR
+// ==============================================
+function abrirEditorSerie(tmdbId) {
+    const modal = document.getElementById('modalEditorSerie');
+    const container = document.getElementById('editTemporadasContainer');
+    const titulo = document.getElementById('editorTitulo');
+    serieEditandoId = tmdbId;
+    
+    const serieInfo = document.querySelector(`.serie-item[data-id="${tmdbId}"]`);
+    const nombreSerie = serieInfo ? serieInfo.querySelector('.titulo').textContent : 'Serie';
+    titulo.textContent = `📺 ${nombreSerie}`;
+    
+    let serie = seriesAdmin.find(s => s.tmdb_id == tmdbId);
+    
+    if (!serie) {
+        const anio = serieInfo ? serieInfo.querySelector('.anio').textContent : 'N/D';
+        const portada = serieInfo ? serieInfo.querySelector('.portada-mini')?.src : '';
+        
+        obtenerTemporadasDeTMDB(tmdbId, function(temporadas) {
+            serie = {
+                tmdb_id: tmdbId,
+                titulo: nombreSerie,
+                anio: anio || 'N/D',
+                tipo: 'serie',
+                categoria: 'series',
+                portada: portada || '',
+                sinopsis: 'Sin sinopsis',
+                puntuacion: 'N/A',
+                genero: 'Serie',
+                temporadas: temporadas,
+                id: null
+            };
+            seriesAdmin.push(serie);
+            
+            let totalCaps = 0;
+            temporadas.forEach(t => totalCaps += t.capitulos.length);
+            alert(`✅ Se creó "${nombreSerie}" con ${temporadas.length} temporadas y ${totalCaps} capítulos con enlaces falsos.\n\nLuego puedes editar los enlaces por los correctos.`);
+            
+            container.innerHTML = '';
+            temporadas.forEach((temp, idx) => {
+                agregarTempEditUI(container, temp, idx);
+            });
+            
+            tempActualEditor = 0;
+            totalTempsEditor = temporadas.length;
+            actualizarSelectorTempEditor();
+            
+            modal.classList.add('abierto');
+            document.body.style.overflow = 'hidden';
+        });
+        return;
+    }
+    
+    container.innerHTML = '';
+    if (serie.temporadas && serie.temporadas.length > 0) {
+        serie.temporadas.forEach((temp, idx) => {
+            agregarTempEditUI(container, temp, idx);
+        });
+    } else {
+        agregarTempEditUI(container, null, 0);
+    }
+    
+    tempActualEditor = 0;
+    totalTempsEditor = serie.temporadas ? serie.temporadas.length : 1;
+    actualizarSelectorTempEditor();
+    
+    modal.classList.add('abierto');
+    document.body.style.overflow = 'hidden';
+}
+
+// ==============================================
 // 📝 AGREGAR TEMPORADA EN UI
 // ==============================================
 function agregarTempEditUI(container, temp, idx) {
     const num = container.children.length + 1;
     const div = document.createElement('div');
-    div.className = 'temp-card';
+    div.className = 'temp-card-editor';
     div.dataset.tempIndex = idx !== undefined ? idx : num - 1;
+    if (idx === 0 || idx === undefined) div.classList.add('activa');
     
     let capitulosHTML = '';
     if (temp && temp.capitulos && temp.capitulos.length > 0) {
@@ -831,6 +861,28 @@ function agregarTempEditUI(container, temp, idx) {
         <button class="btn-agregar-temp" onclick="agregarCapituloEdit(this)"><i class="fa fa-plus"></i> Agregar capítulo</button>
     `;
     container.appendChild(div);
+}
+
+// ==============================================
+// 🔄 CAMBIAR TEMPORADA EN EL EDITOR
+// ==============================================
+function cambiarTempEditor(direccion) {
+    const nuevaTemp = tempActualEditor + direccion;
+    if (nuevaTemp < 0 || nuevaTemp >= totalTempsEditor) return;
+    tempActualEditor = nuevaTemp;
+    actualizarSelectorTempEditor();
+}
+
+function actualizarSelectorTempEditor() {
+    const temps = document.querySelectorAll('#editTemporadasContainer .temp-card-editor');
+    temps.forEach((el, idx) => {
+        el.classList.toggle('activa', idx === tempActualEditor);
+    });
+    
+    document.getElementById('tempActualEditor').textContent = `Temporada ${tempActualEditor + 1}`;
+    document.getElementById('totalTempsEditor').textContent = `de ${totalTempsEditor}`;
+    document.getElementById('btnTempAntEditor').disabled = tempActualEditor === 0;
+    document.getElementById('btnTempSigEditor').disabled = tempActualEditor === totalTempsEditor - 1;
 }// ==============================================
 // 💾 GUARDAR CAPÍTULO
 // ==============================================
@@ -838,7 +890,7 @@ function guardarCapitulo(btn, tmdbId) {
     if (!tmdbId) { alert('❌ Error: No hay serie seleccionada'); return; }
     
     const capItem = btn.closest('.capitulo-item');
-    const tempCard = capItem.closest('.temp-card');
+    const tempCard = capItem.closest('.temp-card-editor');
     const tempIndex = parseInt(tempCard.dataset.tempIndex);
     const capIndex = parseInt(capItem.dataset.capIndex);
     
@@ -904,7 +956,7 @@ function guardarSerieFirebase(tmdbId) {
     if (!serie) return;
     
     const temporadas = [];
-    document.querySelectorAll('#editTemporadasContainer .temp-card').forEach(tempDiv => {
+    document.querySelectorAll('#editTemporadasContainer .temp-card-editor').forEach(tempDiv => {
         const nombre = tempDiv.querySelector('.edit-temp-nombre').value.trim() || 'Temporada';
         const capitulos = [];
         tempDiv.querySelectorAll('.capitulo-item').forEach(capDiv => {
@@ -954,13 +1006,19 @@ function guardarSerieFirebase(tmdbId) {
 // 🗑️ ELIMINAR TEMPORADA Y CAPÍTULO
 // ==============================================
 function eliminarTemporadaEdit(btn) {
-    const tempCard = btn.closest('.temp-card');
+    const tempCard = btn.closest('.temp-card-editor');
     const container = document.getElementById('editTemporadasContainer');
     if (container.children.length <= 1) { alert('⚠️ Debe haber al menos una temporada'); return; }
     if (!confirm('¿Eliminar esta temporada y todos sus capítulos?')) return;
+    
     const tmdbId = serieEditandoId;
     const tempIndex = parseInt(tempCard.dataset.tempIndex);
     tempCard.remove();
+    
+    totalTempsEditor = container.children.length;
+    if (tempActualEditor >= totalTempsEditor) tempActualEditor = totalTempsEditor - 1;
+    actualizarSelectorTempEditor();
+    
     const serie = seriesAdmin.find(s => s.tmdb_id == tmdbId);
     if (serie && serie.temporadas && tempIndex !== undefined && tempIndex < serie.temporadas.length) {
         serie.temporadas.splice(tempIndex, 1);
@@ -973,11 +1031,13 @@ function eliminarCapituloEdit(btn) {
     const container = capItem.closest('.edit-capitulos-container');
     if (container.children.length <= 1) { alert('⚠️ Debe haber al menos un capítulo'); return; }
     if (!confirm('¿Eliminar este capítulo?')) return;
-    const tempCard = capItem.closest('.temp-card');
+    
+    const tempCard = capItem.closest('.temp-card-editor');
     const tmdbId = serieEditandoId;
     const tempIndex = parseInt(tempCard.dataset.tempIndex);
     const capIndex = parseInt(capItem.dataset.capIndex);
     capItem.remove();
+    
     const serie = seriesAdmin.find(s => s.tmdb_id == tmdbId);
     if (serie && serie.temporadas && tempIndex !== undefined && tempIndex < serie.temporadas.length) {
         if (capIndex !== undefined && capIndex < serie.temporadas[tempIndex].capitulos.length) {
@@ -991,8 +1051,9 @@ function agregarTemporadaEdit() {
     const container = document.getElementById('editTemporadasContainer');
     const num = container.children.length + 1;
     const tmdbId = serieEditandoId;
+    
     const div = document.createElement('div');
-    div.className = 'temp-card';
+    div.className = 'temp-card-editor';
     div.dataset.tempIndex = num - 1;
     div.innerHTML = `
         <div class="temp-header">
@@ -1018,6 +1079,11 @@ function agregarTemporadaEdit() {
         <button class="btn-agregar-temp" onclick="agregarCapituloEdit(this)"><i class="fa fa-plus"></i> Agregar capítulo</button>
     `;
     container.appendChild(div);
+    
+    totalTempsEditor = container.children.length;
+    tempActualEditor = totalTempsEditor - 1;
+    actualizarSelectorTempEditor();
+    
     const serie = seriesAdmin.find(s => s.tmdb_id == tmdbId);
     if (serie) {
         if (!serie.temporadas) serie.temporadas = [];
@@ -1027,11 +1093,12 @@ function agregarTemporadaEdit() {
 }
 
 function agregarCapituloEdit(btn) {
-    const container = btn.closest('.temp-card').querySelector('.edit-capitulos-container');
+    const container = btn.closest('.temp-card-editor').querySelector('.edit-capitulos-container');
     const num = container.children.length + 1;
     const tmdbId = serieEditandoId;
-    const tempCard = btn.closest('.temp-card');
+    const tempCard = btn.closest('.temp-card-editor');
     const tempIndex = parseInt(tempCard.dataset.tempIndex);
+    
     const div = document.createElement('div');
     div.className = 'capitulo-item';
     div.dataset.capIndex = num - 1;
@@ -1050,6 +1117,7 @@ function agregarCapituloEdit(btn) {
         </div>
     `;
     container.appendChild(div);
+    
     const serie = seriesAdmin.find(s => s.tmdb_id == tmdbId);
     if (serie && serie.temporadas && serie.temporadas[tempIndex]) {
         if (!serie.temporadas[tempIndex].capitulos) {
@@ -1194,7 +1262,9 @@ function eliminarPersonalizado(id, tipo) {
         if (tipo === 'pelicula') cargarPeliculas();
         else cargarSeries();
     }).catch(err => alert('❌ Error: ' + err.message));
-}// ==============================================
+}
+
+// ==============================================
 // ➕ AGREGAR CONTENIDO PERSONALIZADO
 // ==============================================
 function toggleCamposContenido() {
@@ -1321,9 +1391,7 @@ function limpiarFormAgregar() {
     document.getElementById('nuevaUrl2').value = '';
     document.getElementById('temporadasContainer').innerHTML = '';
     toggleCamposContenido();
-}
-
-// ==============================================
+}// ==============================================
 // 🔧 CORREGIR ENLACE DE YOUTUBE
 // ==============================================
 function corregirEnlaceYouTube(url) {
