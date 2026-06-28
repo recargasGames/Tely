@@ -295,7 +295,7 @@
             <div id="editTemporadasContainer"></div>
             <button class="btn-agregar-temp" onclick="agregarTemporadaEdit()"><i class="fa fa-plus"></i> Agregar temporada</button>
             <div class="modal-footer" style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
-                <button class="btn btn-refresh" onclick="cargarSeries()"><i class="fa fa-sync"></i> Recargar series</button>
+                <button class="btn btn-guardar" onclick="guardarSeriesCambios()"><i class="fa fa-save"></i> Guardar cambios</button>
                 <button class="btn btn-danger" onclick="cerrarEditorSerie()"><i class="fa fa-times"></i> Cerrar</button>
             </div>
         </div>
@@ -462,7 +462,9 @@ function cambiarTab(tab) {
     else if (tab === 'personalizadas') cargarPersonalizadas();
     else if (tab === 'categorias') cargarCategorias();
     else if (tab === 'agregar') cargarCategoriasEnSelect();
-}// ==============================================
+}
+
+// ==============================================
 // 📥 CARGAR PELÍCULAS DE TMDB
 // ==============================================
 async function cargarPeliculas() {
@@ -501,9 +503,10 @@ function mostrarPeliculas() {
     contenedor.innerHTML = peliculas.map(p => {
         const tieneEnlace = p.url || p.opcion2;
         const categoria = p.categoria || 'peliculas';
+        const badgeEnlace = tieneEnlace ? '<span class="badge badge-con-enlace">✅ Con enlace</span>' : '<span class="badge badge-sin-enlace">❌ Sin enlace</span>';
         return `<div class="pelicula-item" data-id="${p.id}">
             <div class="info"><div class="info-peli">${p.portada ? `<img src="${p.portada}" class="portada-mini" loading="lazy" onerror="this.style.display='none'">` : ''}<div><span class="titulo">${p.titulo}</span><span class="anio">${p.anio}</span><span class="categoria-tag categoria-${categoria}">${categoria}</span></div></div>
-            <div>${tieneEnlace ? '<span class="badge badge-con-enlace">✅ Con enlace</span>' : '<span class="badge badge-sin-enlace">❌ Sin enlace</span>'}${p.adminId ? '<span class="badge badge-firebase">☁️ Firebase</span>' : ''}<span class="badge badge-peli">TMDB</span></div></div>
+            <div>${badgeEnlace}${p.adminId ? '<span class="badge badge-firebase">☁️ Firebase</span>' : ''}<span class="badge badge-peli">TMDB</span></div></div>
             <div class="enlaces">
                 <input type="text" class="input-opcion1" placeholder="Opción 1 (URL)" value="${p.url || ''}">
                 <input type="text" class="input-opcion2" placeholder="Opción 2 (URL)" value="${p.opcion2 || ''}">
@@ -522,10 +525,8 @@ function mostrarPeliculas() {
             </div>
         </div>`;
     }).join('');
-}
-
-// ==============================================
-// 💾 GUARDAR PELÍCULA - CON ENLACE FALSO AUTOMÁTICO
+}// ==============================================
+// 💾 GUARDAR PELÍCULA - CON ENLACE AUTOMÁTICO VIDSRC.SBS
 // ==============================================
 function guardarEnlacesPelicula(tmdbId) {
     const item = document.querySelector(`.pelicula-item[data-id="${tmdbId}"]`);
@@ -537,9 +538,11 @@ function guardarEnlacesPelicula(tmdbId) {
     const peli = peliculas.find(p => p.id == tmdbId);
     if (!peli) return;
     
+    // 🔥 SI NO TIENE ENLACE, GENERAR UNO AUTOMÁTICO CON VIDSRC.SBS
     if (!url && !opcion2) {
-        url = `https://vidsrc.in/embed/${peli.tmdb_id}`;
-        alert(`✅ Enlace falso generado para "${peli.titulo}": ${url}\n\nLuego edítalo por el correcto.`);
+        url = `https://vidsrc.sbs/embed/movie/${peli.tmdb_id}`;
+        opcion2 = `https://vsembed.su/embed/movie/${peli.tmdb_id}`;
+        alert(`✅ Enlaces automáticos generados para "${peli.titulo}":\nOpción 1: ${url}\nOpción 2: ${opcion2}\n\nPuedes editarlos si lo deseas.`);
     }
     
     url = corregirEnlaceYouTube(url);
@@ -620,25 +623,43 @@ function mostrarSeries(series) {
     contador.textContent = `${series.length} series (Pág ${paginaSeries})`;
     contenedor.innerHTML = series.map(s => {
         const categoria = s.categoria || 'series';
+        const tieneEnlaces = s.temporadas && s.temporadas.length > 0 && s.temporadas.some(t => t.capitulos && t.capitulos.some(c => c.url));
+        const badgeEnlace = tieneEnlaces ? '<span class="badge badge-con-enlace">✅ Con enlaces</span>' : '<span class="badge badge-sin-enlace">❌ Sin enlaces</span>';
         return `<div class="serie-item" data-id="${s.id}">
             <div class="info"><div class="info-peli">${s.portada ? `<img src="${s.portada}" class="portada-mini" loading="lazy" onerror="this.style.display='none'">` : ''}<div><span class="titulo">${s.titulo}</span><span class="anio">${s.anio}</span><span class="categoria-tag categoria-${categoria}">${categoria}</span></div></div>
-            <div>${s.adminId ? '<span class="badge badge-firebase">☁️ Firebase</span>' : '<span class="badge badge-sin-enlace">❌ Sin enlaces</span>'}<span class="badge badge-serie">Serie</span></div></div>
+            <div>${badgeEnlace}${s.adminId ? '<span class="badge badge-firebase">☁️ Firebase</span>' : ''}<span class="badge badge-serie">Serie</span></div></div>
             <div class="temporadas" id="temporadas_${s.id}">${s.temporadas && s.temporadas.length > 0 ? s.temporadas.map((temp, idx) => `<div class="temp-card"><div class="temp-titulo">T${temp.numero}: ${temp.nombre}</div><div class="capitulos">${temp.capitulos ? temp.capitulos.length : 0} capítulos</div></div>`).join('') : '<span style="color:#94A3B8; font-size:0.75rem;">Sin temporadas</span>'}</div>
             <div class="enlaces" style="margin-top:0.3rem;">
                 <button class="btn btn-guardar btn-small" onclick="abrirEditorSerie('${s.id}')"><i class="fa fa-edit"></i> ${s.adminId ? 'Editar enlaces' : 'Agregar enlaces'}</button>
-                ${s.adminId ? `<button class="btn btn-danger btn-small" onclick="eliminarSerie('${s.adminId}')"><i class="fa fa-trash"></i> Eliminar</button>` : ''}
+                ${s.adminId ? `<button class="btn btn-danger btn-small" onclick="eliminarSerie('${s.adminId}')"><i class="fa fa-trash"></i> Eliminar serie</button>` : ''}
             </div>
         </div>`;
     }).join('');
 }
 
+// ==============================================
+// 🗑️ ELIMINAR SERIE COMPLETA
+// ==============================================
 function eliminarSerie(adminId) {
-    if (!confirm('¿Eliminar esta serie de Firebase?')) return;
+    if (!confirm('¿Eliminar esta serie COMPLETA de Firebase? Se borrarán todas las temporadas y capítulos.')) return;
     db.ref(`series_personalizadas/${adminId}`).remove().then(() => {
-        alert('✅ Serie eliminada');
+        alert('✅ Serie eliminada completamente');
         seriesAdmin = seriesAdmin.filter(s => s.id !== adminId);
         cargarSeries();
     }).catch(err => alert('❌ Error: ' + err.message));
+}
+
+// ==============================================
+// 💾 GUARDAR CAMBIOS DE SERIES (Función nueva)
+// ==============================================
+function guardarSeriesCambios() {
+    if (!serieEditandoId) {
+        alert('❌ No hay una serie abierta para guardar');
+        return;
+    }
+    guardarSerieFirebase(serieEditandoId);
+    alert('✅ Cambios guardados correctamente');
+    cargarSeries();
 }// ==============================================
 // 🔥 OBTENER TEMPORADAS DE TMDB
 // ==============================================
@@ -659,7 +680,7 @@ function obtenerTemporadasDeTMDB(tmdbId, callback) {
                         capitulos: [{
                             numero: 1,
                             titulo: 'Capítulo 1',
-                            url: `https://vidsrc.in/embed/${tmdbId}`
+                            url: `https://vidsrc.sbs/embed/tv/${tmdbId}/1/1`
                         }]
                     }]);
                     return;
@@ -677,14 +698,14 @@ function obtenerTemporadasDeTMDB(tmdbId, callback) {
                                         capitulos.push({
                                             numero: ep.episode_number,
                                             titulo: ep.name || `Capítulo ${ep.episode_number}`,
-                                            url: `https://vidsrc.in/embed/${tmdbId}/${season.season_number}/${ep.episode_number}`
+                                            url: `https://vidsrc.sbs/embed/tv/${tmdbId}/${season.season_number}/${ep.episode_number}`
                                         });
                                     });
                                 } else {
                                     capitulos.push({
                                         numero: 1,
                                         titulo: 'Capítulo 1',
-                                        url: `https://vidsrc.in/embed/${tmdbId}`
+                                        url: `https://vidsrc.sbs/embed/tv/${tmdbId}/${season.season_number}/1`
                                     });
                                 }
                                 temporadas.push({
@@ -707,7 +728,7 @@ function obtenerTemporadasDeTMDB(tmdbId, callback) {
                     capitulos: [{
                         numero: 1,
                         titulo: 'Capítulo 1',
-                        url: `https://vidsrc.in/embed/${tmdbId}`
+                        url: `https://vidsrc.sbs/embed/tv/${tmdbId}/1/1`
                     }]
                 }]);
             }
@@ -719,7 +740,7 @@ function obtenerTemporadasDeTMDB(tmdbId, callback) {
                 capitulos: [{
                     numero: 1,
                     titulo: 'Capítulo 1',
-                    url: `https://vidsrc.in/embed/${tmdbId}`
+                    url: `https://vidsrc.sbs/embed/tv/${tmdbId}/1/1`
                 }]
             }]);
         });
@@ -768,7 +789,7 @@ function abrirEditorSerie(tmdbId) {
             
             let totalCaps = 0;
             temporadas.forEach(t => totalCaps += t.capitulos.length);
-            alert(`✅ Se creó "${nombreSerie}" con ${temporadas.length} temporadas y ${totalCaps} capítulos con enlaces falsos.\n\nLuego puedes editar los enlaces por los correctos.`);
+            alert(`✅ Se creó "${nombreSerie}" con ${temporadas.length} temporadas y ${totalCaps} capítulos con enlaces automáticos.\n\nPuedes editar los enlaces por otros si lo deseas.`);
             
             container.innerHTML = '';
             temporadas.forEach((temp, idx) => {
@@ -898,7 +919,12 @@ function guardarCapitulo(btn, tmdbId) {
     const titulo = capItem.querySelector('.edit-cap-titulo').value.trim() || `Capítulo ${numero}`;
     let url = capItem.querySelector('.edit-cap-url').value.trim();
     
-    if (!url) { alert('⚠️ Debes agregar una URL'); return; }
+    if (!url) { 
+        // 🔥 Si no tiene URL, generar una automática
+        url = `https://vidsrc.sbs/embed/tv/${tmdbId}/${tempIndex + 1}/${numero}`;
+        capItem.querySelector('.edit-cap-url').value = url;
+        alert(`✅ Enlace automático generado: ${url}`);
+    }
     url = corregirEnlaceYouTube(url);
     
     let serie = seriesAdmin.find(s => s.tmdb_id == tmdbId);
@@ -919,6 +945,7 @@ function guardarCapitulo(btn, tmdbId) {
         serie.temporadas[tempIndex].capitulos.push(capituloData);
     }
     
+    // 🔥 ACTUALIZAR LA LISTA DE CAPÍTULOS
     const capitulosContainer = tempCard.querySelector('.edit-capitulos-container');
     capitulosContainer.innerHTML = '';
     serie.temporadas[tempIndex].capitulos.forEach((cap, idx) => {
@@ -962,7 +989,10 @@ function guardarSerieFirebase(tmdbId) {
         tempDiv.querySelectorAll('.capitulo-item').forEach(capDiv => {
             const numero = parseInt(capDiv.querySelector('.edit-cap-num').value) || 1;
             const tituloCap = capDiv.querySelector('.edit-cap-titulo').value.trim() || `Capítulo ${numero}`;
-            const url = capDiv.querySelector('.edit-cap-url').value.trim();
+            let url = capDiv.querySelector('.edit-cap-url').value.trim();
+            if (!url) {
+                url = `https://vidsrc.sbs/embed/tv/${tmdbId}/${temporadas.length + 1}/${numero}`;
+            }
             if (url) {
                 capitulos.push({ numero, titulo: tituloCap, url: corregirEnlaceYouTube(url) });
             }
@@ -973,7 +1003,7 @@ function guardarSerieFirebase(tmdbId) {
     });
     
     if (temporadas.length === 0) {
-        temporadas.push({ numero: 1, nombre: 'Temporada 1', capitulos: [{ numero: 1, titulo: 'Capítulo 1', url: '' }] });
+        temporadas.push({ numero: 1, nombre: 'Temporada 1', capitulos: [{ numero: 1, titulo: 'Capítulo 1', url: `https://vidsrc.sbs/embed/tv/${tmdbId}/1/1` }] });
     }
     
     serie.temporadas = temporadas;
@@ -1087,7 +1117,7 @@ function agregarTemporadaEdit() {
     const serie = seriesAdmin.find(s => s.tmdb_id == tmdbId);
     if (serie) {
         if (!serie.temporadas) serie.temporadas = [];
-        serie.temporadas.push({ numero: serie.temporadas.length + 1, nombre: `Temporada ${num}`, capitulos: [{ numero: 1, titulo: 'Capítulo 1', url: '' }] });
+        serie.temporadas.push({ numero: serie.temporadas.length + 1, nombre: `Temporada ${num}`, capitulos: [{ numero: 1, titulo: 'Capítulo 1', url: `https://vidsrc.sbs/embed/tv/${tmdbId}/${num}/1` }] });
     }
     if (tmdbId) guardarSerieFirebase(tmdbId);
 }
@@ -1123,7 +1153,7 @@ function agregarCapituloEdit(btn) {
         if (!serie.temporadas[tempIndex].capitulos) {
             serie.temporadas[tempIndex].capitulos = [];
         }
-        serie.temporadas[tempIndex].capitulos.push({ numero: num, titulo: `Capítulo ${num}`, url: '' });
+        serie.temporadas[tempIndex].capitulos.push({ numero: num, titulo: `Capítulo ${num}`, url: `https://vidsrc.sbs/embed/tv/${tmdbId}/${tempIndex + 1}/${num}` });
     }
 }
 
@@ -1235,10 +1265,12 @@ async function cargarPersonalizadas() {
         if (todos.length === 0) { contenedor.innerHTML = '<div class="cargando">No hay contenido personalizado</div>'; return; }
         contenedor.innerHTML = todos.map(item => {
             const categoria = item.categoria || (item.tipo === 'pelicula' ? 'peliculas' : 'series');
+            const tieneEnlace = item.url || item.opcion2 || (item.temporadas && item.temporadas.length > 0);
+            const badgeEnlace = tieneEnlace ? '<span class="badge badge-con-enlace">✅ Con enlace</span>' : '<span class="badge badge-sin-enlace">❌ Sin enlace</span>';
             return `<div class="pelicula-item" style="border-left-color: ${item.tipo === 'serie' ? '#10B981' : '#60A5FA'};">
                 <div class="info">
                     <div class="info-peli">${item.portada ? `<img src="${item.portada}" class="portada-mini" loading="lazy" onerror="this.style.display='none'">` : ''}<div><span class="titulo">${item.titulo}</span><span class="anio">${item.anio}</span><span class="categoria-tag categoria-${categoria}">${categoria}</span></div></div>
-                    <div><span class="badge ${item.tipo === 'serie' ? 'badge-serie' : 'badge-peli'}">${item.tipo === 'serie' ? '📺 Serie' : '🎬 Película'}</span><span class="badge badge-personalizada">⭐ Personalizada</span><span class="badge badge-firebase">☁️ Firebase</span></div>
+                    <div><span class="badge ${item.tipo === 'serie' ? 'badge-serie' : 'badge-peli'}">${item.tipo === 'serie' ? '📺 Serie' : '🎬 Película'}</span><span class="badge badge-personalizada">⭐ Personalizada</span><span class="badge badge-firebase">☁️ Firebase</span> ${badgeEnlace}</div>
                 </div>
                 <div class="enlaces">
                     ${item.tipo === 'pelicula' ? `
@@ -1321,9 +1353,7 @@ function eliminarCapAgregar(btn) {
     const container = cap.closest('.nueva-capitulos-container');
     if (container.children.length > 1) { cap.remove(); }
     else { alert('Debe haber al menos un capítulo'); }
-}
-
-function agregarContenidoPersonalizado() {
+}function agregarContenidoPersonalizado() {
     const tipo = document.getElementById('tipoContenido').value;
     const titulo = document.getElementById('nuevoTitulo').value.trim();
     const anio = document.getElementById('nuevoAnio').value.trim();
@@ -1345,7 +1375,11 @@ function agregarContenidoPersonalizado() {
     if (tipo === 'pelicula') {
         let url1 = document.getElementById('nuevaUrl1').value.trim();
         let url2 = document.getElementById('nuevaUrl2').value.trim();
-        if (!url1 && !url2) { alert('⚠️ Debes agregar al menos un enlace'); return; }
+        if (!url1 && !url2) { 
+            url1 = `https://vidsrc.sbs/embed/movie/${titulo.toLowerCase().replace(/ /g, '_')}`;
+            url2 = `https://vsembed.su/embed/movie/${titulo.toLowerCase().replace(/ /g, '_')}`;
+            alert(`✅ Enlaces automáticos generados:\nOpción 1: ${url1}\nOpción 2: ${url2}`);
+        }
         url1 = corregirEnlaceYouTube(url1); url2 = corregirEnlaceYouTube(url2);
         datos.url = url1; datos.opcion2 = url2; datos.tipo = 'pelicula';
         const ref = db.ref('contenido_personalizado').push();
@@ -1363,7 +1397,10 @@ function agregarContenidoPersonalizado() {
             tempDiv.querySelectorAll('.cap-item-agregar').forEach(capDiv => {
                 const num = parseInt(capDiv.querySelector('.nueva-cap-num').value) || 1;
                 const tituloCap = capDiv.querySelector('.nueva-cap-titulo').value.trim() || `Capítulo ${num}`;
-                const url = capDiv.querySelector('.nueva-cap-url').value.trim();
+                let url = capDiv.querySelector('.nueva-cap-url').value.trim();
+                if (!url) {
+                    url = `https://vidsrc.sbs/embed/tv/${titulo.toLowerCase().replace(/ /g, '_')}/${temporadas.length + 1}/${num}`;
+                }
                 if (url) { capitulos.push({ numero: num, titulo: tituloCap, url: corregirEnlaceYouTube(url) }); }
             });
             if (capitulos.length > 0) { temporadas.push({ numero: temporadas.length + 1, nombre, capitulos }); }
@@ -1391,7 +1428,9 @@ function limpiarFormAgregar() {
     document.getElementById('nuevaUrl2').value = '';
     document.getElementById('temporadasContainer').innerHTML = '';
     toggleCamposContenido();
-}// ==============================================
+}
+
+// ==============================================
 // 🔧 CORREGIR ENLACE DE YOUTUBE
 // ==============================================
 function corregirEnlaceYouTube(url) {
@@ -1426,13 +1465,13 @@ function abrirModalVideo(url) {
         let enlace = url.trim();
         let html = '';
         if (enlace.includes('youtube.com') || enlace.includes('youtu.be')) {
-            html = `<iframe src="${enlace}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;background:#000;"></iframe>`;
+            html = `<iframe src="${enlace}" frameborder="0" referrerpolicy="origin" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;background:#000;"></iframe>`;
         } else if (enlace.includes('vidmoly')) {
             if (!enlace.includes('controls=')) { enlace += (enlace.includes('?') ? '&' : '?') + 'controls=1&logo=0&autoplay=1'; }
             html = `<object data="${enlace}" type="text/html" style="width:100%;height:100%;border:none;background:#000;"></object>`;
         } else if (enlace.includes('mixdrop')) {
             if (!enlace.includes('autoplay')) { enlace += (enlace.includes('?') ? '&' : '?') + 'autoplay=1'; }
-            html = `<iframe src="${enlace}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;background:#000;"></iframe>`;
+            html = `<iframe src="${enlace}" frameborder="0" referrerpolicy="origin" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;background:#000;"></iframe>`;
         } else if (enlace.includes('drive.google.com')) {
             const id = enlace.match(/[-\w]{25,}/)?.[0];
             if (id) {
@@ -1440,7 +1479,7 @@ function abrirModalVideo(url) {
                 html = `<video src="${driveUrl}" controls playsinline preload="auto" style="width:100%;height:100%;background:#000;" autoplay>Tu navegador no soporta el video.</video>`;
             } else { html = `<div style="color:#EF4444;text-align:center;padding:2rem;">❌ Enlace de Drive inválido</div>`; }
         } else {
-            html = `<iframe src="${enlace}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;background:#000;"></iframe>`;
+            html = `<iframe src="${enlace}" frameborder="0" referrerpolicy="origin" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;background:#000;"></iframe>`;
         }
         content.innerHTML = `<button class="btn-cerrar-modal" onclick="cerrarModalVideo()"><i class="fa-solid fa-xmark"></i></button>${html}`;
     }, 500);
