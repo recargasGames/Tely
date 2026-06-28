@@ -7,6 +7,48 @@
     <title>TELY 🎬</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ===== BLOQUEO DE ANUNCIOS PARA VIDSRC ===== -->
+    <style>
+        iframe[src*="vidsrc"] {
+            pointer-events: none;
+        }
+        .ads, .ad, .advertisement, [class*="ad-"], [id*="ad-"] {
+            display: none !important;
+        }
+    </style>
+    <script>
+        window.open = function(url, name, specs) {
+            if (url && (url.includes('vidsrc') || url.includes('ads'))) {
+                console.log('🚫 Popup bloqueado:', url);
+                return null;
+            }
+            return window.open.apply(window, arguments);
+        };
+        window.addEventListener('beforeunload', function(e) {
+            if (e.target.location && e.target.location.href.includes('vidsrc')) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeName === 'IFRAME') {
+                            const src = node.src || '';
+                            if (src.includes('ads') || src.includes('doubleclick') || src.includes('googlead')) {
+                                node.style.display = 'none';
+                                node.remove();
+                            }
+                        }
+                    });
+                });
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        });
+    </script>
+    
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -35,7 +77,8 @@
                 }
             }
         }
-    </script><style>
+    </script>
+    <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { 
         width: 100%; max-width: 100%; overflow-x: hidden; min-height: 100vh;
@@ -221,7 +264,6 @@
 .btn-nueva-ventana { border-color: rgba(239, 68, 68, 0.3) !important; color: #EF4444 !important; }
 .btn-nueva-ventana:hover { background: rgba(239, 68, 68, 0.15) !important; border-color: #EF4444 !important; }
 
-/* ===== SELECTOR DE TEMPORADA ===== */
 .selector-temporada {
     display: flex; align-items: center; justify-content: center; gap: 1rem;
     margin-bottom: 0.8rem; padding: 0.5rem;
@@ -238,7 +280,6 @@
 .btn-temp:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
 #tempActual { font-weight: 600; color: #A78BFA; font-size: 0.9rem; min-width: 120px; text-align: center; }
 
-/* ===== CAPÍTULOS EN HORIZONTAL (CARRUSEL) ===== */
 .capitulos-horizontal {
     display: flex; gap: 0.8rem; overflow-x: auto;
     padding: 0.3rem 0.2rem 0.8rem; scroll-snap-type: x mandatory;
@@ -424,7 +465,6 @@
 
         <div class="botones-opciones" id="botonesOpciones"></div>
 
-        <!-- CAPÍTULOS CON SELECTOR Y CARRUSEL HORIZONTAL -->
         <div id="capitulosContainer" class="capitulos-container oculto">
             <div class="selector-temporada">
                 <button class="btn-temp" id="tempAnterior" onclick="cambiarTemporada(-1)">
@@ -503,10 +543,8 @@ const TMDB_IMG = "https://image.tmdb.org/t/p/w500";
 const TMDB_LANG = "es-ES";
 const opcionesTMDB = { method: "GET", headers: { "Authorization": `Bearer ${TMDB_TOKEN}`, "Content-Type": "application/json;charset=utf-8" } };
 
-const MI_CONTENIDO = [
-  { id: "rambo_001", titulo: "Rambo 1", anio: "1982", tipo: "pelicula", categoria: "peliculas", portada: "rambo1.png", sinopsis: "Un ex soldado de élite regresa a su pueblo natal y se enfrenta a la hostilidad de las autoridades locales.", puntuacion: "7.7", genero: "Acción / Aventura", tmdb_id: "1136", url: "https://vidsrc.in/embed/1136" },
-  { id: "johnwick_001", titulo: "John Wick", anio: "2014", tipo: "pelicula", categoria: "peliculas", portada: "john wick.png", sinopsis: "Un exasesino a sueldo vuelve a la acción para vengar a su perro.", puntuacion: "7.4", genero: "Acción / Suspenso", tmdb_id: "245891", url: "https://vidsrc.in/embed/245891" }
-];
+// ===== MI_CONTENIDO VACÍO (SIN RAMBO Y JOHN WICK) =====
+const MI_CONTENIDO = [];
 
 async function cargarContenidoAdmin() {
   try {
@@ -643,47 +681,6 @@ async function cargarMasContenido() {
   cargandoMas = false;
 }
 
-// ==============================================
-// 🔄 GIRAR PANTALLA AUTOMÁTICAMENTE
-// ==============================================
-function girarPantallaHorizontal() {
-    setTimeout(() => {
-        if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('landscape')
-                .then(() => { console.log("✅ Pantalla girada a horizontal"); })
-                .catch((err) => {
-                    console.log("⚠️ No se pudo girar la pantalla:", err);
-                    try {
-                        if (document.documentElement.requestFullscreen) {
-                            document.documentElement.requestFullscreen();
-                        }
-                    } catch (e) {}
-                });
-        } else {
-            try {
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen();
-                }
-            } catch (e) {}
-        }
-    }, 300);
-}
-
-function girarPantallaVertical() {
-    setTimeout(() => {
-        if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('portrait')
-                .then(() => { console.log("✅ Pantalla girada a vertical"); })
-                .catch((err) => { console.log("⚠️ No se pudo volver a vertical:", err); });
-        }
-        try {
-            if (document.fullscreenElement) {
-                document.exitFullscreen();
-            }
-        } catch (e) {}
-    }, 300);
-}
-
 function abrirVideoPelicula(peli) {
   if (peli.tmdb_id) {
     db.ref("contenido_personalizado").orderByChild("tmdb_id").equalTo(peli.tmdb_id).once("value", (snapshot) => {
@@ -701,9 +698,6 @@ function abrirVideoPelicula(peli) {
 }
 
 function abrirReproductor(peli) {
-    // 🔥 GIRAR PANTALLA AUTOMÁTICAMENTE A HORIZONTAL
-    girarPantallaHorizontal();
-    
     detenerVideo();
     const modal = document.getElementById("modal-video");
     const player = document.getElementById("netflixPlayer");
@@ -867,8 +861,7 @@ function reproducirOpcion(url) {
     if (id) { const driveUrl = `https://drive.google.com/uc?export=stream&id=${id}&confirm=t&cache=1`; player.innerHTML = `<video src="${driveUrl}" controlsList="nodownload noremoteplayback" controls playsinline preload="auto" crossorigin="anonymous" style="width:100%;height:100%;background:#000;position:absolute;top:0;left:0;" autoplay>Tu navegador no soporta el video.</video>`; } else { player.innerHTML = `<div style="color:#EF4444;text-align:center;padding:4rem;font-size:1.2rem;">❌ Enlace de Drive inválido</div>`; } return;
   }
   player.innerHTML = `<iframe src="${enlace}" frameborder="0" referrerpolicy="origin" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;"></iframe>`;
-}
-    async function cargarRecomendadas(tmdbId) {
+}async function cargarRecomendadas(tmdbId) {
   const contenedor = document.getElementById("recomendadasLista");
   contenedor.innerHTML = "<p style='color:#64748B;text-align:center;padding:0.8rem;'>Cargando...</p>";
   if (!tmdbId) { contenedor.innerHTML = "<p style='color:#64748B;text-align:center;padding:0.8rem;'>Sin recomendaciones</p>"; return; }
@@ -881,9 +874,6 @@ function reproducirOpcion(url) {
 }
 
 function cerrarVideo() {
-    // 🔥 VOLVER A PANTALLA VERTICAL
-    girarPantallaVertical();
-    
     detenerVideo();
     const modal = document.getElementById("modal-video");
     modal.classList.remove("abierto");
