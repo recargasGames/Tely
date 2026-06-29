@@ -144,7 +144,7 @@
     <div id="tab-tmdb">
         <div class="card">
             <h3><i class="fa fa-film"></i> Películas de TMDB</h3>
-            <p class="text-gray-400 text-sm mb-3">Agrega enlaces de video (Opción 1 y Opción 2) a cada película</p>
+            <p class="text-gray-400 text-sm mb-3">Agrega enlaces de video a cada película</p>
             <div class="buscador">
                 <input type="text" id="buscadorPeliculas" placeholder="Buscar película..." onkeydown="if(event.key==='Enter') buscarPeliculas()">
                 <button class="btn btn-buscar btn-small" onclick="buscarPeliculas()"><i class="fa fa-search"></i> Buscar</button>
@@ -256,7 +256,6 @@
             <div id="camposPelicula">
                 <h4 class="text-sm text-gray-300 mt-2 mb-1">🎬 Enlaces de video</h4>
                 <input type="text" id="nuevaUrl1" placeholder="Opción 1 (URL)">
-                <input type="text" id="nuevaUrl2" placeholder="Opción 2 (URL)">
             </div>
             <div id="camposSerie" class="oculto">
                 <h4 class="text-sm text-gray-300 mt-2 mb-1">📺 Temporadas y Capítulos</h4>
@@ -483,7 +482,7 @@ async function cargarPeliculas() {
         peliculasAdmin = datosAdmin ? Object.values(datosAdmin) : [];
         peliculas = datos.results.map(p => {
             const enAdmin = peliculasAdmin.find(a => a.tmdb_id == p.id);
-            return { id: p.id, tmdb_id: p.id, titulo: p.title || "Sin título", anio: p.release_date ? p.release_date.split("-")[0] : "N/D", portada: p.poster_path ? `${TMDB_IMG}${p.poster_path}` : "", sinopsis: p.overview || "Sin sinopsis", puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", genero: "Película", url: enAdmin?.url || "", opcion2: enAdmin?.opcion2 || "", categoria: enAdmin?.categoria || "peliculas", adminId: enAdmin?.id || null, origen: 'tmdb' };
+            return { id: p.id, tmdb_id: p.id, titulo: p.title || "Sin título", anio: p.release_date ? p.release_date.split("-")[0] : "N/D", portada: p.poster_path ? `${TMDB_IMG}${p.poster_path}` : "", sinopsis: p.overview || "Sin sinopsis", puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", genero: "Película", url: enAdmin?.url || "", categoria: enAdmin?.categoria || "peliculas", adminId: enAdmin?.id || null, origen: 'tmdb' };
         });
         document.getElementById("paginacion").style.display = "flex";
         document.getElementById("paginaActual").textContent = paginaActual;
@@ -501,52 +500,39 @@ function mostrarPeliculas() {
     if (peliculas.length === 0) { contenedor.innerHTML = '<div class="cargando">No hay películas disponibles</div>'; contador.textContent = "0 películas"; return; }
     contador.textContent = `${peliculas.length} películas (Pág ${paginaActual})`;
     contenedor.innerHTML = peliculas.map(p => {
-        const tieneEnlace = p.url || p.opcion2;
+        const tieneEnlace = p.url && p.url.trim() !== '';
         const categoria = p.categoria || 'peliculas';
         const badgeEnlace = tieneEnlace ? '<span class="badge badge-con-enlace">✅ Con enlace</span>' : '<span class="badge badge-sin-enlace">❌ Sin enlace</span>';
         return `<div class="pelicula-item" data-id="${p.id}">
             <div class="info"><div class="info-peli">${p.portada ? `<img src="${p.portada}" class="portada-mini" loading="lazy" onerror="this.style.display='none'">` : ''}<div><span class="titulo">${p.titulo}</span><span class="anio">${p.anio}</span><span class="categoria-tag categoria-${categoria}">${categoria}</span></div></div>
             <div>${badgeEnlace}${p.adminId ? '<span class="badge badge-firebase">☁️ Firebase</span>' : ''}<span class="badge badge-peli">TMDB</span></div></div>
             <div class="enlaces">
-                <input type="text" class="input-opcion1" placeholder="Opción 1 (URL)" value="${p.url || ''}">
-                <input type="text" class="input-opcion2" placeholder="Opción 2 (URL)" value="${p.opcion2 || ''}">
-                <select class="input-categoria" style="flex:0.5;min-width:100px;margin-bottom:0;padding:0.3rem 0.5rem;font-size:0.75rem;border-radius:4px;border:1px solid #334155;background:#0F172A;color:#F8FAFC;">
-                    <option value="peliculas" ${categoria === 'peliculas' ? 'selected' : ''}>🎬 Películas</option>
-                    <option value="series" ${categoria === 'series' ? 'selected' : ''}>📺 Series</option>
-                    <option value="anime" ${categoria === 'anime' ? 'selected' : ''}>🇯🇵 Anime</option>
-                    <option value="terror" ${categoria === 'terror' ? 'selected' : ''}>👻 Terror</option>
-                    <option value="comedia" ${categoria === 'comedia' ? 'selected' : ''}>😂 Comedia</option>
-                    <option value="accion" ${categoria === 'accion' ? 'selected' : ''}>💥 Acción</option>
-                    <option value="drama" ${categoria === 'drama' ? 'selected' : ''}>🎭 Drama</option>
-                </select>
+                <input type="text" class="input-opcion1" placeholder="URL del video" value="${p.url || ''}">
                 <button class="btn btn-guardar btn-small" onclick="guardarEnlacesPelicula('${p.id}')"><i class="fa fa-save"></i> Guardar</button>
                 ${p.url ? `<button class="btn btn-probar btn-small" onclick="probarVideo('${p.url}')"><i class="fa fa-play"></i> Probar</button>` : ''}
-                ${p.adminId ? `<button class="btn btn-danger btn-small" onclick="eliminarEnlacesPelicula('${p.adminId}', '${p.id}')"><i class="fa fa-trash"></i> Eliminar</button>` : ''}
+                ${p.adminId ? `<button class="btn btn-danger btn-small" onclick="eliminarEnlacesPelicula('${p.adminId}', '${p.id}')"><i class="fa fa-trash"></i> Eliminar enlace</button>` : ''}
             </div>
         </div>`;
     }).join('');
 }// ==============================================
-// 💾 GUARDAR PELÍCULA - CON ENLACE AUTOMÁTICO VIDSRC.SBS
+// 💾 GUARDAR PELÍCULA - CON ENLACE AUTOMÁTICO UNLIMPLAY
 // ==============================================
 function guardarEnlacesPelicula(tmdbId) {
     const item = document.querySelector(`.pelicula-item[data-id="${tmdbId}"]`);
     if (!item) return;
     
     let url = item.querySelector('.input-opcion1').value.trim();
-    let opcion2 = item.querySelector('.input-opcion2').value.trim();
     const categoria = item.querySelector('.input-categoria').value;
     const peli = peliculas.find(p => p.id == tmdbId);
     if (!peli) return;
     
-    // 🔥 SI NO TIENE ENLACE, GENERAR UNO AUTOMÁTICO CON VIDSRC.SBS
-    if (!url && !opcion2) {
-        url = `https://vidsrc.sbs/embed/movie/${peli.tmdb_id}`;
-        opcion2 = `https://vsembed.su/embed/movie/${peli.tmdb_id}`;
-        alert(`✅ Enlaces automáticos generados para "${peli.titulo}":\nOpción 1: ${url}\nOpción 2: ${opcion2}\n\nPuedes editarlos si lo deseas.`);
+    // 🔥 SI NO TIENE ENLACE, GENERAR UNO AUTOMÁTICO CON UNLIMPLAY
+    if (!url) {
+        url = `https://unlimplay.com/play/embed/movie/${peli.tmdb_id}`;
+        alert(`✅ Enlace automático generado para "${peli.titulo}":\n${url}`);
     }
     
     url = corregirEnlaceYouTube(url);
-    opcion2 = corregirEnlaceYouTube(opcion2);
     
     const existe = peliculasAdmin.find(a => a.tmdb_id == tmdbId);
     const datos = { 
@@ -560,7 +546,6 @@ function guardarEnlacesPelicula(tmdbId) {
         puntuacion: peli.puntuacion, 
         genero: peli.genero, 
         url: url, 
-        opcion2: opcion2, 
         fecha_actualizacion: new Date().toISOString() 
     };
     
@@ -569,18 +554,21 @@ function guardarEnlacesPelicula(tmdbId) {
         alert(`✅ "${peli.titulo}" guardada en Firebase`);
         if (!existe) { datos.id = ref.key; peliculasAdmin.push(datos); }
         else { const index = peliculasAdmin.findIndex(a => a.id === existe.id); if (index !== -1) peliculasAdmin[index] = { ...datos, id: existe.id }; }
-        peli.url = url; peli.opcion2 = opcion2; peli.adminId = existe ? existe.id : ref.key; peli.categoria = categoria || "peliculas";
+        peli.url = url; peli.adminId = existe ? existe.id : ref.key; peli.categoria = categoria || "peliculas";
         mostrarPeliculas();
     }).catch(err => alert("❌ Error al guardar: " + err.message));
 }
 
+// ==============================================
+// 🗑️ ELIMINAR ENLACE DE PELÍCULA
+// ==============================================
 function eliminarEnlacesPelicula(adminId, tmdbId) {
-    if (!confirm('¿Eliminar los enlaces de esta película de Firebase?')) return;
+    if (!confirm('¿Eliminar el enlace de esta película de Firebase?')) return;
     db.ref(`contenido_personalizado/${adminId}`).remove().then(() => {
-        alert('✅ Enlaces eliminados');
+        alert('✅ Enlace eliminado');
         peliculasAdmin = peliculasAdmin.filter(a => a.id !== adminId);
         const peli = peliculas.find(p => p.id == tmdbId);
-        if (peli) { peli.url = ''; peli.opcion2 = ''; peli.adminId = null; }
+        if (peli) { peli.url = ''; peli.adminId = null; }
         mostrarPeliculas();
     }).catch(err => alert('❌ Error: ' + err.message));
 }
@@ -650,7 +638,7 @@ function eliminarSerie(adminId) {
 }
 
 // ==============================================
-// 💾 GUARDAR CAMBIOS DE SERIES (Función nueva)
+// 💾 GUARDAR CAMBIOS DE SERIES
 // ==============================================
 function guardarSeriesCambios() {
     if (!serieEditandoId) {
@@ -680,7 +668,7 @@ function obtenerTemporadasDeTMDB(tmdbId, callback) {
                         capitulos: [{
                             numero: 1,
                             titulo: 'Capítulo 1',
-                            url: `https://vidsrc.sbs/embed/tv/${tmdbId}/1/1`
+                            url: `https://unlimplay.com/play/embed/tv/${tmdbId}/1/1`
                         }]
                     }]);
                     return;
@@ -698,14 +686,14 @@ function obtenerTemporadasDeTMDB(tmdbId, callback) {
                                         capitulos.push({
                                             numero: ep.episode_number,
                                             titulo: ep.name || `Capítulo ${ep.episode_number}`,
-                                            url: `https://vidsrc.sbs/embed/tv/${tmdbId}/${season.season_number}/${ep.episode_number}`
+                                            url: `https://unlimplay.com/play/embed/tv/${tmdbId}/${season.season_number}/${ep.episode_number}`
                                         });
                                     });
                                 } else {
                                     capitulos.push({
                                         numero: 1,
                                         titulo: 'Capítulo 1',
-                                        url: `https://vidsrc.sbs/embed/tv/${tmdbId}/${season.season_number}/1`
+                                        url: `https://unlimplay.com/play/embed/tv/${tmdbId}/${season.season_number}/1`
                                     });
                                 }
                                 temporadas.push({
@@ -728,7 +716,7 @@ function obtenerTemporadasDeTMDB(tmdbId, callback) {
                     capitulos: [{
                         numero: 1,
                         titulo: 'Capítulo 1',
-                        url: `https://vidsrc.sbs/embed/tv/${tmdbId}/1/1`
+                        url: `https://unlimplay.com/play/embed/tv/${tmdbId}/1/1`
                     }]
                 }]);
             }
@@ -740,7 +728,7 @@ function obtenerTemporadasDeTMDB(tmdbId, callback) {
                 capitulos: [{
                     numero: 1,
                     titulo: 'Capítulo 1',
-                    url: `https://vidsrc.sbs/embed/tv/${tmdbId}/1/1`
+                    url: `https://unlimplay.com/play/embed/tv/${tmdbId}/1/1`
                 }]
             }]);
         });
@@ -846,10 +834,11 @@ function agregarTempEditUI(container, temp, idx) {
                     <div class="fila-cap">
                         <label>URL:</label>
                         <input type="text" class="edit-cap-url" value="${cap.url || ''}" placeholder="URL del video">
-                        ${cap.url ? `<button class="btn btn-probar btn-xxs" onclick="probarVideo('${cap.url}')"><i class="fa fa-play"></i> Probar</button>` : ''}
                     </div>
-                    <div style="margin-top:0.3rem;">
+                    <div style="margin-top:0.3rem;display:flex;gap:0.3rem;flex-wrap:wrap;">
                         <button class="btn btn-guardar btn-xxs" onclick="guardarCapitulo(this, '${serieEditandoId}')"><i class="fa fa-save"></i> Guardar</button>
+                        ${cap.url ? `<button class="btn btn-probar btn-xxs" onclick="probarVideo('${cap.url}')"><i class="fa fa-play"></i> Probar</button>` : ''}
+                        ${cap.url ? `<button class="btn btn-danger btn-xxs" onclick="eliminarCapituloEdit(this)"><i class="fa fa-trash"></i> Eliminar</button>` : ''}
                     </div>
                 </div>
             `;
@@ -866,7 +855,7 @@ function agregarTempEditUI(container, temp, idx) {
                     <label>URL:</label>
                     <input type="text" class="edit-cap-url" placeholder="URL del video">
                 </div>
-                <div style="margin-top:0.3rem;">
+                <div style="margin-top:0.3rem;display:flex;gap:0.3rem;flex-wrap:wrap;">
                     <button class="btn btn-guardar btn-xxs" onclick="guardarCapitulo(this, '${serieEditandoId}')"><i class="fa fa-save"></i> Guardar</button>
                 </div>
             </div>
@@ -920,8 +909,7 @@ function guardarCapitulo(btn, tmdbId) {
     let url = capItem.querySelector('.edit-cap-url').value.trim();
     
     if (!url) { 
-        // 🔥 Si no tiene URL, generar una automática
-        url = `https://vidsrc.sbs/embed/tv/${tmdbId}/${tempIndex + 1}/${numero}`;
+        url = `https://unlimplay.com/play/embed/tv/${tmdbId}/${tempIndex + 1}/${numero}`;
         capItem.querySelector('.edit-cap-url').value = url;
         alert(`✅ Enlace automático generado: ${url}`);
     }
@@ -961,10 +949,11 @@ function guardarCapitulo(btn, tmdbId) {
             <div class="fila-cap">
                 <label>URL:</label>
                 <input type="text" class="edit-cap-url" value="${cap.url || ''}" placeholder="URL del video">
-                ${cap.url ? `<button class="btn btn-probar btn-xxs" onclick="probarVideo('${cap.url}')"><i class="fa fa-play"></i> Probar</button>` : ''}
             </div>
-            <div style="margin-top:0.3rem;">
+            <div style="margin-top:0.3rem;display:flex;gap:0.3rem;flex-wrap:wrap;">
                 <button class="btn btn-guardar btn-xxs" onclick="guardarCapitulo(this, '${tmdbId}')"><i class="fa fa-save"></i> Guardar</button>
+                ${cap.url ? `<button class="btn btn-probar btn-xxs" onclick="probarVideo('${cap.url}')"><i class="fa fa-play"></i> Probar</button>` : ''}
+                ${cap.url ? `<button class="btn btn-danger btn-xxs" onclick="eliminarCapituloEdit(this)"><i class="fa fa-trash"></i> Eliminar</button>` : ''}
             </div>
         `;
         capitulosContainer.appendChild(newCapDiv);
@@ -991,7 +980,7 @@ function guardarSerieFirebase(tmdbId) {
             const tituloCap = capDiv.querySelector('.edit-cap-titulo').value.trim() || `Capítulo ${numero}`;
             let url = capDiv.querySelector('.edit-cap-url').value.trim();
             if (!url) {
-                url = `https://vidsrc.sbs/embed/tv/${tmdbId}/${temporadas.length + 1}/${numero}`;
+                url = `https://unlimplay.com/play/embed/tv/${tmdbId}/${temporadas.length + 1}/${numero}`;
             }
             if (url) {
                 capitulos.push({ numero, titulo: tituloCap, url: corregirEnlaceYouTube(url) });
@@ -1003,7 +992,7 @@ function guardarSerieFirebase(tmdbId) {
     });
     
     if (temporadas.length === 0) {
-        temporadas.push({ numero: 1, nombre: 'Temporada 1', capitulos: [{ numero: 1, titulo: 'Capítulo 1', url: `https://vidsrc.sbs/embed/tv/${tmdbId}/1/1` }] });
+        temporadas.push({ numero: 1, nombre: 'Temporada 1', capitulos: [{ numero: 1, titulo: 'Capítulo 1', url: `https://unlimplay.com/play/embed/tv/${tmdbId}/1/1` }] });
     }
     
     serie.temporadas = temporadas;
@@ -1033,7 +1022,7 @@ function guardarSerieFirebase(tmdbId) {
 }
 
 // ==============================================
-// 🗑️ ELIMINAR TEMPORADA Y CAPÍTULO
+// 🗑️ ELIMINAR TEMPORADA
 // ==============================================
 function eliminarTemporadaEdit(btn) {
     const tempCard = btn.closest('.temp-card-editor');
@@ -1056,25 +1045,42 @@ function eliminarTemporadaEdit(btn) {
     if (tmdbId) guardarSerieFirebase(tmdbId);
 }
 
+// ==============================================
+// 🗑️ ELIMINAR CAPÍTULO INDIVIDUAL
+// ==============================================
 function eliminarCapituloEdit(btn) {
     const capItem = btn.closest('.capitulo-item');
-    const container = capItem.closest('.edit-capitulos-container');
-    if (container.children.length <= 1) { alert('⚠️ Debe haber al menos un capítulo'); return; }
+    if (!capItem) return;
+    
     if (!confirm('¿Eliminar este capítulo?')) return;
     
     const tempCard = capItem.closest('.temp-card-editor');
     const tmdbId = serieEditandoId;
     const tempIndex = parseInt(tempCard.dataset.tempIndex);
     const capIndex = parseInt(capItem.dataset.capIndex);
-    capItem.remove();
     
     const serie = seriesAdmin.find(s => s.tmdb_id == tmdbId);
-    if (serie && serie.temporadas && tempIndex !== undefined && tempIndex < serie.temporadas.length) {
-        if (capIndex !== undefined && capIndex < serie.temporadas[tempIndex].capitulos.length) {
+    if (serie && serie.temporadas && serie.temporadas[tempIndex]) {
+        if (serie.temporadas[tempIndex].capitulos && serie.temporadas[tempIndex].capitulos.length > 1) {
             serie.temporadas[tempIndex].capitulos.splice(capIndex, 1);
+            // Reindexar capítulos
+            serie.temporadas[tempIndex].capitulos.forEach((cap, i) => cap.numero = i + 1);
+        } else {
+            alert('⚠️ No puedes eliminar el último capítulo de una temporada');
+            return;
         }
     }
-    if (tmdbId) guardarSerieFirebase(tmdbId);
+    
+    // 🔥 RECARGAR LA TEMPORADA ACTUAL
+    const container = document.getElementById('editTemporadasContainer');
+    container.innerHTML = '';
+    serie.temporadas.forEach((temp, idx) => {
+        agregarTempEditUI(container, temp, idx);
+    });
+    actualizarSelectorTempEditor();
+    
+    guardarSerieFirebase(tmdbId);
+    alert('✅ Capítulo eliminado correctamente');
 }
 
 function agregarTemporadaEdit() {
@@ -1101,7 +1107,7 @@ function agregarTemporadaEdit() {
                     <label>URL:</label>
                     <input type="text" class="edit-cap-url" placeholder="URL del video">
                 </div>
-                <div style="margin-top:0.3rem;">
+                <div style="margin-top:0.3rem;display:flex;gap:0.3rem;flex-wrap:wrap;">
                     <button class="btn btn-guardar btn-xxs" onclick="guardarCapitulo(this, '${tmdbId}')"><i class="fa fa-save"></i> Guardar</button>
                 </div>
             </div>
@@ -1117,7 +1123,7 @@ function agregarTemporadaEdit() {
     const serie = seriesAdmin.find(s => s.tmdb_id == tmdbId);
     if (serie) {
         if (!serie.temporadas) serie.temporadas = [];
-        serie.temporadas.push({ numero: serie.temporadas.length + 1, nombre: `Temporada ${num}`, capitulos: [{ numero: 1, titulo: 'Capítulo 1', url: `https://vidsrc.sbs/embed/tv/${tmdbId}/${num}/1` }] });
+        serie.temporadas.push({ numero: serie.temporadas.length + 1, nombre: `Temporada ${num}`, capitulos: [{ numero: 1, titulo: 'Capítulo 1', url: `https://unlimplay.com/play/embed/tv/${tmdbId}/${num}/1` }] });
     }
     if (tmdbId) guardarSerieFirebase(tmdbId);
 }
@@ -1142,7 +1148,7 @@ function agregarCapituloEdit(btn) {
             <label>URL:</label>
             <input type="text" class="edit-cap-url" placeholder="URL del video">
         </div>
-        <div style="margin-top:0.3rem;">
+        <div style="margin-top:0.3rem;display:flex;gap:0.3rem;flex-wrap:wrap;">
             <button class="btn btn-guardar btn-xxs" onclick="guardarCapitulo(this, '${tmdbId}')"><i class="fa fa-save"></i> Guardar</button>
         </div>
     `;
@@ -1153,7 +1159,7 @@ function agregarCapituloEdit(btn) {
         if (!serie.temporadas[tempIndex].capitulos) {
             serie.temporadas[tempIndex].capitulos = [];
         }
-        serie.temporadas[tempIndex].capitulos.push({ numero: num, titulo: `Capítulo ${num}`, url: `https://vidsrc.sbs/embed/tv/${tmdbId}/${tempIndex + 1}/${num}` });
+        serie.temporadas[tempIndex].capitulos.push({ numero: num, titulo: `Capítulo ${num}`, url: `https://unlimplay.com/play/embed/tv/${tmdbId}/${tempIndex + 1}/${num}` });
     }
 }
 
@@ -1265,7 +1271,7 @@ async function cargarPersonalizadas() {
         if (todos.length === 0) { contenedor.innerHTML = '<div class="cargando">No hay contenido personalizado</div>'; return; }
         contenedor.innerHTML = todos.map(item => {
             const categoria = item.categoria || (item.tipo === 'pelicula' ? 'peliculas' : 'series');
-            const tieneEnlace = item.url || item.opcion2 || (item.temporadas && item.temporadas.length > 0);
+            const tieneEnlace = item.url || (item.temporadas && item.temporadas.length > 0);
             const badgeEnlace = tieneEnlace ? '<span class="badge badge-con-enlace">✅ Con enlace</span>' : '<span class="badge badge-sin-enlace">❌ Sin enlace</span>';
             return `<div class="pelicula-item" style="border-left-color: ${item.tipo === 'serie' ? '#10B981' : '#60A5FA'};">
                 <div class="info">
@@ -1275,8 +1281,7 @@ async function cargarPersonalizadas() {
                 <div class="enlaces">
                     ${item.tipo === 'pelicula' ? `
                         ${item.url ? `<span style="color:#94A3B8;font-size:0.75rem;">URL: ${item.url.substring(0, 30)}...</span>` : ''}
-                        ${item.opcion2 ? `<span style="color:#94A3B8;font-size:0.75rem;">Op2: ${item.opcion2.substring(0, 30)}...</span>` : ''}
-                        ${item.url || item.opcion2 ? `<button class="btn btn-probar btn-small" onclick="probarVideo('${item.url || item.opcion2}')"><i class="fa fa-play"></i> Probar</button>` : ''}
+                        ${item.url ? `<button class="btn btn-probar btn-small" onclick="probarVideo('${item.url}')"><i class="fa fa-play"></i> Probar</button>` : ''}
                     ` : `${item.temporadas && item.temporadas.length > 0 ? item.temporadas.length + ' temporadas' : 'Sin temporadas'}`}
                     <button class="btn btn-danger btn-small" onclick="eliminarPersonalizado('${item.id}', '${item.tipo}')"><i class="fa fa-trash"></i></button>
                 </div>
@@ -1294,9 +1299,7 @@ function eliminarPersonalizado(id, tipo) {
         if (tipo === 'pelicula') cargarPeliculas();
         else cargarSeries();
     }).catch(err => alert('❌ Error: ' + err.message));
-}
-
-// ==============================================
+}// ==============================================
 // ➕ AGREGAR CONTENIDO PERSONALIZADO
 // ==============================================
 function toggleCamposContenido() {
@@ -1353,7 +1356,9 @@ function eliminarCapAgregar(btn) {
     const container = cap.closest('.nueva-capitulos-container');
     if (container.children.length > 1) { cap.remove(); }
     else { alert('Debe haber al menos un capítulo'); }
-}function agregarContenidoPersonalizado() {
+}
+
+function agregarContenidoPersonalizado() {
     const tipo = document.getElementById('tipoContenido').value;
     const titulo = document.getElementById('nuevoTitulo').value.trim();
     const anio = document.getElementById('nuevoAnio').value.trim();
@@ -1374,14 +1379,12 @@ function eliminarCapAgregar(btn) {
     
     if (tipo === 'pelicula') {
         let url1 = document.getElementById('nuevaUrl1').value.trim();
-        let url2 = document.getElementById('nuevaUrl2').value.trim();
-        if (!url1 && !url2) { 
-            url1 = `https://vidsrc.sbs/embed/movie/${titulo.toLowerCase().replace(/ /g, '_')}`;
-            url2 = `https://vsembed.su/embed/movie/${titulo.toLowerCase().replace(/ /g, '_')}`;
-            alert(`✅ Enlaces automáticos generados:\nOpción 1: ${url1}\nOpción 2: ${url2}`);
+        if (!url1) { 
+            url1 = `https://unlimplay.com/play/embed/movie/${titulo.toLowerCase().replace(/ /g, '_')}`;
+            alert(`✅ Enlace automático generado:\n${url1}`);
         }
-        url1 = corregirEnlaceYouTube(url1); url2 = corregirEnlaceYouTube(url2);
-        datos.url = url1; datos.opcion2 = url2; datos.tipo = 'pelicula';
+        url1 = corregirEnlaceYouTube(url1);
+        datos.url = url1; datos.tipo = 'pelicula';
         const ref = db.ref('contenido_personalizado').push();
         ref.set(datos).then(() => {
             alert('✅ Película agregada');
@@ -1399,7 +1402,7 @@ function eliminarCapAgregar(btn) {
                 const tituloCap = capDiv.querySelector('.nueva-cap-titulo').value.trim() || `Capítulo ${num}`;
                 let url = capDiv.querySelector('.nueva-cap-url').value.trim();
                 if (!url) {
-                    url = `https://vidsrc.sbs/embed/tv/${titulo.toLowerCase().replace(/ /g, '_')}/${temporadas.length + 1}/${num}`;
+                    url = `https://unlimplay.com/play/embed/tv/${titulo.toLowerCase().replace(/ /g, '_')}/${temporadas.length + 1}/${num}`;
                 }
                 if (url) { capitulos.push({ numero: num, titulo: tituloCap, url: corregirEnlaceYouTube(url) }); }
             });
@@ -1425,7 +1428,6 @@ function limpiarFormAgregar() {
     document.getElementById('nuevoGenero').value = '';
     document.getElementById('nuevoRating').value = '';
     document.getElementById('nuevaUrl1').value = '';
-    document.getElementById('nuevaUrl2').value = '';
     document.getElementById('temporadasContainer').innerHTML = '';
     toggleCamposContenido();
 }
