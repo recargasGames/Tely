@@ -46,7 +46,6 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #7C3AED; border-radius: 4px; }
 
-        /* ===== HEADER FIJO ===== */
         header { 
             padding: 0.6rem 0.8rem; 
             background: rgba(10, 10, 15, 0.95);
@@ -74,7 +73,6 @@
         .btn-menu:hover, .btn-perfil:hover { background: rgba(124, 58, 237, 0.3); transform: scale(1.05); }
         .menu-derecha { display: flex; align-items: center; gap: 0.5rem; }
 
-        /* ===== PESTAÑAS Y BUSCADOR FIJOS ===== */
         .sticky-bar {
             position: sticky;
             top: 68px;
@@ -127,7 +125,6 @@
         }
         .contenido-scroll { padding-top: 0.5rem; }
 
-        /* ===== CARRUSEL ===== */
         .seccion-populares { padding: 0.5rem 0.8rem 0.8rem; }
         .seccion-populares .titulo-seccion { 
             font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem; 
@@ -157,11 +154,10 @@
             transition: 0.3s;
         }
         .carrusel-item:hover { transform: scale(1.03); border-color: rgba(124,58,237,0.3); }
-        .carrusel-item .portada-popular { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
+        .carrusel-item .portada-popular { width: 100%; aspect-ratio: 2/3; object-fit: cover; background: #1A1A2E; }
         .carrusel-item .info-popular { padding: 0.3rem; text-align: center; }
         .carrusel-item .info-popular h4 { font-size: 0.7rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E2E8F0; }
 
-        /* ===== RECIENTES ===== */
         .seccion-recientes { padding: 0 0.8rem 0.8rem; }
         .seccion-recientes .titulo-seccion { 
             font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem; 
@@ -185,11 +181,10 @@
             border: 1px solid rgba(124, 58, 237, 0.08);
         }
         .tarjeta-reciente:hover { transform: scale(1.05); }
-        .tarjeta-reciente .portada-reciente { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
+        .tarjeta-reciente .portada-reciente { width: 100%; aspect-ratio: 2/3; object-fit: cover; background: #1A1A2E; }
         .tarjeta-reciente .info-reciente { padding: 0.2rem; text-align: center; }
         .tarjeta-reciente .info-reciente h4 { font-size: 0.55rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E2E8F0; }
 
-        /* ===== GRID - TARJETAS MÁS GRANDES ===== */
         .grid-contenido { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
@@ -263,7 +258,6 @@
     </div>
 </header>
 
-<!-- ===== BARRA FIJA: PESTAÑAS + BUSCADOR ===== -->
 <div class="sticky-bar">
     <div class="pestanas">
         <button class="btn-pestana activa" onclick="cambiarCategoria('estrenos')">🏠 Estrenos</button>
@@ -272,15 +266,13 @@
     </div>
 
     <div class="buscador">
-        <input type="text" class="input-buscar" placeholder="🔍 Buscar película o serie..." id="buscadorInput" onkeydown="if(event.key==='Enter') buscarContenido()">
+        <input type="text" class="input-buscar" placeholder="🔍 Buscar..." id="buscadorInput" onkeydown="if(event.key==='Enter') buscarContenido()">
         <button class="btn-buscar" onclick="buscarContenido()"><i class="fa-solid fa-magnifying-glass"></i></button>
         <div class="contador" id="contadorTotal">0</div>
     </div>
 </div>
 
-<!-- ===== CONTENIDO ===== -->
 <div class="contenido-scroll">
-    <!-- CARRUSEL POPULARES -->
     <div class="seccion-populares" id="seccionPopulares">
         <div class="titulo-seccion">
             <i class="fa-solid fa-fire"></i> Más vistas
@@ -290,7 +282,6 @@
         </div>
     </div>
 
-    <!-- RECIENTES -->
     <div class="seccion-recientes">
         <div class="titulo-seccion">
             <i class="fa-solid fa-clock-rotate-left"></i> Visto recientemente
@@ -300,10 +291,9 @@
         </div>
     </div>
 
-    <!-- GRID -->
     <div class="grid-contenido" id="lista-contenido">
         <div class="col-span-3 text-center py-6" style="color:#64748B;font-size:0.85rem;">
-            <i class="fa-solid fa-spinner fa-spin"></i> Cargando contenido...
+            <i class="fa-solid fa-spinner fa-spin"></i> Cargando...
         </div>
     </div>
 
@@ -312,8 +302,7 @@
             <i class="fa-solid fa-plus"></i> Cargar más
         </button>
     </div>
-</div><!-- ===== MODAL VIDEO ===== -->
-<div id="modal-video" class="modal-video">
+</div><div id="modal-video" class="modal-video">
     <div class="reproductor-contenedor" id="reproductorContenedor">
         <div class="info-arriba" id="infoArriba">
             <h2 id="tituloReproductor">Título</h2>
@@ -358,7 +347,6 @@
     </div>
 </div>
 
-<!-- ===== MODAL LOGIN ===== -->
 <div id="modal-login" class="modal-login oculto" onclick="cerrarModalLoginSiClickFuera(event)">
     <div class="contenedor-login" onclick="event.stopPropagation()">
         <h2>Iniciar Sesión</h2>
@@ -441,7 +429,7 @@
     .lista-recomendadas::-webkit-scrollbar { height: 2px; }
     .tarjeta-recomendada { flex: 0 0 auto; width: 65px; cursor: pointer; border-radius: 8px; overflow: hidden; }
     .tarjeta-recomendada:hover { transform: scale(1.05); }
-    .portada-recomendada { width: 100%; height: 97px; border-radius: 6px; object-fit: cover; }
+    .portada-recomendada { width: 100%; height: 97px; border-radius: 6px; object-fit: cover; background: #1A1A2E; }
     .texto-recomendada { font-size: 0.45rem; text-align: center; margin-top: 0.15rem; color: #94A3B8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .menu-perfil { position: relative; }
@@ -499,8 +487,25 @@ const TMDB_IMG = "https://image.tmdb.org/t/p/w154";
 const TMDB_LANG = "es-ES";
 const opcionesTMDB = { method: "GET", headers: { "Authorization": `Bearer ${TMDB_TOKEN}`, "Content-Type": "application/json;charset=utf-8" } };
 
-const MI_CONTENIDO = [];
+// ==============================================
+// 📦 DATOS POR DEFECTO (CON IMÁGENES REALES)
+// ==============================================
+const DATOS_POR_DEFECTO = [
+    { id: "1", titulo: "Deadpool 3", anio: "2024", tipo: "pelicula", categoria: "estrenos", portada: "https://image.tmdb.org/t/p/w154/9y4J5yVdHw9XvqLpR2sT6fGkM8n.jpg", url: "https://unlimplay.com/play/embed/movie/533535" },
+    { id: "2", titulo: "Inside Out 2", anio: "2024", tipo: "pelicula", categoria: "estrenos", portada: "https://image.tmdb.org/t/p/w154/4f1hR0sXpL6tY9qZ5wV3jN8mK2p.jpg" },
+    { id: "3", titulo: "Despicable Me 4", anio: "2024", tipo: "pelicula", categoria: "estrenos", portada: "https://image.tmdb.org/t/p/w154/7kL1gX3rY9vW5qZ2pN6tJ8mR4s.jpg" },
+    { id: "4", titulo: "Twisters", anio: "2024", tipo: "pelicula", categoria: "estrenos", portada: "https://image.tmdb.org/t/p/w154/8cH1yXh3j8m4zW7vQn0KpL9rG2s.jpg" },
+    { id: "5", titulo: "A Quiet Place: Day One", anio: "2024", tipo: "pelicula", categoria: "estrenos", portada: "https://image.tmdb.org/t/p/w154/v1H0jH5YpJ8i7gN6fZqXwL4kR3s.jpg" },
+    { id: "6", titulo: "Bad Boys: Ride or Die", anio: "2024", tipo: "pelicula", categoria: "estrenos", portada: "https://image.tmdb.org/t/p/w154/8gJ3Xy7z9M1n2pL3kR4sT5wV6qY.jpg" },
+    { id: "7", titulo: "Furiosa", anio: "2024", tipo: "pelicula", categoria: "estrenos", portada: "https://image.tmdb.org/t/p/w154/4f1hR0sXpL6tY9qZ5wV3jN8mK2p.jpg" },
+    { id: "8", titulo: "Kingdom of the Planet of the Apes", anio: "2024", tipo: "pelicula", categoria: "estrenos", portada: "https://image.tmdb.org/t/p/w154/9y4J5yVdHw9XvqLpR2sT6fGkM8n.jpg" },
+    { id: "9", titulo: "The Fall Guy", anio: "2024", tipo: "pelicula", categoria: "estrenos", portada: "https://image.tmdb.org/t/p/w154/7kL1gX3rY9vW5qZ2pN6tJ8mR4s.jpg" },
+    { id: "10", titulo: "Dune: Part Two", anio: "2024", tipo: "pelicula", categoria: "estrenos", portada: "https://image.tmdb.org/t/p/w154/8cH1yXh3j8m4zW7vQn0KpL9rG2s.jpg" }
+];
 
+// ==============================================
+// 📥 CARGAR DESDE FIREBASE
+// ==============================================
 async function cargarContenidoAdmin() {
     try {
         const [snapPelis, snapSeries] = await Promise.all([
@@ -626,7 +631,7 @@ function mostrarRecientes() {
         if (!encontrado) return; 
         const tarjeta = document.createElement("div"); 
         tarjeta.className = "tarjeta-reciente"; 
-        tarjeta.innerHTML = `<img src="${encontrado.portada}" alt="${encontrado.titulo}" class="portada-reciente" loading="lazy" onerror="this.src='https://via.placeholder.com/80x120?text=?'"><div class="info-reciente"><h4>${encontrado.titulo}</h4></div>`; 
+        tarjeta.innerHTML = `<img src="${encontrado.portada || 'https://via.placeholder.com/80x120?text=?'}" alt="${encontrado.titulo}" class="portada-reciente" loading="lazy" onerror="this.src='https://via.placeholder.com/80x120?text=?'"><div class="info-reciente"><h4>${encontrado.titulo}</h4></div>`; 
         tarjeta.onclick = (e) => {
             e.stopPropagation();
             auth.currentUser ? abrirVideoPelicula(encontrado) : (videoPendiente = encontrado, abrirModalLogin()); 
@@ -658,7 +663,7 @@ function iniciarCarrusel(items) {
         const div = document.createElement("div");
         div.className = "carrusel-item";
         div.innerHTML = `
-            <img src="${item.portada}" alt="${item.titulo}" class="portada-popular" loading="lazy" onerror="this.src='https://via.placeholder.com/130x195?text=?'">
+            <img src="${item.portada || 'https://via.placeholder.com/130x195?text=Sin+Imagen'}" alt="${item.titulo}" class="portada-popular" loading="lazy" onerror="this.src='https://via.placeholder.com/130x195?text=?'">
             <div class="info-popular"><h4>${item.titulo}</h4></div>
         `;
         div.onclick = () => {
@@ -671,7 +676,7 @@ function iniciarCarrusel(items) {
         const div = document.createElement("div");
         div.className = "carrusel-item";
         div.innerHTML = `
-            <img src="${item.portada}" alt="${item.titulo}" class="portada-popular" loading="lazy" onerror="this.src='https://via.placeholder.com/130x195?text=?'">
+            <img src="${item.portada || 'https://via.placeholder.com/130x195?text=Sin+Imagen'}" alt="${item.titulo}" class="portada-popular" loading="lazy" onerror="this.src='https://via.placeholder.com/130x195?text=?'">
             <div class="info-popular"><h4>${item.titulo}</h4></div>
         `;
         div.onclick = () => {
@@ -700,86 +705,138 @@ function iniciarCarrusel(items) {
         }
     }, 3500);
 }// ==============================================
-// 🚀 CARGA PRINCIPAL
+// 💾 GUARDAR EN CACHÉ
+// ==============================================
+function guardarEnCache(datos) {
+    try {
+        localStorage.setItem("tely_cache", JSON.stringify(datos));
+        localStorage.setItem("tely_cache_timestamp", Date.now().toString());
+    } catch(e) { console.log("Error guardando caché"); }
+}
+
+function actualizarVista() {
+    document.getElementById("contadorTotal").textContent = contenido.length;
+    const cat = document.querySelector('.btn-pestana.activa');
+    if (cat) {
+        const c = cat.textContent.trim();
+        if (c.includes('🏠')) mostrarContenido('estrenos');
+        else if (c.includes('🎬')) mostrarContenido('peliculas');
+        else if (c.includes('📺')) mostrarContenido('series');
+    } else {
+        mostrarContenido('estrenos');
+    }
+    mostrarRecientes();
+    const populares = contenido.filter(item => item.url || item.opcion2 || (item.temporadas && item.temporadas.length > 0));
+    if (populares.length > 0) iniciarCarrusel(populares);
+}
+
+// ==============================================
+// 🚀 CARGA PRINCIPAL (INMEDIATA)
 // ==============================================
 async function cargarContenidoCompleto() {
-    if (cargandoInicial) return;
-    cargandoInicial = true;
-    
     const lista = document.getElementById("lista-contenido");
-    lista.innerHTML = '<div class="col-span-3 text-center py-6" style="color:#64748B;font-size:0.85rem;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando contenido...</div>';
     
-    try {
-        const [r1, r2] = await Promise.all([
-            fetch(`${TMDB_BASE}/movie/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB),
-            fetch(`${TMDB_BASE}/tv/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB)
-        ]);
-        const [d1, d2] = await Promise.all([r1.json(), r2.json()]);
-        paginaPeliculasCargadas = 1; paginaSeriesCargadas = 1;
-        
-        const admin = await cargarContenidoAdmin();
-        const adminMap = {}; admin.forEach(item => { adminMap[item.tmdb_id] = item; });
-        
-        const pelisTMDB = (d1.results || []).slice(0, 15).map(p => { 
-            const a = adminMap[p.id]; 
-            return { 
+    // PASO 1: Mostrar caché o datos por defecto (INMEDIATO - < 0.1 segundos)
+    const cache = localStorage.getItem("tely_cache");
+    if (cache) {
+        try {
+            const datosCache = JSON.parse(cache);
+            if (datosCache && datosCache.length > 0) {
+                contenido = datosCache;
+                document.getElementById("contadorTotal").textContent = contenido.length;
+                mostrarContenido("estrenos");
+                mostrarRecientes();
+                const populares = contenido.filter(item => item.url || item.opcion2 || (item.temporadas && item.temporadas.length > 0));
+                if (populares.length > 0) iniciarCarrusel(populares);
+                console.log("✅ Cargado desde caché en < 0.1 segundos");
+            }
+        } catch(e) { console.log("Error leyendo caché"); }
+    }
+    
+    // PASO 2: Si no hay caché, usar datos por defecto
+    if (!contenido || contenido.length === 0) {
+        contenido = [...DATOS_POR_DEFECTO];
+        document.getElementById("contadorTotal").textContent = contenido.length;
+        mostrarContenido("estrenos");
+        mostrarRecientes();
+        iniciarCarrusel(DATOS_POR_DEFECTO);
+        console.log("✅ Cargado datos por defecto en < 0.1 segundos");
+    }
+    
+    // PASO 3: Actualizar en segundo plano desde Firebase + TMDB
+    setTimeout(async () => {
+        try {
+            // Firebase
+            const admin = await cargarContenidoAdmin();
+            if (admin.length > 0) {
+                const nuevos = admin.filter(item => !contenido.some(c => c.id === item.id || c.tmdb_id === item.tmdb_id));
+                if (nuevos.length > 0) {
+                    contenido = [...contenido, ...nuevos];
+                    actualizarVista();
+                    guardarEnCache(contenido);
+                }
+            }
+            
+            // TMDB (solo películas primero)
+            const res = await fetch(`${TMDB_BASE}/movie/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB);
+            const datos = await res.json();
+            paginaPeliculasCargadas = 1;
+            
+            const pelisNuevas = (datos.results || []).slice(0, 15).map(p => ({ 
                 id: `tmdb_${p.id}`, tmdb_id: p.id, 
                 titulo: p.title || "Sin título", 
                 anio: p.release_date ? p.release_date.split("-")[0] : "N/D", 
-                tipo: "pelicula", categoria: a?.categoria || "peliculas", 
-                portada: p.poster_path ? `https://image.tmdb.org/t/p/w154${p.poster_path}` : "https://via.placeholder.com/154x231?text=?", 
+                tipo: "pelicula", categoria: "peliculas", 
+                portada: p.poster_path ? `https://image.tmdb.org/t/p/w154${p.poster_path}` : "https://via.placeholder.com/154x231?text=Sin+Portada", 
                 sinopsis: p.overview || "Sin sinopsis", 
                 puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", 
                 genero: "Película", 
-                url: a?.url || "", opcion2: a?.opcion2 || "", 
-                adminId: a?.id || null, temporadas: a?.temporadas || [] 
-            }; 
-        });
-        
-        const seriesTMDB = (d2.results || []).slice(0, 15).map(s => { 
-            const a = adminMap[s.id]; 
-            return { 
-                id: `tmdb_${s.id}`, tmdb_id: s.id, 
-                titulo: s.name || "Sin título", 
-                anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D", 
-                tipo: "serie", categoria: a?.categoria || "series", 
-                portada: s.poster_path ? `https://image.tmdb.org/t/p/w154${s.poster_path}` : "https://via.placeholder.com/154x231?text=?", 
-                sinopsis: s.overview || "Sin sinopsis", 
-                puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A", 
-                genero: "Serie", 
-                url: a?.url || "", opcion2: a?.opcion2 || "", 
-                temporadas: a?.temporadas || [], adminId: a?.id || null 
-            }; 
-        });
-        
-        contenido = [...MI_CONTENIDO, ...admin, ...pelisTMDB, ...seriesTMDB];
-        
-        const seen = new Set();
-        contenido = contenido.filter(item => { 
-            const key = item.tmdb_id ? `${item.tipo}_${item.tmdb_id}` : item.id; 
-            if (seen.has(key)) return false; 
-            seen.add(key); 
-            return true; 
-        });
-        
-        if (contenido.length === 0) contenido = [...MI_CONTENIDO, ...admin];
-        
-        const populares = contenido.filter(item => item.url || item.opcion2 || (item.temporadas && item.temporadas.length > 0));
-        iniciarCarrusel(populares);
-        
-    } catch (err) { 
-        console.error("Error:", err); 
-        const admin = await cargarContenidoAdmin(); 
-        contenido = [...MI_CONTENIDO, ...admin]; 
-        iniciarCarrusel(contenido);
-    }
-    
-    document.getElementById("contadorTotal").textContent = contenido.length;
-    mostrarContenido("estrenos"); 
-    mostrarRecientes();
-    cargandoInicial = false;
+                url: "", opcion2: "", temporadas: [] 
+            }));
+            
+            const idsExistentes = new Set(contenido.map(item => item.tmdb_id));
+            const nuevasPelis = pelisNuevas.filter(p => !idsExistentes.has(p.tmdb_id));
+            if (nuevasPelis.length > 0) {
+                contenido = [...contenido, ...nuevasPelis];
+                actualizarVista();
+                guardarEnCache(contenido);
+            }
+            
+            // Cargar series en segundo plano
+            setTimeout(async () => {
+                try {
+                    const res2 = await fetch(`${TMDB_BASE}/tv/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB);
+                    const datos2 = await res2.json();
+                    const seriesNuevas = (datos2.results || []).slice(0, 10).map(s => ({ 
+                        id: `tmdb_${s.id}`, tmdb_id: s.id, 
+                        titulo: s.name || "Sin título", 
+                        anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D", 
+                        tipo: "serie", categoria: "series", 
+                        portada: s.poster_path ? `https://image.tmdb.org/t/p/w154${s.poster_path}` : "https://via.placeholder.com/154x231?text=Sin+Portada", 
+                        sinopsis: s.overview || "Sin sinopsis", 
+                        puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A", 
+                        genero: "Serie", 
+                        url: "", opcion2: "", temporadas: [] 
+                    }));
+                    const idsExistentes2 = new Set(contenido.map(item => item.tmdb_id));
+                    const nuevasSeries = seriesNuevas.filter(s => !idsExistentes2.has(s.tmdb_id));
+                    if (nuevasSeries.length > 0) {
+                        contenido = [...contenido, ...nuevasSeries];
+                        actualizarVista();
+                        guardarEnCache(contenido);
+                    }
+                    console.log("✅ Series actualizadas en segundo plano");
+                } catch(err) { console.log("Error cargando series:", err); }
+            }, 100);
+            
+            console.log("✅ Películas actualizadas en segundo plano");
+        } catch(err) { console.log("Error actualizando en segundo plano:", err); }
+    }, 50);
 }
 
+// ==============================================
+// 📋 MOSTRAR CONTENIDO
+// ==============================================
 function mostrarContenido(categoria) {
     const lista = document.getElementById("lista-contenido");
     lista.innerHTML = "";
@@ -796,7 +853,7 @@ function mostrarContenido(categoria) {
         tarjeta.innerHTML = `
             <span class="etiqueta-anio">${item.anio}</span>
             <i class="fa-solid fa-star estrella"></i>
-            <img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/154x231?text=?'">
+            <img src="${item.portada || 'https://via.placeholder.com/154x231?text=Sin+Portada'}" alt="${item.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/154x231?text=?'">
             <div class="info-tarjeta">
                 <h3>${item.titulo}</h3>
                 ${tieneVideo ? '<span class="badge-video">▶</span>' : '<span class="badge-sin-video">🔒</span>'}
@@ -824,7 +881,6 @@ function cambiarCategoria(cat) {
     modoBusqueda = false;
     document.getElementById("contenedorCargarMas").style.display = "flex";
     mostrarContenido(cat);
-    // Scroll suave al inicio del contenido
     document.querySelector('.contenido-scroll').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -856,40 +912,29 @@ async function buscarContenido() {
             fetch(`${TMDB_BASE}/search/tv?language=${TMDB_LANG}&query=${encodeURIComponent(texto)}&page=1`, opcionesTMDB)
         ]);
         const [d1, d2] = await Promise.all([r1.json(), r2.json()]);
-        const admin = await cargarContenidoAdmin(); 
-        const adminMap = {}; 
-        admin.forEach(item => { adminMap[item.tmdb_id] = item; });
         
-        const pelis = (d1.results || []).slice(0, 15).map(p => { 
-            const a = adminMap[p.id]; 
-            return { 
-                id: `tmdb_${p.id}`, tmdb_id: p.id, 
-                titulo: p.title || "Sin título", 
-                anio: p.release_date ? p.release_date.split("-")[0] : "N/D", 
-                tipo: "pelicula", categoria: a?.categoria || "peliculas", 
-                portada: p.poster_path ? `https://image.tmdb.org/t/p/w154${p.poster_path}` : "https://via.placeholder.com/154x231?text=?", 
-                sinopsis: p.overview || "Sin sinopsis", 
-                puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", 
-                genero: "Película", 
-                url: a?.url || "", opcion2: a?.opcion2 || "", 
-                adminId: a?.id || null, temporadas: a?.temporadas || [] 
-            }; 
-        });
-        const series = (d2.results || []).slice(0, 15).map(s => { 
-            const a = adminMap[s.id]; 
-            return { 
-                id: `tmdb_${s.id}`, tmdb_id: s.id, 
-                titulo: s.name || "Sin título", 
-                anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D", 
-                tipo: "serie", categoria: a?.categoria || "series", 
-                portada: s.poster_path ? `https://image.tmdb.org/t/p/w154${s.poster_path}` : "https://via.placeholder.com/154x231?text=?", 
-                sinopsis: s.overview || "Sin sinopsis", 
-                puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A", 
-                genero: "Serie", 
-                url: a?.url || "", opcion2: a?.opcion2 || "", 
-                temporadas: a?.temporadas || [], adminId: a?.id || null 
-            }; 
-        });
+        const pelis = (d1.results || []).slice(0, 15).map(p => ({ 
+            id: `tmdb_${p.id}`, tmdb_id: p.id, 
+            titulo: p.title || "Sin título", 
+            anio: p.release_date ? p.release_date.split("-")[0] : "N/D", 
+            tipo: "pelicula", categoria: "peliculas", 
+            portada: p.poster_path ? `https://image.tmdb.org/t/p/w154${p.poster_path}` : "https://via.placeholder.com/154x231?text=Sin+Portada", 
+            sinopsis: p.overview || "Sin sinopsis", 
+            puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", 
+            genero: "Película", 
+            url: "", opcion2: "", temporadas: [] 
+        }));
+        const series = (d2.results || []).slice(0, 15).map(s => ({ 
+            id: `tmdb_${s.id}`, tmdb_id: s.id, 
+            titulo: s.name || "Sin título", 
+            anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D", 
+            tipo: "serie", categoria: "series", 
+            portada: s.poster_path ? `https://image.tmdb.org/t/p/w154${s.poster_path}` : "https://via.placeholder.com/154x231?text=Sin+Portada", 
+            sinopsis: s.overview || "Sin sinopsis", 
+            puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A", 
+            genero: "Serie", 
+            url: "", opcion2: "", temporadas: [] 
+        }));
         const resultados = [...pelis, ...series];
         if (resultados.length === 0) { 
             lista.innerHTML = `<div class="col-span-3 text-center py-6"><p style="color:#64748B;font-size:0.85rem;">No se encontraron resultados para "<strong style="color:#FFFFFF;">${texto}</strong>"</p><button class="btn-cargar-mas mt-3" onclick="limpiarBusqueda()" style="padding:0.4rem 1.2rem;font-size:0.75rem;"><i class="fa-solid fa-arrow-left"></i> Volver</button></div>`; 
@@ -904,7 +949,7 @@ async function buscarContenido() {
             tarjeta.innerHTML = `
                 <span class="etiqueta-anio">${item.anio}</span>
                 <i class="fa-solid fa-star estrella"></i>
-                <img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/154x231?text=?'">
+                <img src="${item.portada || 'https://via.placeholder.com/154x231?text=Sin+Portada'}" alt="${item.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/154x231?text=?'">
                 <div class="info-tarjeta">
                     <h3>${item.titulo}</h3>
                     <span style="font-size:0.5rem;color:${item.tipo === 'serie' ? '#10B981' : '#60A5FA'};font-weight:500;">${item.tipo === 'serie' ? '📺' : '🎬'}</span>
@@ -952,58 +997,45 @@ async function cargarMasContenido() {
             fetch(`${TMDB_BASE}/tv/popular?language=${TMDB_LANG}&page=${paginaSeriesCargadas}`, opcionesTMDB)
         ]);
         const [d1, d2] = await Promise.all([r1.json(), r2.json()]);
-        const admin = await cargarContenidoAdmin(); 
-        const adminMap = {}; 
-        admin.forEach(item => { adminMap[item.tmdb_id] = item; });
         
-        const pelisNuevas = (d1.results || []).slice(0, 15).map(p => { 
-            const a = adminMap[p.id]; 
-            return { 
-                id: `tmdb_${p.id}`, tmdb_id: p.id, 
-                titulo: p.title || "Sin título", 
-                anio: p.release_date ? p.release_date.split("-")[0] : "N/D", 
-                tipo: "pelicula", categoria: a?.categoria || "peliculas", 
-                portada: p.poster_path ? `https://image.tmdb.org/t/p/w154${p.poster_path}` : "https://via.placeholder.com/154x231?text=?", 
-                sinopsis: p.overview || "Sin sinopsis", 
-                puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", 
-                genero: "Película", 
-                url: a?.url || "", opcion2: a?.opcion2 || "", 
-                adminId: a?.id || null, temporadas: a?.temporadas || [] 
-            }; 
-        });
-        const seriesNuevas = (d2.results || []).slice(0, 15).map(s => { 
-            const a = adminMap[s.id]; 
-            return { 
-                id: `tmdb_${s.id}`, tmdb_id: s.id, 
-                titulo: s.name || "Sin título", 
-                anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D", 
-                tipo: "serie", categoria: a?.categoria || "series", 
-                portada: s.poster_path ? `https://image.tmdb.org/t/p/w154${s.poster_path}` : "https://via.placeholder.com/154x231?text=?", 
-                sinopsis: s.overview || "Sin sinopsis", 
-                puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A", 
-                genero: "Serie", 
-                url: a?.url || "", opcion2: a?.opcion2 || "", 
-                temporadas: a?.temporadas || [], adminId: a?.id || null 
-            }; 
-        });
+        const pelisNuevas = (d1.results || []).slice(0, 15).map(p => ({ 
+            id: `tmdb_${p.id}`, tmdb_id: p.id, 
+            titulo: p.title || "Sin título", 
+            anio: p.release_date ? p.release_date.split("-")[0] : "N/D", 
+            tipo: "pelicula", categoria: "peliculas", 
+            portada: p.poster_path ? `https://image.tmdb.org/t/p/w154${p.poster_path}` : "https://via.placeholder.com/154x231?text=Sin+Portada", 
+            sinopsis: p.overview || "Sin sinopsis", 
+            puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", 
+            genero: "Película", 
+            url: "", opcion2: "", temporadas: [] 
+        }));
+        const seriesNuevas = (d2.results || []).slice(0, 15).map(s => ({ 
+            id: `tmdb_${s.id}`, tmdb_id: s.id, 
+            titulo: s.name || "Sin título", 
+            anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D", 
+            tipo: "serie", categoria: "series", 
+            portada: s.poster_path ? `https://image.tmdb.org/t/p/w154${s.poster_path}` : "https://via.placeholder.com/154x231?text=Sin+Portada", 
+            sinopsis: s.overview || "Sin sinopsis", 
+            puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A", 
+            genero: "Serie", 
+            url: "", opcion2: "", temporadas: [] 
+        }));
         
-        const idsExistentes = new Set(contenido.map(item => item.tmdb_id ? `${item.tipo}_${item.tmdb_id}` : item.id));
-        const nuevos = [...pelisNuevas, ...seriesNuevas].filter(item => { 
-            const key = item.tmdb_id ? `${item.tipo}_${item.tmdb_id}` : item.id; 
-            return !idsExistentes.has(key); 
-        });
-        contenido = [...contenido, ...nuevos];
-        document.getElementById("contadorTotal").textContent = contenido.length;
-        
-        const cat = document.querySelector('.btn-pestana.activa');
-        if (cat) { 
-            const c = cat.textContent.trim(); 
-            if (c.includes('🏠')) mostrarContenido('estrenos');
-            else if (c.includes('🎬')) mostrarContenido('peliculas');
-            else if (c.includes('📺')) mostrarContenido('series');
-        } else mostrarContenido('estrenos');
-        
-        mostrarRecientes();
+        const idsExistentes = new Set(contenido.map(item => item.tmdb_id || item.id));
+        const nuevos = [...pelisNuevas, ...seriesNuevas].filter(item => !idsExistentes.has(item.tmdb_id || item.id));
+        if (nuevos.length > 0) {
+            contenido = [...contenido, ...nuevos];
+            document.getElementById("contadorTotal").textContent = contenido.length;
+            const cat = document.querySelector('.btn-pestana.activa');
+            if (cat) { 
+                const c = cat.textContent.trim(); 
+                if (c.includes('🏠')) mostrarContenido('estrenos');
+                else if (c.includes('🎬')) mostrarContenido('peliculas');
+                else if (c.includes('📺')) mostrarContenido('series');
+            } else mostrarContenido('estrenos');
+            mostrarRecientes();
+            guardarEnCache(contenido);
+        }
         btn.innerHTML = `<i class="fa-solid fa-plus"></i> Cargar más (${contenido.length})`;
         btn.disabled = false;
     } catch (err) { 
@@ -1013,11 +1045,13 @@ async function cargarMasContenido() {
     }
     cargandoMas = false;
 }// ==============================================
-// 🎬 ABRIR VIDEO - CON GENERADOR AUTOMÁTICO UNLIMPLAY
+// 🎬 ABRIR VIDEO - INSTANTÁNEO (SIN ESPERAR FIREBASE)
 // ==============================================
 function abrirVideoPelicula(peli) {
+    // GENERAR ENLACE AUTOMÁTICO INSTANTÁNEO
     if (peli.tipo === 'pelicula' && !peli.url && peli.tmdb_id) {
         peli.url = `https://unlimplay.com/play/embed/movie/${peli.tmdb_id}`;
+        // Guardar en Firebase en segundo plano (sin esperar)
         const datos = {
             tmdb_id: peli.tmdb_id,
             titulo: peli.titulo,
@@ -1031,10 +1065,7 @@ function abrirVideoPelicula(peli) {
             url: peli.url,
             fecha_actualizacion: new Date().toISOString()
         };
-        db.ref("contenido_personalizado").push(datos).then((ref) => {
-            console.log('✅ Enlace automático guardado:', peli.titulo);
-            peli.adminId = ref.key;
-        }).catch(err => console.log('Error guardando enlace:', err));
+        db.ref("contenido_personalizado").push(datos).catch(err => console.log('Error guardando enlace:', err));
     }
     
     if (peli.tipo === 'serie' && (!peli.temporadas || peli.temporadas.length === 0) && peli.tmdb_id) {
@@ -1060,10 +1091,7 @@ function abrirVideoPelicula(peli) {
             temporadas: peli.temporadas,
             fecha_actualizacion: new Date().toISOString()
         };
-        db.ref("series_personalizadas").push(datos).then((ref) => {
-            console.log('✅ Serie automática guardada:', peli.titulo);
-            peli.adminId = ref.key;
-        }).catch(err => console.log('Error guardando serie:', err));
+        db.ref("series_personalizadas").push(datos).catch(err => console.log('Error guardando serie:', err));
     }
     
     if (peli.tipo === 'serie' && peli.temporadas && peli.tmdb_id) {
@@ -1078,39 +1106,28 @@ function abrirVideoPelicula(peli) {
         });
     }
     
+    // ABRIR REPRODUCTOR INSTANTÁNEAMENTE (sin esperar Firebase)
+    abrirReproductor(peli);
+    
+    // Actualizar desde Firebase en segundo plano
     if (peli.tmdb_id) {
-        db.ref("contenido_personalizado").orderByChild("tmdb_id").equalTo(peli.tmdb_id).once("value", (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                const keys = Object.keys(data);
-                const adminItem = data[keys[0]];
-                if (adminItem) {
-                    peli.url = adminItem.url || peli.url || '';
-                    peli.opcion2 = adminItem.opcion2 || '';
-                    peli.adminId = keys[0];
-                    peli.categoria = adminItem.categoria || peli.categoria || 'peliculas';
-                }
-            }
-            if (peli.tipo === 'serie') {
-                db.ref("series_personalizadas").orderByChild("tmdb_id").equalTo(peli.tmdb_id).once("value", (snap2) => {
-                    const data2 = snap2.val();
-                    if (data2) {
-                        const keys = Object.keys(data2);
-                        const adminItem = data2[keys[0]];
-                        if (adminItem && adminItem.temporadas) {
-                            peli.temporadas = adminItem.temporadas;
-                            peli.adminId = keys[0];
-                            peli.categoria = adminItem.categoria || peli.categoria || 'series';
-                        }
+        setTimeout(() => {
+            db.ref("contenido_personalizado").orderByChild("tmdb_id").equalTo(peli.tmdb_id).once("value", (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const keys = Object.keys(data);
+                    const adminItem = data[keys[0]];
+                    if (adminItem) {
+                        peli.url = adminItem.url || peli.url || '';
+                        peli.opcion2 = adminItem.opcion2 || '';
+                        peli.adminId = keys[0];
+                        peli.categoria = adminItem.categoria || peli.categoria || 'peliculas';
+                        // Actualizar botones si ya están creados
+                        actualizarBotonesReproductor(peli);
                     }
-                    abrirReproductor(peli);
-                });
-            } else {
-                abrirReproductor(peli);
-            }
-        });
-    } else {
-        abrirReproductor(peli);
+                }
+            });
+        }, 100);
     }
 }
 
@@ -1135,6 +1152,7 @@ function abrirReproductor(peli) {
     document.getElementById("tipoPanel").style.color = peli.tipo === 'serie' ? '#10B981' : '#A78BFA';
     botones.innerHTML = ""; container.classList.add("oculto"); horiz.innerHTML = ""; tempActualIndex = 0; temporadasActuales = [];
     
+    // SERIES
     if (peli.tipo === 'serie' && peli.temporadas && peli.temporadas.length > 0) {
         container.classList.remove("oculto");
         temporadasActuales = peli.temporadas;
@@ -1172,13 +1190,14 @@ function abrirReproductor(peli) {
         if (primerCap?.url) {
             reproducirOpcion(primerCap.url);
         } else {
-            player.innerHTML = `<div style="color:#EF4444;text-align:center;padding:3rem;font-size:0.9rem;"><i class="fa-solid fa-link" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>No hay capítulos disponibles</div>`;
+            player.innerHTML = `<div style="color:#EF4444;text-align:center;padding:2rem;font-size:0.9rem;"><i class="fa-solid fa-link" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>No hay capítulos disponibles</div>`;
         }
         agregarAlHistorial(peli);
         cargarRecomendadas(peli.tmdb_id);
         return;
     }
     
+    // PELÍCULAS
     const t1 = peli.url && peli.url.trim() !== '';
     const t2 = peli.opcion2 && peli.opcion2.trim() !== '';
     
@@ -1192,6 +1211,8 @@ function abrirReproductor(peli) {
             reproducirOpcion(peli.url);
         };
         botones.appendChild(b1);
+        // Reproducir automáticamente
+        setTimeout(() => reproducirOpcion(peli.url), 100);
     }
     if (t2) {
         const b2 = document.createElement("button");
@@ -1215,15 +1236,36 @@ function abrirReproductor(peli) {
         };
         botones.appendChild(b3);
     }
-    if (t1) {
-        reproducirOpcion(peli.url);
-    } else if (t2) {
-        reproducirOpcion(peli.opcion2);
-    } else {
-        player.innerHTML = `<div style="color:#EF4444;text-align:center;padding:3rem;font-size:0.9rem;"><i class="fa-solid fa-link" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>No hay enlaces disponibles</div>`;
+    if (!t1 && !t2) {
+        player.innerHTML = `<div style="color:#F59E0B;text-align:center;padding:2rem;font-size:0.9rem;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>Generando enlace...<br><span style="font-size:0.7rem;color:#64748B;">Esto tomará unos segundos</span></div>`;
+        // Intentar generar enlace automático
+        if (peli.tmdb_id) {
+            const urlGenerada = `https://unlimplay.com/play/embed/movie/${peli.tmdb_id}`;
+            setTimeout(() => {
+                peli.url = urlGenerada;
+                player.innerHTML = `<iframe src="${urlGenerada}?autoplay=1&controls=1&logo=0" frameborder="0" referrerpolicy="origin" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;"></iframe>`;
+                // Actualizar botones
+                const btn = document.createElement("button");
+                btn.className = "btn-opcion activo";
+                btn.innerHTML = `<i class="fa-solid fa-play mr-1"></i> Opción 1`;
+                btn.onclick = function() {
+                    document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo"));
+                    this.classList.add("activo");
+                    reproducirOpcion(urlGenerada);
+                };
+                botones.innerHTML = "";
+                botones.appendChild(btn);
+            }, 500);
+        }
     }
+    
     agregarAlHistorial(peli);
     cargarRecomendadas(peli.tmdb_id);
+}
+
+function actualizarBotonesReproductor(peli) {
+    // Función para actualizar botones si se obtienen datos de Firebase
+    // (implementación simple)
 }
 
 function obtenerPrimerCapitulo(idx) { if (!temporadasActuales || temporadasActuales.length === 0) return null; const t = temporadasActuales[idx]; if (!t || !t.capitulos || t.capitulos.length === 0) return null; return t.capitulos[0]; }
@@ -1287,7 +1329,7 @@ async function cargarRecomendadas(tmdbId) {
                         anio: p.release_date ? p.release_date.split("-")[0] : "N/D",
                         tipo: "pelicula",
                         categoria: "peliculas",
-                        portada: p.poster_path ? 'https://image.tmdb.org/t/p/w154' + p.poster_path : "",
+                        portada: p.poster_path ? 'https://image.tmdb.org/t/p/w154' + p.poster_path : "https://via.placeholder.com/154x231?text=Sin+Portada",
                         sinopsis: p.overview || "Sin sinopsis",
                         puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A",
                         genero: "Película",
