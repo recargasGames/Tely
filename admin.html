@@ -122,10 +122,11 @@
         .btn-op2-guardar{background:#3B82F6;color:white;padding:0.2rem 0.5rem;font-size:0.6rem;border-radius:4px;border:none;cursor:pointer}
         .btn-op2-guardar:hover{background:#2563EB}
         .btn-op1-guardar:disabled,.btn-op2-guardar:disabled{opacity:0.5;cursor:not-allowed}
-        /* TOAST */
         #toast{position:fixed;bottom:20px;right:20px;background:#10B981;color:white;padding:12px 24px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.3);display:none;z-index:99999;transition:0.3s;max-width:90vw;font-size:0.9rem}
         #toast.error{background:#EF4444}
         #toast.warning{background:#F59E0B;color:#0F172A}
+        .btn-detener{background:#EF4444;color:white;border:none;padding:0.6rem 1.2rem;border-radius:8px;font-weight:600;cursor:pointer;transition:0.3s;font-size:0.8rem;display:inline-flex;align-items:center;gap:0.5rem}
+        .btn-detener:hover{background:#DC2626}
     </style>
 </head>
 <body>
@@ -158,7 +159,7 @@
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
         <div>
             <h3 style="color:#A78BFA;margin:0;"><i class="fa-solid fa-rocket"></i> Carga Masiva Automática</h3>
-            <p style="color:#94A3B8;font-size:0.75rem;margin:0;">Agrega TODAS las películas y series con enlaces automáticos</p>
+            <p style="color:#94A3B8;font-size:0.75rem;margin:0;">Agrega TODAS las películas y series con enlaces automáticos (página por página)</p>
         </div>
         <div class="botones-carga">
             <button class="btn-carga-peliculas" onclick="agregarPeliculasAutomaticamente()" id="btnAgregarPelis">
@@ -170,6 +171,9 @@
             <button class="btn-carga-masiva" onclick="agregarTodoAutomaticamente()" id="btnAgregarTodo">
                 <i class="fa-solid fa-bolt"></i> 🚀 Agregar Todo
             </button>
+            <button class="btn-detener" onclick="detenerCargaMasiva()" id="btnDetener" style="display:none;">
+                <i class="fa-solid fa-stop"></i> Detener
+            </button>
         </div>
     </div>
     <div id="progresoCarga" style="display:none;margin-top:0.5rem;">
@@ -177,6 +181,7 @@
             <div class="progreso-barra" id="barraProgreso"></div>
         </div>
         <p class="progreso-texto" id="textoProgreso">0% - Preparando...</p>
+        <p class="progreso-texto" id="textoDetalle" style="font-size:0.7rem;color:#60A5FA;"></p>
     </div>
 </div>
 
@@ -352,6 +357,7 @@ let busquedaSeriesActual = '';
 let serieEditandoId = null;
 let tempActualEditor = 0;
 let totalTempsEditor = 0;
+let detenerCarga = false;
 
 // ==============================================
 // 🔥 VERIFICAR CONEXIÓN FIREBASE
@@ -451,7 +457,8 @@ auth.onAuthStateChanged(user => {
         document.getElementById("btnLogin").classList.remove('oculto');
         document.getElementById("btnLogout").classList.add('oculto');
     }
-});<script>
+});
+
 // ==============================================
 // 🍞 TOAST
 // ==============================================
@@ -470,8 +477,7 @@ function mostrarToast(mensaje, tipo = 'success') {
             toast.className = '';
         }, 300);
     }, 4000);
-}
-
+}<script>
 // ==============================================
 // 📋 CAMBIAR TABS
 // ==============================================
@@ -567,7 +573,8 @@ function mostrarPeliculas() {
             </div>
         </div>`;
     }).join('');
-}<script>
+}
+
 // ==============================================
 // 💾 GUARDAR OPCIÓN 1 (PELÍCULA)
 // ==============================================
@@ -650,8 +657,7 @@ function eliminarEnlacesPelicula(adminId, tmdbId) {
         if (peli) { peli.url = ''; peli.opcion2 = ''; peli.adminId = null; }
         mostrarPeliculas();
     }).catch(err => mostrarToast('❌ Error: ' + err.message, 'error'));
-}
-
+}<script>
 // ==============================================
 // 🔐 VERIFICAR AUTENTICACIÓN
 // ==============================================
@@ -723,235 +729,290 @@ function eliminarSerie(adminId) {
         seriesAdmin = seriesAdmin.filter(s => s.id !== adminId);
         cargarSeries();
     }).catch(err => mostrarToast('❌ Error: ' + err.message, 'error'));
-}<script>
+}
+
 // ==============================================
 // 🚀 FUNCIONES DE PROGRESO
 // ==============================================
-function mostrarProgreso(texto, porcentaje) {
+function mostrarProgreso(texto, porcentaje, detalle = '') {
     const div = document.getElementById('progresoCarga');
     const barra = document.getElementById('barraProgreso');
     const textoEl = document.getElementById('textoProgreso');
+    const detalleEl = document.getElementById('textoDetalle');
     div.style.display = 'block';
     barra.style.width = Math.min(porcentaje, 100) + '%';
     textoEl.textContent = texto;
+    if (detalle) {
+        detalleEl.textContent = detalle;
+    }
 }
 
 function ocultarProgreso() {
     setTimeout(() => {
         document.getElementById('progresoCarga').style.display = 'none';
         document.getElementById('barraProgreso').style.width = '0%';
+        document.getElementById('textoDetalle').textContent = '';
     }, 2000);
 }
 
 // ==============================================
-// 🎬 AGREGAR PELÍCULAS AUTOMÁTICAMENTE
+// 🛑 DETENER CARGA MASIVA
+// ==============================================
+function detenerCargaMasiva() {
+    detenerCarga = true;
+    mostrarToast('⏹️ Deteniendo carga...', 'warning');
+    document.getElementById('btnDetener').style.display = 'none';
+}
+
+// ==============================================
+// 🎬 AGREGAR PELÍCULAS AUTOMÁTICAMENTE - TODAS LAS PÁGINAS
 // ==============================================
 async function agregarPeliculasAutomaticamente() {
     if (!usuarioPuedeEscribir()) return;
     const btn = document.getElementById('btnAgregarPelis');
     const todoBtn = document.getElementById('btnAgregarTodo');
     const seriesBtn = document.getElementById('btnAgregarSeries');
+    const detenerBtn = document.getElementById('btnDetener');
     
     if (!confirm('⚠️ ¿Agregar TODAS las películas populares de TMDB a Firebase?\n\nEsto puede tomar varios minutos.')) return;
     
+    detenerCarga = false;
     btn.disabled = true;
     todoBtn.disabled = true;
     seriesBtn.disabled = true;
+    detenerBtn.style.display = 'inline-flex';
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cargando...';
     
     let peliculasGuardadas = 0;
     let page = 1;
+    let totalEncontradas = 0;
+    let totalPaginasRecorridas = 0;
     
     try {
-        mostrarProgreso('📥 Cargando películas de TMDB...', 5);
-        
-        let todasPeliculas = [];
-        let hayMas = true;
-        
-        while (hayMas) {
-            const res = await fetch(`${TMDB_BASE}/movie/popular?api_key=${TMDB_API_KEY}&language=${TMDB_LANG}&page=${page}`, opcionesTMDB);
-            const data = await res.json();
-            
-            if (data.results && data.results.length > 0) {
-                todasPeliculas = [...todasPeliculas, ...data.results];
-                mostrarProgreso(`📥 Cargando películas... Página ${page} (${todasPeliculas.length} encontradas)`, Math.min(5 + (page / 50) * 25, 30));
-                page++;
-            } else {
-                hayMas = false;
-            }
-            if (page > 100) hayMas = false;
-        }
-        
-        mostrarProgreso(`📦 ${todasPeliculas.length} películas encontradas. Guardando...`, 30);
+        mostrarProgreso('📥 Iniciando carga masiva de películas...', 5);
         
         const tmdbIdsExistentes = new Set(peliculasAdmin.map(p => p.tmdb_id));
         const updates = {};
+        let hayMas = true;
         
-        for (let i = 0; i < todasPeliculas.length; i++) {
-            const p = todasPeliculas[i];
-            if (tmdbIdsExistentes.has(p.id)) continue;
+        while (hayMas && !detenerCarga) {
+            const res = await fetch(`${TMDB_BASE}/movie/popular?api_key=${TMDB_API_KEY}&language=${TMDB_LANG}&page=${page}`, opcionesTMDB);
+            if (!res.ok) throw new Error(`Error ${res.status} en página ${page}`);
+            const data = await res.json();
             
-            const newKey = db.ref("contenido_personalizado").push().key;
-            const url = `https://unlimplay.com/play/embed/movie/${p.id}`;
-            updates[`contenido_personalizado/${newKey}`] = {
-                tmdb_id: p.id,
-                titulo: p.title || "Sin título",
-                anio: p.release_date ? p.release_date.split("-")[0] : "N/D",
-                tipo: "pelicula",
-                categoria: "peliculas",
-                portada: p.poster_path ? `${TMDB_IMG}${p.poster_path}` : "",
-                sinopsis: p.overview || "Sin sinopsis",
-                puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A",
-                genero: "Película",
-                url: url,
-                opcion2: "",
-                fecha_actualizacion: new Date().toISOString()
-            };
-            peliculasGuardadas++;
-            
-            if (i % 10 === 0) {
-                mostrarProgreso(`💾 Guardando películas... ${peliculasGuardadas}/${todasPeliculas.length}`, 30 + (i / todasPeliculas.length) * 60);
+            if (data.results && data.results.length > 0) {
+                totalEncontradas += data.results.length;
+                totalPaginasRecorridas = page;
+                
+                for (const p of data.results) {
+                    if (detenerCarga) break;
+                    if (tmdbIdsExistentes.has(p.id)) continue;
+                    
+                    const newKey = db.ref("contenido_personalizado").push().key;
+                    const url = `https://unlimplay.com/play/embed/movie/${p.id}`;
+                    updates[`contenido_personalizado/${newKey}`] = {
+                        tmdb_id: p.id,
+                        titulo: p.title || "Sin título",
+                        anio: p.release_date ? p.release_date.split("-")[0] : "N/D",
+                        tipo: "pelicula",
+                        categoria: "peliculas",
+                        portada: p.poster_path ? `${TMDB_IMG}${p.poster_path}` : "",
+                        sinopsis: p.overview || "Sin sinopsis",
+                        puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A",
+                        genero: "Película",
+                        url: url,
+                        opcion2: "",
+                        fecha_actualizacion: new Date().toISOString()
+                    };
+                    peliculasGuardadas++;
+                }
+                
+                const progress = Math.min(5 + (page / 10) * 85, 90);
+                mostrarProgreso(
+                    `📥 Página ${page} - ${peliculasGuardadas} películas guardadas`, 
+                    progress,
+                    `Total encontradas: ${totalEncontradas} | Página ${page}`
+                );
+                
+                // Si la página actual es la última o no hay más resultados
+                if (page >= data.total_pages || data.total_pages === 0) {
+                    hayMas = false;
+                }
+                page++;
+                
+                // Guardar cada 50 películas para no perder progreso
+                if (Object.keys(updates).length > 50) {
+                    await db.ref().update(updates);
+                    // Limpiar updates para no acumular demasiado
+                    for (const key in updates) {
+                        delete updates[key];
+                    }
+                }
+                
+            } else {
+                hayMas = false;
             }
         }
         
+        // Guardar el resto de películas
         if (Object.keys(updates).length > 0) {
             await db.ref().update(updates);
         }
         
-        mostrarProgreso(`✅ ${peliculasGuardadas} películas guardadas con enlaces automáticos`, 100);
-        mostrarToast(`🎉 ${peliculasGuardadas} películas agregadas a Firebase con enlaces`);
+        if (detenerCarga) {
+            mostrarProgreso(`⏹️ Carga detenida - ${peliculasGuardadas} películas guardadas`, 100);
+            mostrarToast(`⏹️ Carga detenida. ${peliculasGuardadas} películas guardadas.`, 'warning');
+        } else {
+            mostrarProgreso(`✅ ${peliculasGuardadas} películas guardadas con enlaces automáticos`, 100);
+            mostrarToast(`🎉 ${peliculasGuardadas} películas agregadas a Firebase con enlaces`);
+        }
         recargarTodo();
         
     } catch (err) {
         mostrarToast('❌ Error: ' + err.message, 'error');
+        mostrarProgreso(`❌ Error: ${err.message}`, 100);
     }
     
     btn.disabled = false;
     todoBtn.disabled = false;
     seriesBtn.disabled = false;
+    detenerBtn.style.display = 'none';
     btn.innerHTML = '<i class="fa-solid fa-film"></i> Películas';
     ocultarProgreso();
-}
-
+}<script>
 // ==============================================
-// 📺 AGREGAR SERIES AUTOMÁTICAMENTE
+// 📺 AGREGAR SERIES AUTOMÁTICAMENTE - TODAS LAS PÁGINAS
 // ==============================================
 async function agregarSeriesAutomaticamente() {
     if (!usuarioPuedeEscribir()) return;
     const btn = document.getElementById('btnAgregarSeries');
     const todoBtn = document.getElementById('btnAgregarTodo');
     const pelisBtn = document.getElementById('btnAgregarPelis');
+    const detenerBtn = document.getElementById('btnDetener');
     
     if (!confirm('⚠️ ¿Agregar TODAS las series populares de TMDB a Firebase?\n\nEsto puede tomar varios minutos.')) return;
     
+    detenerCarga = false;
     btn.disabled = true;
     todoBtn.disabled = true;
     pelisBtn.disabled = true;
+    detenerBtn.style.display = 'inline-flex';
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cargando...';
     
     let seriesGuardadas = 0;
     let page = 1;
+    let totalEncontradas = 0;
     
     try {
-        mostrarProgreso('📥 Cargando series de TMDB...', 5);
-        
-        let todasSeries = [];
-        let hayMas = true;
-        
-        while (hayMas) {
-            const res = await fetch(`${TMDB_BASE}/tv/popular?api_key=${TMDB_API_KEY}&language=${TMDB_LANG}&page=${page}`, opcionesTMDB);
-            const data = await res.json();
-            
-            if (data.results && data.results.length > 0) {
-                todasSeries = [...todasSeries, ...data.results];
-                mostrarProgreso(`📥 Cargando series... Página ${page} (${todasSeries.length} encontradas)`, Math.min(5 + (page / 50) * 25, 30));
-                page++;
-            } else {
-                hayMas = false;
-            }
-            if (page > 100) hayMas = false;
-        }
-        
-        mostrarProgreso(`📦 ${todasSeries.length} series encontradas. Guardando...`, 30);
+        mostrarProgreso('📥 Iniciando carga masiva de series...', 5);
         
         const tmdbIdsExistentes = new Set(seriesAdmin.map(s => s.tmdb_id));
         const updates = {};
+        let hayMas = true;
         
-        for (let i = 0; i < todasSeries.length; i++) {
-            const s = todasSeries[i];
-            if (tmdbIdsExistentes.has(s.id)) continue;
+        while (hayMas && !detenerCarga) {
+            const res = await fetch(`${TMDB_BASE}/tv/popular?api_key=${TMDB_API_KEY}&language=${TMDB_LANG}&page=${page}`, opcionesTMDB);
+            if (!res.ok) throw new Error(`Error ${res.status} en página ${page}`);
+            const data = await res.json();
             
-            const newKey = db.ref("series_personalizadas").push().key;
-            
-            // Obtener temporadas de la serie (máximo 3)
-            let temporadas = [];
-            try {
-                const seasonRes = await fetch(`${TMDB_BASE}/tv/${s.id}?api_key=${TMDB_API_KEY}&language=${TMDB_LANG}`, opcionesTMDB);
-                const seasonData = await seasonRes.json();
+            if (data.results && data.results.length > 0) {
+                totalEncontradas += data.results.length;
                 
-                if (seasonData.seasons) {
-                    const temps = seasonData.seasons.filter(se => se.season_number > 0);
-                    const maxTemps = Math.min(temps.length, 3);
-                    for (let t = 0; t < maxTemps; t++) {
-                        const temp = temps[t];
-                        const capRes = await fetch(`${TMDB_BASE}/tv/${s.id}/season/${temp.season_number}?api_key=${TMDB_API_KEY}&language=${TMDB_LANG}`, opcionesTMDB);
-                        const capData = await capRes.json();
+                for (const s of data.results) {
+                    if (detenerCarga) break;
+                    if (tmdbIdsExistentes.has(s.id)) continue;
+                    
+                    const newKey = db.ref("series_personalizadas").push().key;
+                    
+                    // Obtener temporadas de la serie (máximo 3 temporadas, 5 capítulos cada una)
+                    let temporadas = [];
+                    try {
+                        const seasonRes = await fetch(`${TMDB_BASE}/tv/${s.id}?api_key=${TMDB_API_KEY}&language=${TMDB_LANG}`, opcionesTMDB);
+                        const seasonData = await seasonRes.json();
                         
-                        const capitulos = [];
-                        if (capData.episodes) {
-                            const maxCaps = Math.min(capData.episodes.length, 5);
-                            for (let e = 0; e < maxCaps; e++) {
-                                const ep = capData.episodes[e];
-                                capitulos.push({
-                                    numero: ep.episode_number,
-                                    titulo: ep.name || `Capítulo ${ep.episode_number}`,
-                                    url: `https://unlimplay.com/play/embed/tv/${s.id}/${temp.season_number}/${ep.episode_number}`
-                                });
+                        if (seasonData.seasons) {
+                            const temps = seasonData.seasons.filter(se => se.season_number > 0);
+                            const maxTemps = Math.min(temps.length, 3);
+                            for (let t = 0; t < maxTemps; t++) {
+                                const temp = temps[t];
+                                const capRes = await fetch(`${TMDB_BASE}/tv/${s.id}/season/${temp.season_number}?api_key=${TMDB_API_KEY}&language=${TMDB_LANG}`, opcionesTMDB);
+                                const capData = await capRes.json();
+                                
+                                const capitulos = [];
+                                if (capData.episodes) {
+                                    const maxCaps = Math.min(capData.episodes.length, 5);
+                                    for (let e = 0; e < maxCaps; e++) {
+                                        const ep = capData.episodes[e];
+                                        capitulos.push({
+                                            numero: ep.episode_number,
+                                            titulo: ep.name || `Capítulo ${ep.episode_number}`,
+                                            url: `https://unlimplay.com/play/embed/tv/${s.id}/${temp.season_number}/${ep.episode_number}`
+                                        });
+                                    }
+                                }
+                                
+                                if (capitulos.length > 0) {
+                                    temporadas.push({
+                                        numero: temp.season_number,
+                                        nombre: temp.name || `Temporada ${temp.season_number}`,
+                                        capitulos: capitulos
+                                    });
+                                }
                             }
                         }
-                        
-                        if (capitulos.length > 0) {
-                            temporadas.push({
-                                numero: temp.season_number,
-                                nombre: temp.name || `Temporada ${temp.season_number}`,
-                                capitulos: capitulos
-                            });
-                        }
+                    } catch(e) {
+                        console.warn('Error obteniendo temporadas para', s.name, e);
+                    }
+                    
+                    if (temporadas.length === 0) {
+                        temporadas.push({
+                            numero: 1,
+                            nombre: 'Temporada 1',
+                            capitulos: [{
+                                numero: 1,
+                                titulo: 'Capítulo 1',
+                                url: `https://unlimplay.com/play/embed/tv/${s.id}/1/1`
+                            }]
+                        });
+                    }
+                    
+                    updates[`series_personalizadas/${newKey}`] = {
+                        tmdb_id: s.id,
+                        titulo: s.name || "Sin título",
+                        anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D",
+                        tipo: "serie",
+                        categoria: "series",
+                        portada: s.poster_path ? `${TMDB_IMG}${s.poster_path}` : "",
+                        sinopsis: s.overview || "Sin sinopsis",
+                        puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A",
+                        genero: "Serie",
+                        temporadas: temporadas,
+                        fecha_actualizacion: new Date().toISOString()
+                    };
+                    seriesGuardadas++;
+                }
+                
+                const progress = Math.min(5 + (page / 10) * 85, 90);
+                mostrarProgreso(
+                    `📥 Página ${page} - ${seriesGuardadas} series guardadas`, 
+                    progress,
+                    `Total encontradas: ${totalEncontradas} | Página ${page}`
+                );
+                
+                if (page >= data.total_pages || data.total_pages === 0) {
+                    hayMas = false;
+                }
+                page++;
+                
+                if (Object.keys(updates).length > 30) {
+                    await db.ref().update(updates);
+                    for (const key in updates) {
+                        delete updates[key];
                     }
                 }
-            } catch(e) {
-                console.warn('Error obteniendo temporadas para', s.name, e);
-            }
-            
-            if (temporadas.length === 0) {
-                temporadas.push({
-                    numero: 1,
-                    nombre: 'Temporada 1',
-                    capitulos: [{
-                        numero: 1,
-                        titulo: 'Capítulo 1',
-                        url: `https://unlimplay.com/play/embed/tv/${s.id}/1/1`
-                    }]
-                });
-            }
-            
-            updates[`series_personalizadas/${newKey}`] = {
-                tmdb_id: s.id,
-                titulo: s.name || "Sin título",
-                anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D",
-                tipo: "serie",
-                categoria: "series",
-                portada: s.poster_path ? `${TMDB_IMG}${s.poster_path}` : "",
-                sinopsis: s.overview || "Sin sinopsis",
-                puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A",
-                genero: "Serie",
-                temporadas: temporadas,
-                fecha_actualizacion: new Date().toISOString()
-            };
-            seriesGuardadas++;
-            
-            if (i % 2 === 0) {
-                mostrarProgreso(`💾 Guardando series... ${seriesGuardadas}/${todasSeries.length}`, 30 + (i / todasSeries.length) * 60);
+                
+            } else {
+                hayMas = false;
             }
         }
         
@@ -959,17 +1020,24 @@ async function agregarSeriesAutomaticamente() {
             await db.ref().update(updates);
         }
         
-        mostrarProgreso(`✅ ${seriesGuardadas} series guardadas con enlaces automáticos`, 100);
-        mostrarToast(`🎉 ${seriesGuardadas} series agregadas a Firebase con enlaces`);
+        if (detenerCarga) {
+            mostrarProgreso(`⏹️ Carga detenida - ${seriesGuardadas} series guardadas`, 100);
+            mostrarToast(`⏹️ Carga detenida. ${seriesGuardadas} series guardadas.`, 'warning');
+        } else {
+            mostrarProgreso(`✅ ${seriesGuardadas} series guardadas con enlaces automáticos`, 100);
+            mostrarToast(`🎉 ${seriesGuardadas} series agregadas a Firebase con enlaces`);
+        }
         recargarTodo();
         
     } catch (err) {
         mostrarToast('❌ Error: ' + err.message, 'error');
+        mostrarProgreso(`❌ Error: ${err.message}`, 100);
     }
     
     btn.disabled = false;
     todoBtn.disabled = false;
     pelisBtn.disabled = false;
+    detenerBtn.style.display = 'none';
     btn.innerHTML = '<i class="fa-solid fa-tv"></i> Series';
     ocultarProgreso();
 }
@@ -981,9 +1049,11 @@ async function agregarTodoAutomaticamente() {
     if (!usuarioPuedeEscribir()) return;
     if (!confirm('⚠️ ¿Agregar TODAS las películas y series populares a Firebase?\n\nPuede tomar varios minutos.')) return;
     await agregarPeliculasAutomaticamente();
-    setTimeout(async () => {
-        await agregarSeriesAutomaticamente();
-    }, 1000);
+    if (!detenerCarga) {
+        setTimeout(async () => {
+            await agregarSeriesAutomaticamente();
+        }, 2000);
+    }
 }
 
 // ==============================================
@@ -1074,15 +1144,15 @@ function recargarTodo() {
 }
 
 // ==============================================
-// 🎬 FUNCIONES DEL EDITOR DE SERIES (RESUMEN)
+// 🎬 FUNCIONES DEL EDITOR DE SERIES
 // ==============================================
 function abrirEditorSerie(tmdbId) {
-    // ... (código completo del editor)
     mostrarToast('📝 Editor de series abierto');
+    // Código completo del editor aquí...
 }
 
 function agregarTemporadaEdit() {
-    // ... 
+    // ...
 }
 
 function guardarSeriesCambios() {
@@ -1106,7 +1176,6 @@ document.addEventListener('keydown', function(e) {
 
 toggleCamposContenido();
 
-// Funciones placeholder para el editor de series
 function toggleCamposContenido() {
     const tipo = document.getElementById('tipoContenido').value;
     document.getElementById('camposPelicula').classList.toggle('oculto', tipo === 'serie');
