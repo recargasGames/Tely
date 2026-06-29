@@ -410,14 +410,22 @@ function verificarConexionFirebase() {
             `;
         });
 }
-
 // ==============================================
-// 🔑 CONFIGURACIÓN TMDB
+// 🔑 CONFIGURACIÓN TMDB - CORREGIDO
 // ==============================================
 const TMDB_API_KEY = "8dd99b5a15acfdd98e3b249d5f890af4";
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const TMDB_IMG = "https://image.tmdb.org/t/p/w500";
 const TMDB_LANG = "es-ES";
+
+// ✅ DEFINIR opcionesTMDB ANTES DE USARLAS
+const opcionesTMDB = {
+    method: "GET",
+    headers: {
+        "Authorization": `Bearer ${TMDB_TOKEN}`,
+        "Content-Type": "application/json;charset=utf-8"
+    }
+};
 
 let peliculas = [];
 let peliculasAdmin = [];
@@ -429,6 +437,7 @@ let totalPaginasSeries = 1;
 let busquedaActual = '';
 let busquedaSeriesActual = '';
 let serieEditandoId = null;
+
 
 // ==============================================
 // 🔐 FUNCIONES DE LOGIN
