@@ -105,6 +105,18 @@
         .cap-item-agregar{display:flex;gap:0.3rem;margin-bottom:0.3rem;flex-wrap:wrap;align-items:center}
         .cap-item-agregar input{flex:1;min-width:60px;margin-bottom:0;padding:0.3rem 0.5rem;font-size:0.75rem}
         .cap-item-agregar .cap-num{width:50px;flex:none}
+        /* ===== BARRA DE PROGRESO ===== */
+        .progreso-container{background:#0F172A;border-radius:8px;height:20px;overflow:hidden;border:1px solid #334155;margin-top:0.5rem}
+        .progreso-barra{background:linear-gradient(90deg,#10B981,#7C3AED);height:100%;width:0%;transition:width 0.3s;border-radius:8px}
+        .progreso-texto{color:#94A3B8;font-size:0.75rem;margin-top:0.2rem}
+        .btn-carga-masiva{background:linear-gradient(135deg,#7C3AED,#10B981);color:white;border:none;padding:0.8rem 1.5rem;border-radius:8px;font-weight:700;cursor:pointer;transition:0.3s;font-size:0.9rem;display:inline-flex;align-items:center;gap:0.5rem}
+        .btn-carga-masiva:hover{transform:scale(1.03);box-shadow:0 4px 20px rgba(124,58,237,0.3)}
+        .btn-carga-masiva:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+        .btn-carga-peliculas{background:linear-gradient(135deg,#3B82F6,#60A5FA);color:white;border:none;padding:0.6rem 1.2rem;border-radius:8px;font-weight:600;cursor:pointer;transition:0.3s;font-size:0.8rem;display:inline-flex;align-items:center;gap:0.5rem}
+        .btn-carga-peliculas:hover{transform:scale(1.03);box-shadow:0 4px 20px rgba(59,130,246,0.3)}
+        .btn-carga-series{background:linear-gradient(135deg,#8B5CF6,#A78BFA);color:white;border:none;padding:0.6rem 1.2rem;border-radius:8px;font-weight:600;cursor:pointer;transition:0.3s;font-size:0.8rem;display:inline-flex;align-items:center;gap:0.5rem}
+        .btn-carga-series:hover{transform:scale(1.03);box-shadow:0 4px 20px rgba(139,92,246,0.3)}
+        .botones-carga{display:flex;gap:0.8rem;flex-wrap:wrap;align-items:center}
     </style>
 </head>
 <body>
@@ -134,6 +146,33 @@
         </div>
     </div>
 
+    <!-- ===== BOTONES DE CARGA MASIVA ===== -->
+    <div class="card" style="border:2px solid #7C3AED;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+            <div>
+                <h3 style="color:#A78BFA;margin:0;"><i class="fa-solid fa-rocket"></i> Carga Masiva Automática</h3>
+                <p style="color:#94A3B8;font-size:0.75rem;margin:0;">Agrega películas y series a Firebase con un clic</p>
+            </div>
+            <div class="botones-carga">
+                <button class="btn-carga-peliculas" onclick="agregarPeliculasAutomaticamente()" id="btnAgregarPelis">
+                    <i class="fa-solid fa-film"></i> Agregar Películas
+                </button>
+                <button class="btn-carga-series" onclick="agregarSeriesAutomaticamente()" id="btnAgregarSeries">
+                    <i class="fa-solid fa-tv"></i> Agregar Series
+                </button>
+                <button class="btn-carga-masiva" onclick="agregarTodoAutomaticamente()" id="btnAgregarTodo">
+                    <i class="fa-solid fa-bolt"></i> 🚀 Agregar Todo
+                </button>
+            </div>
+        </div>
+        <div id="progresoCarga" style="display:none;margin-top:0.5rem;">
+            <div class="progreso-container">
+                <div class="progreso-barra" id="barraProgreso"></div>
+            </div>
+            <p class="progreso-texto" id="textoProgreso">0% - Preparando...</p>
+        </div>
+    </div>
+
     <div class="tabs">
         <button class="tab activo" onclick="cambiarTab('tmdb')"><i class="fa fa-film"></i> Películas</button>
         <button class="tab" onclick="cambiarTab('series')"><i class="fa fa-tv"></i> Series</button>
@@ -144,7 +183,7 @@
     <div id="tab-tmdb">
         <div class="card">
             <h3><i class="fa fa-film"></i> Películas de TMDB</h3>
-            <p class="text-gray-400 text-sm mb-3">Agrega enlaces de video a cada película</p>
+            <p class="text-gray-400 text-sm mb-3">Agrega enlaces de video (Opción 1 y Opción 2) a cada película</p>
             <div class="buscador">
                 <input type="text" id="buscadorPeliculas" placeholder="Buscar película..." onkeydown="if(event.key==='Enter') buscarPeliculas()">
                 <button class="btn btn-buscar btn-small" onclick="buscarPeliculas()"><i class="fa fa-search"></i> Buscar</button>
@@ -256,6 +295,7 @@
             <div id="camposPelicula">
                 <h4 class="text-sm text-gray-300 mt-2 mb-1">🎬 Enlaces de video</h4>
                 <input type="text" id="nuevaUrl1" placeholder="Opción 1 (URL)">
+                <input type="text" id="nuevaUrl2" placeholder="Opción 2 (URL)">
             </div>
             <div id="camposSerie" class="oculto">
                 <h4 class="text-sm text-gray-300 mt-2 mb-1">📺 Temporadas y Capítulos</h4>
@@ -507,7 +547,17 @@ function mostrarPeliculas() {
             <div class="info"><div class="info-peli">${p.portada ? `<img src="${p.portada}" class="portada-mini" loading="lazy" onerror="this.style.display='none'">` : ''}<div><span class="titulo">${p.titulo}</span><span class="anio">${p.anio}</span><span class="categoria-tag categoria-${categoria}">${categoria}</span></div></div>
             <div>${badgeEnlace}${p.adminId ? '<span class="badge badge-firebase">☁️ Firebase</span>' : ''}<span class="badge badge-peli">TMDB</span></div></div>
             <div class="enlaces">
-                <input type="text" class="input-opcion1" placeholder="URL del video" value="${p.url || ''}">
+                <input type="text" class="input-opcion1" placeholder="Opción 1 (URL)" value="${p.url || ''}">
+                <input type="text" class="input-opcion2" placeholder="Opción 2 (URL)" value="${p.opcion2 || ''}">
+                <select class="input-categoria" style="flex:0.5;min-width:100px;margin-bottom:0;padding:0.3rem 0.5rem;font-size:0.75rem;border-radius:4px;border:1px solid #334155;background:#0F172A;color:#F8FAFC;">
+                    <option value="peliculas" ${categoria === 'peliculas' ? 'selected' : ''}>🎬 Películas</option>
+                    <option value="series" ${categoria === 'series' ? 'selected' : ''}>📺 Series</option>
+                    <option value="anime" ${categoria === 'anime' ? 'selected' : ''}>🇯🇵 Anime</option>
+                    <option value="terror" ${categoria === 'terror' ? 'selected' : ''}>👻 Terror</option>
+                    <option value="comedia" ${categoria === 'comedia' ? 'selected' : ''}>😂 Comedia</option>
+                    <option value="accion" ${categoria === 'accion' ? 'selected' : ''}>💥 Acción</option>
+                    <option value="drama" ${categoria === 'drama' ? 'selected' : ''}>🎭 Drama</option>
+                </select>
                 <button class="btn btn-guardar btn-small" onclick="guardarEnlacesPelicula('${p.id}')"><i class="fa fa-save"></i> Guardar</button>
                 ${p.url ? `<button class="btn btn-probar btn-small" onclick="probarVideo('${p.url}')"><i class="fa fa-play"></i> Probar</button>` : ''}
                 ${p.adminId ? `<button class="btn btn-danger btn-small" onclick="eliminarEnlacesPelicula('${p.adminId}', '${p.id}')"><i class="fa fa-trash"></i> Eliminar enlace</button>` : ''}
@@ -522,6 +572,7 @@ function guardarEnlacesPelicula(tmdbId) {
     if (!item) return;
     
     let url = item.querySelector('.input-opcion1').value.trim();
+    let opcion2 = item.querySelector('.input-opcion2').value.trim();
     const categoria = item.querySelector('.input-categoria').value;
     const peli = peliculas.find(p => p.id == tmdbId);
     if (!peli) return;
@@ -533,6 +584,7 @@ function guardarEnlacesPelicula(tmdbId) {
     }
     
     url = corregirEnlaceYouTube(url);
+    opcion2 = corregirEnlaceYouTube(opcion2);
     
     const existe = peliculasAdmin.find(a => a.tmdb_id == tmdbId);
     const datos = { 
@@ -546,6 +598,7 @@ function guardarEnlacesPelicula(tmdbId) {
         puntuacion: peli.puntuacion, 
         genero: peli.genero, 
         url: url, 
+        opcion2: opcion2 || '',
         fecha_actualizacion: new Date().toISOString() 
     };
     
@@ -554,7 +607,7 @@ function guardarEnlacesPelicula(tmdbId) {
         alert(`✅ "${peli.titulo}" guardada en Firebase`);
         if (!existe) { datos.id = ref.key; peliculasAdmin.push(datos); }
         else { const index = peliculasAdmin.findIndex(a => a.id === existe.id); if (index !== -1) peliculasAdmin[index] = { ...datos, id: existe.id }; }
-        peli.url = url; peli.adminId = existe ? existe.id : ref.key; peli.categoria = categoria || "peliculas";
+        peli.url = url; peli.opcion2 = opcion2; peli.adminId = existe ? existe.id : ref.key; peli.categoria = categoria || "peliculas";
         mostrarPeliculas();
     }).catch(err => alert("❌ Error al guardar: " + err.message));
 }
@@ -568,7 +621,7 @@ function eliminarEnlacesPelicula(adminId, tmdbId) {
         alert('✅ Enlace eliminado');
         peliculasAdmin = peliculasAdmin.filter(a => a.id !== adminId);
         const peli = peliculas.find(p => p.id == tmdbId);
-        if (peli) { peli.url = ''; peli.adminId = null; }
+        if (peli) { peli.url = ''; peli.opcion2 = ''; peli.adminId = null; }
         mostrarPeliculas();
     }).catch(err => alert('❌ Error: ' + err.message));
 }
@@ -1063,7 +1116,6 @@ function eliminarCapituloEdit(btn) {
     if (serie && serie.temporadas && serie.temporadas[tempIndex]) {
         if (serie.temporadas[tempIndex].capitulos && serie.temporadas[tempIndex].capitulos.length > 1) {
             serie.temporadas[tempIndex].capitulos.splice(capIndex, 1);
-            // Reindexar capítulos
             serie.temporadas[tempIndex].capitulos.forEach((cap, i) => cap.numero = i + 1);
         } else {
             alert('⚠️ No puedes eliminar el último capítulo de una temporada');
@@ -1071,7 +1123,6 @@ function eliminarCapituloEdit(btn) {
         }
     }
     
-    // 🔥 RECARGAR LA TEMPORADA ACTUAL
     const container = document.getElementById('editTemporadasContainer');
     container.innerHTML = '';
     serie.temporadas.forEach((temp, idx) => {
@@ -1299,7 +1350,9 @@ function eliminarPersonalizado(id, tipo) {
         if (tipo === 'pelicula') cargarPeliculas();
         else cargarSeries();
     }).catch(err => alert('❌ Error: ' + err.message));
-}// ==============================================
+}
+
+// ==============================================
 // ➕ AGREGAR CONTENIDO PERSONALIZADO
 // ==============================================
 function toggleCamposContenido() {
@@ -1379,12 +1432,13 @@ function agregarContenidoPersonalizado() {
     
     if (tipo === 'pelicula') {
         let url1 = document.getElementById('nuevaUrl1').value.trim();
+        let url2 = document.getElementById('nuevaUrl2').value.trim();
         if (!url1) { 
             url1 = `https://unlimplay.com/play/embed/movie/${titulo.toLowerCase().replace(/ /g, '_')}`;
             alert(`✅ Enlace automático generado:\n${url1}`);
         }
-        url1 = corregirEnlaceYouTube(url1);
-        datos.url = url1; datos.tipo = 'pelicula';
+        url1 = corregirEnlaceYouTube(url1); url2 = corregirEnlaceYouTube(url2);
+        datos.url = url1; datos.opcion2 = url2 || ''; datos.tipo = 'pelicula';
         const ref = db.ref('contenido_personalizado').push();
         ref.set(datos).then(() => {
             alert('✅ Película agregada');
@@ -1428,6 +1482,7 @@ function limpiarFormAgregar() {
     document.getElementById('nuevoGenero').value = '';
     document.getElementById('nuevoRating').value = '';
     document.getElementById('nuevaUrl1').value = '';
+    document.getElementById('nuevaUrl2').value = '';
     document.getElementById('temporadasContainer').innerHTML = '';
     toggleCamposContenido();
 }
@@ -1446,6 +1501,236 @@ function corregirEnlaceYouTube(url) {
         if (videoId) { return `https://www.youtube.com/embed/${videoId}?autoplay=1`; }
     }
     return url;
+}// ==============================================
+// 🚀 FUNCIONES PARA PROGRESO
+// ==============================================
+function mostrarProgreso(texto, porcentaje) {
+    const div = document.getElementById('progresoCarga');
+    const barra = document.getElementById('barraProgreso');
+    const textoEl = document.getElementById('textoProgreso');
+    div.style.display = 'block';
+    barra.style.width = Math.min(porcentaje, 100) + '%';
+    textoEl.textContent = texto;
+}
+
+function ocultarProgreso() {
+    setTimeout(() => {
+        document.getElementById('progresoCarga').style.display = 'none';
+        document.getElementById('barraProgreso').style.width = '0%';
+    }, 2000);
+}
+
+// ==============================================
+// 🎬 AGREGAR PELÍCULAS AUTOMÁTICAMENTE
+// ==============================================
+async function agregarPeliculasAutomaticamente() {
+    const btn = document.getElementById('btnAgregarPelis');
+    const todoBtn = document.getElementById('btnAgregarTodo');
+    const seriesBtn = document.getElementById('btnAgregarSeries');
+    
+    if (!confirm('⚠️ ¿Agregar TODAS las películas populares a Firebase?\n\nPuede tomar varios minutos.')) return;
+    
+    btn.disabled = true;
+    todoBtn.disabled = true;
+    seriesBtn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cargando...';
+    
+    let peliculasGuardadas = 0;
+    const totalPaginas = 5;
+    
+    try {
+        mostrarProgreso('📥 Cargando películas de TMDB...', 5);
+        
+        let todasPeliculas = [];
+        for (let page = 1; page <= totalPaginas; page++) {
+            const res = await fetch(`${TMDB_BASE}/movie/popular?language=${TMDB_LANG}&page=${page}`, opcionesTMDB);
+            const data = await res.json();
+            if (data.results) {
+                todasPeliculas = [...todasPeliculas, ...data.results];
+            }
+            mostrarProgreso(`📥 Cargando películas... Página ${page}/${totalPaginas} (${todasPeliculas.length} encontradas)`, 5 + (page / totalPaginas) * 25);
+        }
+        
+        mostrarProgreso(`📦 ${todasPeliculas.length} películas encontradas. Guardando...`, 30);
+        
+        for (let i = 0; i < todasPeliculas.length; i++) {
+            const p = todasPeliculas[i];
+            const existe = peliculasAdmin.find(a => a.tmdb_id == p.id);
+            if (existe) continue;
+            
+            const url = `https://unlimplay.com/play/embed/movie/${p.id}`;
+            const datos = {
+                tmdb_id: p.id,
+                titulo: p.title || "Sin título",
+                anio: p.release_date ? p.release_date.split("-")[0] : "N/D",
+                tipo: "pelicula",
+                categoria: "peliculas",
+                portada: p.poster_path ? `${TMDB_IMG}${p.poster_path}` : "",
+                sinopsis: p.overview || "Sin sinopsis",
+                puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A",
+                genero: "Película",
+                url: url,
+                fecha_actualizacion: new Date().toISOString()
+            };
+            
+            const ref = db.ref("contenido_personalizado").push();
+            await ref.set(datos);
+            peliculasGuardadas++;
+            
+            if (i % 5 === 0) {
+                const progress = 30 + (i / todasPeliculas.length) * 60;
+                mostrarProgreso(`💾 Guardando películas... ${peliculasGuardadas}/${todasPeliculas.length}`, progress);
+            }
+        }
+        
+        mostrarProgreso(`✅ ${peliculasGuardadas} películas guardadas`, 100);
+        alert(`🎉 ${peliculasGuardadas} películas agregadas a Firebase`);
+        recargarTodo();
+        
+    } catch (err) {
+        alert('❌ Error: ' + err.message);
+    }
+    
+    btn.disabled = false;
+    todoBtn.disabled = false;
+    seriesBtn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-film"></i> Agregar Películas';
+    ocultarProgreso();
+}
+
+// ==============================================
+// 📺 AGREGAR SERIES AUTOMÁTICAMENTE
+// ==============================================
+async function agregarSeriesAutomaticamente() {
+    const btn = document.getElementById('btnAgregarSeries');
+    const todoBtn = document.getElementById('btnAgregarTodo');
+    const pelisBtn = document.getElementById('btnAgregarPelis');
+    
+    if (!confirm('⚠️ ¿Agregar TODAS las series populares a Firebase?\n\nPuede tomar varios minutos.')) return;
+    
+    btn.disabled = true;
+    todoBtn.disabled = true;
+    pelisBtn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cargando...';
+    
+    let seriesGuardadas = 0;
+    const totalPaginas = 5;
+    
+    try {
+        mostrarProgreso('📥 Cargando series de TMDB...', 5);
+        
+        let todasSeries = [];
+        for (let page = 1; page <= totalPaginas; page++) {
+            const res = await fetch(`${TMDB_BASE}/tv/popular?language=${TMDB_LANG}&page=${page}`, opcionesTMDB);
+            const data = await res.json();
+            if (data.results) {
+                todasSeries = [...todasSeries, ...data.results];
+            }
+            mostrarProgreso(`📥 Cargando series... Página ${page}/${totalPaginas} (${todasSeries.length} encontradas)`, 5 + (page / totalPaginas) * 25);
+        }
+        
+        mostrarProgreso(`📦 ${todasSeries.length} series encontradas. Guardando...`, 30);
+        
+        for (let i = 0; i < todasSeries.length; i++) {
+            const s = todasSeries[i];
+            const existe = seriesAdmin.find(a => a.tmdb_id == s.id);
+            if (existe) continue;
+            
+            let temporadas = [];
+            try {
+                const seasonRes = await fetch(`${TMDB_BASE}/tv/${s.id}?api_key=${TMDB_API_KEY}&language=${TMDB_LANG}`, opcionesTMDB);
+                const seasonData = await seasonRes.json();
+                
+                if (seasonData.seasons) {
+                    const temps = seasonData.seasons.filter(se => se.season_number > 0);
+                    for (let t = 0; t < Math.min(temps.length, 3); t++) {
+                        const temp = temps[t];
+                        const capRes = await fetch(`${TMDB_BASE}/tv/${s.id}/season/${temp.season_number}?api_key=${TMDB_API_KEY}&language=${TMDB_LANG}`, opcionesTMDB);
+                        const capData = await capRes.json();
+                        
+                        const capitulos = [];
+                        if (capData.episodes) {
+                            const eps = capData.episodes.slice(0, 5);
+                            eps.forEach(ep => {
+                                capitulos.push({
+                                    numero: ep.episode_number,
+                                    titulo: ep.name || `Capítulo ${ep.episode_number}`,
+                                    url: `https://unlimplay.com/play/embed/tv/${s.id}/${temp.season_number}/${ep.episode_number}`
+                                });
+                            });
+                        }
+                        
+                        if (capitulos.length > 0) {
+                            temporadas.push({
+                                numero: temp.season_number,
+                                nombre: temp.name || `Temporada ${temp.season_number}`,
+                                capitulos: capitulos
+                            });
+                        }
+                    }
+                }
+            } catch(e) {}
+            
+            if (temporadas.length === 0) {
+                temporadas.push({
+                    numero: 1,
+                    nombre: 'Temporada 1',
+                    capitulos: [{
+                        numero: 1,
+                        titulo: 'Capítulo 1',
+                        url: `https://unlimplay.com/play/embed/tv/${s.id}/1/1`
+                    }]
+                });
+            }
+            
+            const datos = {
+                tmdb_id: s.id,
+                titulo: s.name || "Sin título",
+                anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D",
+                tipo: "serie",
+                categoria: "series",
+                portada: s.poster_path ? `${TMDB_IMG}${s.poster_path}` : "",
+                sinopsis: s.overview || "Sin sinopsis",
+                puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A",
+                genero: "Serie",
+                temporadas: temporadas,
+                fecha_actualizacion: new Date().toISOString()
+            };
+            
+            const ref = db.ref("series_personalizadas").push();
+            await ref.set(datos);
+            seriesGuardadas++;
+            
+            if (i % 2 === 0) {
+                const progress = 30 + (i / todasSeries.length) * 60;
+                mostrarProgreso(`💾 Guardando series... ${seriesGuardadas}/${todasSeries.length}`, progress);
+            }
+        }
+        
+        mostrarProgreso(`✅ ${seriesGuardadas} series guardadas`, 100);
+        alert(`🎉 ${seriesGuardadas} series agregadas a Firebase`);
+        recargarTodo();
+        
+    } catch (err) {
+        alert('❌ Error: ' + err.message);
+    }
+    
+    btn.disabled = false;
+    todoBtn.disabled = false;
+    pelisBtn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-tv"></i> Agregar Series';
+    ocultarProgreso();
+}
+
+// ==============================================
+// 🚀 AGREGAR TODO AUTOMÁTICAMENTE
+// ==============================================
+async function agregarTodoAutomaticamente() {
+    if (!confirm('⚠️ ¿Agregar TODAS las películas y series populares a Firebase?\n\nPuede tomar varios minutos.')) return;
+    await agregarPeliculasAutomaticamente();
+    setTimeout(async () => {
+        await agregarSeriesAutomaticamente();
+    }, 1000);
 }
 
 // ==============================================
@@ -1468,18 +1753,6 @@ function abrirModalVideo(url) {
         let html = '';
         if (enlace.includes('youtube.com') || enlace.includes('youtu.be')) {
             html = `<iframe src="${enlace}" frameborder="0" referrerpolicy="origin" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;background:#000;"></iframe>`;
-        } else if (enlace.includes('vidmoly')) {
-            if (!enlace.includes('controls=')) { enlace += (enlace.includes('?') ? '&' : '?') + 'controls=1&logo=0&autoplay=1'; }
-            html = `<object data="${enlace}" type="text/html" style="width:100%;height:100%;border:none;background:#000;"></object>`;
-        } else if (enlace.includes('mixdrop')) {
-            if (!enlace.includes('autoplay')) { enlace += (enlace.includes('?') ? '&' : '?') + 'autoplay=1'; }
-            html = `<iframe src="${enlace}" frameborder="0" referrerpolicy="origin" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;background:#000;"></iframe>`;
-        } else if (enlace.includes('drive.google.com')) {
-            const id = enlace.match(/[-\w]{25,}/)?.[0];
-            if (id) {
-                const driveUrl = `https://drive.google.com/uc?export=stream&id=${id}&confirm=t&cache=1`;
-                html = `<video src="${driveUrl}" controls playsinline preload="auto" style="width:100%;height:100%;background:#000;" autoplay>Tu navegador no soporta el video.</video>`;
-            } else { html = `<div style="color:#EF4444;text-align:center;padding:2rem;">❌ Enlace de Drive inválido</div>`; }
         } else {
             html = `<iframe src="${enlace}" frameborder="0" referrerpolicy="origin" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;background:#000;"></iframe>`;
         }
