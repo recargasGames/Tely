@@ -16,7 +16,6 @@
                         texto: '#FFFFFF',
                         grisClaro: '#1A1A2E',
                         grisMedio: '#2D2D44',
-                        oscuro: '#0F0F1A',
                         acento: '#7C3AED',
                         acentoClaro: '#A78BFA',
                         botonActivo: '#7C3AED',
@@ -35,183 +34,189 @@
         html, body { 
             width: 100%; max-width: 100%; overflow-x: hidden; min-height: 100vh;
             background: #0A0A0F; color: #FFFFFF;
-            font-family: 'Segoe UI', Roboto, sans-serif; scroll-behavior: smooth;
+            font-family: 'Segoe UI', Roboto, sans-serif;
         }
         body.dark { background: #0A0A0F; color: #FFFFFF; }
 
-        ::-webkit-scrollbar { width: 3px; height: 3px; }
+        ::-webkit-scrollbar { width: 2px; height: 2px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #7C3AED; border-radius: 4px; }
 
         header { 
-            padding: 0.5rem 0.8rem; 
-            background: rgba(10, 10, 15, 0.92);
+            padding: 0.4rem 0.6rem; 
+            background: rgba(10, 10, 15, 0.95);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(124, 58, 237, 0.15);
             position: sticky; top: 0; z-index: 50; 
         }
-        .logo-contenedor { display: flex; align-items: center; gap: 0.4rem; }
-        .logo { height: 28px; width: auto; object-fit: contain; }
+        .logo-contenedor { display: flex; align-items: center; gap: 0.3rem; }
+        .logo { height: 24px; width: auto; }
         .titulo-app { 
-            font-size: 1.1rem; font-weight: 800; 
+            font-size: 1rem; font-weight: 800; 
             background: linear-gradient(135deg, #7C3AED, #A78BFA);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        .btn-menu { 
-            background: rgba(124, 58, 237, 0.15); border: none; font-size: 0.9rem; 
-            cursor: pointer; color: #FFFFFF; padding: 0.35rem; border-radius: 50%;
-            transition: 0.3s; width: 30px; height: 30px;
+        .btn-menu, .btn-perfil { 
+            background: rgba(124, 58, 237, 0.15); border: none; 
+            cursor: pointer; color: #FFFFFF; 
+            border-radius: 50%; transition: 0.3s; 
+            width: 28px; height: 28px; font-size: 0.85rem;
             display: flex; align-items: center; justify-content: center;
         }
-        .btn-menu:hover { background: rgba(124, 58, 237, 0.3); transform: scale(1.05); }
-        .btn-perfil { 
-            background: rgba(124, 58, 237, 0.15); border: none; font-size: 1rem; 
-            cursor: pointer; color: #FFFFFF; padding: 0.35rem; border-radius: 50%;
-            transition: 0.3s; width: 30px; height: 30px;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .btn-perfil:hover { background: rgba(124, 58, 237, 0.3); transform: scale(1.05); }
+        .btn-menu:hover, .btn-perfil:hover { background: rgba(124, 58, 237, 0.3); transform: scale(1.05); }
         .menu-derecha { display: flex; align-items: center; gap: 0.3rem; }
 
         .pestanas { 
-            display: flex; gap: 0.3rem; padding: 0.4rem 0.8rem; flex-wrap: wrap;
-            background: rgba(10, 10, 15, 0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            display: flex; gap: 0.2rem; padding: 0.3rem 0.6rem; flex-wrap: wrap;
+            background: rgba(10, 10, 15, 0.8);
             border-bottom: 1px solid rgba(124, 58, 237, 0.08);
         }
         .btn-pestana { 
-            padding: 0.25rem 0.8rem; border-radius: 9999px; border: none; 
-            font-weight: 600; cursor: pointer; font-size: 0.7rem;
-            transition: all 0.3s ease;
+            padding: 0.2rem 0.6rem; border-radius: 9999px; border: none; 
+            font-weight: 600; cursor: pointer; font-size: 0.65rem;
+            transition: all 0.2s ease;
         }
         .btn-pestana.inactiva { background: rgba(255,255,255,0.05); color: #94A3B8; }
         .btn-pestana.inactiva:hover { background: rgba(255,255,255,0.1); color: #FFFFFF; }
-        .btn-pestana.activa { background: #7C3AED; color: #FFFFFF; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4); }
+        .btn-pestana.activa { background: #7C3AED; color: #FFFFFF; }
 
         .buscador { 
-            display: flex; align-items: center; gap: 0.4rem; 
-            padding: 0.4rem 0.8rem; flex-wrap: wrap;
+            display: flex; align-items: center; gap: 0.3rem; 
+            padding: 0.3rem 0.6rem; flex-wrap: wrap;
         }
         .input-buscar { 
-            flex: 1; min-width: 120px; padding: 0.4rem 0.8rem; border-radius: 9999px; 
+            flex: 1; min-width: 100px; padding: 0.3rem 0.6rem; border-radius: 9999px; 
             border: 2px solid rgba(124, 58, 237, 0.2); background: rgba(255,255,255,0.05);
-            color: #FFFFFF; font-size: 0.75rem; transition: 0.3s;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            color: #FFFFFF; font-size: 0.7rem; transition: 0.3s;
         }
-        .input-buscar:focus { outline: none; border-color: #7C3AED; box-shadow: 0 0 30px rgba(124, 58, 237, 0.15); background: rgba(255,255,255,0.08); }
+        .input-buscar:focus { outline: none; border-color: #7C3AED; background: rgba(255,255,255,0.08); }
         .input-buscar::placeholder { color: #64748B; }
         .btn-buscar { 
-            background: #7C3AED; border: none; font-size: 0.8rem; cursor: pointer; 
-            color: #FFFFFF; padding: 0.4rem 0.8rem; border-radius: 9999px;
+            background: #7C3AED; border: none; font-size: 0.7rem; cursor: pointer; 
+            color: #FFFFFF; padding: 0.3rem 0.6rem; border-radius: 9999px;
             transition: 0.3s;
         }
-        .btn-buscar:hover { background: #6D28D9; transform: scale(1.05); box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4); }
+        .btn-buscar:hover { background: #6D28D9; transform: scale(1.05); }
         .contador { 
-            background: rgba(255,255,255,0.05); padding: 0.25rem 0.6rem; border-radius: 9999px; 
-            font-weight: 500; font-size: 0.6rem; color: #94A3B8;
+            background: rgba(255,255,255,0.05); padding: 0.15rem 0.5rem; border-radius: 9999px; 
+            font-weight: 500; font-size: 0.55rem; color: #94A3B8;
             border: 1px solid rgba(124, 58, 237, 0.1);
         }
 
-        .seccion-recientes { padding: 0 0.8rem 0.8rem; }
+        /* ===== CARRUSEL POPULARES ===== */
+        .seccion-populares { padding: 0.3rem 0.6rem 0.5rem; }
+        .seccion-populares .titulo-seccion { 
+            font-size: 0.75rem; font-weight: 700; margin-bottom: 0.3rem; 
+            display: flex; align-items: center; gap: 0.3rem;
+            color: #FFFFFF;
+        }
+        .seccion-populares .titulo-seccion i { color: #F59E0B; }
+
+        .carrusel-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+        .carrusel-track {
+            display: flex;
+            transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            gap: 0.3rem;
+        }
+        .carrusel-item {
+            flex: 0 0 auto;
+            width: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.04);
+            cursor: pointer;
+            border: 1px solid rgba(124,58,237,0.08);
+            transition: 0.3s;
+        }
+        .carrusel-item:hover { transform: scale(1.03); border-color: rgba(124,58,237,0.3); }
+        .carrusel-item .portada-popular { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
+        .carrusel-item .info-popular { padding: 0.2rem; text-align: center; }
+        .carrusel-item .info-popular h4 { font-size: 0.5rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E2E8F0; }
+
+        /* ===== RECIENTES ===== */
+        .seccion-recientes { padding: 0 0.6rem 0.5rem; }
         .seccion-recientes .titulo-seccion { 
-            font-size: 0.85rem; font-weight: 700; margin-bottom: 0.4rem; 
-            display: flex; align-items: center; gap: 0.4rem;
+            font-size: 0.75rem; font-weight: 700; margin-bottom: 0.3rem; 
+            display: flex; align-items: center; gap: 0.3rem;
             color: #FFFFFF;
         }
         .seccion-recientes .titulo-seccion i { color: #7C3AED; }
 
         .scroll-recientes { 
-            display: flex; gap: 0.4rem; overflow-x: auto; 
-            padding: 0.2rem 0 0.4rem; scroll-snap-type: x mandatory; 
+            display: flex; gap: 0.3rem; overflow-x: auto; 
+            padding: 0.15rem 0 0.3rem; 
             -webkit-overflow-scrolling: touch;
         }
         .scroll-recientes::-webkit-scrollbar { height: 2px; }
-        .scroll-recientes::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
-        .scroll-recientes::-webkit-scrollbar-thumb { background: #7C3AED; border-radius: 4px; }
+        .scroll-recientes::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        .scroll-recientes::-webkit-scrollbar-thumb { background: #7C3AED; }
         
         .tarjeta-reciente { 
-            flex: 0 0 auto; width: 65px; border-radius: 6px; overflow: hidden; 
-            background: rgba(255,255,255,0.04); cursor: pointer; transition: all 0.3s ease; 
-            scroll-snap-align: start;
+            flex: 0 0 auto; width: 55px; border-radius: 6px; overflow: hidden; 
+            background: rgba(255,255,255,0.04); cursor: pointer; 
             border: 1px solid rgba(124, 58, 237, 0.08);
         }
-        .tarjeta-reciente:hover { transform: scale(1.05) translateY(-3px); box-shadow: 0 8px 30px rgba(124, 58, 237, 0.2); border-color: rgba(124, 58, 237, 0.3); }
         .tarjeta-reciente .portada-reciente { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
-        .tarjeta-reciente .info-reciente { padding: 0.15rem; text-align: center; }
-        .tarjeta-reciente .info-reciente h4 { font-size: 0.45rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E2E8F0; }
+        .tarjeta-reciente .info-reciente { padding: 0.1rem; text-align: center; }
+        .tarjeta-reciente .info-reciente h4 { font-size: 0.4rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E2E8F0; }
 
-        /* GRID: 4 columnas fijas en móvil */
+        /* ===== GRID ===== */
         .grid-contenido { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
-            gap: 0.4rem; 
-            padding: 0 0.8rem 1rem; 
+            gap: 0.3rem; 
+            padding: 0 0.6rem 0.8rem; 
         }
-        @media (min-width: 480px) { 
-            .grid-contenido { grid-template-columns: repeat(4, 1fr); gap: 0.4rem; } 
-        }
-        @media (min-width: 768px) { 
-            .grid-contenido { grid-template-columns: repeat(5, 1fr); gap: 0.5rem; } 
-        }
-        @media (min-width: 1024px) { 
-            .grid-contenido { grid-template-columns: repeat(6, 1fr); gap: 0.5rem; } 
-        }
+        @media (min-width: 480px) { .grid-contenido { grid-template-columns: repeat(4, 1fr); } }
+        @media (min-width: 768px) { .grid-contenido { grid-template-columns: repeat(5, 1fr); } }
+        @media (min-width: 1024px) { .grid-contenido { grid-template-columns: repeat(6, 1fr); } }
         
         .tarjeta { 
-            border-radius: 8px; overflow: hidden; background: rgba(255,255,255,0.04); 
-            cursor: pointer; transition: all 0.25s ease; position: relative; 
+            border-radius: 6px; overflow: hidden; background: rgba(255,255,255,0.04); 
+            cursor: pointer; position: relative; 
             border: 1px solid rgba(124, 58, 237, 0.06);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
         }
-        .tarjeta:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 30px rgba(124, 58, 237, 0.2); border-color: rgba(124, 58, 237, 0.2); }
         .tarjeta:active { transform: scale(0.97); }
         .portada { width: 100%; aspect-ratio: 2/3; object-fit: cover; background: #1A1A2E; }
         .etiqueta-anio { 
-            position: absolute; top: 0.3rem; left: 0.3rem; 
+            position: absolute; top: 0.2rem; left: 0.2rem; 
             background: rgba(124, 58, 237, 0.85); color: #fff; 
-            padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.5rem; font-weight: 700;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            padding: 0.05rem 0.3rem; border-radius: 3px; font-size: 0.4rem; font-weight: 700;
         }
         .estrella { 
-            position: absolute; top: 0.3rem; right: 0.3rem; 
-            color: #F59E0B; font-size: 0.55rem;
-            text-shadow: 0 2px 10px rgba(245, 158, 11, 0.5);
+            position: absolute; top: 0.2rem; right: 0.2rem; 
+            color: #F59E0B; font-size: 0.45rem;
         }
-        .info-tarjeta { padding: 0.3rem; }
+        .info-tarjeta { padding: 0.2rem; }
         .info-tarjeta h3 { 
-            font-size: 0.6rem; font-weight: 600; margin-bottom: 0.05rem; 
-            line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            font-size: 0.5rem; font-weight: 600; 
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             color: #F1F5F9;
         }
-        .badge-video { font-size: 0.45rem; color: #34D399; font-weight: 600; background: rgba(52, 211, 153, 0.12); padding: 0.1rem 0.3rem; border-radius: 3px; }
-        .badge-sin-video { font-size: 0.45rem; color: #64748B; font-weight: 500; background: rgba(100, 116, 139, 0.1); padding: 0.1rem 0.3rem; border-radius: 3px; }
-        .badge-serie { font-size: 0.4rem; color: #A78BFA; font-weight: 600; background: rgba(124, 58, 237, 0.15); padding: 0.1rem 0.3rem; border-radius: 3px; margin-left: 0.15rem; }
+        .badge-video { font-size: 0.4rem; color: #34D399; font-weight: 600; background: rgba(52,211,153,0.12); padding: 0.05rem 0.2rem; border-radius: 3px; }
+        .badge-sin-video { font-size: 0.4rem; color: #64748B; font-weight: 500; background: rgba(100,116,139,0.1); padding: 0.05rem 0.2rem; border-radius: 3px; }
+        .badge-serie { font-size: 0.35rem; color: #A78BFA; font-weight: 600; background: rgba(124,58,237,0.15); padding: 0.05rem 0.2rem; border-radius: 3px; margin-left: 0.1rem; }
 
         .btn-cargar-mas { 
             background: rgba(124, 58, 237, 0.15); color: #FFFFFF; 
-            padding: 0.5rem 1.5rem; border-radius: 9999px; 
+            padding: 0.3rem 1rem; border-radius: 9999px; 
             border: 2px solid rgba(124, 58, 237, 0.2); font-weight: 600; 
-            cursor: pointer; display: flex; align-items: center; gap: 0.4rem; 
-            font-size: 0.75rem; transition: 0.3s; margin: 0 auto; 
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            cursor: pointer; display: flex; align-items: center; gap: 0.3rem; 
+            font-size: 0.6rem; transition: 0.3s; margin: 0 auto; 
         }
-        .btn-cargar-mas:hover { background: rgba(124, 58, 237, 0.25); border-color: #7C3AED; transform: scale(1.03); box-shadow: 0 4px 30px rgba(124, 58, 237, 0.2); }
+        .btn-cargar-mas:hover { background: rgba(124, 58, 237, 0.25); border-color: #7C3AED; }
         .btn-cargar-mas:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .oculto { display: none !important; }
-        .skeleton { background: linear-gradient(90deg, #1A1A2E 25%, #2D2D44 50%, #1A1A2E 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
-        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
     </style>
 </head>
-<body>
-    <header>
+<body><header>
     <div class="flex justify-between items-center">
         <div class="logo-contenedor">
             <img src="logo.png" alt="Logo TELY" class="logo" onerror="this.style.display='none'">
@@ -222,11 +227,11 @@
             <div class="menu-perfil">
                 <button class="btn-perfil" onclick="toggleMenu()"><i class="fa-solid fa-user-circle"></i></button>
                 <div class="dropdown" id="menuPerfil">
-                    <div class="dropdown-header" id="nombrePerfil">Acceder</div>
-                    <div class="dropdown-header" style="font-size:0.65rem;color:#64748B;">📺 Visto recientemente</div>
+                    <div class="dropdown-header" id="nombrePerfil" style="font-size:0.7rem;">Acceder</div>
+                    <div class="dropdown-header" style="font-size:0.55rem;color:#64748B;">📺 Visto recientemente</div>
                     <div id="listaHistorial"></div>
-                    <button onclick="limpiarHistorial()" style="color:#F59E0B;font-size:0.75rem;"><i class="fa-solid fa-trash"></i> Limpiar historial</button>
-                    <button onclick="cerrarSesion()" style="color:#EF4444;border-top:1px solid rgba(124,58,237,0.08);margin-top:0.3rem;padding-top:0.5rem;font-size:0.75rem;"><i class="fa-solid fa-sign-out"></i> Cerrar sesión</button>
+                    <button onclick="limpiarHistorial()" style="color:#F59E0B;font-size:0.65rem;"><i class="fa-solid fa-trash"></i> Limpiar</button>
+                    <button onclick="cerrarSesion()" style="color:#EF4444;font-size:0.65rem;border-top:1px solid rgba(124,58,237,0.08);margin-top:0.2rem;padding-top:0.4rem;"><i class="fa-solid fa-sign-out"></i> Cerrar sesión</button>
                 </div>
             </div>
         </div>
@@ -245,6 +250,17 @@
     <div class="contador" id="contadorTotal">0</div>
 </div>
 
+<!-- ===== CARRUSEL POPULARES ===== -->
+<div class="seccion-populares" id="seccionPopulares">
+    <div class="titulo-seccion">
+        <i class="fa-solid fa-fire"></i> Más vistas
+    </div>
+    <div class="carrusel-container">
+        <div class="carrusel-track" id="carruselTrack"></div>
+    </div>
+</div>
+
+<!-- ===== RECIENTES ===== -->
 <div class="seccion-recientes">
     <div class="titulo-seccion">
         <i class="fa-solid fa-clock-rotate-left"></i> Visto recientemente
@@ -252,14 +268,15 @@
     <div class="scroll-recientes" id="scrollRecientes"></div>
 </div>
 
+<!-- ===== GRID ===== -->
 <div class="grid-contenido" id="lista-contenido"></div>
 
-<div class="flex justify-center py-3 px-4" id="contenedorCargarMas">
+<div class="flex justify-center py-2 px-4" id="contenedorCargarMas">
     <button class="btn-cargar-mas" onclick="cargarMasContenido()" id="btnCargarMas">
         <i class="fa-solid fa-plus"></i> Cargar más
     </button>
-</div>
-    <div id="modal-video" class="modal-video">
+</div><!-- ===== MODAL VIDEO ===== -->
+<div id="modal-video" class="modal-video">
     <div class="reproductor-contenedor" id="reproductorContenedor">
         <div class="info-arriba" id="infoArriba">
             <h2 id="tituloReproductor">Título</h2>
@@ -298,25 +315,26 @@
         <div class="seccion-recomendadas" id="seccionRecomendadas">
             <h4 class="titulo-recomendadas">Te podría gustar</h4>
             <div class="lista-recomendadas" id="recomendadasLista">
-                <p style="color:#64748B;font-size:0.7rem;text-align:center;padding:0.5rem;">Cargando...</p>
+                <p style="color:#64748B;font-size:0.6rem;text-align:center;padding:0.3rem;">Cargando...</p>
             </div>
         </div>
     </div>
 </div>
 
+<!-- ===== MODAL LOGIN ===== -->
 <div id="modal-login" class="modal-login oculto" onclick="cerrarModalLoginSiClickFuera(event)">
     <div class="contenedor-login" onclick="event.stopPropagation()">
         <h2>Iniciar Sesión</h2>
-        <p style="text-align:center;color:#64748B;font-size:0.8rem;margin-bottom:1rem;">Accede para ver todo el contenido</p>
+        <p style="text-align:center;color:#64748B;font-size:0.7rem;margin-bottom:0.8rem;">Accede para ver todo el contenido</p>
         <button class="btn-google" id="btnGoogleLogin" onclick="iniciarConGoogle()">
             <i class="fa-brands fa-google"></i> Continuar con Google
         </button>
-        <div style="margin:0.8rem 0;text-align:center;color:#64748B;font-size:0.7rem;">— o con número de teléfono —</div>
+        <div style="margin:0.6rem 0;text-align:center;color:#64748B;font-size:0.6rem;">— o con número de teléfono —</div>
         <div>
             <input type="tel" id="telefonoInput" placeholder="+58 412 1234567">
             <button class="btn-enviar-codigo" onclick="enviarCodigo()">Enviar código</button>
         </div>
-        <div id="seccionCodigo" class="oculto" style="margin-top:0.6rem;">
+        <div id="seccionCodigo" class="oculto" style="margin-top:0.4rem;">
             <input type="text" id="codigoInput" placeholder="Código de 6 dígitos">
             <button class="btn-enviar-codigo" onclick="verificarCodigo()" style="background:#10B981;">Verificar</button>
         </div>
@@ -327,94 +345,91 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-    <style>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script><style>
     .modal-video { 
         position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 9998; 
         display: none; flex-direction: column; overflow-y: auto;
-        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
     }
     .modal-video.abierto { display: flex; animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
     .reproductor-contenedor {
         background: #0A0A0F; width: 100%; max-width: 1200px; margin: 0 auto;
-        padding: 0.8rem; display: flex; flex-direction: column; gap: 0.5rem;
+        padding: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem;
     }
     .netflix-player {
         width: 100%; aspect-ratio: 16/9; position: relative; background: #000;
-        border-radius: 12px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+        border-radius: 10px; overflow: hidden;
     }
     .netflix-player iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background: #000; }
 
-    .controles-superior { display: flex; justify-content: flex-end; gap: 0.4rem; flex-shrink: 0; }
-    .btn-control { background: rgba(255,255,255,0.06); border: none; color: #fff; padding: 0.3rem 0.7rem; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; font-size: 0.7rem; transition: 0.3s; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+    .controles-superior { display: flex; justify-content: flex-end; gap: 0.3rem; }
+    .btn-control { background: rgba(255,255,255,0.06); border: none; color: #fff; padding: 0.2rem 0.5rem; border-radius: 6px; cursor: pointer; font-size: 0.6rem; transition: 0.3s; }
     .btn-control:hover { background: rgba(255,255,255,0.12); }
     .btn-cerrar-modal { background: rgba(239, 68, 68, 0.15); color: #EF4444; }
     .btn-cerrar-modal:hover { background: rgba(239, 68, 68, 0.3); }
 
-    .info-arriba { margin-bottom: 0.4rem; flex-shrink: 0; }
-    .info-arriba h2 { font-size: 1.1rem; font-weight: 700; color: #fff; background: linear-gradient(135deg, #FFFFFF, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .info-arriba .detalles-arriba { display: flex; gap: 0.6rem; align-items: center; font-size: 0.65rem; color: #94A3B8; flex-wrap: wrap; margin-top: 0.1rem; }
-    .info-arriba .sinopsis-arriba { font-size: 0.7rem; color: #94A3B8; margin-top: 0.15rem; line-height: 1.4; max-height: 2.5rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .info-arriba { margin-bottom: 0.3rem; }
+    .info-arriba h2 { font-size: 0.9rem; font-weight: 700; color: #fff; background: linear-gradient(135deg, #FFFFFF, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .info-arriba .detalles-arriba { display: flex; gap: 0.4rem; align-items: center; font-size: 0.55rem; color: #94A3B8; flex-wrap: wrap; }
+    .info-arriba .sinopsis-arriba { font-size: 0.6rem; color: #94A3B8; margin-top: 0.1rem; line-height: 1.3; max-height: 2rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
-    .botones-opciones { display: flex; gap: 0.4rem; flex-wrap: wrap; flex-shrink: 0; }
-    .btn-opcion { padding: 0.3rem 0.8rem; border-radius: 8px; border: 2px solid rgba(124, 58, 237, 0.2); background: rgba(255,255,255,0.04); color: #fff; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; font-weight: 600; font-size: 0.65rem; transition: 0.3s; }
-    .btn-opcion.activo { border-color: #7C3AED; background: #7C3AED; color: #fff; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3); }
-    .btn-opcion:hover { border-color: #7C3AED; transform: translateY(-2px); }
-    .btn-nueva-ventana { border-color: rgba(239, 68, 68, 0.3) !important; color: #EF4444 !important; font-size: 0.65rem; }
-    .btn-nueva-ventana:hover { background: rgba(239, 68, 68, 0.15) !important; border-color: #EF4444 !important; }
+    .botones-opciones { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+    .btn-opcion { padding: 0.2rem 0.6rem; border-radius: 6px; border: 2px solid rgba(124,58,237,0.2); background: rgba(255,255,255,0.04); color: #fff; cursor: pointer; font-weight: 600; font-size: 0.55rem; transition: 0.3s; }
+    .btn-opcion.activo { border-color: #7C3AED; background: #7C3AED; color: #fff; }
+    .btn-opcion:hover { border-color: #7C3AED; }
+    .btn-nueva-ventana { border-color: rgba(239,68,68,0.3) !important; color: #EF4444 !important; font-size: 0.55rem; }
+    .btn-nueva-ventana:hover { background: rgba(239,68,68,0.15) !important; }
 
-    .capitulos-container { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 0.5rem; border: 1px solid rgba(124,58,237,0.06); }
-    .selector-temporada { display: flex; align-items: center; justify-content: center; gap: 0.6rem; margin-bottom: 0.4rem; }
-    .selector-temporada .btn-temp { background: rgba(255,255,255,0.06); border: none; color: #fff; padding: 0.15rem 0.5rem; border-radius: 9999px; cursor: pointer; transition: .3s; font-size: 0.65rem; }
+    .capitulos-container { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 0.3rem; border: 1px solid rgba(124,58,237,0.06); }
+    .selector-temporada { display: flex; align-items: center; justify-content: center; gap: 0.4rem; margin-bottom: 0.3rem; }
+    .selector-temporada .btn-temp { background: rgba(255,255,255,0.06); border: none; color: #fff; padding: 0.1rem 0.4rem; border-radius: 9999px; cursor: pointer; font-size: 0.55rem; }
     .selector-temporada .btn-temp:hover { background: rgba(124,58,237,0.2); }
     .selector-temporada .btn-temp:disabled { opacity: 0.3; cursor: not-allowed; }
-    .selector-temporada span { color: #fff; font-weight: 600; font-size: 0.75rem; }
-    .capitulos-horizontal { display: flex; gap: 0.3rem; overflow-x: auto; padding: 0.2rem 0; }
-    .capitulo-item-horizontal { flex: 0 0 auto; min-width: 90px; padding: 0.3rem 0.4rem; background: rgba(255,255,255,0.04); border-radius: 6px; cursor: pointer; transition: .3s; border: 1px solid transparent; text-align: center; }
+    .selector-temporada span { color: #fff; font-weight: 600; font-size: 0.65rem; }
+    .capitulos-horizontal { display: flex; gap: 0.2rem; overflow-x: auto; padding: 0.15rem 0; }
+    .capitulo-item-horizontal { flex: 0 0 auto; min-width: 70px; padding: 0.2rem 0.3rem; background: rgba(255,255,255,0.04); border-radius: 4px; cursor: pointer; border: 1px solid transparent; text-align: center; }
     .capitulo-item-horizontal:hover { background: rgba(255,255,255,0.08); }
     .capitulo-item-horizontal.activo { background: rgba(124,58,237,0.15); border-color: #7C3AED; }
-    .cap-numero-h { font-size: 0.5rem; color: #64748B; display: block; }
-    .cap-titulo-h { font-size: 0.55rem; color: #E2E8F0; display: block; font-weight: 500; }
-    .cap-play-h { font-size: 0.5rem; color: #34D399; display: block; margin-top: 0.15rem; }
-    .cap-sin-enlace-h { font-size: 0.5rem; color: #EF4444; display: block; margin-top: 0.15rem; }
+    .cap-numero-h { font-size: 0.4rem; color: #64748B; display: block; }
+    .cap-titulo-h { font-size: 0.45rem; color: #E2E8F0; display: block; font-weight: 500; }
+    .cap-play-h { font-size: 0.4rem; color: #34D399; display: block; }
+    .cap-sin-enlace-h { font-size: 0.4rem; color: #EF4444; display: block; }
 
-    .seccion-recomendadas { border-top: 1px solid rgba(124, 58, 237, 0.1); padding-top: 0.5rem; margin-top: 0.5rem; flex-shrink: 0; }
-    .titulo-recomendadas { font-size: 0.8rem; font-weight: 600; color: #fff; margin-bottom: 0.4rem; }
-    .lista-recomendadas { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.3rem; }
+    .seccion-recomendadas { border-top: 1px solid rgba(124,58,237,0.1); padding-top: 0.3rem; margin-top: 0.3rem; }
+    .titulo-recomendadas { font-size: 0.65rem; font-weight: 600; color: #fff; margin-bottom: 0.3rem; }
+    .lista-recomendadas { display: flex; gap: 0.3rem; overflow-x: auto; padding-bottom: 0.2rem; }
     .lista-recomendadas::-webkit-scrollbar { height: 2px; }
-    .lista-recomendadas::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
-    .lista-recomendadas::-webkit-scrollbar-thumb { background: #7C3AED; border-radius: 4px; }
-    .tarjeta-recomendada { flex: 0 0 auto; width: 70px; cursor: pointer; transition: all 0.3s ease; border-radius: 8px; overflow: hidden; }
-    .tarjeta-recomendada:hover { transform: scale(1.08) translateY(-4px); box-shadow: 0 8px 30px rgba(124, 58, 237, 0.2); }
-    .portada-recomendada { width: 100%; height: 105px; border-radius: 6px; object-fit: cover; }
-    .texto-recomendada { font-size: 0.5rem; text-align: center; margin-top: 0.15rem; color: #94A3B8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tarjeta-recomendada { flex: 0 0 auto; width: 55px; cursor: pointer; border-radius: 6px; overflow: hidden; }
+    .tarjeta-recomendada:hover { transform: scale(1.05); }
+    .portada-recomendada { width: 100%; height: 82px; border-radius: 4px; object-fit: cover; }
+    .texto-recomendada { font-size: 0.4rem; text-align: center; margin-top: 0.1rem; color: #94A3B8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .menu-perfil { position: relative; }
-    .dropdown { position: absolute; right: 0; top: 120%; background: rgba(26, 26, 46, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 12px; width: 240px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); display: none; z-index: 100; border: 1px solid rgba(124, 58, 237, 0.15); padding: 0.3rem 0; }
+    .dropdown { position: absolute; right: 0; top: 120%; background: rgba(26,26,46,0.95); backdrop-filter: blur(20px); border-radius: 10px; width: 200px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); display: none; z-index: 100; border: 1px solid rgba(124,58,237,0.15); padding: 0.2rem 0; }
     .dropdown.mostrar { display: block; animation: slideDown 0.25s ease; }
-    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-    .dropdown-header { padding: 0.5rem 0.8rem; border-bottom: 1px solid rgba(124, 58, 237, 0.08); font-weight: 600; color: #F1F5F9; font-size: 0.75rem; }
-    .dropdown button { display: block; width: 100%; padding: 0.4rem 0.8rem; text-align: left; border: none; background: none; cursor: pointer; font-size: 0.7rem; color: #CBD5E1; transition: 0.2s; }
-    .dropdown button:hover { background: rgba(124, 58, 237, 0.08); color: #FFFFFF; }
-    .historial-vacio { padding: 0.8rem; text-align: center; color: #64748B; font-size: 0.7rem; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .dropdown-header { padding: 0.3rem 0.6rem; border-bottom: 1px solid rgba(124,58,237,0.08); font-weight: 600; color: #F1F5F9; font-size: 0.65rem; }
+    .dropdown button { display: block; width: 100%; padding: 0.3rem 0.6rem; text-align: left; border: none; background: none; cursor: pointer; font-size: 0.6rem; color: #CBD5E1; transition: 0.2s; }
+    .dropdown button:hover { background: rgba(124,58,237,0.08); color: #FFFFFF; }
+    .historial-vacio { padding: 0.5rem; text-align: center; color: #64748B; font-size: 0.6rem; }
 
-    .modal-login { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-login { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 0.8rem; }
     .modal-login.oculto { display: none; }
-    .contenedor-login { background: rgba(26, 26, 46, 0.95); border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 360px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); border: 1px solid rgba(124, 58, 237, 0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-    .contenedor-login h2 { font-size: 1.2rem; font-weight: 700; text-align: center; margin-bottom: 0.3rem; background: linear-gradient(135deg, #FFFFFF, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .contenedor-login input { width: 100%; padding: 0.6rem; border-radius: 10px; border: 1px solid rgba(124, 58, 237, 0.15); background: rgba(255,255,255,0.05); color: #FFFFFF; font-size: 0.8rem; margin-bottom: 0.4rem; transition: 0.3s; }
-    .contenedor-login input:focus { outline: none; border-color: #7C3AED; box-shadow: 0 0 30px rgba(124, 58, 237, 0.1); }
-    .contenedor-login input::placeholder { color: #64748B; }
-    .btn-google { background: rgba(255,255,255,0.05); border: 1px solid rgba(124, 58, 237, 0.15); color: #FFFFFF; padding: 0.6rem; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.8rem; }
-    .btn-google:hover { background: rgba(124, 58, 237, 0.15); border-color: #7C3AED; }
-    .btn-enviar-codigo { background: #7C3AED; border: none; color: #FFFFFF; padding: 0.6rem; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; transition: 0.3s; font-size: 0.8rem; }
-    .btn-enviar-codigo:hover { background: #6D28D9; transform: scale(1.02); }
-    .btn-cerrar-login { background: none; border: none; color: #64748B; cursor: pointer; width: 100%; margin-top: 0.4rem; font-size: 0.7rem; transition: 0.3s; }
+    .contenedor-login { background: rgba(26,26,46,0.95); border-radius: 14px; padding: 1.2rem; width: 100%; max-width: 320px; border: 1px solid rgba(124,58,237,0.1); }
+    .contenedor-login h2 { font-size: 1rem; font-weight: 700; text-align: center; margin-bottom: 0.2rem; background: linear-gradient(135deg, #FFFFFF, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .contenedor-login input { width: 100%; padding: 0.4rem; border-radius: 8px; border: 1px solid rgba(124,58,237,0.15); background: rgba(255,255,255,0.05); color: #FFFFFF; font-size: 0.7rem; margin-bottom: 0.3rem; }
+    .contenedor-login input:focus { outline: none; border-color: #7C3AED; }
+    .btn-google { background: rgba(255,255,255,0.05); border: 1px solid rgba(124,58,237,0.15); color: #FFFFFF; padding: 0.4rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; gap: 0.3rem; }
+    .btn-google:hover { background: rgba(124,58,237,0.15); }
+    .btn-enviar-codigo { background: #7C3AED; border: none; color: #FFFFFF; padding: 0.4rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-size: 0.7rem; }
+    .btn-enviar-codigo:hover { background: #6D28D9; }
+    .btn-cerrar-login { background: none; border: none; color: #64748B; cursor: pointer; width: 100%; margin-top: 0.3rem; font-size: 0.6rem; }
     .btn-cerrar-login:hover { color: #FFFFFF; }
-</style>
-    <script>
+
+    .oculto { display: none !important; }
+</style><script>
 // ==============================================
 // 🔧 CONFIGURACIÓN FIREBASE
 // ==============================================
@@ -440,10 +455,11 @@ let tempActualIndex = 0, temporadasActuales = [];
 let menuAbierto = false;
 let cargandoMas = false;
 let cargandoInicial = false;
+let intervaloAutoSlide = null;
 
 const TMDB_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4ZGQ5OWI1YTE1YWNmZGQ5OGUzYjI0OWQ1Zjg5MGFmNCIsIm5iZiI6MTc4MjI3NzIzMS4zMzMsInN1YiI6IjZhM2I2NDZmZThmMTMwOTc2MWVjNDYxYiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.JLmHWuXkhDc9LreAvXFZa0qTS7PR_nrj_SSwVm9UZ9Y";
 const TMDB_BASE = "https://api.themoviedb.org/3";
-const TMDB_IMG = "https://image.tmdb.org/t/p/w200";
+const TMDB_IMG = "https://image.tmdb.org/t/p/w92";
 const TMDB_LANG = "es-ES";
 const opcionesTMDB = { method: "GET", headers: { "Authorization": `Bearer ${TMDB_TOKEN}`, "Content-Type": "application/json;charset=utf-8" } };
 
@@ -469,8 +485,7 @@ function cambiarModo() {
 }
 if (localStorage.getItem("modo") === "oscuro" || (!localStorage.getItem("modo") && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
     document.body.classList.add("dark"); document.getElementById("iconoModo").className = "fa-solid fa-sun";
-}
-    // ==============================================
+}// ==============================================
 // 📋 MENÚ PERFIL
 // ==============================================
 function toggleMenu() {
@@ -565,14 +580,14 @@ function mostrarHistorial() {
 
 function mostrarRecientes() {
     const contenedor = document.getElementById("scrollRecientes"), historial = JSON.parse(localStorage.getItem("historialTely")) || [];
-    if (historial.length === 0) { contenedor.innerHTML = `<p style="color:#64748B;font-size:0.65rem;padding:0.3rem;">No has visto nada aún</p>`; return; }
+    if (historial.length === 0) { contenedor.innerHTML = `<p style="color:#64748B;font-size:0.55rem;padding:0.2rem;">No has visto nada aún</p>`; return; }
     contenedor.innerHTML = "";
     historial.slice(0, 10).forEach(item => { 
         const encontrado = contenido.find(c => c.id === item.id); 
         if (!encontrado) return; 
         const tarjeta = document.createElement("div"); 
         tarjeta.className = "tarjeta-reciente"; 
-        tarjeta.innerHTML = `<img src="${encontrado.portada}" alt="${encontrado.titulo}" class="portada-reciente" loading="lazy" onerror="this.src='https://via.placeholder.com/65x95?text=?'"><div class="info-reciente"><h4>${encontrado.titulo}</h4></div>`; 
+        tarjeta.innerHTML = `<img src="${encontrado.portada}" alt="${encontrado.titulo}" class="portada-reciente" loading="lazy" onerror="this.src='https://via.placeholder.com/55x82?text=?'"><div class="info-reciente"><h4>${encontrado.titulo}</h4></div>`; 
         tarjeta.onclick = (e) => {
             e.stopPropagation();
             auth.currentUser ? abrirVideoPelicula(encontrado) : (videoPendiente = encontrado, abrirModalLogin()); 
@@ -582,25 +597,84 @@ function mostrarRecientes() {
 }
 
 function limpiarHistorial() { localStorage.removeItem("historialTely"); mostrarHistorial(); mostrarRecientes(); }
-    // ==============================================
-// 🚀 CARGA PRINCIPAL (OPTIMIZADA)
+
+// ==============================================
+// 🔄 CARRUSEL AUTOMÁTICO
+// ==============================================
+let carruselIndex = 0;
+let carruselItems = [];
+
+function iniciarCarrusel(items) {
+    carruselItems = items;
+    const track = document.getElementById("carruselTrack");
+    track.innerHTML = "";
+    
+    if (!items || items.length === 0) {
+        document.getElementById("seccionPopulares").style.display = "none";
+        return;
+    }
+    
+    // Mostrar los primeros 10 en el carrusel
+    const mostrar = items.slice(0, 10);
+    mostrar.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "carrusel-item";
+        div.innerHTML = `
+            <img src="${item.portada}" alt="${item.titulo}" class="portada-popular" loading="lazy" onerror="this.src='https://via.placeholder.com/100x150?text=?'">
+            <div class="info-popular"><h4>${item.titulo}</h4></div>
+        `;
+        div.onclick = () => {
+            auth.currentUser ? abrirVideoPelicula(item) : (videoPendiente = item, abrirModalLogin());
+        };
+        track.appendChild(div);
+    });
+    
+    // Clonar los primeros para efecto infinito
+    const clones = mostrar.slice(0, 3).map(item => {
+        const div = document.createElement("div");
+        div.className = "carrusel-item";
+        div.innerHTML = `
+            <img src="${item.portada}" alt="${item.titulo}" class="portada-popular" loading="lazy" onerror="this.src='https://via.placeholder.com/100x150?text=?'">
+            <div class="info-popular"><h4>${item.titulo}</h4></div>
+        `;
+        div.onclick = () => {
+            auth.currentUser ? abrirVideoPelicula(item) : (videoPendiente = item, abrirModalLogin());
+        };
+        return div;
+    });
+    clones.forEach(clone => track.appendChild(clone));
+    
+    // Auto-slide
+    if (intervaloAutoSlide) clearInterval(intervaloAutoSlide);
+    intervaloAutoSlide = setInterval(() => {
+        const totalItems = track.children.length;
+        if (totalItems === 0) return;
+        carruselIndex++;
+        if (carruselIndex >= totalItems - 3) {
+            carruselIndex = 0;
+            track.style.transition = 'none';
+            track.style.transform = `translateX(0)`;
+            setTimeout(() => {
+                track.style.transition = 'transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                carruselIndex = 1;
+                track.style.transform = `translateX(-${carruselIndex * 103}px)`;
+            }, 50);
+        } else {
+            track.style.transform = `translateX(-${carruselIndex * 103}px)`;
+        }
+    }, 3000);
+}// ==============================================
+// 🚀 CARGA PRINCIPAL
 // ==============================================
 async function cargarContenidoCompleto() {
     if (cargandoInicial) return;
     cargandoInicial = true;
     
     const lista = document.getElementById("lista-contenido");
-    // Mostrar skeletons
-    lista.innerHTML = '';
-    for (let i = 0; i < 12; i++) {
-        const sk = document.createElement('div');
-        sk.className = 'skeleton';
-        sk.style.aspectRatio = '2/3';
-        sk.style.borderRadius = '8px';
-        lista.appendChild(sk);
-    }
+    lista.innerHTML = '<div class="col-span-4 text-center py-4" style="color:#64748B;font-size:0.7rem;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</div>';
     
     try {
+        // Solo cargar 1 página de cada para ser rápido
         const [r1, r2] = await Promise.all([
             fetch(`${TMDB_BASE}/movie/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB),
             fetch(`${TMDB_BASE}/tv/popular?language=${TMDB_LANG}&page=1`, opcionesTMDB)
@@ -611,14 +685,14 @@ async function cargarContenidoCompleto() {
         const admin = await cargarContenidoAdmin();
         const adminMap = {}; admin.forEach(item => { adminMap[item.tmdb_id] = item; });
         
-        const pelisTMDB = (d1.results || []).slice(0, 20).map(p => { 
+        const pelisTMDB = (d1.results || []).slice(0, 12).map(p => { 
             const a = adminMap[p.id]; 
             return { 
                 id: `tmdb_${p.id}`, tmdb_id: p.id, 
                 titulo: p.title || "Sin título", 
                 anio: p.release_date ? p.release_date.split("-")[0] : "N/D", 
                 tipo: "pelicula", categoria: a?.categoria || "peliculas", 
-                portada: p.poster_path ? `https://image.tmdb.org/t/p/w200${p.poster_path}` : "https://via.placeholder.com/200x300?text=Sin+Portada", 
+                portada: p.poster_path ? `https://image.tmdb.org/t/p/w92${p.poster_path}` : "https://via.placeholder.com/92x138?text=?", 
                 sinopsis: p.overview || "Sin sinopsis", 
                 puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", 
                 genero: "Película", 
@@ -627,14 +701,14 @@ async function cargarContenidoCompleto() {
             }; 
         });
         
-        const seriesTMDB = (d2.results || []).slice(0, 20).map(s => { 
+        const seriesTMDB = (d2.results || []).slice(0, 12).map(s => { 
             const a = adminMap[s.id]; 
             return { 
                 id: `tmdb_${s.id}`, tmdb_id: s.id, 
                 titulo: s.name || "Sin título", 
                 anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D", 
                 tipo: "serie", categoria: a?.categoria || "series", 
-                portada: s.poster_path ? `https://image.tmdb.org/t/p/w200${s.poster_path}` : "https://via.placeholder.com/200x300?text=Sin+Portada", 
+                portada: s.poster_path ? `https://image.tmdb.org/t/p/w92${s.poster_path}` : "https://via.placeholder.com/92x138?text=?", 
                 sinopsis: s.overview || "Sin sinopsis", 
                 puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A", 
                 genero: "Serie", 
@@ -655,10 +729,15 @@ async function cargarContenidoCompleto() {
         
         if (contenido.length === 0) contenido = [...MI_CONTENIDO, ...admin];
         
+        // Iniciar carrusel con las más populares
+        const populares = contenido.filter(item => item.url || item.opcion2 || (item.temporadas && item.temporadas.length > 0));
+        iniciarCarrusel(populares);
+        
     } catch (err) { 
         console.error("Error:", err); 
         const admin = await cargarContenidoAdmin(); 
         contenido = [...MI_CONTENIDO, ...admin]; 
+        iniciarCarrusel(contenido);
     }
     
     document.getElementById("contadorTotal").textContent = contenido.length;
@@ -673,7 +752,7 @@ function mostrarContenido(categoria) {
     let filtrados = contenido.filter(item => item.categoria === categoria);
     if (categoria === 'estrenos') filtrados = contenido;
     if (!filtrados.length) {
-        lista.innerHTML = `<div class="col-span-4 text-center py-6" style="color:#64748B;font-size:0.8rem;">No hay contenido en <strong style="color:#A78BFA;">${categoria}</strong></div>`;
+        lista.innerHTML = `<div class="col-span-4 text-center py-4" style="color:#64748B;font-size:0.7rem;">No hay contenido en <strong style="color:#A78BFA;">${categoria}</strong></div>`;
         return;
     }
     filtrados.forEach(item => {
@@ -683,7 +762,7 @@ function mostrarContenido(categoria) {
         tarjeta.innerHTML = `
             <span class="etiqueta-anio">${item.anio}</span>
             <i class="fa-solid fa-star estrella"></i>
-            <img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/200x300?text=?'">
+            <img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/92x138?text=?'">
             <div class="info-tarjeta">
                 <h3>${item.titulo}</h3>
                 ${tieneVideo ? '<span class="badge-video">▶</span>' : '<span class="badge-sin-video">🔒</span>'}
@@ -714,7 +793,7 @@ function cambiarCategoria(cat) {
 }
 
 // ==============================================
-// 🔍 BÚSQUEDA (OPTIMIZADA)
+// 🔍 BÚSQUEDA
 // ==============================================
 async function buscarContenido() {
     const texto = document.getElementById("buscadorInput").value.trim();
@@ -733,7 +812,7 @@ async function buscarContenido() {
     modoBusqueda = true; 
     document.getElementById("contenedorCargarMas").style.display = "none";
     const lista = document.getElementById("lista-contenido");
-    lista.innerHTML = '<div class="col-span-4 text-center py-6" style="color:#64748B;font-size:0.8rem;"><i class="fa-solid fa-spinner fa-spin"></i> Buscando...</div>';
+    lista.innerHTML = '<div class="col-span-4 text-center py-4" style="color:#64748B;font-size:0.7rem;"><i class="fa-solid fa-spinner fa-spin"></i> Buscando...</div>';
     
     try {
         const [r1, r2] = await Promise.all([
@@ -752,7 +831,7 @@ async function buscarContenido() {
                 titulo: p.title || "Sin título", 
                 anio: p.release_date ? p.release_date.split("-")[0] : "N/D", 
                 tipo: "pelicula", categoria: a?.categoria || "peliculas", 
-                portada: p.poster_path ? `https://image.tmdb.org/t/p/w200${p.poster_path}` : "https://via.placeholder.com/200x300?text=Sin+Portada", 
+                portada: p.poster_path ? `https://image.tmdb.org/t/p/w92${p.poster_path}` : "https://via.placeholder.com/92x138?text=?", 
                 sinopsis: p.overview || "Sin sinopsis", 
                 puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", 
                 genero: "Película", 
@@ -767,7 +846,7 @@ async function buscarContenido() {
                 titulo: s.name || "Sin título", 
                 anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D", 
                 tipo: "serie", categoria: a?.categoria || "series", 
-                portada: s.poster_path ? `https://image.tmdb.org/t/p/w200${s.poster_path}` : "https://via.placeholder.com/200x300?text=Sin+Portada", 
+                portada: s.poster_path ? `https://image.tmdb.org/t/p/w92${s.poster_path}` : "https://via.placeholder.com/92x138?text=?", 
                 sinopsis: s.overview || "Sin sinopsis", 
                 puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A", 
                 genero: "Serie", 
@@ -777,7 +856,7 @@ async function buscarContenido() {
         });
         const resultados = [...pelis, ...series];
         if (resultados.length === 0) { 
-            lista.innerHTML = `<div class="col-span-4 text-center py-6"><p style="color:#64748B;font-size:0.8rem;">No se encontraron resultados para "<strong style="color:#FFFFFF;">${texto}</strong>"</p><button class="btn-cargar-mas mt-3" onclick="limpiarBusqueda()" style="padding:0.3rem 1rem;font-size:0.7rem;"><i class="fa-solid fa-arrow-left"></i> Volver</button></div>`; 
+            lista.innerHTML = `<div class="col-span-4 text-center py-4"><p style="color:#64748B;font-size:0.7rem;">No se encontraron resultados para "<strong style="color:#FFFFFF;">${texto}</strong>"</p><button class="btn-cargar-mas mt-2" onclick="limpiarBusqueda()" style="padding:0.2rem 0.8rem;font-size:0.6rem;"><i class="fa-solid fa-arrow-left"></i> Volver</button></div>`; 
             return; 
         }
         document.getElementById("contadorTotal").textContent = resultados.length;
@@ -789,10 +868,10 @@ async function buscarContenido() {
             tarjeta.innerHTML = `
                 <span class="etiqueta-anio">${item.anio}</span>
                 <i class="fa-solid fa-star estrella"></i>
-                <img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/200x300?text=?'">
+                <img src="${item.portada}" alt="${item.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/92x138?text=?'">
                 <div class="info-tarjeta">
                     <h3>${item.titulo}</h3>
-                    <span style="font-size:0.5rem;color:${item.tipo === 'serie' ? '#10B981' : '#60A5FA'};font-weight:500;">${item.tipo === 'serie' ? '📺 Serie' : '🎬 Película'}</span>
+                    <span style="font-size:0.4rem;color:${item.tipo === 'serie' ? '#10B981' : '#60A5FA'};font-weight:500;">${item.tipo === 'serie' ? '📺' : '🎬'}</span>
                     ${tieneVideo ? ' <span class="badge-video">▶</span>' : ' <span class="badge-sin-video">🔒</span>'}
                 </div>
             `;
@@ -801,7 +880,7 @@ async function buscarContenido() {
         });
     } catch (err) { 
         console.error("Error:", err); 
-        lista.innerHTML = `<div class="col-span-4 text-center py-6" style="color:#EF4444;font-size:0.8rem;">❌ Error al buscar</div>`; 
+        lista.innerHTML = `<div class="col-span-4 text-center py-4" style="color:#EF4444;font-size:0.7rem;">❌ Error al buscar</div>`; 
     }
 }
 
@@ -819,7 +898,7 @@ function limpiarBusqueda() {
 }
 
 // ==============================================
-// 🔄 CARGAR MÁS (OPTIMIZADO)
+// 🔄 CARGAR MÁS
 // ==============================================
 async function cargarMasContenido() {
     if (cargandoMas || modoBusqueda) return;
@@ -848,7 +927,7 @@ async function cargarMasContenido() {
                 titulo: p.title || "Sin título", 
                 anio: p.release_date ? p.release_date.split("-")[0] : "N/D", 
                 tipo: "pelicula", categoria: a?.categoria || "peliculas", 
-                portada: p.poster_path ? `https://image.tmdb.org/t/p/w200${p.poster_path}` : "https://via.placeholder.com/200x300?text=Sin+Portada", 
+                portada: p.poster_path ? `https://image.tmdb.org/t/p/w92${p.poster_path}` : "https://via.placeholder.com/92x138?text=?", 
                 sinopsis: p.overview || "Sin sinopsis", 
                 puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", 
                 genero: "Película", 
@@ -863,7 +942,7 @@ async function cargarMasContenido() {
                 titulo: s.name || "Sin título", 
                 anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D", 
                 tipo: "serie", categoria: a?.categoria || "series", 
-                portada: s.poster_path ? `https://image.tmdb.org/t/p/w200${s.poster_path}` : "https://via.placeholder.com/200x300?text=Sin+Portada", 
+                portada: s.poster_path ? `https://image.tmdb.org/t/p/w92${s.poster_path}` : "https://via.placeholder.com/92x138?text=?", 
                 sinopsis: s.overview || "Sin sinopsis", 
                 puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A", 
                 genero: "Serie", 
@@ -901,7 +980,6 @@ async function cargarMasContenido() {
 // 🎬 ABRIR VIDEO - CON GENERADOR AUTOMÁTICO UNLIMPLAY
 // ==============================================
 function abrirVideoPelicula(peli) {
-    // Generar enlace automático para películas sin enlace
     if (peli.tipo === 'pelicula' && !peli.url && peli.tmdb_id) {
         peli.url = `https://unlimplay.com/play/embed/movie/${peli.tmdb_id}`;
         const datos = {
@@ -923,7 +1001,6 @@ function abrirVideoPelicula(peli) {
         }).catch(err => console.log('Error guardando enlace:', err));
     }
     
-    // Generar enlace automático para series sin enlaces
     if (peli.tipo === 'serie' && (!peli.temporadas || peli.temporadas.length === 0) && peli.tmdb_id) {
         peli.temporadas = [{
             numero: 1,
@@ -953,7 +1030,6 @@ function abrirVideoPelicula(peli) {
         }).catch(err => console.log('Error guardando serie:', err));
     }
     
-    // Completar enlaces faltantes en capítulos existentes
     if (peli.tipo === 'serie' && peli.temporadas && peli.tmdb_id) {
         peli.temporadas.forEach(temp => {
             if (temp.capitulos) {
@@ -966,7 +1042,6 @@ function abrirVideoPelicula(peli) {
         });
     }
     
-    // Buscar en Firebase si hay datos guardados
     if (peli.tmdb_id) {
         db.ref("contenido_personalizado").orderByChild("tmdb_id").equalTo(peli.tmdb_id).once("value", (snapshot) => {
             const data = snapshot.val();
@@ -1061,7 +1136,7 @@ function abrirReproductor(peli) {
         if (primerCap?.url) {
             reproducirOpcion(primerCap.url);
         } else {
-            player.innerHTML = `<div style="color:#EF4444;text-align:center;padding:3rem;font-size:0.9rem;"><i class="fa-solid fa-link" style="font-size:2rem;display:block;margin-bottom:0.8rem;"></i>No hay capítulos disponibles</div>`;
+            player.innerHTML = `<div style="color:#EF4444;text-align:center;padding:2rem;font-size:0.8rem;"><i class="fa-solid fa-link" style="font-size:1.5rem;display:block;margin-bottom:0.5rem;"></i>No hay capítulos disponibles</div>`;
         }
         agregarAlHistorial(peli);
         cargarRecomendadas(peli.tmdb_id);
@@ -1109,7 +1184,7 @@ function abrirReproductor(peli) {
     } else if (t2) {
         reproducirOpcion(peli.opcion2);
     } else {
-        player.innerHTML = `<div style="color:#EF4444;text-align:center;padding:3rem;font-size:0.9rem;"><i class="fa-solid fa-link" style="font-size:2rem;display:block;margin-bottom:0.8rem;"></i>No hay enlaces disponibles</div>`;
+        player.innerHTML = `<div style="color:#EF4444;text-align:center;padding:2rem;font-size:0.8rem;"><i class="fa-solid fa-link" style="font-size:1.5rem;display:block;margin-bottom:0.5rem;"></i>No hay enlaces disponibles</div>`;
     }
     agregarAlHistorial(peli);
     cargarRecomendadas(peli.tmdb_id);
@@ -1123,7 +1198,7 @@ function mostrarTemporada(index) {
     tempActualIndex = index; const temp = temporadasActuales[index]; const container = document.getElementById("capitulosHorizontal"); const label = document.getElementById("tempActual");
     label.textContent = `Temporada ${temp.numero || index + 1}`; container.innerHTML = "";
     document.getElementById("tempAnterior").disabled = index === 0; document.getElementById("tempSiguiente").disabled = index === temporadasActuales.length - 1;
-    if (!temp.capitulos || temp.capitulos.length === 0) { container.innerHTML = `<p style="color:#64748B;padding:0.3rem;text-align:center;font-size:0.7rem;">Sin capítulos</p>`; return; }
+    if (!temp.capitulos || temp.capitulos.length === 0) { container.innerHTML = `<p style="color:#64748B;padding:0.2rem;text-align:center;font-size:0.6rem;">Sin capítulos</p>`; return; }
     temp.capitulos.forEach((cap, idx) => { const div = document.createElement("div"); div.className = "capitulo-item-horizontal"; if (idx === 0 && cap.url) div.classList.add("activo"); div.innerHTML = `<span class="cap-numero-h">Cap ${cap.numero || idx + 1}</span><span class="cap-titulo-h">${cap.titulo || 'Capítulo ' + (idx + 1)}</span>${cap.url ? '<span class="cap-play-h"><i class="fa-solid fa-play"></i> Ver</span>' : '<span class="cap-sin-enlace-h">🔒 Sin enlace</span>'}`; div.onclick = function() { if (cap.url) { document.querySelectorAll(".capitulo-item-horizontal").forEach(el => el.classList.remove("activo")); this.classList.add("activo"); reproducirOpcion(cap.url); } else { alert("❌ Este capítulo no tiene enlace"); } }; container.appendChild(div); });
 }
 
@@ -1152,17 +1227,17 @@ function reproducirOpcion(url) {
 // ==============================================
 async function cargarRecomendadas(tmdbId) {
     const container = document.getElementById("recomendadasLista");
-    container.innerHTML = "<p style='color:#64748B;font-size:0.7rem;text-align:center;padding:0.5rem;'>Cargando...</p>";
-    if (!tmdbId) { container.innerHTML = "<p style='color:#64748B;font-size:0.7rem;text-align:center;padding:0.5rem;'>Sin recomendaciones</p>"; return; }
+    container.innerHTML = "<p style='color:#64748B;font-size:0.6rem;text-align:center;padding:0.3rem;'>Cargando...</p>";
+    if (!tmdbId) { container.innerHTML = "<p style='color:#64748B;font-size:0.6rem;text-align:center;padding:0.3rem;'>Sin recomendaciones</p>"; return; }
     try {
         const res = await fetch(`${TMDB_BASE}/movie/${tmdbId}/recommendations?language=${TMDB_LANG}&page=1`, opcionesTMDB);
         const datos = await res.json();
         container.innerHTML = "";
-        if (!datos.results || datos.results.length === 0) { container.innerHTML = "<p style='color:#64748B;font-size:0.7rem;text-align:center;padding:0.5rem;'>No hay películas relacionadas</p>"; return; }
+        if (!datos.results || datos.results.length === 0) { container.innerHTML = "<p style='color:#64748B;font-size:0.6rem;text-align:center;padding:0.3rem;'>No hay películas relacionadas</p>"; return; }
         datos.results.slice(0, 6).forEach(p => {
             const t = document.createElement("div");
             t.className = "tarjeta-recomendada";
-            t.innerHTML = `<img src="${p.poster_path ? 'https://image.tmdb.org/t/p/w200' + p.poster_path : 'https://via.placeholder.com/70x105?text=?'}" alt="${p.title}" class="portada-recomendada" loading="lazy"><p class="texto-recomendada">${p.title}</p>`;
+            t.innerHTML = `<img src="${p.poster_path ? 'https://image.tmdb.org/t/p/w92' + p.poster_path : 'https://via.placeholder.com/55x82?text=?'}" alt="${p.title}" class="portada-recomendada" loading="lazy"><p class="texto-recomendada">${p.title}</p>`;
             t.onclick = () => {
                 cerrarVideo();
                 const comp = contenido.find(c => c.tmdb_id == p.id);
@@ -1176,7 +1251,7 @@ async function cargarRecomendadas(tmdbId) {
                         anio: p.release_date ? p.release_date.split("-")[0] : "N/D",
                         tipo: "pelicula",
                         categoria: "peliculas",
-                        portada: p.poster_path ? 'https://image.tmdb.org/t/p/w200' + p.poster_path : "",
+                        portada: p.poster_path ? 'https://image.tmdb.org/t/p/w92' + p.poster_path : "",
                         sinopsis: p.overview || "Sin sinopsis",
                         puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A",
                         genero: "Película",
@@ -1188,7 +1263,7 @@ async function cargarRecomendadas(tmdbId) {
             };
             container.appendChild(t);
         });
-    } catch (err) { container.innerHTML = "<p style='color:#EF4444;font-size:0.7rem;text-align:center;padding:0.5rem;'>Error al cargar</p>"; }
+    } catch (err) { container.innerHTML = "<p style='color:#EF4444;font-size:0.6rem;text-align:center;padding:0.3rem;'>Error al cargar</p>"; }
 }
 
 // ==============================================
@@ -1204,6 +1279,10 @@ function cerrarVideo() {
     document.getElementById("capitulosContainer").classList.add("oculto");
     tempActualIndex = 0;
     temporadasActuales = [];
+    if (intervaloAutoSlide) {
+        clearInterval(intervaloAutoSlide);
+        intervaloAutoSlide = null;
+    }
 }
 
 function detenerVideo() { document.getElementById("netflixPlayer").innerHTML = ""; }
