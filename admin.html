@@ -539,6 +539,7 @@ function guardarEnlacesPelicula(tmdbId) {
     const peli = peliculas.find(p => p.id == tmdbId);
     if (!peli) return;
     
+    // 🔥 SI NO TIENE ENLACE, GENERAR UNO AUTOMÁTICO CON UNLIMPLAY
     if (!url) {
         url = `https://unlimplay.com/play/embed/movie/${peli.tmdb_id}`;
         alert(`✅ Enlace automático generado para "${peli.titulo}":\n${url}`);
@@ -1271,9 +1272,7 @@ function limpiarFormAgregar() {
     document.getElementById('nuevaUrl2').value = '';
     document.getElementById('temporadasContainer').innerHTML = '';
     toggleCamposContenido();
-}
-
-// ==============================================
+}// ==============================================
 // 🚀 FUNCIONES PARA PROGRESO
 // ==============================================
 function mostrarProgreso(texto, porcentaje) {
@@ -1293,12 +1292,12 @@ function ocultarProgreso() {
 }
 
 // ==============================================
-// 🎬 AGREGAR PELÍCULAS AUTOMÁTICAMENTE
+// 🎬 AGREGAR PELÍCULAS AUTOMÁTICAMENTE - CON UNLIMPLAY Y TODAS LAS PÁGINAS
 // ==============================================
 async function agregarPeliculasAutomaticamente() {
     const btn = document.getElementById('btnAgregarPelis');
     const todoBtn = document.getElementById('btnAgregarTodo');
-    constseriesBtn = document.getElementById('btnAgregarSeries');
+    const seriesBtn = document.getElementById('btnAgregarSeries');
     
     if (!confirm('⚠️ ¿Agregar TODAS las películas populares a Firebase?\n\nPuede tomar varios minutos.')) return;
     
@@ -1308,7 +1307,7 @@ async function agregarPeliculasAutomaticamente() {
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cargando...';
     
     let peliculasGuardadas = 0;
-    const totalPaginas = 5;
+    const totalPaginas = 20; // 🔥 20 páginas = 400 películas
     
     try {
         mostrarProgreso('📥 Cargando películas de TMDB...', 5);
@@ -1317,8 +1316,10 @@ async function agregarPeliculasAutomaticamente() {
         for (let page = 1; page <= totalPaginas; page++) {
             const res = await fetch(`${TMDB_BASE}/movie/popular?api_key=${TMDB_API_KEY}&language=${TMDB_LANG}&page=${page}`, opcionesTMDB);
             const data = await res.json();
-            if (data.results) {
+            if (data.results && data.results.length > 0) {
                 todasPeliculas = [...todasPeliculas, ...data.results];
+            } else {
+                break; // No hay más páginas
             }
             mostrarProgreso(`📥 Cargando películas... Página ${page}/${totalPaginas} (${todasPeliculas.length} encontradas)`, 5 + (page / totalPaginas) * 25);
         }
@@ -1330,6 +1331,7 @@ async function agregarPeliculasAutomaticamente() {
             const existe = peliculasAdmin.find(a => a.tmdb_id == p.id);
             if (existe) continue;
             
+            // 🔥 FORMATO UNLIMPLAY
             const url = `https://unlimplay.com/play/embed/movie/${p.id}`;
             const datos = {
                 tmdb_id: p.id,
@@ -1371,7 +1373,7 @@ async function agregarPeliculasAutomaticamente() {
 }
 
 // ==============================================
-// 📺 AGREGAR SERIES AUTOMÁTICAMENTE
+// 📺 AGREGAR SERIES AUTOMÁTICAMENTE - CON UNLIMPLAY Y TODAS LAS PÁGINAS
 // ==============================================
 async function agregarSeriesAutomaticamente() {
     const btn = document.getElementById('btnAgregarSeries');
@@ -1386,7 +1388,7 @@ async function agregarSeriesAutomaticamente() {
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cargando...';
     
     let seriesGuardadas = 0;
-    const totalPaginas = 5;
+    const totalPaginas = 20; // 🔥 20 páginas = 400 series
     
     try {
         mostrarProgreso('📥 Cargando series de TMDB...', 5);
@@ -1395,8 +1397,10 @@ async function agregarSeriesAutomaticamente() {
         for (let page = 1; page <= totalPaginas; page++) {
             const res = await fetch(`${TMDB_BASE}/tv/popular?api_key=${TMDB_API_KEY}&language=${TMDB_LANG}&page=${page}`, opcionesTMDB);
             const data = await res.json();
-            if (data.results) {
+            if (data.results && data.results.length > 0) {
                 todasSeries = [...todasSeries, ...data.results];
+            } else {
+                break;
             }
             mostrarProgreso(`📥 Cargando series... Página ${page}/${totalPaginas} (${todasSeries.length} encontradas)`, 5 + (page / totalPaginas) * 25);
         }
