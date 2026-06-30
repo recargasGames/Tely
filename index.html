@@ -240,6 +240,20 @@
         .btn-cargar-mas:hover { background: rgba(124, 58, 237, 0.25); border-color: #7C3AED; }
         .btn-cargar-mas:disabled { opacity: 0.5; cursor: not-allowed; }
 
+        /* ===== LOADING SHIMMER ===== */
+        .shimmer {
+            background: linear-gradient(90deg, #1A1A2E 25%, #2D2D44 50%, #1A1A2E 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 10px;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer-card { aspect-ratio: 2/3; width: 100%; border-radius: 10px; }
+        .shimmer-carrusel { aspect-ratio: 2/3; width: 140px; border-radius: 10px; }
+
         .oculto { display: none !important; }
     </style>
 </head>
@@ -286,7 +300,15 @@
         <div class="titulo-seccion"><i class="fa-solid fa-fire"></i> 🎬 Más vistas</div>
         <div class="carrusel-container">
             <div class="carrusel-wrapper" id="carruselWrapper">
-                <div class="carrusel-track" id="carruselTrack"></div>
+                <div class="carrusel-track" id="carruselTrack">
+                    <!-- Placeholders de carga -->
+                    <div class="carrusel-item"><div class="shimmer-carrusel shimmer"></div></div>
+                    <div class="carrusel-item"><div class="shimmer-carrusel shimmer"></div></div>
+                    <div class="carrusel-item"><div class="shimmer-carrusel shimmer"></div></div>
+                    <div class="carrusel-item"><div class="shimmer-carrusel shimmer"></div></div>
+                    <div class="carrusel-item"><div class="shimmer-carrusel shimmer"></div></div>
+                    <div class="carrusel-item"><div class="shimmer-carrusel shimmer"></div></div>
+                </div>
             </div>
         </div>
     </div>
@@ -301,7 +323,13 @@
 
     <!-- ===== GRID CONTENIDO ===== -->
     <div class="grid-contenido" id="lista-contenido">
-        <!-- Se llena con JavaScript -->
+        <!-- 6 placeholders de carga -->
+        <div class="tarjeta"><div class="shimmer-card shimmer"></div></div>
+        <div class="tarjeta"><div class="shimmer-card shimmer"></div></div>
+        <div class="tarjeta"><div class="shimmer-card shimmer"></div></div>
+        <div class="tarjeta"><div class="shimmer-card shimmer"></div></div>
+        <div class="tarjeta"><div class="shimmer-card shimmer"></div></div>
+        <div class="tarjeta"><div class="shimmer-card shimmer"></div></div>
     </div>
 
     <!-- ===== BOTÓN CARGAR MÁS ===== -->
@@ -548,8 +576,8 @@ const ANIMES_PELICULAS = [
     { titulo: "El viaje de Arrietty", tmdb_id: "45762", anio: "2010", portada: "https://image.tmdb.org/t/p/w154/9e6Tbq1XwJNkLq2RwXbHnP8qRn.jpg", sinopsis: "Arrietty es una pequeña persona que vive bajo el piso." },
     { titulo: "El jardín de las palabras", tmdb_id: "16728", anio: "2013", portada: "https://image.tmdb.org/t/p/w154/9e6Tbq1XwJNkLq2RwXbHnP8qRn.jpg", sinopsis: "Un estudiante y una mujer se encuentran en un jardín." }
 ];
-    // ==============================================
-// 📥 CARGAR CONTENIDO ADMIN
+  // ==============================================
+// 📥 CARGAR CONTENIDO ADMIN (Firebase)
 // ==============================================
 async function cargarContenidoAdmin() {
     try {
@@ -565,18 +593,68 @@ async function cargarContenidoAdmin() {
 }
 
 // ==============================================
-// 🚀 CARGA COMPLETA (12 de cada categoría)
+// 🔥 ESCUCHAR CAMBIOS EN FIREBASE (TIEMPO REAL)
+// ==============================================
+function escucharFirebase() {
+    // Escuchar cambios en películas personalizadas
+    db.ref("contenido_personalizado").on("value", function(snapshot) {
+        const datos = snapshot.val();
+        if (datos) {
+            const peliculas = Object.values(datos);
+            peliculas.forEach(peli => {
+                // ✅ Opción 1
+                if (peli.url) {
+                    console.log(`🎬 ${peli.titulo} - Opción 1: ${peli.url}`);
+                }
+                // ✅ Opción 2
+                if (peli.opcion2) {
+                    console.log(`🎬 ${peli.titulo} - Opción 2: ${peli.opcion2}`);
+                }
+            });
+            // Recargar contenido si hay cambios
+            recargarContenido();
+        }
+    });
+
+    // Escuchar cambios en series personalizadas
+    db.ref("series_personalizadas").on("value", function(snapshot) {
+        const datos = snapshot.val();
+        if (datos) {
+            const series = Object.values(datos);
+            series.forEach(serie => {
+                if (serie.temporadas) {
+                    console.log(`📺 ${serie.titulo} - Temporadas: ${serie.temporadas.length}`);
+                }
+            });
+            recargarContenido();
+        }
+    });
+}
+
+// ==============================================
+// 🔄 RECARGAR CONTENIDO CUANDO FIREBASE CAMBIA
+// ==============================================
+function recargarContenido() {
+    console.log("🔄 Actualizando contenido desde Firebase...");
+    cargarContenidoCompleto();
+}
+
+// ==============================================
+// 🚀 CARGA COMPLETA CON SHIMMER (CARGA RÁPIDA)
 // ==============================================
 async function cargarContenidoCompleto() {
     if (cargandoInicial) return;
     cargandoInicial = true;
+    
+    // Mostrar shimmer mientras carga
+    mostrarShimmer();
     
     try {
         const admin = await cargarContenidoAdmin();
         const adminMap = {}; 
         admin.forEach(item => { adminMap[item.tmdb_id] = item; });
         
-        // Cargar 12 películas, 12 series, 12 animes
+        // Cargar datos de TMDB
         const [r1, r2, r3] = await Promise.all([
             fetch(`${TMDB_BASE}/movie/popular?language=es-ES&page=1`, opcionesTMDB),
             fetch(`${TMDB_BASE}/tv/popular?language=es-ES&page=1`, opcionesTMDB),
@@ -634,7 +712,7 @@ async function cargarContenidoCompleto() {
             }; 
         });
         
-        // 12 Animes (desde TMDB)
+        // 12 Animes desde TMDB
         const animeTMDB = (d3.results || []).slice(0, 12).map(s => {
             const a = adminMap[s.id];
             const capitulos = [];
@@ -665,7 +743,7 @@ async function cargarContenidoCompleto() {
             };
         });
         
-        // AGREGAR ANIMES PRECARGADOS (series y películas)
+        // ANIMES PRECARGADOS
         const animesSeries = ANIMES_SERIES.slice(0, 12).map(a => {
             const capitulos = [];
             for (let i = 1; i <= 10; i++) {
@@ -694,7 +772,6 @@ async function cargarContenidoCompleto() {
             };
         });
         
-        // ANIMES PELÍCULAS
         const animesPeliculas = ANIMES_PELICULAS.slice(0, 12).map(a => ({
             id: `anime_${a.tmdb_id}`,
             tmdb_id: a.tmdb_id,
@@ -723,7 +800,12 @@ async function cargarContenidoCompleto() {
             return true; 
         });
         
-        // ===== INICIAR CARRUSEL =====
+        // ✅ MOSTRAR CONTENIDO INMEDIATAMENTE (LAS IMÁGENES CARGAN SOLAS)
+        document.getElementById("contadorTotal").textContent = contenido.length;
+        mostrarContenido("estrenos");
+        mostrarRecientes();
+        
+        // ✅ INICIAR CARRUSEL CON LOS DATOS
         const peliculasPopulares = contenido.filter(item => 
             item.categoria === 'peliculas' && (item.url || item.temporadas?.length > 0)
         );
@@ -772,15 +854,28 @@ async function cargarContenidoCompleto() {
             temporadas: []
         }));
         contenido = [...animesSeries, ...animesPeliculas];
+        document.getElementById("contadorTotal").textContent = contenido.length;
+        mostrarContenido("estrenos");
+        mostrarRecientes();
         iniciarCarrusel('carruselTrack', contenido.slice(0, 15));
     }
-    
-    document.getElementById("contadorTotal").textContent = contenido.length;
-    mostrarContenido("estrenos");
-    mostrarRecientes();
     cargandoInicial = false;
 }
-    // ==============================================
+
+// ==============================================
+// 🎨 MOSTRAR SHIMMER MIENTRAS CARGA
+// ==============================================
+function mostrarShimmer() {
+    const lista = document.getElementById("lista-contenido");
+    lista.innerHTML = "";
+    for (let i = 0; i < 6; i++) {
+        const div = document.createElement("div");
+        div.className = "tarjeta";
+        div.innerHTML = `<div class="shimmer-card shimmer"></div>`;
+        lista.appendChild(div);
+    }
+}
+  // ==============================================
 // 🔄 CARRUSEL AUTOMÁTICO
 // ==============================================
 function iniciarCarrusel(trackId, items) {
@@ -863,7 +958,7 @@ function iniciarCarrusel(trackId, items) {
 }
 
 // ==============================================
-// 🖼️ MOSTRAR CONTENIDO
+// 🖼️ MOSTRAR CONTENIDO (CON IMÁGENES INMEDIATAS)
 // ==============================================
 function mostrarContenido(categoria) {
     const lista = document.getElementById("lista-contenido");
@@ -892,6 +987,7 @@ function mostrarContenido(categoria) {
                 <h3>${item.titulo}</h3>
                 ${tieneVideo ? '<span class="badge-video">▶</span>' : ''}
                 ${item.tipo === 'serie' ? (esAnime ? '<span class="badge-anime">🌸</span>' : '<span class="badge-serie">📺</span>') : ''}
+                ${item.opcion2 ? '<span class="badge-video" style="color:#F59E0B;">🔗2</span>' : ''}
             </div>
         `;
         tarjeta.onclick = () => { 
@@ -917,7 +1013,7 @@ function cambiarCategoria(cat) {
     modoBusqueda = false;
     mostrarContenido(cat);
 }
-    // ==============================================
+  // ==============================================
 // 🔍 BÚSQUEDA
 // ==============================================
 async function buscarContenido() {
@@ -1031,7 +1127,7 @@ function limpiarBusqueda() {
 }
 
 // ==============================================
-// 🔄 CARGAR MÁS (más películas, series y animes)
+// 🔄 CARGAR MÁS
 // ==============================================
 async function cargarMasContenido() {
     if (cargandoMas || modoBusqueda) return;
@@ -1041,7 +1137,6 @@ async function cargarMasContenido() {
     btn.disabled = true;
     try {
         paginaActual++;
-        // Cargar más películas, series y animes
         const [r1, r2, r3] = await Promise.all([
             fetch(`${TMDB_BASE}/movie/popular?language=es-ES&page=${paginaActual}`, opcionesTMDB),
             fetch(`${TMDB_BASE}/tv/popular?language=es-ES&page=${paginaActual}`, opcionesTMDB),
@@ -1108,7 +1203,8 @@ async function cargarMasContenido() {
     btn.innerHTML = `<i class="fa-solid fa-plus"></i> Cargar más (${contenido.length})`;
     btn.disabled = false;
     cargandoMas = false;
-}// ==============================================
+}
+  // ==============================================
 // 🎬 VIDEO Y CAPÍTULOS
 // ==============================================
 function abrirVideoPelicula(peli) {
@@ -1391,7 +1487,7 @@ function recargarVideo() {
 }
 
 function detenerVideo() { document.getElementById("netflixPlayer").innerHTML = ""; }
-    // ==============================================
+  // ==============================================
 // 📥 RECOMENDACIONES
 // ==============================================
 async function cargarRecomendadas(tmdbId) {
@@ -1475,7 +1571,7 @@ function mostrarRecientes() {
 }
 
 function limpiarHistorial() { localStorage.removeItem("historialTely"); mostrarHistorial(); mostrarRecientes(); }
-    // ==============================================
+  // ==============================================
 // 🔐 AUTENTICACIÓN
 // ==============================================
 function iniciarConGoogle() {
@@ -1556,10 +1652,17 @@ function cerrarSesion() {
         menuAbierto = false;
     });
 }
-    // ==============================================
+  // ==============================================
 // ⚡ INICIO RÁPIDO
 // ==============================================
+// 1. Primero cargar contenido
 cargarContenidoCompleto();
+
+// 2. Luego empezar a escuchar cambios en Firebase
+setTimeout(() => {
+    escucharFirebase();
+    console.log("🔥 Escuchando cambios en Firebase...");
+}, 2000);
 
 auth.onAuthStateChanged(user => {
     if (user) {
