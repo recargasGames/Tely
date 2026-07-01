@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TELY 🎬</title>
+    <!-- PRECARGA DE IMÁGENES Y DOMINIOS -->
+    <link rel="preconnect" href="https://image.tmdb.org">
+    <link rel="dns-prefetch" href="https://image.tmdb.org">
+    <link rel="preconnect" href="https://tely-xi.vercel.app">
+    <link rel="preload" as="image" href="https://i.postimg.cc/8k4h4K7y/placeholder.jpg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -42,16 +47,6 @@
         .sugerencia-item .info .detalle{font-size:.7rem;color:#94A3B8}
         .sugerencia-item .badge-tipo-sug{font-size:.6rem;padding:.1rem .4rem;border-radius:4px;background:rgba(124,58,237,.2);color:#A78BFA}
         .sugerencia-vacio{padding:.8rem;text-align:center;color:#64748B;font-size:.85rem}
-        
-        .menu-puntos{position:relative;display:inline-block}
-        .btn-puntos{background:rgba(255,255,255,.05);border:none;color:#94A3B8;cursor:pointer;padding:.2rem .5rem;border-radius:6px;font-size:1rem;transition:.2s}
-        .btn-puntos:hover{background:rgba(255,255,255,.1);color:#fff}
-        .dropdown-puntos{position:absolute;right:0;top:120%;background:rgba(26,26,46,.98);backdrop-filter:blur(20px);border-radius:12px;min-width:200px;max-height:300px;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.5);display:none;z-index:150;border:1px solid rgba(124,58,237,.15);padding:.3rem 0}
-        .dropdown-puntos.mostrar{display:block;animation:slideDown .2s ease}
-        .dropdown-puntos .item-punto{display:flex;align-items:center;gap:.5rem;padding:.4rem .8rem;cursor:pointer;font-size:.8rem;color:#CBD5E1;transition:.2s;border-bottom:1px solid rgba(124,58,237,.05)}
-        .dropdown-puntos .item-punto:hover{background:rgba(124,58,237,.1);color:#fff}
-        .dropdown-puntos .item-punto img{width:24px;height:36px;object-fit:cover;border-radius:3px}
-        .dropdown-puntos .item-punto .titulo-punto{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
         
         .contenido-scroll{padding-top:.5rem}
         .seccion-populares{padding:.6rem 1rem 1rem}
@@ -94,7 +89,10 @@
         .badge-video{font-size:.6rem;color:#34D399;font-weight:600;background:rgba(52,211,153,.12);padding:.1rem .5rem;border-radius:4px}
         .badge-serie{font-size:.55rem;color:#A78BFA;font-weight:600;background:rgba(124,58,237,.15);padding:.1rem .5rem;border-radius:4px}
         .badge-opcion2{font-size:.55rem;color:#F59E0B;font-weight:600;background:rgba(245,158,11,.15);padding:.1rem .5rem;border-radius:4px}
-        .contenedor-cargar-mas{display:none!important}
+        .contenedor-cargar-mas{display:flex;justify-content:center;padding:.8rem 1rem 1.2rem}
+        .btn-cargar-mas{background:rgba(124,58,237,.15);color:#fff;padding:.6rem 2rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;font-size:1rem;transition:.3s}
+        .btn-cargar-mas:hover{background:rgba(124,58,237,.25);border-color:#7C3AED}
+        .btn-cargar-mas:disabled{opacity:.5;cursor:not-allowed}
         .shimmer{background:linear-gradient(90deg,#1A1A2E 25%,#2D2D44 50%,#1A1A2E 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:10px}
         @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
         .shimmer-card{aspect-ratio:2/3;width:100%;border-radius:10px}
@@ -129,7 +127,9 @@
         .selector-temporada .btn-temp:hover{background:rgba(124,58,237,.2)}
         .selector-temporada .btn-temp:disabled{opacity:.3;cursor:not-allowed}
         .selector-temporada span{color:#fff;font-weight:700;font-size:.95rem}
-        .capitulos-horizontal{display:flex;gap:.4rem;overflow-x:auto;padding:.2rem 0;flex-wrap:wrap}
+        .capitulos-horizontal{display:flex;gap:.4rem;overflow-x:auto;padding:.2rem 0;scrollbar-width:thin;flex-wrap:nowrap}
+        .capitulos-horizontal::-webkit-scrollbar{height:4px}
+        .capitulos-horizontal::-webkit-scrollbar-thumb{background:#7C3AED;border-radius:4px}
         .capitulo-item-horizontal{flex:0 0 auto;min-width:80px;padding:.3rem .5rem;background:rgba(255,255,255,.04);border-radius:8px;cursor:pointer;border:1px solid transparent;text-align:center}
         .capitulo-item-horizontal:hover{background:rgba(255,255,255,.08)}
         .capitulo-item-horizontal.activo{background:rgba(124,58,237,.15);border-color:#7C3AED}
@@ -172,8 +172,7 @@
         @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
     </style>
 </head>
-<body>
-    <header>
+<body><header>
     <div class="flex justify-between items-center">
         <div class="logo-contenedor">
             <img src="logo.png" alt="Logo TELY" class="logo" loading="lazy" onerror="this.style.display='none'">
@@ -209,8 +208,7 @@
             <div id="sugerenciasLista"></div>
         </div>
     </div>
-</div>
-    <div class="contenido-scroll">
+</div><div class="contenido-scroll">
     <div class="seccion-populares" id="seccionPopulares">
         <div class="titulo-seccion"><i class="fa-solid fa-fire"></i> 🔥 Más vistas</div>
         <div class="carrusel-container">
@@ -243,11 +241,17 @@
         <div class="tarjeta"><div class="shimmer-card shimmer"></div></div>
     </div>
 
+    <!-- BOTÓN CARGAR 20 MÁS -->
+    <div class="contenedor-cargar-mas" id="contenedorCargarMas">
+        <button class="btn-cargar-mas" onclick="cargarMasContenido()" id="btnCargarMas">
+            <i class="fa-solid fa-plus"></i> Cargar 20 más
+        </button>
+    </div>
+
     <div id="observador-scroll" class="cargando-observador" style="display:none;">
-        <i class="fa-solid fa-spinner"></i> Cargando más...
+        <i class="fa-solid fa-spinner"></i> Cargando 20 más...
     </div>
-    </div>
-    <div id="modal-video" class="modal-video">
+</div><div id="modal-video" class="modal-video">
     <div class="reproductor-contenedor">
         <div class="info-arriba">
             <h2 id="tituloReproductor">Título</h2>
@@ -278,8 +282,7 @@
             <div class="lista-recomendadas" id="recomendadasLista"><p style="color:#64748B;font-size:.85rem;text-align:center;padding:.5rem;">Cargando...</p></div>
         </div>
     </div>
-</div>
-    <div id="modal-login" class="modal-login oculto" onclick="cerrarModalLoginSiClickFuera(event)">
+</div><div id="modal-login" class="modal-login oculto" onclick="cerrarModalLoginSiClickFuera(event)">
     <div class="contenedor-login" onclick="event.stopPropagation()">
         <h2>Iniciar Sesión</h2>
         <p style="text-align:center;color:#64748B;font-size:.95rem;margin-bottom:1rem;">Accede para ver todo el contenido</p>
@@ -300,8 +303,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-    <script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script><script>
 // ==============================================
 // 🔧 FIREBASE
 // ==============================================
@@ -324,12 +326,12 @@ let menuAbierto = false, cargandoMas = false, cargandoInicial = false, carruselI
 let categoriaActual = 'estrenos';
 let hayMasParaCargar = true;
 let totalMostrados = 0;
+let totalFiltrados = 0;
 const ITEMS_POR_PAGINA = 20;
 
 // ==============================================
 // 🔑 TMDB CON PROXY
 // ==============================================
-// ⚠️ CAMBIA ESTA URL POR LA DE TU PROXY
 const PROXY_URL = "https://tely-xi.vercel.app/api/tmdb";
 
 async function fetchTMDB(path, params = {}) {
@@ -344,7 +346,7 @@ async function fetchTMDB(path, params = {}) {
 }
 
 function getImagenUrl(path, size = 'w92') {
-    if (!path) return 'https://via.placeholder.com/92x138?text=?';
+    if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
     return `https://image.tmdb.org/t/p/${size}${path}`;
 }
 
@@ -362,8 +364,7 @@ function mostrarToast(mensaje, tipo = 'success') {
     t.textContent = mensaje;
     document.body.appendChild(t);
     setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(20px)'; setTimeout(() => t.remove(), 300); }, 3000);
-}
-    // ==============================================
+}// ==============================================
 // 📥 CARGAR CONTENIDO ADMIN
 // ==============================================
 async function cargarContenidoAdmin() {
@@ -392,6 +393,125 @@ function escucharFirebase() {
 }
 function recargarContenido() { cargarContenidoCompleto(); }
 
+// ==============================================
+// 🚀 CARGA INSTANTÁNEA - 20 PELÍCULAS + 20 SERIES
+// ==============================================
+async function cargarContenidoCompleto() {
+    if (cargandoInicial) return;
+    cargandoInicial = true;
+    
+    // ⭐ MOSTRAR SHIMMER MIENTRAS CARGA
+    mostrarShimmer();
+    
+    try {
+        const admin = await cargarContenidoAdmin();
+        const adminMap = {}; admin.forEach(i => { adminMap[i.tmdb_id] = i; });
+        
+        // ⭐ CARGAR 20 PELÍCULAS + 20 SERIES DE UNA VEZ
+        const [d1, d2] = await Promise.all([
+            fetchTMDB('movie/popular', { page: 1 }).catch(() => null),
+            fetchTMDB('tv/popular', { page: 1 }).catch(() => null)
+        ]);
+        
+        let pelis = [], series = [];
+        
+        if (d1 && d1.results) {
+            pelis = (d1.results || []).slice(0, 20).map(p => {
+                const a = adminMap[p.id];
+                return { 
+                    id: `tmdb_${p.id}`, tmdb_id: p.id, 
+                    titulo: a?.titulo || p.title || "Sin título",
+                    anio: p.release_date ? p.release_date.split("-")[0] : "N/D", 
+                    tipo: "pelicula", categoria: "peliculas", 
+                    portada: a?.portada || getImagenUrl(p.poster_path, 'w92'),
+                    sinopsis: a?.sinopsis || p.overview || "Sin sinopsis", 
+                    puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", 
+                    genero: "Película", url: a?.url || generarEnlaceUnlimplay(p.id, 'pelicula'), 
+                    opcion2: a?.opcion2 || '', adminId: a?.id || null 
+                };
+            });
+        }
+        
+        if (d2 && d2.results) {
+            series = (d2.results || []).slice(0, 20).map(s => {
+                const a = adminMap[s.id];
+                let temps = a?.temporadas || [];
+                if (!temps || !temps.length) {
+                    temps = [{ numero: 1, nombre: "Temporada 1", capitulos: [] }];
+                    for (let i = 1; i <= 10; i++) {
+                        temps[0].capitulos.push({
+                            numero: i, titulo: `Capítulo ${i}`,
+                            url: generarEnlaceUnlimplay(s.id, 'serie', 1, i),
+                            opcion2: a?.opcion2 || ''
+                        });
+                    }
+                }
+                return { 
+                    id: `tmdb_${s.id}`, tmdb_id: s.id, 
+                    titulo: a?.titulo || s.name || "Sin título",
+                    anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D", 
+                    tipo: "serie", categoria: "series", 
+                    portada: a?.portada || getImagenUrl(s.poster_path, 'w92'),
+                    sinopsis: a?.sinopsis || s.overview || "Sin sinopsis", 
+                    puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A", 
+                    genero: "Serie", temporadas: temps,
+                    opcion2: a?.opcion2 || '', adminId: a?.id || null 
+                };
+            });
+        }
+        
+        // ⭐ COMBINAR: PRIMERO ADMIN LUEGO TMDB
+        contenido = [...admin, ...pelis, ...series];
+        const seen = new Set();
+        contenido = contenido.filter(i => { 
+            const k = i.tmdb_id ? `${i.tipo}_${i.tmdb_id}` : i.id; 
+            if (seen.has(k)) return false; seen.add(k); return true; 
+        });
+        
+        // ⭐ SI NO HAY DATOS, USAR RESPALDO
+        if (contenido.length === 0) {
+            contenido = DATOS_RESPALDO.map(p => ({
+                ...p,
+                id: `backup_${p.tmdb_id}`,
+                portada: p.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg'
+            }));
+            mostrarToast('ℹ️ Usando datos de respaldo', 'warning');
+        }
+        
+        document.getElementById("contadorTotal").textContent = contenido.length;
+        mostrarContenido(categoriaActual || "estrenos");
+        mostrarRecientes();
+        iniciarCarrusel('carruselTrack', contenido.filter(i => i.categoria === 'peliculas' && (i.url || i.temporadas?.length > 0)).slice(0, 15));
+        console.log(`✅ Cargados ${contenido.length} elementos`);
+        
+        // Verificar si hay más para cargar
+        if (d1 && d1.total_pages > 1 || d2 && d2.total_pages > 1) {
+            hayMasParaCargar = true;
+            document.getElementById('contenedorCargarMas').style.display = 'flex';
+            document.getElementById('btnCargarMas').disabled = false;
+            document.getElementById('btnCargarMas').innerHTML = `<i class="fa-solid fa-plus"></i> Cargar 20 más`;
+        } else {
+            hayMasParaCargar = false;
+            document.getElementById('contenedorCargarMas').style.display = 'none';
+        }
+        
+    } catch (e) { 
+        console.error("Error cargando contenido:", e);
+        // Fallback a respaldo
+        contenido = DATOS_RESPALDO.map(p => ({
+            ...p,
+            id: `backup_${p.tmdb_id}`,
+            portada: p.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg'
+        }));
+        document.getElementById("contadorTotal").textContent = contenido.length;
+        mostrarContenido(categoriaActual || "estrenos");
+        mostrarRecientes();
+        iniciarCarrusel('carruselTrack', contenido.slice(0, 15));
+        mostrarToast('⚠️ Usando datos de respaldo', 'warning');
+    }
+    cargandoInicial = false;
+}
+
 function mostrarShimmer() {
     const l = document.getElementById("lista-contenido");
     l.innerHTML = "";
@@ -401,85 +521,7 @@ function mostrarShimmer() {
         d.innerHTML = `<div class="shimmer-card shimmer"></div>`; 
         l.appendChild(d); 
     }
-}
-
-// ==============================================
-// 🚀 CARGA COMPLETA CON PROXY
-// ==============================================
-async function cargarContenidoCompleto() {
-    if (cargandoInicial) return;
-    cargandoInicial = true;
-    mostrarShimmer();
-    try {
-        const admin = await cargarContenidoAdmin();
-        const adminMap = {}; admin.forEach(i => { adminMap[i.tmdb_id] = i; });
-        
-        const [d1, d2] = await Promise.all([
-            fetchTMDB('movie/popular', { page: 1 }),
-            fetchTMDB('tv/popular', { page: 1 })
-        ]);
-        
-        const pelis = (d1.results || []).slice(0, 20).map(p => {
-            const a = adminMap[p.id];
-            return { 
-                id: `tmdb_${p.id}`, tmdb_id: p.id, 
-                titulo: a?.titulo || p.title || "Sin título",
-                anio: p.release_date ? p.release_date.split("-")[0] : "N/D", 
-                tipo: "pelicula", categoria: "peliculas", 
-                portada: a?.portada || getImagenUrl(p.poster_path, 'w92'),
-                sinopsis: a?.sinopsis || p.overview || "Sin sinopsis", 
-                puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", 
-                genero: "Película", url: a?.url || generarEnlaceUnlimplay(p.id, 'pelicula'), 
-                opcion2: a?.opcion2 || '', adminId: a?.id || null 
-            };
-        });
-        
-        const series = (d2.results || []).slice(0, 20).map(s => {
-            const a = adminMap[s.id];
-            let temps = a?.temporadas || [];
-            if (!temps || !temps.length) {
-                temps = [{ numero: 1, nombre: "Temporada 1", capitulos: [] }];
-                for (let i = 1; i <= 10; i++) {
-                    temps[0].capitulos.push({
-                        numero: i, titulo: `Capítulo ${i}`,
-                        url: generarEnlaceUnlimplay(s.id, 'serie', 1, i),
-                        opcion2: a?.opcion2 || ''
-                    });
-                }
-            }
-            return { 
-                id: `tmdb_${s.id}`, tmdb_id: s.id, 
-                titulo: a?.titulo || s.name || "Sin título",
-                anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D", 
-                tipo: "serie", categoria: "series", 
-                portada: a?.portada || getImagenUrl(s.poster_path, 'w92'),
-                sinopsis: a?.sinopsis || s.overview || "Sin sinopsis", 
-                puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A", 
-                genero: "Serie", temporadas: temps,
-                opcion2: a?.opcion2 || '', adminId: a?.id || null 
-            };
-        });
-        
-        contenido = [...admin, ...pelis, ...series];
-        const seen = new Set();
-        contenido = contenido.filter(i => { 
-            const k = i.tmdb_id ? `${i.tipo}_${i.tmdb_id}` : i.id; 
-            if (seen.has(k)) return false; seen.add(k); return true; 
-        });
-        
-        document.getElementById("contadorTotal").textContent = contenido.length;
-        mostrarContenido(categoriaActual || "estrenos");
-        mostrarRecientes();
-        iniciarCarrusel('carruselTrack', contenido.filter(i => i.categoria === 'peliculas' && (i.url || i.temporadas?.length > 0)).slice(0, 15));
-        console.log(`✅ Cargados ${contenido.length} elementos (via proxy)`);
-    } catch (e) { 
-        console.error("Error cargando contenido:", e);
-        mostrarToast('❌ Error al cargar. Reintentando...', 'error');
-        setTimeout(cargarContenidoCompleto, 3000);
-    }
-    cargandoInicial = false;
-}
-    // ==============================================
+}// ==============================================
 // 🔄 CARRUSEL
 // ==============================================
 function iniciarCarrusel(trackId, items) {
@@ -494,7 +536,7 @@ function iniciarCarrusel(trackId, items) {
     items.forEach(i => {
         const d = document.createElement("div");
         d.className = "carrusel-item";
-        d.innerHTML = `<span class="badge-tipo">🎬</span><img src="${i.portada}" alt="${i.titulo}" class="portada-popular" loading="lazy" onerror="this.src='https://via.placeholder.com/140x210?text=?'"><div class="info-popular"><h4>${i.titulo}</h4></div>`;
+        d.innerHTML = `<span class="badge-tipo">🎬</span><img src="${i.portada}" alt="${i.titulo}" class="portada-popular" loading="eager" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg';this.onerror=null;"><div class="info-popular"><h4>${i.titulo}</h4></div>`;
         d.onclick = () => { auth.currentUser ? abrirVideoPelicula(i) : (videoPendiente = i, abrirModalLogin()); };
         track.appendChild(d);
     });
@@ -502,7 +544,7 @@ function iniciarCarrusel(trackId, items) {
     clones.forEach(i => {
         const d = document.createElement("div");
         d.className = "carrusel-item";
-        d.innerHTML = `<span class="badge-tipo">🎬</span><img src="${i.portada}" alt="${i.titulo}" class="portada-popular" loading="lazy" onerror="this.src='https://via.placeholder.com/140x210?text=?'"><div class="info-popular"><h4>${i.titulo}</h4></div>`;
+        d.innerHTML = `<span class="badge-tipo">🎬</span><img src="${i.portada}" alt="${i.titulo}" class="portada-popular" loading="eager" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg';this.onerror=null;"><div class="info-popular"><h4>${i.titulo}</h4></div>`;
         d.onclick = () => { auth.currentUser ? abrirVideoPelicula(i) : (videoPendiente = i, abrirModalLogin()); };
         track.appendChild(d);
     });
@@ -519,53 +561,7 @@ function iniciarCarrusel(trackId, items) {
 }
 
 // ==============================================
-// 📋 MENÚ DE TRES PUNTITOS
-// ==============================================
-function toggleMenuPuntos(element, listaItems) {
-    const dropdown = element.querySelector('.dropdown-puntos');
-    if (!dropdown) return;
-    document.querySelectorAll('.dropdown-puntos.mostrar').forEach(d => {
-        if (d !== dropdown) d.classList.remove('mostrar');
-    });
-    if (dropdown.classList.contains('mostrar')) {
-        dropdown.classList.remove('mostrar');
-        return;
-    }
-    dropdown.innerHTML = '';
-    listaItems.slice(0, 20).forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'item-punto';
-        div.innerHTML = `
-            <img src="${item.portada}" alt="${item.titulo}" loading="lazy" onerror="this.src='https://via.placeholder.com/24x36?text=?'">
-            <span class="titulo-punto">${item.titulo}</span>
-            <span style="font-size:.6rem;color:#64748B;">${item.anio || ''}</span>
-        `;
-        div.onclick = (e) => {
-            e.stopPropagation();
-            dropdown.classList.remove('mostrar');
-            if (auth.currentUser) abrirVideoPelicula(item);
-            else { videoPendiente = item; abrirModalLogin(); }
-        };
-        dropdown.appendChild(div);
-    });
-    if (listaItems.length > 20) {
-        const div = document.createElement('div');
-        div.className = 'item-punto';
-        div.style.color = '#64748B';
-        div.style.justifyContent = 'center';
-        div.textContent = `+ ${listaItems.length - 20} más...`;
-        div.onclick = (e) => {
-            e.stopPropagation();
-            dropdown.classList.remove('mostrar');
-            mostrarContenido(categoriaActual || 'estrenos');
-        };
-        dropdown.appendChild(div);
-    }
-    dropdown.classList.add('mostrar');
-}
-
-// ==============================================
-// 🖼️ MOSTRAR CONTENIDO
+// 🖼️ MOSTRAR CONTENIDO (20 INICIALES)
 // ==============================================
 function mostrarContenido(categoria) {
     categoriaActual = categoria;
@@ -581,12 +577,14 @@ function mostrarContenido(categoria) {
     else if (categoria === 'series') filtrados = contenido.filter(i => i.tipo === 'serie' || i.categoria === 'series');
     
     window._filtradosActuales = filtrados;
+    totalFiltrados = filtrados.length;
     const mostrar = filtrados.slice(0, ITEMS_POR_PAGINA);
     totalMostrados = mostrar.length;
     
     if (!mostrar.length) { 
         lista.innerHTML = `<div class="col-span-3 text-center py-6" style="color:#64748B;font-size:1rem;">No hay contenido en <strong style="color:#A78BFA;">${categoria}</strong></div>`; 
         document.getElementById("contadorTotal").textContent = filtrados.length;
+        document.getElementById('contenedorCargarMas').style.display = 'none';
         return; 
     }
     
@@ -597,24 +595,17 @@ function mostrarContenido(categoria) {
         t.innerHTML = `
             <span class="etiqueta-anio">${i.anio}</span>
             <i class="fa-solid fa-star estrella"></i>
-            <img src="${i.portada}" alt="${i.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/154x231?text=?'">
+            <img src="${i.portada}" alt="${i.titulo}" class="portada" loading="eager" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg';this.onerror=null;">
             <div class="info-tarjeta">
                 <h3>${i.titulo}</h3>
                 <div class="badges">
                     ${tiene ? ' <span class="badge-video">▶</span>' : ''}
                     ${i.tipo === 'serie' ? ' <span class="badge-serie">📺</span>' : ''}
                     ${i.opcion2 ? ' <span class="badge-opcion2">🔗2</span>' : ''}
-                    <div class="menu-puntos">
-                        <button class="btn-puntos" onclick="event.stopPropagation(); toggleMenuPuntos(this.parentElement, window._filtradosActuales || [])">
-                            <i class="fa-solid fa-ellipsis-vertical"></i>
-                        </button>
-                        <div class="dropdown-puntos"></div>
-                    </div>
                 </div>
             </div>
         `;
-        t.onclick = (e) => {
-            if (e.target.closest('.menu-puntos')) return;
+        t.onclick = () => {
             if (auth.currentUser) abrirVideoPelicula(i);
             else { videoPendiente = i; abrirModalLogin(); }
         };
@@ -622,13 +613,18 @@ function mostrarContenido(categoria) {
     });
     
     document.getElementById("contadorTotal").textContent = filtrados.length;
-    const obs = document.getElementById("observador-scroll");
-    if (filtrados.length <= ITEMS_POR_PAGINA) {
-        obs.style.display = 'none';
-        hayMasParaCargar = false;
-    } else {
-        obs.style.display = 'block';
+    
+    // Mostrar/ocultar botón cargar 20 más
+    const btnContainer = document.getElementById('contenedorCargarMas');
+    const btn = document.getElementById('btnCargarMas');
+    if (filtrados.length > ITEMS_POR_PAGINA) {
+        btnContainer.style.display = 'flex';
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-plus"></i> Cargar 20 más (${filtrados.length - totalMostrados} restantes)`;
         hayMasParaCargar = true;
+    } else {
+        btnContainer.style.display = 'none';
+        hayMasParaCargar = false;
     }
 }
 
@@ -648,14 +644,7 @@ function cambiarCategoria(cat) {
     document.getElementById("buscadorInput").value = '';
     ocultarSugerencias();
     mostrarContenido(cat);
-}
-
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.menu-puntos')) {
-        document.querySelectorAll('.dropdown-puntos.mostrar').forEach(d => d.classList.remove('mostrar'));
-    }
-});
-    // ==============================================
+}// ==============================================
 // 🔍 BÚSQUEDA CON SUGERENCIAS
 // ==============================================
 function mostrarSugerencias(texto) {
@@ -673,7 +662,7 @@ function mostrarSugerencias(texto) {
         div.className = "sugerencia-item";
         const tieneCaps = i.temporadas ? i.temporadas.reduce((sum, t) => sum + (t.capitulos ? t.capitulos.length : 0), 0) : 0;
         div.innerHTML = `
-            <img src="${i.portada}" alt="${i.titulo}" loading="lazy" onerror="this.src='https://via.placeholder.com/32x48?text=?'">
+            <img src="${i.portada}" alt="${i.titulo}" loading="eager" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg';this.onerror=null;">
             <div class="info">
                 <div class="titulo">${i.titulo}</div>
                 <div class="detalle">${i.anio || 'N/D'} • ${i.tipo === 'serie' ? '📺 Serie' : '🎬 Película'}${i.tipo === 'serie' && tieneCaps ? ` • ${tieneCaps} capítulos` : ''}</div>
@@ -705,26 +694,41 @@ async function buscarContenido() {
     ocultarSugerencias();
     try {
         const [d1, d2] = await Promise.all([
-            fetchTMDB('search/movie', { query: texto, page: 1 }),
-            fetchTMDB('search/tv', { query: texto, page: 1 })
+            fetchTMDB('search/movie', { query: texto, page: 1 }).catch(() => null),
+            fetchTMDB('search/tv', { query: texto, page: 1 }).catch(() => null)
         ]);
-        const pelis = (d1.results || []).slice(0, 10).map(p => ({ 
-            id: `tmdb_${p.id}`, tmdb_id: p.id, titulo: p.title || "Sin título", 
-            anio: p.release_date ? p.release_date.split("-")[0] : "N/D", tipo: "pelicula", categoria: "peliculas", 
-            portada: getImagenUrl(p.poster_path, 'w92'), sinopsis: p.overview || "Sin sinopsis", 
-            puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", genero: "Película", 
-            url: generarEnlaceUnlimplay(p.id, 'pelicula'), opcion2: '' 
-        }));
-        const series = (d2.results || []).slice(0, 10).map(s => ({ 
-            id: `tmdb_${s.id}`, tmdb_id: s.id, titulo: s.name || "Sin título", 
-            anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D", tipo: "serie", categoria: "series", 
-            portada: getImagenUrl(s.poster_path, 'w92'), sinopsis: s.overview || "Sin sinopsis", 
-            puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A", genero: "Serie", 
-            temporadas: [{ numero: 1, capitulos: Array.from({length: 10}, (_, i) => ({ 
-                numero: i+1, titulo: `Capítulo ${i+1}`, url: generarEnlaceUnlimplay(s.id, 'serie', 1, i+1), opcion2: '' 
-            })) }] 
-        }));
-        const resultados = [...pelis, ...series];
+        
+        let resultados = [];
+        if (d1 && d1.results) {
+            const pelis = (d1.results || []).slice(0, 10).map(p => ({ 
+                id: `tmdb_${p.id}`, tmdb_id: p.id, titulo: p.title || "Sin título", 
+                anio: p.release_date ? p.release_date.split("-")[0] : "N/D", tipo: "pelicula", categoria: "peliculas", 
+                portada: getImagenUrl(p.poster_path, 'w92'), sinopsis: p.overview || "Sin sinopsis", 
+                puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", genero: "Película", 
+                url: generarEnlaceUnlimplay(p.id, 'pelicula'), opcion2: '' 
+            }));
+            resultados = [...resultados, ...pelis];
+        }
+        if (d2 && d2.results) {
+            const series = (d2.results || []).slice(0, 10).map(s => ({ 
+                id: `tmdb_${s.id}`, tmdb_id: s.id, titulo: s.name || "Sin título", 
+                anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D", tipo: "serie", categoria: "series", 
+                portada: getImagenUrl(s.poster_path, 'w92'), sinopsis: s.overview || "Sin sinopsis", 
+                puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A", genero: "Serie", 
+                temporadas: [{ numero: 1, capitulos: Array.from({length: 10}, (_, i) => ({ 
+                    numero: i+1, titulo: `Capítulo ${i+1}`, url: generarEnlaceUnlimplay(s.id, 'serie', 1, i+1), opcion2: '' 
+                })) }] 
+            }));
+            resultados = [...resultados, ...series];
+        }
+        
+        if (resultados.length === 0) {
+            resultados = DATOS_RESPALDO
+                .filter(p => p.titulo.toLowerCase().includes(texto.toLowerCase()))
+                .slice(0, 10)
+                .map(p => ({ ...p, id: `backup_${p.tmdb_id}` }));
+        }
+        
         if (!resultados.length) { 
             lista.innerHTML = `<div class="col-span-3 text-center py-6"><p style="color:#64748B;font-size:1rem;">No se encontraron resultados para "<strong style="color:#fff;">${texto}</strong>"</p><button class="btn-cargar-mas mt-3" onclick="limpiarBusqueda()" style="padding:.4rem 1.2rem;font-size:.9rem;background:rgba(124,58,237,.15);color:#fff;border-radius:9999px;border:2px solid rgba(124,58,237,.2);cursor:pointer;"><i class="fa-solid fa-arrow-left"></i> Volver</button></div>`; 
             return; 
@@ -734,13 +738,29 @@ async function buscarContenido() {
         resultados.forEach(i => { 
             const t = document.createElement("div"); 
             t.className = "tarjeta"; 
-            t.innerHTML = `<span class="etiqueta-anio">${i.anio}</span><i class="fa-solid fa-star estrella"></i><img src="${i.portada}" alt="${i.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/154x231?text=?'"><div class="info-tarjeta"><h3>${i.titulo}</h3><div class="badges">${i.url || i.opcion2 || (i.temporadas && i.temporadas.length) ? ' <span class="badge-video">▶</span>' : ''}${i.tipo === 'serie' ? ' <span class="badge-serie">📺</span>' : ''}</div></div>`; 
+            t.innerHTML = `<span class="etiqueta-anio">${i.anio}</span><i class="fa-solid fa-star estrella"></i><img src="${i.portada}" alt="${i.titulo}" class="portada" loading="eager" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg';this.onerror=null;"><div class="info-tarjeta"><h3>${i.titulo}</h3><div class="badges">${i.url || i.opcion2 || (i.temporadas && i.temporadas.length) ? ' <span class="badge-video">▶</span>' : ''}${i.tipo === 'serie' ? ' <span class="badge-serie">📺</span>' : ''}</div></div>`; 
             t.onclick = () => { auth.currentUser ? abrirVideoPelicula(i) : (videoPendiente = i, abrirModalLogin()); }; 
             lista.appendChild(t); 
         });
     } catch (e) { 
         console.error(e);
-        lista.innerHTML = `<div class="col-span-3 text-center py-6" style="color:#EF4444;font-size:1rem;">❌ Error al buscar</div>`; 
+        const resultados = DATOS_RESPALDO
+            .filter(p => p.titulo.toLowerCase().includes(texto.toLowerCase()))
+            .slice(0, 10)
+            .map(p => ({ ...p, id: `backup_${p.tmdb_id}` }));
+        if (resultados.length > 0) {
+            document.getElementById("contadorTotal").textContent = resultados.length;
+            lista.innerHTML = "";
+            resultados.forEach(i => { 
+                const t = document.createElement("div"); 
+                t.className = "tarjeta"; 
+                t.innerHTML = `<span class="etiqueta-anio">${i.anio}</span><i class="fa-solid fa-star estrella"></i><img src="${i.portada}" alt="${i.titulo}" class="portada" loading="eager" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg';this.onerror=null;"><div class="info-tarjeta"><h3>${i.titulo}</h3><div class="badges">${i.url || i.opcion2 || (i.temporadas && i.temporadas.length) ? ' <span class="badge-video">▶</span>' : ''}${i.tipo === 'serie' ? ' <span class="badge-serie">📺</span>' : ''}</div></div>`; 
+                t.onclick = () => { auth.currentUser ? abrirVideoPelicula(i) : (videoPendiente = i, abrirModalLogin()); }; 
+                lista.appendChild(t); 
+            });
+        } else {
+            lista.innerHTML = `<div class="col-span-3 text-center py-6" style="color:#EF4444;font-size:1rem;">❌ Error al buscar</div>`; 
+        }
     }
 }
 
@@ -765,90 +785,91 @@ function iniciarScrollInfinito() {
     observer.observe(observador);
 }
 
+// ==============================================
+// 🔄 CARGAR 20 MÁS
+// ==============================================
 async function cargarMasContenido() {
     if (cargandoMas || modoBusqueda) return;
     cargandoMas = true;
+    const btn = document.getElementById('btnCargarMas');
     const obs = document.getElementById("observador-scroll");
-    obs.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cargando más...';
+    
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cargando 20...';
+    btn.disabled = true;
+    obs.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cargando 20 más...';
     obs.style.display = 'block';
+    
     try {
-        paginaActual++;
-        const [d1, d2] = await Promise.all([
-            fetchTMDB('movie/popular', { page: paginaActual }),
-            fetchTMDB('tv/popular', { page: paginaActual })
-        ]);
-        const pelis = (d1.results || []).slice(0, 10).map(p => ({ 
-            id: `tmdb_${p.id}`, tmdb_id: p.id, titulo: p.title || "Sin título", 
-            anio: p.release_date ? p.release_date.split("-")[0] : "N/D", tipo: "pelicula", categoria: "peliculas", 
-            portada: getImagenUrl(p.poster_path, 'w92'), sinopsis: p.overview || "Sin sinopsis", 
-            puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", genero: "Película", 
-            url: generarEnlaceUnlimplay(p.id, 'pelicula'), opcion2: '' 
-        }));
-        const series = (d2.results || []).slice(0, 10).map(s => ({ 
-            id: `tmdb_${s.id}`, tmdb_id: s.id, titulo: s.name || "Sin título", 
-            anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D", tipo: "serie", categoria: "series", 
-            portada: getImagenUrl(s.poster_path, 'w92'), sinopsis: s.overview || "Sin sinopsis", 
-            puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A", genero: "Serie", 
-            temporadas: [{ numero: 1, capitulos: Array.from({length: 10}, (_, i) => ({ 
-                numero: i+1, titulo: `Capítulo ${i+1}`, url: generarEnlaceUnlimplay(s.id, 'serie', 1, i+1), opcion2: '' 
-            })) }] 
-        }));
-        const ids = new Set(contenido.map(i => i.tmdb_id ? `${i.tipo}_${i.tmdb_id}` : i.id));
-        const filtradas = [...pelis, ...series].filter(i => { const k = `${i.tipo}_${i.tmdb_id}`; return !ids.has(k); });
-        if (!filtradas.length) {
+        // Usar los filtrados actuales
+        const filtrados = window._filtradosActuales || contenido;
+        const total = filtrados.length;
+        const actual = totalMostrados;
+        const siguientes = filtrados.slice(actual, actual + ITEMS_POR_PAGINA);
+        
+        if (!siguientes.length) {
             hayMasParaCargar = false;
+            btn.innerHTML = '✅ No hay más contenido';
+            btn.disabled = true;
             obs.innerHTML = '✅ No hay más contenido';
             obs.style.display = 'block';
             cargandoMas = false;
             return;
         }
-        contenido = [...contenido, ...filtradas];
-        document.getElementById("contadorTotal").textContent = contenido.length;
+        
+        // Agregar los nuevos elementos
         const lista = document.getElementById("lista-contenido");
-        filtradas.forEach(i => {
+        siguientes.forEach(i => {
             const tiene = i.url || i.opcion2 || (i.temporadas && i.temporadas.length > 0);
             const t = document.createElement("div");
             t.className = "tarjeta";
             t.innerHTML = `
                 <span class="etiqueta-anio">${i.anio}</span>
                 <i class="fa-solid fa-star estrella"></i>
-                <img src="${i.portada}" alt="${i.titulo}" class="portada" loading="lazy" onerror="this.src='https://via.placeholder.com/154x231?text=?'">
+                <img src="${i.portada}" alt="${i.titulo}" class="portada" loading="eager" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg';this.onerror=null;">
                 <div class="info-tarjeta">
                     <h3>${i.titulo}</h3>
                     <div class="badges">
                         ${tiene ? ' <span class="badge-video">▶</span>' : ''}
                         ${i.tipo === 'serie' ? ' <span class="badge-serie">📺</span>' : ''}
                         ${i.opcion2 ? ' <span class="badge-opcion2">🔗2</span>' : ''}
-                        <div class="menu-puntos">
-                            <button class="btn-puntos" onclick="event.stopPropagation(); toggleMenuPuntos(this.parentElement, window._filtradosActuales || [])">
-                                <i class="fa-solid fa-ellipsis-vertical"></i>
-                            </button>
-                            <div class="dropdown-puntos"></div>
-                        </div>
                     </div>
                 </div>
             `;
-            t.onclick = (e) => {
-                if (e.target.closest('.menu-puntos')) return;
+            t.onclick = () => {
                 if (auth.currentUser) abrirVideoPelicula(i);
                 else { videoPendiente = i; abrirModalLogin(); }
             };
             lista.appendChild(t);
         });
-        if (d1.total_pages <= paginaActual && d2.total_pages <= paginaActual) {
+        
+        totalMostrados += siguientes.length;
+        
+        // Actualizar botón
+        const restantes = total - totalMostrados;
+        if (restantes > 0) {
+            btn.innerHTML = `<i class="fa-solid fa-plus"></i> Cargar 20 más (${restantes} restantes)`;
+            btn.disabled = false;
+            obs.innerHTML = '<i class="fa-solid fa-spinner"></i> Cargando 20 más...';
+            obs.style.display = 'block';
+            hayMasParaCargar = true;
+        } else {
             hayMasParaCargar = false;
+            btn.innerHTML = '✅ No hay más contenido';
+            btn.disabled = true;
             obs.innerHTML = '✅ No hay más contenido';
             obs.style.display = 'block';
-        } else {
-            obs.innerHTML = '<i class="fa-solid fa-spinner"></i> Cargando más...';
-            obs.style.display = 'block';
         }
-    } catch (e) { console.error(e); obs.innerHTML = '❌ Error al cargar más'; obs.style.display = 'block'; }
+        
+    } catch (e) { 
+        console.error(e);
+        btn.innerHTML = '<i class="fa-solid fa-plus"></i> Cargar 20 más';
+        btn.disabled = false;
+        obs.innerHTML = '❌ Error al cargar más';
+        obs.style.display = 'block';
+    }
     cargandoMas = false;
-}
-
-// ==============================================
-// 🎬 VIDEO Y CAPÍTULOS (TODOS LOS CAPÍTULOS)
+}// ==============================================
+// 🎬 VIDEO Y CAPÍTULOS
 // ==============================================
 function abrirVideoPelicula(peli) {
     if (peli.tipo === 'serie' && (!peli.temporadas || !peli.temporadas.length) && peli.tmdb_id) {
@@ -1023,7 +1044,8 @@ function recargarVideo() {
 }
 
 function detenerVideo() { document.getElementById("netflixPlayer").innerHTML = ""; }
-    // ==============================================
+
+// ==============================================
 // 📥 RECOMENDACIONES
 // ==============================================
 async function cargarRecomendadas(tmdbId) {
@@ -1031,20 +1053,37 @@ async function cargarRecomendadas(tmdbId) {
     c.innerHTML = "<p style='color:#64748B;font-size:.85rem;text-align:center;padding:.5rem;'>Cargando...</p>";
     if (!tmdbId) { c.innerHTML = "<p style='color:#64748B;font-size:.85rem;text-align:center;padding:.5rem;'>Sin recomendaciones</p>"; return; }
     try {
-        const d = await fetchTMDB(`movie/${tmdbId}/recommendations`, { page: 1 });
+        const d = await fetchTMDB(`movie/${tmdbId}/recommendations`, { page: 1 }).catch(() => null);
         c.innerHTML = "";
-        if (!d.results || !d.results.length) { c.innerHTML = "<p style='color:#64748B;font-size:.85rem;text-align:center;padding:.5rem;'>No hay recomendaciones</p>"; return; }
+        if (!d || !d.results || !d.results.length) { 
+            const fallback = DATOS_RESPALDO.slice(0, 4);
+            fallback.forEach(p => {
+                const t = document.createElement("div");
+                t.className = "tarjeta-recomendada";
+                t.innerHTML = `<img src="${p.portada}" alt="${p.titulo}" class="portada-recomendada" loading="eager" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg';this.onerror=null;"><p class="texto-recomendada">${p.titulo}</p>`;
+                t.onclick = () => { cerrarVideo(); abrirVideoPelicula(p); };
+                c.appendChild(t);
+            });
+            return; 
+        }
         d.results.slice(0, 6).forEach(p => {
             const t = document.createElement("div");
             t.className = "tarjeta-recomendada";
-            t.innerHTML = `<img src="${p.poster_path ? 'https://image.tmdb.org/t/p/w92' + p.poster_path : 'https://via.placeholder.com/75x110?text=?'}" alt="${p.title}" class="portada-recomendada" loading="lazy"><p class="texto-recomendada">${p.title}</p>`;
+            t.innerHTML = `<img src="${p.poster_path ? 'https://image.tmdb.org/t/p/w92' + p.poster_path : 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg'}" alt="${p.title}" class="portada-recomendada" loading="eager" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg';this.onerror=null;"><p class="texto-recomendada">${p.title}</p>`;
             t.onclick = () => { cerrarVideo(); const comp = contenido.find(c => c.tmdb_id == p.id); if (comp) abrirVideoPelicula(comp); else abrirVideoPelicula({ id: `tmdb_${p.id}`, tmdb_id: p.id, titulo: p.title, anio: p.release_date ? p.release_date.split("-")[0] : "N/D", tipo: "pelicula", categoria: "peliculas", portada: getImagenUrl(p.poster_path, 'w92'), sinopsis: p.overview || "Sin sinopsis", puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", genero: "Película", url: generarEnlaceUnlimplay(p.id, 'pelicula'), opcion2: '', temporadas: [] }); };
             c.appendChild(t);
         });
-    } catch (e) { c.innerHTML = "<p style='color:#64748B;font-size:.85rem;text-align:center;padding:.5rem;'>Sin recomendaciones</p>"; }
-}
-
-// ==============================================
+    } catch (e) { 
+        const fallback = DATOS_RESPALDO.slice(0, 4);
+        fallback.forEach(p => {
+            const t = document.createElement("div");
+            t.className = "tarjeta-recomendada";
+            t.innerHTML = `<img src="${p.portada}" alt="${p.titulo}" class="portada-recomendada" loading="eager" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg';this.onerror=null;"><p class="texto-recomendada">${p.titulo}</p>`;
+            t.onclick = () => { cerrarVideo(); abrirVideoPelicula(p); };
+            c.appendChild(t);
+        });
+    }
+}// ==============================================
 // 📋 HISTORIAL
 // ==============================================
 function agregarAlHistorial(item) {
@@ -1072,7 +1111,7 @@ function mostrarRecientes() {
         if (!f) return;
         const t = document.createElement("div");
         t.className = "tarjeta-reciente";
-        t.innerHTML = `<img src="${f.portada}" alt="${f.titulo}" class="portada-reciente" loading="lazy" onerror="this.src='https://via.placeholder.com/85x130?text=?'"><div class="info-reciente"><h4>${f.titulo}</h4></div>`;
+        t.innerHTML = `<img src="${f.portada}" alt="${f.titulo}" class="portada-reciente" loading="eager" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg';this.onerror=null;"><div class="info-reciente"><h4>${f.titulo}</h4></div>`;
         t.onclick = (e) => { e.stopPropagation(); if (auth.currentUser) abrirVideoPelicula(f); else { videoPendiente = f; abrirModalLogin(); } };
         c.appendChild(t);
     });
@@ -1081,7 +1120,7 @@ function mostrarRecientes() {
 function limpiarHistorial() { localStorage.removeItem("historialTely"); mostrarHistorial(); mostrarRecientes(); }
 
 // ==============================================
-// 🔐 AUTENTICACIÓN
+// 🔐 AUTENTICACIÓN (CON SMS HABILITADO)
 // ==============================================
 function iniciarConGoogle() {
     const btn = document.getElementById('btnGoogleLogin');
@@ -1109,25 +1148,63 @@ function iniciarConGoogle() {
 }
 
 function iniciarRecaptcha() {
-    const c = document.getElementById('recaptcha-container');
-    if (c) c.innerHTML = '';
-    if (!recaptchaVerifier) { try { recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { size: 'invisible', callback: function() {} }); } catch(e) { console.error(e); } }
+    const container = document.getElementById('recaptcha-container');
+    if (!container) return;
+    container.innerHTML = '';
+    if (recaptchaVerifier) { try { recaptchaVerifier.clear(); } catch(e) {} recaptchaVerifier = null; }
+    try {
+        recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 
+            size: 'invisible',
+            callback: function() { console.log('✅ reCAPTCHA resuelto'); },
+            'expired-callback': function() { recaptchaVerifier = null; iniciarRecaptcha(); }
+        });
+    } catch(e) { setTimeout(iniciarRecaptcha, 1000); }
 }
 
 function enviarCodigo() {
-    iniciarRecaptcha();
     const t = document.getElementById("telefonoInput").value.trim();
     if (!t || !t.startsWith("+")) { mostrarToast('⚠️ Agrega código de país ej: +58 412 1234567', 'warning'); return; }
-    auth.signInWithPhoneNumber(t, recaptchaVerifier).then(r => { confirmationResult = r; document.getElementById("seccionCodigo").classList.remove("oculto"); mostrarToast('✅ Código enviado', 'success'); }).catch(e => { mostrarToast('❌ Error: ' + e.message, 'error'); });
+    
+    if (!recaptchaVerifier) { iniciarRecaptcha(); setTimeout(() => { if (recaptchaVerifier) enviarCodigo(); }, 1000); return; }
+    
+    auth.signInWithPhoneNumber(t, recaptchaVerifier)
+        .then(r => { 
+            confirmationResult = r; 
+            document.getElementById("seccionCodigo").classList.remove("oculto"); 
+            mostrarToast('✅ Código enviado. Revisa tu teléfono.', 'success'); 
+        })
+        .catch(e => { 
+            console.error('❌ Error SMS:', e);
+            if (e.code === 'auth/operation-not-allowed') {
+                mostrarToast('❌ El SMS no está habilitado. Ve a Firebase Console → Authentication → Sign-in methods y activa Teléfono.', 'error');
+            } else if (e.message.includes('reCAPTCHA')) { 
+                recaptchaVerifier = null; 
+                iniciarRecaptcha(); 
+                mostrarToast('⚠️ Error de reCAPTCHA. Intenta de nuevo.', 'error'); 
+            } else { 
+                mostrarToast('❌ Error: ' + e.message, 'error'); 
+            }
+        });
 }
 
 function verificarCodigo() {
     const c = document.getElementById("codigoInput").value.trim();
     if (!c || c.length < 6) { mostrarToast('⚠️ Ingresa el código de 6 dígitos', 'warning'); return; }
-    confirmationResult.confirm(c).then(r => { document.getElementById("nombrePerfil").textContent = r.user.phoneNumber || "✅ Sesión iniciada"; cerrarModalLogin(); if (videoPendiente) { abrirVideoPelicula(videoPendiente); agregarAlHistorial(videoPendiente); videoPendiente = null; } mostrarToast('✅ Sesión iniciada', 'success'); }).catch(e => { mostrarToast('❌ Código incorrecto', 'error'); });
+    confirmationResult.confirm(c)
+        .then(r => { 
+            document.getElementById("nombrePerfil").textContent = r.user.phoneNumber || "✅ Sesión iniciada"; 
+            cerrarModalLogin(); 
+            if (videoPendiente) { abrirVideoPelicula(videoPendiente); agregarAlHistorial(videoPendiente); videoPendiente = null; } 
+            mostrarToast('✅ Sesión iniciada', 'success'); 
+        })
+        .catch(e => { mostrarToast('❌ Código incorrecto o expirado', 'error'); });
 }
 
-function cerrarModalLogin() { document.getElementById("modal-login").classList.add("oculto"); videoPendiente = null; }
+function cerrarModalLogin() { 
+    document.getElementById("modal-login").classList.add("oculto"); 
+    videoPendiente = null; 
+    if (recaptchaVerifier) { try { recaptchaVerifier.clear(); } catch(e) {} recaptchaVerifier = null; }
+}
 function cerrarModalLoginSiClickFuera(e) { if (e.target === e.currentTarget) cerrarModalLogin(); }
 
 function toggleMenu() {
@@ -1136,7 +1213,11 @@ function toggleMenu() {
     if (menuAbierto) { m.classList.remove("mostrar"); menuAbierto = false; } else { m.classList.add("mostrar"); menuAbierto = true; mostrarHistorial(); }
 }
 
-function abrirModalLogin() { document.getElementById("modal-login").classList.remove("oculto"); if (menuAbierto) { document.getElementById("menuPerfil").classList.remove("mostrar"); menuAbierto = false; } }
+function abrirModalLogin() { 
+    document.getElementById("modal-login").classList.remove("oculto"); 
+    if (menuAbierto) { document.getElementById("menuPerfil").classList.remove("mostrar"); menuAbierto = false; }
+    setTimeout(iniciarRecaptcha, 500);
+}
 
 function cambiarModo() {
     const body = document.body, icono = document.getElementById("iconoModo");
@@ -1167,7 +1248,7 @@ window.addEventListener('popstate', function(e) {
 });
 
 history.pushState(null, '', window.location.href);
-console.log('✅ TELY cargado - Versión 6.0 - Con Proxy Vercel');
+console.log('✅ TELY cargado - Carga instantánea 20+20 - SMS habilitado');
 
 setTimeout(iniciarScrollInfinito, 3000);
 </script>
