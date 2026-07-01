@@ -1111,10 +1111,10 @@ function mostrarRecientes() {
 }
 
 function limpiarHistorial() { localStorage.removeItem("historialTely"); mostrarHistorial(); mostrarRecientes(); }// ==============================================
-// 🔐 AUTENTICACIÓN (CORREGIDO - WebView/Web to App)
+// 🔐 AUTENTICACIÓN (CORREGIDO - SIN REDIRECT)
 // ==============================================
 
-// ⭐ DATOS DE RESPALDO (por si falla Firebase o TMDB)
+// ⭐ DATOS DE RESPALDO
 const DATOS_RESPALDO = [
     { id: 'backup_1', tmdb_id: 1, titulo: 'Guardianes de la Galaxia Vol. 3', anio: '2023', tipo: 'pelicula', categoria: 'peliculas', portada: 'https://image.tmdb.org/t/p/w92/rc2yJPlGm7lJ17DbmF2cy0ys9D1.jpg', sinopsis: 'Los Guardianes deben proteger al universo', puntuacion: '8.0', genero: 'Acción', url: 'https://unlimplay.com/play/embed/movie/1', opcion2: '' },
     { id: 'backup_2', tmdb_id: 2, titulo: 'Barbie', anio: '2023', tipo: 'pelicula', categoria: 'peliculas', portada: 'https://image.tmdb.org/t/p/w92/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg', sinopsis: 'Barbie sale al mundo real', puntuacion: '7.5', genero: 'Comedia', url: 'https://unlimplay.com/play/embed/movie/2', opcion2: '' },
@@ -1128,7 +1128,18 @@ const DATOS_RESPALDO = [
     { id: 'backup_10', tmdb_id: 10, titulo: 'Elemental', anio: '2023', tipo: 'pelicula', categoria: 'peliculas', portada: 'https://image.tmdb.org/t/p/w92/4HpA8kUcPz1LnAqLzkVg9hJ1Lq.jpg', sinopsis: 'Una historia de amor entre fuego y agua', puntuacion: '7.3', genero: 'Animación', url: 'https://unlimplay.com/play/embed/movie/10', opcion2: '' }
 ];
 
-// ⭐ INICIAR SESIÓN CON GOOGLE
+// ⭐ DETECTAR SI ES WEBVIEW
+function esWebView() {
+    const ua = navigator.userAgent.toLowerCase();
+    return ua.includes('wv') || 
+           ua.includes('android') && !ua.includes('chrome') ||
+           window.navigator.standalone === true ||
+           document.referrer.includes('webtoapp');
+}
+
+console.log('📱 Es WebView:', esWebView());
+
+// ⭐ INICIAR SESIÓN CON GOOGLE (SIN REDIRECT - USANDO POPUP)
 function iniciarConGoogle() {
     const btn = document.getElementById('btnGoogleLogin');
     if (!btn) return;
@@ -1139,17 +1150,51 @@ function iniciarConGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ 'prompt': 'select_account' });
     
-    // ⭐ SI ES WEBVIEW, USAR REDIRECT
-    if (esWebView() || navigator.userAgent.includes('Android')) {
-        console.log('📱 WebView: Usando signInWithRedirect');
-        auth.signInWithRedirect(provider);
-        mostrarToast('🔄 Abriendo Google...', 'warning');
-        btn.innerHTML = original;
-        btn.disabled = false;
+    // ⭐ EN WEBVIEW, USAR POPUP CON UN TRUCO
+    // Abrimos en una nueva ventana para evitar problemas de almacenamiento
+    if (esWebView()) {
+        // Configurar para que use popup en lugar de redirect
+        auth.useDeviceLanguage();
+        
+        // Intentar con popup - en WebView a veces funciona si se abre en una nueva pestaña
+        auth.signInWithPopup(provider)
+            .then((r) => {
+                document.getElementById("nombrePerfil").textContent = r.user.displayName || r.user.email || "✅ Sesión iniciada";
+                cerrarModalLogin();
+                btn.innerHTML = original;
+                btn.disabled = false;
+                if (videoPendiente) { 
+                    const t = videoPendiente; 
+                    videoPendiente = null; 
+                    abrirVideoPelicula(t); 
+                    agregarAlHistorial(t); 
+                }
+                mostrarToast('✅ Sesión iniciada correctamente', 'success');
+            })
+            .catch((e) => {
+                btn.innerHTML = original;
+                btn.disabled = false;
+                console.error('❌ Error en popup:', e);
+                
+                // ⭐ SI EL POPUP FALLA, USAR REDIRECT PERO CON UN MENSAJE
+                if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
+                    mostrarToast('⚠️ Abre una ventana nueva con Google', 'warning');
+                    // Intentar abrir en una nueva pestaña
+                    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${firebaseConfig.apiKey}&redirect_uri=${encodeURIComponent(window.location.href)}&response_type=code&scope=email%20profile&access_type=online`;
+                    window.open(url, '_blank');
+                    return;
+                }
+                
+                if (e.code === 'auth/unauthorized-domain') {
+                    mostrarToast('❌ Agrega este dominio en Firebase Console', 'error');
+                } else {
+                    mostrarToast('❌ Error: ' + e.message, 'error');
+                }
+            });
         return;
     }
     
-    // ⭐ EN WEB NORMAL: POPUP
+    // ⭐ EN WEB NORMAL: POPUP NORMAL
     auth.signInWithPopup(provider)
         .then((r) => {
             document.getElementById("nombrePerfil").textContent = r.user.displayName || r.user.email || "✅ Sesión iniciada";
@@ -1169,17 +1214,11 @@ function iniciarConGoogle() {
             btn.disabled = false;
             
             if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
-                console.log('📱 Popup falló, usando redirect');
-                auth.signInWithRedirect(provider);
-                mostrarToast('🔄 Abriendo Google...', 'warning');
+                mostrarToast('⚠️ Permite popups o intenta de nuevo.', 'warning');
                 return;
             }
             
-            if (e.code === 'auth/popup-closed-by-user') {
-                mostrarToast('⚠️ Cerraste la ventana de Google. Intenta de nuevo.', 'warning');
-            } else if (e.code === 'auth/popup-blocked') {
-                mostrarToast('⛔ Permite popups para este sitio.', 'error');
-            } else if (e.code === 'auth/unauthorized-domain') {
+            if (e.code === 'auth/unauthorized-domain') {
                 mostrarToast('❌ Agrega este dominio en Firebase Console > Authentication > Authorized domains', 'error');
             } else {
                 mostrarToast('❌ Error: ' + e.message, 'error');
@@ -1187,39 +1226,9 @@ function iniciarConGoogle() {
         });
 }
 
-// ⭐ MANEJAR EL RESULTADO DEL REDIRECT (PARA WEBVIEW)
-auth.getRedirectResult()
-    .then((result) => {
-        if (result && result.user) {
-            console.log('✅ Usuario autenticado por redirect:', result.user.displayName);
-            document.getElementById("nombrePerfil").textContent = result.user.displayName || result.user.email || "✅ Sesión iniciada";
-            cerrarModalLogin();
-            if (videoPendiente) { 
-                const t = videoPendiente; 
-                videoPendiente = null; 
-                abrirVideoPelicula(t); 
-                agregarAlHistorial(t); 
-            }
-            mostrarToast('✅ Sesión iniciada correctamente', 'success');
-        }
-    })
-    .catch((error) => {
-        console.error('❌ Error en redirect:', error);
-        if (error.code === 'auth/unauthorized-domain') {
-            const host = window.location.hostname;
-            mostrarToast(`❌ Dominio "${host}" no autorizado. Agrégalo en Firebase Console.`, 'error');
-        } else if (error.code === 'auth/web-storage-unsupported') {
-            mostrarToast('❌ WebView no soporta almacenamiento. Habilita DOM Storage.', 'error');
-        } else if (error.code === 'auth/network-request-failed') {
-            mostrarToast('❌ Error de red. Verifica tu conexión a Internet.', 'error');
-        } else {
-            if (error.code !== 'auth/no-user' && error.code !== 'auth/no-user-return') {
-                console.log('⏳ No hay sesión activa:', error.code);
-            }
-        }
-    });
+// ⭐ ELIMINADO: auth.getRedirectResult() - No funciona en WebView con almacenamiento particionado
 
-// ⭐ INICIALIZAR reCAPTCHA (SOLO PARA SMS - no usado en WebView)
+// ⭐ INICIALIZAR reCAPTCHA (SOLO PARA SMS - no usado)
 function iniciarRecaptcha() {
     const container = document.getElementById('recaptcha-container');
     if (!container) return;
@@ -1238,13 +1247,12 @@ function iniciarRecaptcha() {
 }
 
 function enviarCodigo() {
-    // ⭐ EN WEBVIEW, EL SMS PUEDE NO FUNCIONAR
-    mostrarToast('⚠️ El inicio con SMS puede no funcionar en WebView. Usa Google.', 'warning');
+    mostrarToast('⚠️ El SMS no funciona en WebView. Usa Google.', 'warning');
     return;
 }
 
 function verificarCodigo() {
-    mostrarToast('⚠️ El inicio con SMS puede no funcionar en WebView. Usa Google.', 'warning');
+    mostrarToast('⚠️ El SMS no funciona en WebView. Usa Google.', 'warning');
     return;
 }
 
@@ -1339,7 +1347,7 @@ window.addEventListener('popstate', function(e) {
 });
 
 history.pushState(null, '', window.location.href);
-console.log('✅ TELY cargado - Compatible con WebView/Web to App');
+console.log('✅ TELY cargado - Compatible con WebView (sin redirect)');
 
 setTimeout(iniciarScrollInfinito, 3000);
 </script>
