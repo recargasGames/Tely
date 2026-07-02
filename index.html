@@ -87,7 +87,6 @@
         .info-tarjeta .badges{display:flex;gap:.2rem;align-items:center}
         .badge-video{font-size:.6rem;color:#34D399;font-weight:600;background:rgba(52,211,153,.12);padding:.1rem .5rem;border-radius:4px}
         .badge-serie{font-size:.55rem;color:#A78BFA;font-weight:600;background:rgba(124,58,237,.15);padding:.1rem .5rem;border-radius:4px}
-        .badge-opcion2{font-size:.55rem;color:#3B82F6;font-weight:600;background:rgba(59,130,246,.15);padding:.1rem .5rem;border-radius:4px}
         .badge-firebase{font-size:.55rem;color:#F59E0B;font-weight:600;background:rgba(245,158,11,.15);padding:.1rem .5rem;border-radius:4px}
         .contenedor-cargar-mas{display:flex;justify-content:center;padding:.8rem 1rem 1.2rem}
         .btn-cargar-mas{background:rgba(124,58,237,.15);color:#fff;padding:.6rem 2rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;font-size:1rem;transition:.3s}
@@ -109,8 +108,6 @@
         .btn-control:hover{background:rgba(255,255,255,.12)}
         .btn-cerrar-modal{background:rgba(239,68,68,.15);color:#EF4444}
         .btn-cerrar-modal:hover{background:rgba(239,68,68,.3)}
-        .btn-fullscreen{background:rgba(255,255,255,.06);border:none;color:#fff;padding:.4rem .9rem;border-radius:8px;cursor:pointer;font-size:.85rem;transition:.3s}
-        .btn-fullscreen:hover{background:rgba(255,255,255,.12)}
         .info-arriba{margin-bottom:.4rem}
         .info-arriba h2{font-size:1.4rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#fff,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
         .info-arriba .detalles-arriba{display:flex;gap:.6rem;align-items:center;font-size:.85rem;color:#94A3B8;flex-wrap:wrap}
@@ -129,17 +126,21 @@
         .selector-temporada .btn-temp:hover{background:rgba(124,58,237,.2)}
         .selector-temporada .btn-temp:disabled{opacity:.3;cursor:not-allowed}
         .selector-temporada span{color:#fff;font-weight:700;font-size:.95rem}
-        .capitulos-horizontal{display:flex;gap:.4rem;overflow-x:auto;padding:.2rem 0;scrollbar-width:thin;flex-wrap:nowrap}
-        .capitulos-horizontal::-webkit-scrollbar{height:4px}
-        .capitulos-horizontal::-webkit-scrollbar-thumb{background:#7C3AED;border-radius:4px}
-        .capitulo-item-horizontal{flex:0 0 auto;min-width:80px;padding:.3rem .5rem;background:rgba(255,255,255,.04);border-radius:8px;cursor:pointer;border:1px solid transparent;text-align:center}
-        .capitulo-item-horizontal:hover{background:rgba(255,255,255,.08)}
-        .capitulo-item-horizontal.activo{background:rgba(124,58,237,.15);border-color:#7C3AED}
-        .capitulo-item-horizontal.sin-enlace{opacity:.5;cursor:not-allowed}
-        .cap-numero-h{font-size:.6rem;color:#64748B;display:block}
-        .cap-titulo-h{font-size:.65rem;color:#E2E8F0;display:block;font-weight:500}
-        .cap-play-h{font-size:.6rem;color:#34D399;display:block}
-        .cap-sin-enlace-h{font-size:.6rem;color:#EF4444;display:block}
+        /* Estilos para capítulos en lista vertical */
+        .capitulos-lista{display:flex;flex-direction:column;gap:.3rem;padding:.2rem 0;max-height:300px;overflow-y:auto}
+        .capitulos-lista::-webkit-scrollbar{width:4px}
+        .capitulos-lista::-webkit-scrollbar-thumb{background:#7C3AED;border-radius:4px}
+        .capitulo-item-lista{display:flex;flex-direction:column;padding:.4rem .6rem;background:rgba(255,255,255,.04);border-radius:8px;cursor:pointer;border:1px solid transparent;transition:.2s}
+        .capitulo-item-lista:hover{background:rgba(255,255,255,.08)}
+        .capitulo-item-lista.activo{background:rgba(124,58,237,.15);border-color:#7C3AED}
+        .capitulo-item-lista.sin-enlace{opacity:.5;cursor:not-allowed}
+        .cap-item-lista-top{display:flex;align-items:center;gap:.5rem}
+        .cap-numero-lista{font-size:.7rem;color:#A78BFA;font-weight:700;min-width:30px}
+        .cap-titulo-lista{font-size:.75rem;color:#E2E8F0;font-weight:500;flex:1}
+        .cap-play-lista{font-size:.6rem;color:#34D399;font-weight:600}
+        .cap-play-lista.opcion2{color:#3B82F6}
+        .cap-sin-enlace-lista{font-size:.6rem;color:#EF4444}
+        .cap-sinopsis-lista{font-size:.65rem;color:#64748B;margin-top:.1rem;padding-left:2rem;line-height:1.3}
         .seccion-recomendadas{border-top:1px solid rgba(124,58,237,.1);padding-top:.6rem;margin-top:.6rem}
         .titulo-recomendadas{font-size:.95rem;font-weight:700;color:#fff;margin-bottom:.5rem}
         .lista-recomendadas{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.3rem}
@@ -182,8 +183,8 @@
             .modal-video.abierto .controles-superior .btn-control { font-size: 0.7rem; padding: 0.2rem 0.6rem; }
         }
     </style>
-</head>
-<body><header>
+</head><body>
+<header>
     <div class="flex justify-between items-center">
         <div class="logo-contenedor">
             <img src="logo.png" alt="Logo TELY" class="logo" loading="lazy" onerror="this.style.display='none'">
@@ -278,9 +279,6 @@
         <div class="controles-superior">
             <button class="btn-control btn-cerrar-modal" onclick="cerrarVideo()"><i class="fa-solid fa-xmark"></i> Cerrar</button>
             <button class="btn-control" onclick="recargarVideo()" style="color:#34D399;"><i class="fa-solid fa-rotate"></i> Recargar</button>
-            <button class="btn-control btn-fullscreen" onclick="toggleFullscreen()" style="color:#F59E0B;">
-                <i class="fa-solid fa-expand"></i> Pantalla completa
-            </button>
         </div>
         <div class="botones-opciones" id="botonesOpciones"></div>
         <div id="capitulosContainer" class="capitulos-container oculto">
@@ -289,7 +287,7 @@
                 <span id="tempActual">Temporada 1</span>
                 <button class="btn-temp" id="tempSiguiente" onclick="cambiarTemporadaHandler(1)"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
-            <div class="capitulos-horizontal" id="capitulosHorizontal"></div>
+            <div class="capitulos-lista" id="capitulosLista"></div>
         </div>
         <div class="seccion-recomendadas">
             <h4 class="titulo-recomendadas">Te podría gustar</h4>
@@ -340,6 +338,7 @@ let menuAbierto = false, cargandoMas = false, cargandoInicial = false, carruselI
 let categoriaActual = 'estrenos';
 let hayMasParaCargar = true;
 let totalMostrados = 0;
+let opcionActivaActual = 1; // 1 = Opción 1, 2 = Opción 2
 const ITEMS_POR_PAGINA = 20;
 
 // ==============================================
@@ -363,7 +362,6 @@ function getImagenUrl(path, size = 'w92') {
     return `https://image.tmdb.org/t/p/${size}${path}`;
 }
 
-// ⭐ FUNCIÓN PARA GENERAR ENLACES DE MÚLTIPLES PLATAFORMAS
 function generarEnlaceMultiplataforma(tmdb_id, tipo, plataforma, temporada = 1, capitulo = 1) {
     const plataformas = {
         'unlimplay': {
@@ -392,17 +390,6 @@ function generarEnlaceMultiplataforma(tmdb_id, tipo, plataforma, temporada = 1, 
     else return plat.serie(tmdb_id, temporada, capitulo);
 }
 
-function getNombrePlataforma(key) {
-    const nombres = {
-        'unlimplay': 'Unlimplay',
-        'vidsrc': 'Vidsrc',
-        'vidmoly': 'Vidmoly',
-        'embed': 'Embed.su',
-        '2embed': '2Embed'
-    };
-    return nombres[key] || key;
-}
-
 function mostrarToast(mensaje, tipo = 'success') {
     const a = document.querySelector('.toast-tely');
     if (a) a.remove();
@@ -413,19 +400,6 @@ function mostrarToast(mensaje, tipo = 'success') {
     t.textContent = mensaje;
     document.body.appendChild(t);
     setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(20px)'; setTimeout(() => t.remove(), 300); }, 3000);
-}
-
-// ⭐ TOGGLE FULLSCREEN
-function toggleFullscreen() {
-    const modal = document.getElementById('modal-video');
-    if (!document.fullscreenElement) {
-        modal.requestFullscreen().catch(err => {
-            const player = document.getElementById('netflixPlayer');
-            if (player) player.requestFullscreen().catch(e => {});
-        });
-    } else {
-        document.exitFullscreen();
-    }
 }// ==============================================
 // 📥 CARGAR CONTENIDO ADMIN (Firebase primero)
 // ==============================================
@@ -441,7 +415,7 @@ async function cargarContenidoAdmin() {
         const sf = series.map(s => {
             const temps = s.temporadas ? s.temporadas.map(t => ({
                 ...t,
-                capitulos: t.capitulos ? t.capitulos.map(c => ({ ...c, opcion2: c.opcion2 || s.opcion2 || '', plataforma2: c.plataforma2 || s.plataforma2 || 'vidsrc' })) : []
+                capitulos: t.capitulos ? t.capitulos.map(c => ({ ...c, opcion2: c.opcion2 || s.opcion2 || '', plataforma2: c.plataforma2 || s.plataforma2 || 'vidsrc', sinopsis: c.sinopsis || '' })) : []
             })) : [];
             return { ...s, tipo: 'serie', opcion2: s.opcion2 || '', plataforma2: s.plataforma2 || 'vidsrc', temporadas: temps };
         });
@@ -536,6 +510,7 @@ async function cargarContenidoCompleto() {
                     for (let i = 1; i <= 10; i++) {
                         temps[0].capitulos.push({
                             numero: i, titulo: `Capítulo ${i}`,
+                            sinopsis: `Sinopsis del capítulo ${i}`,
                             url: generarEnlaceMultiplataforma(s.id, 'serie', 'unlimplay', 1, i),
                             opcion2: a?.opcion2 || generarEnlaceMultiplataforma(s.id, 'serie', 'vidsrc', 1, i),
                             plataforma2: a?.plataforma2 || 'vidsrc'
@@ -605,11 +580,6 @@ async function cargarContenidoCompleto() {
             document.getElementById('contenedorCargarMas').style.display = 'none';
         }
         
-        const conOp2 = contenido.filter(i => i.opcion2 && i.opcion2.trim() !== '').length;
-        if (conOp2 > 0) {
-            console.log(`🎯 ${conOp2} elementos tienen Opción 2`);
-        }
-        
     } catch (e) { 
         console.error("Error cargando contenido:", e);
         contenido = DATOS_RESPALDO.map(p => ({
@@ -666,7 +636,7 @@ function iniciarCarrusel(trackId, items) {
 }
 
 // ==============================================
-// 🖼️ MOSTRAR CONTENIDO (CON OPCIÓN 2)
+// 🖼️ MOSTRAR CONTENIDO
 // ==============================================
 function mostrarContenido(categoria) {
     categoriaActual = categoria;
@@ -693,10 +663,6 @@ function mostrarContenido(categoria) {
     }
     
     mostrar.forEach(i => {
-        const tiene = i.url || i.opcion2 || (i.temporadas && i.temporadas.length > 0);
-        const tieneOp2 = i.opcion2 && i.opcion2.trim() !== '';
-        const platName2 = i.plataforma2 || 'vidsrc';
-        
         const t = document.createElement("div");
         t.className = "tarjeta";
         t.innerHTML = `
@@ -706,9 +672,7 @@ function mostrarContenido(categoria) {
             <div class="info-tarjeta">
                 <h3>${i.titulo}</h3>
                 <div class="badges">
-                    ${i.url ? ' <span class="badge-video">▶ Op1</span>' : ''}
-                    ${tieneOp2 ? ` <span class="badge-opcion2">🔗 Op2 (${platName2})</span>` : ''}
-                    ${i.tipo === 'serie' ? ' <span class="badge-serie">📺</span>' : ''}
+                    ${i.tipo === 'serie' ? ' <span class="badge-serie">📺 Serie</span>' : ' <span class="badge-video">🎬 Película</span>'}
                     ${i.adminId ? ' <span class="badge-firebase">☁️</span>' : ''}
                 </div>
             </div>
@@ -824,7 +788,8 @@ async function buscarContenido() {
                 portada: getImagenUrl(s.poster_path, 'w92'), sinopsis: s.overview || "Sin sinopsis", 
                 puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A", genero: "Serie", 
                 temporadas: [{ numero: 1, capitulos: Array.from({length: 10}, (_, i) => ({ 
-                    numero: i+1, titulo: `Capítulo ${i+1}`, 
+                    numero: i+1, titulo: `Capítulo ${i+1}`,
+                    sinopsis: `Sinopsis del capítulo ${i+1}`,
                     url: generarEnlaceMultiplataforma(s.id, 'serie', 'unlimplay', 1, i+1),
                     opcion2: generarEnlaceMultiplataforma(s.id, 'serie', 'vidsrc', 1, i+1),
                     plataforma2: 'vidsrc'
@@ -847,7 +812,7 @@ async function buscarContenido() {
         resultados.forEach(i => { 
             const t = document.createElement("div"); 
             t.className = "tarjeta"; 
-            t.innerHTML = `<span class="etiqueta-anio">${i.anio}</span><i class="fa-solid fa-star estrella"></i><img src="${i.portada}" alt="${i.titulo}" class="portada" loading="eager" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg';this.onerror=null;"><div class="info-tarjeta"><h3>${i.titulo}</h3><div class="badges">${i.url ? ' <span class="badge-video">▶ Op1</span>' : ''}${i.opcion2 ? ` <span class="badge-opcion2">🔗 Op2</span>` : ''}${i.tipo === 'serie' ? ' <span class="badge-serie">📺</span>' : ''}</div></div>`; 
+            t.innerHTML = `<span class="etiqueta-anio">${i.anio}</span><i class="fa-solid fa-star estrella"></i><img src="${i.portada}" alt="${i.titulo}" class="portada" loading="eager" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg';this.onerror=null;"><div class="info-tarjeta"><h3>${i.titulo}</h3><div class="badges">${i.tipo === 'serie' ? ' <span class="badge-serie">📺 Serie</span>' : ' <span class="badge-video">🎬 Película</span>'}</div></div>`; 
             t.onclick = () => { auth.currentUser ? abrirVideoPelicula(i) : (videoPendiente = i, abrirModalLogin()); }; 
             lista.appendChild(t); 
         });
@@ -863,7 +828,7 @@ async function buscarContenido() {
             resultados.forEach(i => { 
                 const t = document.createElement("div"); 
                 t.className = "tarjeta"; 
-                t.innerHTML = `<span class="etiqueta-anio">${i.anio}</span><i class="fa-solid fa-star estrella"></i><img src="${i.portada}" alt="${i.titulo}" class="portada" loading="eager" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg';this.onerror=null;"><div class="info-tarjeta"><h3>${i.titulo}</h3><div class="badges">${i.url ? ' <span class="badge-video">▶ Op1</span>' : ''}${i.opcion2 ? ` <span class="badge-opcion2">🔗 Op2</span>` : ''}${i.tipo === 'serie' ? ' <span class="badge-serie">📺</span>' : ''}</div></div>`; 
+                t.innerHTML = `<span class="etiqueta-anio">${i.anio}</span><i class="fa-solid fa-star estrella"></i><img src="${i.portada}" alt="${i.titulo}" class="portada" loading="eager" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg';this.onerror=null;"><div class="info-tarjeta"><h3>${i.titulo}</h3><div class="badges">${i.tipo === 'serie' ? ' <span class="badge-serie">📺 Serie</span>' : ' <span class="badge-video">🎬 Película</span>'}</div></div>`; 
                 t.onclick = () => { auth.currentUser ? abrirVideoPelicula(i) : (videoPendiente = i, abrirModalLogin()); }; 
                 lista.appendChild(t); 
             });
@@ -919,9 +884,6 @@ async function cargarMasContenido() {
         }
         const lista = document.getElementById("lista-contenido");
         siguientes.forEach(i => {
-            const tiene = i.url || i.opcion2 || (i.temporadas && i.temporadas.length > 0);
-            const tieneOp2 = i.opcion2 && i.opcion2.trim() !== '';
-            const platName2 = i.plataforma2 || 'vidsrc';
             const t = document.createElement("div");
             t.className = "tarjeta";
             t.innerHTML = `
@@ -931,9 +893,7 @@ async function cargarMasContenido() {
                 <div class="info-tarjeta">
                     <h3>${i.titulo}</h3>
                     <div class="badges">
-                        ${i.url ? ' <span class="badge-video">▶ Op1</span>' : ''}
-                        ${tieneOp2 ? ` <span class="badge-opcion2">🔗 Op2 (${platName2})</span>` : ''}
-                        ${i.tipo === 'serie' ? ' <span class="badge-serie">📺</span>' : ''}
+                        ${i.tipo === 'serie' ? ' <span class="badge-serie">📺 Serie</span>' : ' <span class="badge-video">🎬 Película</span>'}
                         ${i.adminId ? ' <span class="badge-firebase">☁️</span>' : ''}
                     </div>
                 </div>
@@ -973,6 +933,7 @@ async function cargarMasContenido() {
 // 🎬 VIDEO Y CAPÍTULOS
 // ==============================================
 function abrirVideoPelicula(peli) {
+    opcionActivaActual = 1;
     if (peli.tipo === 'serie' && (!peli.temporadas || !peli.temporadas.length) && peli.tmdb_id) {
         const adminItem = contenido.find(c => c.tmdb_id == peli.tmdb_id && c.tipo === 'serie');
         if (adminItem && adminItem.temporadas && adminItem.temporadas.length) {
@@ -982,6 +943,7 @@ function abrirVideoPelicula(peli) {
             for (let i = 1; i <= 10; i++) {
                 caps.push({ 
                     numero: i, titulo: `Capítulo ${i}`,
+                    sinopsis: `Sinopsis del capítulo ${i}`,
                     url: generarEnlaceMultiplataforma(peli.tmdb_id, 'serie', 'unlimplay', 1, i),
                     opcion2: generarEnlaceMultiplataforma(peli.tmdb_id, 'serie', 'vidsrc', 1, i),
                     plataforma2: 'vidsrc'
@@ -1000,9 +962,7 @@ function abrirVideoPelicula(peli) {
         peli.plataforma2 = 'vidsrc';
     }
     abrirReproductor(peli);
-}
-
-function abrirReproductor(peli) {
+}function abrirReproductor(peli) {
     detenerVideo();
     const modal = document.getElementById("modal-video"), player = document.getElementById("netflixPlayer"), botones = document.getElementById("botonesOpciones"), container = document.getElementById("capitulosContainer");
     peliculaActual = peli;
@@ -1017,31 +977,106 @@ function abrirReproductor(peli) {
     document.getElementById("tipoPanel").style.color = peli.tipo === 'serie' ? '#10B981' : '#A78BFA';
     botones.innerHTML = "";
     container.classList.add("oculto");
-    document.getElementById("capitulosHorizontal").innerHTML = "";
+    document.getElementById("capitulosLista").innerHTML = "";
     tempActualIndex = 0;
     temporadasActuales = [];
+    opcionActivaActual = 1;
     
-    if (peli.tipo === 'serie' && peli.temporadas && peli.temporadas.length) {
-        container.classList.remove("oculto");
-        temporadasActuales = peli.temporadas;
-        mostrarTemporada(0);
-        const pc = obtenerPrimerCapitulo(0);
+    // --- PELÍCULAS ---
+    if (peli.tipo !== 'serie') {
+        const t1 = peli.url && peli.url.trim();
+        const t2 = peli.opcion2 && peli.opcion2.trim();
+        
         const b1 = document.createElement("button");
         b1.className = "btn-opcion activo";
-        b1.innerHTML = `<i class="fa-solid fa-play mr-1"></i> Opción 1 (Unlimplay)`;
+        b1.innerHTML = `<i class="fa-solid fa-play mr-1"></i> Opción 1`;
         b1.onclick = function() { 
             document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo")); 
             this.classList.add("activo"); 
-            if (pc?.url) reproducirOpcion(pc.url); 
+            opcionActivaActual = 1;
+            if (t1) reproducirOpcion(peli.url); 
         };
-        botones.appendChild(b1);
+        if (t1) { 
+            botones.appendChild(b1); 
+        } else { 
+            b1.className = "btn-opcion sin-enlace"; 
+            b1.innerHTML = `<i class="fa-solid fa-link-slash mr-1"></i> Opción 1 (Sin enlace)`;
+            b1.onclick = function() { alert("❌ No hay enlace disponible"); };
+            botones.appendChild(b1); 
+        }
+        
         const b2 = document.createElement("button");
         b2.className = "btn-opcion";
-        const platName = pc?.plataforma2 || peli.plataforma2 || 'vidsrc';
-        b2.innerHTML = `<i class="fa-solid fa-play mr-1"></i> Opción 2 (${getNombrePlataforma(platName)})`;
+        b2.innerHTML = `<i class="fa-solid fa-play mr-1"></i> Opción 2`;
         b2.onclick = function() { 
             document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo")); 
             this.classList.add("activo"); 
+            opcionActivaActual = 2;
+            if (t2) reproducirOpcion(peli.opcion2); 
+        };
+        if (t2) { 
+            botones.appendChild(b2); 
+        } else { 
+            b2.className = "btn-opcion sin-enlace"; 
+            b2.innerHTML = `<i class="fa-solid fa-link-slash mr-1"></i> Opción 2 (Sin enlace)`;
+            b2.onclick = function() { alert("❌ No hay enlace alternativo disponible"); };
+            botones.appendChild(b2); 
+        }
+        
+        // Nueva ventana - usa la opción activa
+        const b3 = document.createElement("button");
+        b3.className = "btn-opcion btn-nueva-ventana";
+        b3.innerHTML = `<i class="fa-solid fa-external-link-alt mr-1"></i> Abrir en nueva ventana`;
+        b3.onclick = function() { 
+            const u = opcionActivaActual === 1 ? peli.url : peli.opcion2;
+            if (u) { 
+                window.open(u, '_blank'); 
+            } else { 
+                alert("❌ No hay enlace disponible para esta opción"); 
+            }
+        };
+        if (t1 || t2) botones.appendChild(b3);
+        
+        if (t1) {
+            reproducirOpcion(peli.url);
+        } else if (t2) {
+            reproducirOpcion(peli.opcion2);
+            document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo"));
+            if (b2) b2.classList.add("activo");
+            opcionActivaActual = 2;
+        } else {
+            player.innerHTML = `<div style="color:#EF4444;text-align:center;padding:3rem;font-size:1rem;"><i class="fa-solid fa-link" style="font-size:2.5rem;display:block;margin-bottom:.5rem;"></i>No hay enlaces disponibles</div>`;
+        }
+        agregarAlHistorial(peli);
+        cargarRecomendadas(peli.tmdb_id);
+        return;
+    }
+    
+    // --- SERIES con capítulos en lista vertical y sinopsis ---
+    if (peli.tipo === 'serie' && peli.temporadas && peli.temporadas.length) {
+        container.classList.remove("oculto");
+        temporadasActuales = peli.temporadas;
+        mostrarTemporadaLista(0);
+        const pc = obtenerPrimerCapitulo(0);
+        
+        const b1 = document.createElement("button");
+        b1.className = "btn-opcion activo";
+        b1.innerHTML = `<i class="fa-solid fa-play mr-1"></i> Opción 1`;
+        b1.onclick = function() { 
+            document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo")); 
+            this.classList.add("activo"); 
+            opcionActivaActual = 1;
+            if (pc?.url) reproducirOpcion(pc.url); 
+        };
+        botones.appendChild(b1);
+        
+        const b2 = document.createElement("button");
+        b2.className = "btn-opcion";
+        b2.innerHTML = `<i class="fa-solid fa-play mr-1"></i> Opción 2`;
+        b2.onclick = function() { 
+            document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo")); 
+            this.classList.add("activo"); 
+            opcionActivaActual = 2;
             if (pc?.opcion2) reproducirOpcion(pc.opcion2); 
         };
         if (pc?.opcion2 && pc.opcion2.trim() !== '') {
@@ -1052,81 +1087,34 @@ function abrirReproductor(peli) {
             b2.onclick = function() { alert("❌ No hay enlace alternativo disponible"); };
             botones.appendChild(b2);
         }
+        
         const b3 = document.createElement("button");
         b3.className = "btn-opcion btn-nueva-ventana";
-        b3.innerHTML = `<i class="fa-solid fa-external-link-alt mr-1"></i> Nueva ventana`;
+        b3.innerHTML = `<i class="fa-solid fa-external-link-alt mr-1"></i> Abrir en nueva ventana`;
         b3.onclick = function() { 
-            const u = pc?.url || pc?.opcion2; 
-            if (u) window.open(u, '_blank'); 
-            else alert("❌ No hay enlace"); 
+            const capActivo = document.querySelector('.capitulo-item-lista.activo');
+            let u = null;
+            if (capActivo) {
+                const idx = capActivo.dataset.index;
+                const temp = temporadasActuales[tempActualIndex];
+                if (temp && temp.capitulos && temp.capitulos[idx]) {
+                    const cap = temp.capitulos[idx];
+                    u = opcionActivaActual === 1 ? cap.url : cap.opcion2;
+                }
+            } else {
+                const pc2 = obtenerPrimerCapitulo(tempActualIndex);
+                u = opcionActivaActual === 1 ? pc2?.url : pc2?.opcion2;
+            }
+            if (u) { window.open(u, '_blank'); } 
+            else { alert("❌ No hay enlace disponible para esta opción"); }
         };
         botones.appendChild(b3);
+        
         if (pc?.url) reproducirOpcion(pc.url); 
         else player.innerHTML = `<div style="color:#EF4444;text-align:center;padding:3rem;font-size:1rem;"><i class="fa-solid fa-link" style="font-size:2.5rem;display:block;margin-bottom:.5rem;"></i>No hay capítulos disponibles</div>`;
         agregarAlHistorial(peli);
         cargarRecomendadas(peli.tmdb_id);
-        return;
     }
-    
-    const t1 = peli.url && peli.url.trim();
-    const t2 = peli.opcion2 && peli.opcion2.trim();
-    const platName2 = peli.plataforma2 || 'vidsrc';
-    
-    const b1 = document.createElement("button");
-    b1.className = "btn-opcion activo";
-    b1.innerHTML = `<i class="fa-solid fa-play mr-1"></i> Opción 1 (Unlimplay)`;
-    b1.onclick = function() { 
-        document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo")); 
-        this.classList.add("activo"); 
-        if (t1) reproducirOpcion(peli.url); 
-    };
-    if (t1) { 
-        botones.appendChild(b1); 
-    } else { 
-        b1.className = "btn-opcion sin-enlace"; 
-        b1.innerHTML = `<i class="fa-solid fa-link-slash mr-1"></i> Opción 1 (Sin enlace)`;
-        b1.onclick = function() { alert("❌ No hay enlace disponible"); };
-        botones.appendChild(b1); 
-    }
-    
-    const b2 = document.createElement("button");
-    b2.className = "btn-opcion";
-    b2.innerHTML = `<i class="fa-solid fa-play mr-1"></i> Opción 2 (${getNombrePlataforma(platName2)})`;
-    b2.onclick = function() { 
-        document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo")); 
-        this.classList.add("activo"); 
-        if (t2) reproducirOpcion(peli.opcion2); 
-    };
-    if (t2) { 
-        botones.appendChild(b2); 
-    } else { 
-        b2.className = "btn-opcion sin-enlace"; 
-        b2.innerHTML = `<i class="fa-solid fa-link-slash mr-1"></i> Opción 2 (Sin enlace)`;
-        b2.onclick = function() { alert("❌ No hay enlace alternativo disponible"); };
-        botones.appendChild(b2); 
-    }
-    
-    const b3 = document.createElement("button");
-    b3.className = "btn-opcion btn-nueva-ventana";
-    b3.innerHTML = `<i class="fa-solid fa-external-link-alt mr-1"></i> Nueva ventana`;
-    b3.onclick = function() { 
-        const u = peli.url || peli.opcion2; 
-        if (u) window.open(u, '_blank'); 
-        else alert("❌ No hay enlace"); 
-    };
-    if (t1 || t2) botones.appendChild(b3);
-    
-    if (t1) {
-        reproducirOpcion(peli.url);
-    } else if (t2) {
-        reproducirOpcion(peli.opcion2);
-        document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo"));
-        if (b2) b2.classList.add("activo");
-    } else {
-        player.innerHTML = `<div style="color:#EF4444;text-align:center;padding:3rem;font-size:1rem;"><i class="fa-solid fa-link" style="font-size:2.5rem;display:block;margin-bottom:.5rem;"></i>No hay enlaces disponibles</div>`;
-    }
-    agregarAlHistorial(peli);
-    cargarRecomendadas(peli.tmdb_id);
 }
 
 function obtenerPrimerCapitulo(idx) { 
@@ -1136,12 +1124,15 @@ function obtenerPrimerCapitulo(idx) {
     return t.capitulos[0]; 
 }
 
-function mostrarTemporada(index) {
+// ==============================================
+// 📺 MOSTRAR TEMPORADA CON CAPÍTULOS EN LISTA VERTICAL
+// ==============================================
+function mostrarTemporadaLista(index) {
     if (!temporadasActuales || !temporadasActuales.length) return;
     if (index < 0) index = 0; 
     if (index >= temporadasActuales.length) index = temporadasActuales.length - 1;
     tempActualIndex = index;
-    const temp = temporadasActuales[index], container = document.getElementById("capitulosHorizontal"), label = document.getElementById("tempActual");
+    const temp = temporadasActuales[index], container = document.getElementById("capitulosLista"), label = document.getElementById("tempActual");
     label.textContent = `Temporada ${temp.numero || index + 1}`;
     container.innerHTML = "";
     document.getElementById("tempAnterior").disabled = index === 0;
@@ -1152,50 +1143,61 @@ function mostrarTemporada(index) {
     }
     temp.capitulos.forEach((cap, idx) => {
         const d = document.createElement("div");
-        d.className = "capitulo-item-horizontal";
+        d.className = "capitulo-item-lista";
+        d.dataset.index = idx;
         if (idx === 0 && cap.url) d.classList.add("activo");
-        if (!cap.url) d.classList.add("sin-enlace");
-        const platName = cap.plataforma2 || 'vidsrc';
-        d.innerHTML = `<span class="cap-numero-h">Cap ${cap.numero || idx + 1}</span>
-            <span class="cap-titulo-h">${cap.titulo || 'Capítulo ' + (idx + 1)}</span>
-            ${cap.url ? `<span class="cap-play-h"><i class="fa-solid fa-play"></i> Ver (Op1)</span>` : '<span class="cap-sin-enlace-h">🔒 Sin enlace</span>'}
-            ${cap.opcion2 ? `<span class="cap-play-h" style="color:#3B82F6;font-size:0.5rem;">🔗 Op2: ${getNombrePlataforma(platName)}</span>` : ''}`;
+        if (!cap.url && !cap.opcion2) d.classList.add("sin-enlace");
+        
+        const tieneOp1 = cap.url && cap.url.trim() !== '';
+        const tieneOp2 = cap.opcion2 && cap.opcion2.trim() !== '';
+        
+        d.innerHTML = `
+            <div class="cap-item-lista-top">
+                <span class="cap-numero-lista">Cap ${cap.numero || idx + 1}</span>
+                <span class="cap-titulo-lista">${cap.titulo || 'Capítulo ' + (idx + 1)}</span>
+                ${tieneOp1 ? `<span class="cap-play-lista">▶ Opción 1</span>` : ''}
+                ${tieneOp2 ? `<span class="cap-play-lista opcion2">▶ Opción 2</span>` : ''}
+                ${!tieneOp1 && !tieneOp2 ? `<span class="cap-sin-enlace-lista">🔒 Sin enlace</span>` : ''}
+            </div>
+            ${cap.sinopsis ? `<div class="cap-sinopsis-lista">${cap.sinopsis}</div>` : ''}
+        `;
         d.onclick = function() { 
-            if (cap.url) { 
-                document.querySelectorAll(".capitulo-item-horizontal").forEach(el => el.classList.remove("activo")); 
-                this.classList.add("activo"); 
-                reproducirOpcion(cap.url); 
+            document.querySelectorAll(".capitulo-item-lista").forEach(el => el.classList.remove("activo")); 
+            this.classList.add("activo"); 
+            const u = opcionActivaActual === 1 ? cap.url : cap.opcion2;
+            if (u && u.trim() !== '') {
+                reproducirOpcion(u);
                 const bs = document.getElementById("botonesOpciones"); 
                 if (bs.children.length) { 
                     document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo")); 
-                    if (bs.children[0]) bs.children[0].classList.add("activo"); 
+                    if (opcionActivaActual === 1 && bs.children[0]) bs.children[0].classList.add("activo");
+                    else if (opcionActivaActual === 2 && bs.children[1]) bs.children[1].classList.add("activo");
                 } 
-            } else if (cap.opcion2) {
-                document.querySelectorAll(".capitulo-item-horizontal").forEach(el => el.classList.remove("activo")); 
-                this.classList.add("activo"); 
-                reproducirOpcion(cap.opcion2); 
-                const bs = document.getElementById("botonesOpciones"); 
-                if (bs.children.length) { 
-                    document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo")); 
-                    if (bs.children[1]) bs.children[1].classList.add("activo"); 
-                } 
-            } else { 
-                alert("❌ Este capítulo no tiene enlace"); 
-            } 
+            } else {
+                // Si la opción activa no tiene enlace, intentar con la otra
+                const otra = opcionActivaActual === 1 ? cap.opcion2 : cap.url;
+                if (otra && otra.trim() !== '') {
+                    opcionActivaActual = opcionActivaActual === 1 ? 2 : 1;
+                    reproducirOpcion(otra);
+                    const bs = document.getElementById("botonesOpciones"); 
+                    if (bs.children.length) { 
+                        document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo")); 
+                        if (opcionActivaActual === 1 && bs.children[0]) bs.children[0].classList.add("activo");
+                        else if (opcionActivaActual === 2 && bs.children[1]) bs.children[1].classList.add("activo");
+                    } 
+                } else {
+                    alert("❌ Este capítulo no tiene enlaces disponibles");
+                }
+            }
         };
         container.appendChild(d);
     });
-    const totalCaps = temp.capitulos.length;
-    const info = document.createElement("div");
-    info.style.cssText = "font-size:.65rem;color:#64748B;text-align:center;padding:.2rem 0;width:100%;";
-    info.textContent = `📺 ${totalCaps} capítulos disponibles`;
-    container.appendChild(info);
 }
 
 function cambiarTemporadaHandler(dir) { 
     const n = tempActualIndex + dir; 
     if (n >= 0 && n < temporadasActuales.length) { 
-        mostrarTemporada(n); 
+        mostrarTemporadaLista(n); 
         const c = obtenerPrimerCapitulo(n); 
         if (c?.url) { 
             reproducirOpcion(c.url); 
@@ -1204,7 +1206,16 @@ function cambiarTemporadaHandler(dir) {
                 document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo")); 
                 if (bs.children[0]) bs.children[0].classList.add("activo"); 
             } 
-        } 
+            opcionActivaActual = 1;
+        } else if (c?.opcion2) {
+            reproducirOpcion(c.opcion2);
+            const bs = document.getElementById("botonesOpciones"); 
+            if (bs.children.length) { 
+                document.querySelectorAll(".btn-opcion").forEach(b => b.classList.remove("activo")); 
+                if (bs.children[1]) bs.children[1].classList.add("activo"); 
+            }
+            opcionActivaActual = 2;
+        }
     } 
 }
 
@@ -1218,8 +1229,7 @@ function reproducirOpcion(url) {
             <span style="font-size:0.8rem;color:#64748B;">Esto puede tardar unos segundos</span>
         </div>
     `;
-    if (e.includes('unlimplay.com')) { 
-        if (!e.includes('?')) e += '?autoplay=1&controls=1&logo=0'; 
+    if (e.includes('unlimplay.com') || e.includes('vidsrc') || e.includes('vidmoly') || e.includes('embed') || e.includes('2embed')) { 
         const iframe = document.createElement('iframe');
         iframe.src = e;
         iframe.frameborder = "0";
@@ -1259,14 +1269,11 @@ function reproducirOpcion(url) {
 }
 
 function cerrarVideo() { 
-    if (document.fullscreenElement) {
-        document.exitFullscreen();
-    }
     detenerVideo(); 
     document.getElementById("modal-video").classList.remove("abierto"); 
     document.body.style.overflow = "auto"; 
     peliculaActual = null; 
-    document.getElementById("capitulosHorizontal").innerHTML = ""; 
+    document.getElementById("capitulosLista").innerHTML = ""; 
     document.getElementById("capitulosContainer").classList.add("oculto"); 
     tempActualIndex = 0; temporadasActuales = []; 
 }
@@ -1352,7 +1359,8 @@ function mostrarRecientes() {
 }
 
 function limpiarHistorial() { localStorage.removeItem("historialTely"); mostrarHistorial(); mostrarRecientes(); }
-    // ==============================================
+
+// ==============================================
 // 🔐 AUTENTICACIÓN
 // ==============================================
 function iniciarConGoogle() {
@@ -1481,21 +1489,18 @@ auth.onAuthStateChanged(user => {
     document.getElementById("nombrePerfil").textContent = user ? (user.displayName || user.phoneNumber || user.email || "✅ Sesión iniciada") : "❌ Sesión cerrada"; 
 });
 
-// ⭐⭐⭐ FUNCIÓN PARA QUE EL BOTÓN ATRÁS NO CIERRE LA APP ⭐⭐⭐
-// Cuando el modal de video está abierto, al presionar atrás se cierra el video
+// ⭐ BOTÓN ATRÁS NO CIERRA LA APP
 window.addEventListener('popstate', function(e) { 
     if (document.getElementById("modal-video").classList.contains("abierto")) { 
         cerrarVideo(); 
         e.preventDefault(); 
-        // ⭐ VOLVER A AGREGAR EL ESTADO PARA QUE NO SE SALGA
         history.pushState(null, '', window.location.href); 
     } 
 });
 
-// ⭐ AGREGAR UN ESTADO INICIAL PARA QUE EL BOTÓN ATRÁS NO CIERRE LA APP
 history.pushState(null, '', window.location.href);
 
-console.log('✅ TELY cargado - Con Opción 2, Fullscreen, Rotación y Botón Atrás');
+console.log('✅ TELY cargado - Opción 1 y Opción 2, capítulos con sinopsis, sin botón pantalla completa');
 
 setTimeout(iniciarScrollInfinito, 3000);
 </script>
