@@ -47,15 +47,18 @@
         .admin-card{background:rgba(255,255,255,.04);border-radius:12px;padding:1.2rem;border:1px solid rgba(124,58,237,.15);margin-bottom:1rem}
         body:not(.dark) .admin-card{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1)}
         .admin-card h3{font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem}
+        .admin-card h3 i{color:#7C3AED}
         .admin-input{width:100%;padding:.6rem;border-radius:8px;border:1px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.9rem;margin-bottom:.5rem}
         body:not(.dark) .admin-input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
         .admin-input:focus{outline:none;border-color:#7C3AED}
-        .admin-btn{background:#7C3AED;border:none;color:#fff;padding:.5rem 1.5rem;border-radius:8px;font-weight:700;cursor:pointer}
+        .admin-btn{background:#7C3AED;border:none;color:#fff;padding:.5rem 1.5rem;border-radius:8px;font-weight:700;cursor:pointer;transition:.3s}
         .admin-btn:hover{background:#6D28D9}
         .admin-btn-danger{background:#EF4444}
         .admin-btn-danger:hover{background:#DC2626}
         .admin-btn-success{background:#10B981}
         .admin-btn-success:hover{background:#059669}
+        .admin-btn-magic{background:#F59E0B;color:#111}
+        .admin-btn-magic:hover{background:#D97706}
         .admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
         @media(max-width:768px){.admin-grid{grid-template-columns:1fr}}
         .admin-item{background:rgba(255,255,255,.02);border-radius:8px;padding:.6rem;border-left:3px solid #7C3AED;margin-bottom:.4rem}
@@ -63,16 +66,16 @@
         .admin-item .title{font-weight:600;font-size:.9rem}
         .admin-item .meta{font-size:.75rem;color:#94A3B8}
         body:not(.dark) .admin-item .meta{color:#888}
-        .admin-item .actions{display:flex;gap:.3rem;margin-top:.2rem}
+        .admin-item .actions{display:flex;gap:.3rem;margin-top:.2rem;flex-wrap:wrap}
         .admin-item .actions button{padding:.1rem .6rem;border-radius:4px;border:none;font-size:.7rem;font-weight:600;cursor:pointer}
         .admin-item .actions .edit{background:rgba(59,130,246,.2);color:#60A5FA}
         .admin-item .actions .delete{background:rgba(239,68,68,.2);color:#F87171}
         .admin-item .actions .edit:hover{background:rgba(59,130,246,.3)}
         .admin-item .actions .delete:hover{background:rgba(239,68,68,.3)}
-        .cap-item-admin{background:rgba(255,255,255,.02);border-radius:4px;padding:.3rem .6rem;margin:.2rem 0;border-left:2px solid #3B82F6;font-size:.8rem}
+        .cap-item-admin{background:rgba(255,255,255,.02);border-radius:4px;padding:.2rem .6rem;margin:.2rem 0;border-left:2px solid #3B82F6;font-size:.75rem}
         body:not(.dark) .cap-item-admin{background:rgba(0,0,0,.02)}
-        .badge-op2{color:#34D399;font-size:.6rem;font-weight:600}
-        .badge-no-op2{color:#EF4444;font-size:.6rem;font-weight:600}
+        .badge-op2{color:#34D399;font-size:.55rem;font-weight:600}
+        .badge-no-op2{color:#EF4444;font-size:.55rem;font-weight:600}
         .user-dropdown{position:absolute;right:0;top:calc(100% + 8px);background:rgba(26,26,46,.95);border-radius:12px;width:200px;border:1px solid rgba(124,58,237,.15);padding:.4rem 0;display:none;z-index:50;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
         body:not(.dark) .user-dropdown{background:rgba(255,255,255,.95);border-color:rgba(0,0,0,.1)}
@@ -82,7 +85,11 @@
         body:not(.dark) .user-dropdown a:hover{background:rgba(124,58,237,.08);color:#111}
         .user-dropdown hr{margin:.2rem 0;border:none;border-top:1px solid rgba(124,58,237,.08)}
         .user-menu{position:relative}
-        .load-more{display:flex;justify-content:center;padding:1rem 0}
+        .loading-text{color:#64748B;font-size:.9rem}
+        .magic-section{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:.8rem;margin:.5rem 0}
+        .magic-section .info{font-size:.75rem;color:#94A3B8}
+        .progress-bar{height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:.3rem;overflow:hidden}
+        .progress-bar .fill{height:100%;width:0%;background:#F59E0B;border-radius:2px;transition:width 0.5s}
     </style>
 </head>
 <body>
@@ -118,38 +125,61 @@
         </div>
     </div>
 
-    <!-- AGREGAR SERIE -->
+    <!-- BOTÓN MÁGICO -->
+    <div class="admin-card" style="border-color:rgba(245,158,11,.3)">
+        <h3><i class="fas fa-wand-magic-sparkles text-yellow-500"></i> Botón Mágico - Generar Serie Completa</h3>
+        <p style="color:#94A3B8;font-size:.85rem;margin-bottom:.5rem;">
+            Ingresa el ID de TMDB y genera automáticamente TODAS las temporadas y capítulos con enlaces de Unlimplay
+        </p>
+        <div class="magic-section">
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+                <input class="admin-input" id="magicTmdbId" placeholder="TMDB ID (ej: 1399 para Game of Thrones)" style="flex:1;min-width:150px;">
+                <input class="admin-input" id="magicTitulo" placeholder="Título de la serie" style="flex:1;min-width:150px;" value="Mi Serie">
+                <input class="admin-input" id="magicAnio" placeholder="Año" style="width:100px;" value="2024">
+            </div>
+            <button class="admin-btn admin-btn-magic" onclick="generarSerieMagica()" style="width:100%;margin-top:.3rem;">
+                <i class="fas fa-wand-magic-sparkles"></i> ✨ GENERAR SERIE COMPLETA ✨
+            </button>
+            <div class="progress-bar" id="magicProgress"><div class="fill" id="magicFill"></div></div>
+            <div class="info" id="magicInfo">Listo para generar...</div>
+        </div>
+        <div style="font-size:.7rem;color:#64748B;margin-top:.3rem;">
+            <i class="fas fa-info-circle"></i> Formato: <code>https://unlimplay.co/play/tv/ID/TEMPORADA/EPISODIO</code>
+        </div>
+    </div>
+
+    <!-- AGREGAR SERIE MANUAL -->
     <div class="admin-card">
-        <h3><i class="fas fa-plus-circle text-purple-500"></i> Agregar Serie a Firebase</h3>
+        <h3><i class="fas fa-plus-circle text-purple-500"></i> Agregar Serie Manual</h3>
         <div class="admin-grid">
             <div>
                 <input class="admin-input" id="sTitulo" placeholder="Título de la serie" value="Aprenderás">
                 <input class="admin-input" id="sAnio" placeholder="Año" value="2024">
+                <input class="admin-input" id="sTmdbId" placeholder="TMDB ID" value="1">
                 <input class="admin-input" id="sPortada" placeholder="URL de la portada" value="https://image.tmdb.org/t/p/w342/kqjL17yufvn9OVLyXYpvtyrFfak.jpg">
                 <textarea class="admin-input" id="sSinopsis" rows="2" placeholder="Sinopsis">Serie para aprender a programar</textarea>
-                <input class="admin-input" id="sGenero" placeholder="Género" value="Educativo">
             </div>
             <div>
-                <h4 class="text-sm font-bold text-blue-400">Capítulos (Opción 2)</h4>
+                <h4 class="text-sm font-bold text-blue-400">Capítulos (Opción 2 opcional)</h4>
                 <div id="capitulosAdmin">
                     <div class="cap-item-admin">
                         <span>Cap 1: </span>
                         <input class="admin-input" style="display:inline-block;width:auto;" id="c1Titulo" placeholder="Título" value="Introducción">
-                        <input class="admin-input" style="display:inline-block;width:auto;" id="c1Op2" placeholder="Opción 2 (Vidsrc)" value="https://vidsrc.in/embed/tv/1/1/1?lang=es">
+                        <input class="admin-input" style="display:inline-block;width:auto;" id="c1Op2" placeholder="Opción 2 (Vidsrc)" value="">
                     </div>
                     <div class="cap-item-admin">
                         <span>Cap 2: </span>
                         <input class="admin-input" style="display:inline-block;width:auto;" id="c2Titulo" placeholder="Título" value="Variables">
-                        <input class="admin-input" style="display:inline-block;width:auto;" id="c2Op2" placeholder="Opción 2 (Vidsrc)" value="https://vidsrc.in/embed/tv/1/1/2?lang=es">
+                        <input class="admin-input" style="display:inline-block;width:auto;" id="c2Op2" placeholder="Opción 2 (Vidsrc)" value="">
                     </div>
                     <div class="cap-item-admin">
                         <span>Cap 3: </span>
                         <input class="admin-input" style="display:inline-block;width:auto;" id="c3Titulo" placeholder="Título" value="Funciones">
-                        <input class="admin-input" style="display:inline-block;width:auto;" id="c3Op2" placeholder="Opción 2 (Vidsrc)" value="https://vidsrc.in/embed/tv/1/1/3?lang=es">
+                        <input class="admin-input" style="display:inline-block;width:auto;" id="c3Op2" placeholder="Opción 2 (Vidsrc)" value="">
                     </div>
                 </div>
                 <div style="display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap">
-                    <button class="admin-btn" onclick="guardarSerie()"><i class="fas fa-save"></i> Guardar Serie</button>
+                    <button class="admin-btn" onclick="guardarSerieManual()"><i class="fas fa-save"></i> Guardar</button>
                     <button class="admin-btn admin-btn-success" onclick="cargarSeries()"><i class="fas fa-refresh"></i> Recargar</button>
                 </div>
             </div>
@@ -160,66 +190,74 @@
     <div class="admin-card">
         <h3><i class="fas fa-list text-emerald-500"></i> Series guardadas en Firebase</h3>
         <div id="listaSeries" class="max-h-96 overflow-y-auto">
-            <p style="color:#64748B;font-size:.9rem;">Cargando series...</p>
+            <p class="loading-text">Cargando series...</p>
         </div>
     </div>
 </main>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-<script>
+<script type="importmap">
+{
+    "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js",
+        "firebase/database": "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"
+    }
+}
+</script>
+<script type="module">
+import { initializeApp } from "firebase/app";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { getDatabase, ref, get, set, push, update, remove, child, onValue } from "firebase/database";
+
 const firebaseConfig = {
-    apiKey: "AIzaSyCwLATDpQN1RWv3rLPjJXbNnIBkyo_BUfI",
-    authDomain: "tely-ap.firebaseapp.com",
-    databaseURL: "https://tely-ap-default-rtdb.firebaseio.com",
-    projectId: "tely-ap",
-    storageBucket: "tely-ap.firebasestorage.app",
-    messagingSenderId: "760862940967",
-    appId: "1:760862940967:web:69bbbbfee0de40f68a1302"
+    apiKey: "AIzaSyBPBDEVUR7hjNrxCYrefF9Sbl0Wofp3VoQ",
+    authDomain: "telyx-23210.firebaseapp.com",
+    projectId: "telyx-23210",
+    storageBucket: "telyx-23210.firebasestorage.app",
+    messagingSenderId: "10164285015",
+    appId: "1:10164285015:web:5cf32bd2831de126c67d12",
+    measurementId: "G-0YEZMJYMJS"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+let serieKeyActual = null;
 
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) { return true; });
 document.addEventListener('backbutton', function(e) { return true; }, false);
 
-let serieKeyActual = null;
-
-function irALogin() { window.location.href = 'login.html'; }
-function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
-function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
-document.addEventListener('click', (e) => { const menu = document.getElementById('userDropdown'); if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show'); });
-auth.onAuthStateChanged(user => {
-    document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
-    document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
-});
-
-function toggleTheme() {
+window.irALogin = function() { window.location.href = 'login.html'; };
+window.cerrarSesion = function() { signOut(auth).then(() => { location.reload(); }); };
+window.toggleUserMenu = function() { document.getElementById('userDropdown').classList.toggle('show'); };
+window.toggleTheme = function() {
     const body = document.body;
     const btn = document.getElementById('themeBtn');
     if (body.classList.contains('dark')) { body.classList.remove('dark'); btn.innerHTML = '<i class="fas fa-moon"></i>'; localStorage.setItem('theme', 'light'); }
     else { body.classList.add('dark'); btn.innerHTML = '<i class="fas fa-sun"></i>'; localStorage.setItem('theme', 'dark'); }
-}
+};
+
 if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
 else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
 
-function generarEnlaceMultiplataforma(tmdb_id, tipo, plataforma, temporada = 1, capitulo = 1) {
-    const plataformas = {
-        'unlimplay': {
-            pelicula: (id) => `https://unlimplay.com/play/embed/movie/${id}?lang=es-MX&autoplay=1&controls=1&logo=0`,
-            serie: (id, t, c) => `https://unlimplay.com/play/embed/tv/${id}/${t}/${c}?lang=es-MX&autoplay=1&controls=1&logo=0`
-        },
-        'vidsrc': {
-            pelicula: (id) => `https://vidsrc.in/embed/movie/${id}?lang=es`,
-            serie: (id, t, c) => `https://vidsrc.in/embed/tv/${id}/${t}/${c}?lang=es`
-        }
-    };
-    const plat = plataformas[plataforma] || plataformas['unlimplay'];
-    if (tipo === 'pelicula') return plat.pelicula(tmdb_id);
-    else return plat.serie(tmdb_id, temporada, capitulo);
+onAuthStateChanged(auth, (user) => {
+    document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
+    document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
+});
+
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('userDropdown');
+    if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
+});
+
+function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    if (tipo === 'pelicula') {
+        return `https://unlimplay.co/play/movie/${tmdb_id}`;
+    } else {
+        return `https://unlimplay.co/play/tv/${tmdb_id}/${temporada}/${capitulo}`;
+    }
 }
 
 function mostrarToast(msg, tipo = 'success') {
@@ -231,19 +269,126 @@ function mostrarToast(msg, tipo = 'success') {
     setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
 }
 
-// ==============================================
-// 📥 GUARDAR SERIE EN FIREBASE
-// ==============================================
-async function guardarSerie() {
-    const titulo = document.getElementById('sTitulo').value.trim() || 'Aprenderás';
+// ⭐⭐⭐ BOTÓN MÁGICO - GENERAR SERIE COMPLETA ⭐⭐⭐
+window.generarSerieMagica = async function() {
+    const tmdbId = document.getElementById('magicTmdbId').value.trim();
+    const titulo = document.getElementById('magicTitulo').value.trim() || 'Serie Mágica';
+    const anio = document.getElementById('magicAnio').value.trim() || '2024';
+    const btn = document.querySelector('.admin-btn-magic');
+    const fill = document.getElementById('magicFill');
+    const info = document.getElementById('magicInfo');
+
+    if (!tmdbId) {
+        mostrarToast('⚠️ Ingresa un TMDB ID', 'warning');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+    fill.style.width = '10%';
+    info.textContent = '🔍 Obteniendo información de la serie...';
+
+    try {
+        // Obtener información de la serie desde TMDB
+        const response = await fetch(`https://tely-xi.vercel.app/api/tmdb?path=tv/${tmdbId}`);
+        if (!response.ok) throw new Error('Serie no encontrada');
+        const data = await response.json();
+        
+        fill.style.width = '30%';
+        info.textContent = `📺 Serie: ${data.name} - ${data.number_of_seasons} temporadas`;
+
+        // Obtener todas las temporadas y capítulos
+        const temporadas = [];
+        const numTemporadas = data.number_of_seasons || 1;
+
+        for (let t = 1; t <= numTemporadas; t++) {
+            fill.style.width = `${30 + (t / numTemporadas) * 50}%`;
+            info.textContent = `📥 Cargando temporada ${t} de ${numTemporadas}...`;
+            
+            const seasonRes = await fetch(`https://tely-xi.vercel.app/api/tmdb?path=tv/${tmdbId}/season/${t}`);
+            if (!seasonRes.ok) continue;
+            const seasonData = await seasonRes.json();
+            
+            const capitulos = (seasonData.episodes || []).map(ep => ({
+                numero: ep.episode_number,
+                titulo: ep.name || `Capítulo ${ep.episode_number}`,
+                sinopsis: ep.overview || 'Sin sinopsis',
+                url: generarEnlaceUnlimplay(tmdbId, 'serie', t, ep.episode_number),
+                opcion2: '',
+                plataforma2: 'vidsrc'
+            }));
+
+            if (capitulos.length > 0) {
+                temporadas.push({
+                    numero: t,
+                    nombre: seasonData.name || `Temporada ${t}`,
+                    capitulos: capitulos
+                });
+            }
+        }
+
+        fill.style.width = '90%';
+        info.textContent = `📦 Generando ${temporadas.length} temporadas con ${temporadas.reduce((sum, t) => sum + t.capitulos.length, 0)} capítulos...`;
+
+        // Construir objeto para Firebase
+        const serie = {
+            titulo: titulo,
+            anio: anio,
+            sinopsis: data.overview || 'Sin sinopsis',
+            portada: data.poster_path ? `https://image.tmdb.org/t/p/w342${data.poster_path}` : 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
+            genero: data.genres ? data.genres.map(g => g.name).join(', ') : 'Serie',
+            tipo: 'serie',
+            categoria: 'series',
+            tmdb_id: parseInt(tmdbId),
+            opcion2: '',
+            plataforma2: 'vidsrc',
+            temporadas: temporadas
+        };
+
+        // Guardar en Firebase
+        if (serieKeyActual) {
+            await update(ref(db, `series_personalizadas/${serieKeyActual}`), serie);
+            mostrarToast('✅ Serie actualizada mágicamente!', 'success');
+            serieKeyActual = null;
+        } else {
+            await push(ref(db, 'series_personalizadas'), serie);
+            mostrarToast(`✅ Serie "${titulo}" generada con ${temporadas.reduce((sum, t) => sum + t.capitulos.length, 0)} capítulos!`, 'success');
+        }
+
+        fill.style.width = '100%';
+        info.textContent = `✅ ¡Completado! ${temporadas.length} temporadas, ${temporadas.reduce((sum, t) => sum + t.capitulos.length, 0)} capítulos generados.`;
+        
+        // Limpiar campos
+        document.getElementById('magicTmdbId').value = '';
+        document.getElementById('magicTitulo').value = '';
+        
+        cargarSeries();
+
+    } catch (e) {
+        console.error(e);
+        mostrarToast('❌ Error: ' + e.message, 'error');
+        info.textContent = `❌ Error: ${e.message}`;
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> ✨ GENERAR SERIE COMPLETA ✨';
+    setTimeout(() => { fill.style.width = '0%'; }, 3000);
+};
+
+// ⭐ GUARDAR SERIE MANUAL
+window.guardarSerieManual = async function() {
+    const titulo = document.getElementById('sTitulo').value.trim() || 'Sin título';
+    const tmdbId = document.getElementById('sTmdbId').value.trim() || '1';
+    
     const serie = {
         titulo: titulo,
         anio: document.getElementById('sAnio').value.trim() || '2024',
         sinopsis: document.getElementById('sSinopsis').value.trim() || 'Sin sinopsis',
         portada: document.getElementById('sPortada').value.trim() || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
-        genero: document.getElementById('sGenero').value.trim() || 'Educativo',
+        genero: 'Serie',
         tipo: 'serie',
         categoria: 'series',
+        tmdb_id: parseInt(tmdbId) || 1,
         opcion2: '',
         plataforma2: 'vidsrc',
         temporadas: [{
@@ -254,7 +399,7 @@ async function guardarSerie() {
                     numero: 1,
                     titulo: document.getElementById('c1Titulo').value.trim() || 'Capítulo 1',
                     sinopsis: '',
-                    url: generarEnlaceMultiplataforma(1, 'serie', 'unlimplay', 1, 1),
+                    url: generarEnlaceUnlimplay(tmdbId, 'serie', 1, 1),
                     opcion2: document.getElementById('c1Op2').value.trim() || '',
                     plataforma2: 'vidsrc'
                 },
@@ -262,7 +407,7 @@ async function guardarSerie() {
                     numero: 2,
                     titulo: document.getElementById('c2Titulo').value.trim() || 'Capítulo 2',
                     sinopsis: '',
-                    url: generarEnlaceMultiplataforma(1, 'serie', 'unlimplay', 1, 2),
+                    url: generarEnlaceUnlimplay(tmdbId, 'serie', 1, 2),
                     opcion2: document.getElementById('c2Op2').value.trim() || '',
                     plataforma2: 'vidsrc'
                 },
@@ -270,7 +415,7 @@ async function guardarSerie() {
                     numero: 3,
                     titulo: document.getElementById('c3Titulo').value.trim() || 'Capítulo 3',
                     sinopsis: '',
-                    url: generarEnlaceMultiplataforma(1, 'serie', 'unlimplay', 1, 3),
+                    url: generarEnlaceUnlimplay(tmdbId, 'serie', 1, 3),
                     opcion2: document.getElementById('c3Op2').value.trim() || '',
                     plataforma2: 'vidsrc'
                 }
@@ -280,58 +425,55 @@ async function guardarSerie() {
 
     try {
         if (serieKeyActual) {
-            await db.ref(`series_personalizadas/${serieKeyActual}`).update(serie);
-            mostrarToast('✅ Serie actualizada en Firebase', 'success');
+            await update(ref(db, `series_personalizadas/${serieKeyActual}`), serie);
+            mostrarToast('✅ Serie actualizada', 'success');
             serieKeyActual = null;
         } else {
-            await db.ref('series_personalizadas').push(serie);
-            mostrarToast('✅ Serie guardada en Firebase', 'success');
+            await push(ref(db, 'series_personalizadas'), serie);
+            mostrarToast('✅ Serie guardada', 'success');
         }
-        // Limpiar campos
-        document.getElementById('sTitulo').value = 'Aprenderás';
-        document.getElementById('sAnio').value = '2024';
-        document.getElementById('sSinopsis').value = 'Serie para aprender a programar';
-        document.getElementById('sPortada').value = 'https://image.tmdb.org/t/p/w342/kqjL17yufvn9OVLyXYpvtyrFfak.jpg';
-        document.getElementById('sGenero').value = 'Educativo';
-        document.getElementById('c1Titulo').value = 'Introducción';
-        document.getElementById('c1Op2').value = 'https://vidsrc.in/embed/tv/1/1/1?lang=es';
-        document.getElementById('c2Titulo').value = 'Variables';
-        document.getElementById('c2Op2').value = 'https://vidsrc.in/embed/tv/1/1/2?lang=es';
-        document.getElementById('c3Titulo').value = 'Funciones';
-        document.getElementById('c3Op2').value = 'https://vidsrc.in/embed/tv/1/1/3?lang=es';
         cargarSeries();
+        // Limpiar campos manuales
+        document.getElementById('sTitulo').value = '';
+        document.getElementById('sAnio').value = '';
+        document.getElementById('sTmdbId').value = '';
+        document.getElementById('sSinopsis').value = '';
+        document.getElementById('sPortada').value = '';
+        document.getElementById('c1Titulo').value = '';
+        document.getElementById('c1Op2').value = '';
+        document.getElementById('c2Titulo').value = '';
+        document.getElementById('c2Op2').value = '';
+        document.getElementById('c3Titulo').value = '';
+        document.getElementById('c3Op2').value = '';
     } catch(e) {
         mostrarToast('❌ Error: ' + e.message, 'error');
         console.error(e);
     }
-}
+};
 
-// ==============================================
-// 📋 CARGAR SERIES DESDE FIREBASE
-// ==============================================
-async function cargarSeries() {
+// ⭐ CARGAR SERIES
+window.cargarSeries = async function() {
     const container = document.getElementById('listaSeries');
-    container.innerHTML = '<p style="color:#64748B;font-size:.9rem;">Cargando series...</p>';
+    container.innerHTML = '<p class="loading-text">Cargando series...</p>';
     try {
-        const snap = await db.ref('series_personalizadas').once('value');
+        const snap = await get(child(ref(db), 'series_personalizadas'));
         const data = snap.val();
         if (!data) {
-            container.innerHTML = '<p style="color:#64748B;font-size:.9rem;">No hay series guardadas en Firebase</p>';
+            container.innerHTML = '<p class="loading-text">No hay series guardadas en Firebase</p>';
             return;
         }
         container.innerHTML = '';
         Object.entries(data).forEach(([key, s]) => {
-            const caps = s.temporadas?.[0]?.capitulos || [];
-            const capInfo = caps.map((cap, i) => {
-                const tieneOp2 = cap.opcion2 && cap.opcion2.trim() !== '';
-                return `<span class="${tieneOp2 ? 'badge-op2' : 'badge-no-op2'}">Cap${i+1} ${tieneOp2 ? '✅ Op2' : '❌ Sin Op2'}</span>`;
-            }).join(' ');
+            const caps = s.temporadas?.flatMap(t => t.capitulos || []) || [];
+            const totalCaps = caps.length;
+            const totalTemp = s.temporadas?.length || 0;
+            const tieneOp2 = caps.some(c => c.opcion2 && c.opcion2.trim() !== '');
             const div = document.createElement('div');
             div.className = 'admin-item';
             div.innerHTML = `
-                <div class="title">${s.titulo}</div>
-                <div class="meta">${s.anio} • ${s.genero || 'Serie'}</div>
-                <div class="meta">${capInfo}</div>
+                <div class="title">${s.titulo} <span style="font-size:.6rem;color:#94A3B8;">(TMDB: ${s.tmdb_id || 'N/A'})</span></div>
+                <div class="meta">${s.anio} • ${s.genero || 'Serie'} • ${totalTemp} temporadas • ${totalCaps} capítulos</div>
+                <div class="meta">${tieneOp2 ? '✅ Con Opción 2' : '❌ Sin Opción 2'}</div>
                 <div class="actions">
                     <button class="edit" onclick="editarSerie('${key}')"><i class="fas fa-pen"></i> Editar</button>
                     <button class="delete" onclick="eliminarSerie('${key}')"><i class="fas fa-trash"></i> Eliminar</button>
@@ -343,14 +485,12 @@ async function cargarSeries() {
         container.innerHTML = '<p style="color:#EF4444;font-size:.9rem;">Error al cargar</p>';
         console.error(e);
     }
-}
+};
 
-// ==============================================
-// ✏️ EDITAR SERIE
-// ==============================================
-async function editarSerie(key) {
+// ⭐ EDITAR SERIE
+window.editarSerie = async function(key) {
     try {
-        const snap = await db.ref(`series_personalizadas/${key}`).once('value');
+        const snap = await get(child(ref(db), `series_personalizadas/${key}`));
         const s = snap.val();
         if (!s) return;
         serieKeyActual = key;
@@ -358,7 +498,7 @@ async function editarSerie(key) {
         document.getElementById('sAnio').value = s.anio || '';
         document.getElementById('sSinopsis').value = s.sinopsis || '';
         document.getElementById('sPortada').value = s.portada || '';
-        document.getElementById('sGenero').value = s.genero || '';
+        document.getElementById('sTmdbId').value = s.tmdb_id || '';
         const caps = s.temporadas?.[0]?.capitulos || [];
         if (caps[0]) {
             document.getElementById('c1Titulo').value = caps[0].titulo || '';
@@ -374,38 +514,31 @@ async function editarSerie(key) {
         }
         mostrarToast('📝 Editando: ' + s.titulo, 'info');
     } catch(e) {
-        mostrarToast('❌ Error al cargar: ' + e.message, 'error');
+        mostrarToast('❌ Error: ' + e.message, 'error');
     }
-}
+};
 
-// ==============================================
-// 🗑️ ELIMINAR SERIE
-// ==============================================
-async function eliminarSerie(key) {
+// ⭐ ELIMINAR SERIE
+window.eliminarSerie = async function(key) {
     if (!confirm('¿Eliminar esta serie de Firebase?')) return;
     try {
-        await db.ref(`series_personalizadas/${key}`).remove();
+        await remove(ref(db, `series_personalizadas/${key}`));
         if (serieKeyActual === key) serieKeyActual = null;
         cargarSeries();
         mostrarToast('🗑️ Serie eliminada', 'warning');
     } catch(e) {
         mostrarToast('❌ Error: ' + e.message, 'error');
     }
-}
+};
 
-// ==============================================
 // 🔥 ESCUCHAR CAMBIOS EN TIEMPO REAL
-// ==============================================
-db.ref('series_personalizadas').on('value', () => {
+onValue(child(ref(db), 'series_personalizadas'), () => {
     console.log('🔄 Cambio detectado en series - Recargando...');
     cargarSeries();
 });
 
-// ==============================================
-// ⚡ INICIO
-// ==============================================
 cargarSeries();
-console.log('✅ Admin TELY cargado - Listo para agregar series');
+console.log('✅ Admin TELY cargado - Botón mágico listo');
 </script>
 </body>
 </html>
