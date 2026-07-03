@@ -2,1140 +2,278 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin TELY</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>TELY 🎬 - Admin</title>
+    <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}body{background:#0F172A;color:#F8FAFC;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;padding:1rem}
-        .card{background:#1E293B;border-radius:12px;padding:1.2rem;margin-bottom:1rem}.card h3{color:#60A5FA;margin-bottom:0.8rem;font-size:1.1rem}
-        input,select,textarea{width:100%;padding:0.7rem;border-radius:8px;border:1px solid #334155;background:#0F172A;color:#F8FAFC;font-size:0.95rem;margin-bottom:0.5rem}
-        input:focus,select:focus,textarea:focus{outline:none;border-color:#60A5FA}
-        .btn{padding:0.4rem 0.8rem;border:none;border-radius:8px;font-weight:600;cursor:pointer;transition:0.2s;font-size:0.75rem;display:inline-flex;align-items:center;gap:0.3rem}
-        .btn-guardar{background:#10B981;color:white}.btn-guardar:hover{background:#059669}
-        .btn-danger{background:#EF4444;color:white}.btn-danger:hover{background:#DC2626}
-        .btn-refresh{background:#60A5FA;color:white}.btn-refresh:hover{background:#3B82F6}
-        .btn-probar{background:#8B5CF6;color:white}.btn-probar:hover{background:#7C3AED}
-        .btn-exportar{background:#F59E0B;color:#0F172A}.btn-exportar:hover{background:#D97706}
-        .btn-google{background:#4285F4;color:white}.btn-google:hover{background:#357AE8}
-        .btn-recargar-index{background:#F59E0B;color:#0F172A}.btn-recargar-index:hover{background:#D97706}
-        .btn-small{padding:0.2rem 0.6rem;font-size:0.7rem}
-        .btn-xxs{padding:0.1rem 0.35rem;font-size:0.55rem;border-radius:4px}
-        .btn-buscar{background:#3B82F6;color:white}.btn-buscar:hover{background:#2563EB}
-        .btn-agregar-temp{background:#10B981;color:white;padding:0.3rem 0.8rem;font-size:0.75rem;border-radius:6px;border:none;cursor:pointer;margin-top:0.3rem}
-        .btn-agregar-temp:hover{background:#059669}
-        .grid-peliculas{display:grid;grid-template-columns:1fr;gap:0.8rem;max-height:55vh;overflow-y:auto;padding-right:0.5rem}
-        .grid-peliculas::-webkit-scrollbar{width:6px}.grid-peliculas::-webkit-scrollbar-track{background:transparent}.grid-peliculas::-webkit-scrollbar-thumb{background:#475569;border-radius:4px}
-        .pelicula-item{background:#1E293B;padding:0.7rem 0.9rem;border-radius:10px;border-left:4px solid #60A5FA;display:flex;flex-direction:column;gap:0.4rem}
-        .pelicula-item .info{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.3rem}
-        .pelicula-item .info .titulo{font-weight:600;font-size:0.95rem}.pelicula-item .info .anio{color:#94A3B8;font-size:0.8rem}
-        .badge{display:inline-block;padding:0.15rem 0.5rem;border-radius:10px;font-size:0.6rem;font-weight:600}
-        .badge-peli{background:#60A5FA;color:#0F172A}.badge-serie{background:#10B981;color:#0F172A}
-        .badge-sin-enlace{background:#EF4444;color:white}.badge-con-enlace{background:#10B981;color:white}
-        .badge-firebase{background:#F59E0B;color:#0F172A}
-        .badge-op2{background:#3B82F6;color:white}
-        .cargando{text-align:center;color:#94A3B8;padding:1.5rem}
-        .header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid #334155}
-        .header h1{font-size:1.6rem;font-weight:700}.header h1 i{color:#60A5FA}
-        .contador{color:#94A3B8;font-size:0.85rem}
-        .portada-mini{width:35px;height:52px;object-fit:cover;border-radius:4px;margin-right:0.4rem}
-        .info-peli{display:flex;align-items:center;gap:0.3rem}
-        .status-firebase{display:inline-block;padding:0.2rem 0.6rem;border-radius:12px;font-size:0.65rem;font-weight:600;background:#10B981;color:white}
-        .status-firebase.error{background:#EF4444}
-        .tabs{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
-        .tab{padding:0.5rem 1rem;border-radius:8px;border:none;background:#1E293B;color:#94A3B8;cursor:pointer;font-weight:600;transition:0.2s;font-size:0.9rem}
-        .tab.activo{background:#60A5FA;color:#0F172A}.tab:hover{background:#334155}
-        .paginas{display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;margin-top:0.5rem}
-        .paginas button{padding:0.2rem 0.6rem;border-radius:6px;border:1px solid #334155;background:transparent;color:#94A3B8;cursor:pointer}
-        .paginas button:hover{border-color:#60A5FA;color:#60A5FA}.paginas .actual{background:#60A5FA;color:#0F172A;border-color:#60A5FA}
-        .buscador{display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap}.buscador input{flex:1;min-width:150px;margin-bottom:0}.buscador .btn{flex-shrink:0}
-        .serie-item{background:#1E293B;padding:0.7rem 0.9rem;border-radius:10px;border-left:4px solid #10B981;display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.8rem}
-        .serie-item .info{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.3rem}
-        .serie-item .info .titulo{font-weight:600;font-size:0.95rem}.serie-item .info .anio{color:#94A3B8;font-size:0.8rem}
-        .serie-item .temporadas{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.3rem}
-        .serie-item .temporadas .temp-card{background:#0F172A;padding:0.4rem 0.6rem;border-radius:6px;border:1px solid #334155}
-        .serie-item .temporadas .temp-card .temp-titulo{font-size:0.75rem;font-weight:600;color:#10B981}
-        .serie-item .temporadas .temp-card .capitulos{font-size:0.7rem;color:#94A3B8}
-        .oculto{display:none!important}
-        .login-banner{background:#1E293B;border-radius:12px;padding:1rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;border:1px solid #334155}
-        .login-banner .info{display:flex;align-items:center;gap:0.5rem}.login-banner .info i{font-size:1.2rem}
-        .login-banner .info .status{font-size:0.85rem}.login-banner .info .status.logged{color:#10B981}.login-banner .info .status.logged-out{color:#EF4444}
-        .categoria-tag{display:inline-block;padding:0.15rem 0.4rem;border-radius:4px;font-size:0.55rem;font-weight:600;margin-left:0.3rem}
-        .categoria-peliculas{background:#60A5FA;color:#0F172A}
-        .categoria-series{background:#10B981;color:#0F172A}
-        .categoria-anime{background:#EC4899;color:white}
-        .categoria-terror{background:#EF4444;color:white}
-        .categoria-comedia{background:#FBBF24;color:#0F172A}
-        .categoria-accion{background:#FB923C;color:#0F172A}
-        .categoria-drama{background:#34D399;color:#0F172A}
-        .btn-op1-guardar{background:#10B981;color:white;padding:0.2rem 0.5rem;font-size:0.6rem;border-radius:4px;border:none;cursor:pointer}
-        .btn-op1-guardar:hover{background:#059669}
-        .btn-op2-guardar{background:#3B82F6;color:white;padding:0.2rem 0.5rem;font-size:0.6rem;border-radius:4px;border:none;cursor:pointer}
-        .btn-op2-guardar:hover{background:#2563EB}
-        #toast{position:fixed;bottom:20px;right:20px;background:#10B981;color:white;padding:12px 24px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.3);display:none;z-index:99999;transition:0.3s;max-width:90vw;font-size:0.9rem}
-        #toast.error{background:#EF4444}
-        #toast.warning{background:#F59E0B;color:#0F172A}
-        .modal-editor{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99999;display:none;align-items:center;justify-content:center;padding:1rem}
-        .modal-editor.abierto{display:flex}.modal-editor .modal-content{background:#1E293B;border-radius:12px;padding:1.5rem;max-width:750px;width:100%;max-height:90vh;overflow-y:auto}
-        .modal-editor .modal-content h3{color:#10B981;margin-bottom:0.5rem}
-        .modal-editor .modal-content .temp-card-editor{margin-bottom:0.8rem;padding:0.8rem;background:#0F172A;border-radius:8px;border:1px solid #334155}
-        .modal-editor .modal-content .temp-card-editor .temp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem}
-        .modal-editor .modal-content .temp-card-editor .temp-header input{flex:1;margin-right:0.5rem;padding:0.4rem;border-radius:6px;border:1px solid #334155;background:#0F172A;color:#F8FAFC}
-        .modal-editor .modal-footer{display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem}
-        .selector-temp-editor button:disabled{opacity:0.3;cursor:not-allowed}
-        .temp-card-editor{display:none}
-        .temp-card-editor.activa{display:block}
-        .capitulo-item{display:flex;flex-direction:column;gap:0.3rem;padding:0.5rem;background:#0F172A;border-radius:8px;border:1px solid #334155;margin-bottom:0.5rem}
-        .capitulo-item .fila-cap{display:flex;align-items:center;gap:0.3rem;flex-wrap:wrap}
-        .capitulo-item .fila-cap input{flex:1;min-width:80px;margin-bottom:0;padding:0.2rem 0.4rem;font-size:0.7rem;border-radius:4px;border:1px solid #334155;background:#0F172A;color:#F8FAFC}
-        .capitulo-item .fila-cap .cap-num{width:50px;flex:none}
-        .progreso-container{background:#0F172A;border-radius:8px;height:20px;overflow:hidden;border:1px solid #334155;margin-top:0.5rem}
-        .progreso-barra{background:linear-gradient(90deg,#10B981,#7C3AED);height:100%;width:0%;transition:width 0.3s;border-radius:8px}
-        .progreso-texto{color:#94A3B8;font-size:0.75rem;margin-top:0.2rem}
-        .btn-carga-peliculas{background:linear-gradient(135deg,#3B82F6,#60A5FA);color:white;border:none;padding:0.6rem 1.2rem;border-radius:8px;font-weight:600;cursor:pointer;transition:0.3s;font-size:0.8rem;display:inline-flex;align-items:center;gap:0.5rem}
-        .btn-carga-peliculas:hover{transform:scale(1.03);box-shadow:0 4px 20px rgba(59,130,246,0.3)}
-        .btn-carga-series{background:linear-gradient(135deg,#8B5CF6,#A78BFA);color:white;border:none;padding:0.6rem 1.2rem;border-radius:8px;font-weight:600;cursor:pointer;transition:0.3s;font-size:0.8rem;display:inline-flex;align-items:center;gap:0.5rem}
-        .btn-carga-series:hover{transform:scale(1.03);box-shadow:0 4px 20px rgba(139,92,246,0.3)}
-        .btn-carga-masiva{background:linear-gradient(135deg,#7C3AED,#10B981);color:white;border:none;padding:0.8rem 1.5rem;border-radius:8px;font-weight:700;cursor:pointer;transition:0.3s;font-size:0.9rem;display:inline-flex;align-items:center;gap:0.5rem}
-        .btn-carga-masiva:hover{transform:scale(1.03);box-shadow:0 4px 20px rgba(124,58,237,0.3)}
-        .btn-carga-masiva:disabled{opacity:0.5;cursor:not-allowed;transform:none}
-        .botones-carga{display:flex;gap:0.8rem;flex-wrap:wrap;align-items:center}
-        .btn-detener{background:#EF4444;color:white;border:none;padding:0.6rem 1.2rem;border-radius:8px;font-weight:600;cursor:pointer;transition:0.3s;font-size:0.8rem;display:inline-flex;align-items:center;gap:0.5rem}
-        .btn-detener:hover{background:#DC2626}
-        .btn-opcion{background:rgba(255,255,255,0.05);border:1px solid rgba(124,58,237,0.2);color:#fff;padding:0.3rem 0.8rem;border-radius:6px;cursor:pointer;font-size:0.7rem}
-        .btn-opcion.activo{border-color:#7C3AED;background:#7C3AED;color:#fff}
-        .temp-card-agregar{background:#0F172A;padding:1rem;border-radius:8px;border:1px solid #334155;margin-bottom:0.8rem}
-        .temp-card-agregar .temp-header{display:flex;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap}
-        .temp-card-agregar .temp-header input{flex:1;margin-bottom:0}
-        .cap-item-agregar{display:flex;gap:0.3rem;margin-bottom:0.3rem;flex-wrap:wrap;align-items:center}
-        .cap-item-agregar input{flex:1;min-width:60px;margin-bottom:0;padding:0.3rem 0.5rem;font-size:0.75rem}
-        .cap-item-agregar .cap-num{width:50px;flex:none}
-        .error-box{background:#EF4444;color:white;padding:1rem;border-radius:8px;margin-bottom:1rem;text-align:center}
-        .error-box code{background:#0F172A;padding:0.2rem 0.5rem;border-radius:4px;display:inline-block;margin-top:0.3rem;font-size:0.8rem;color:#F8FAFC}
-        .btn-generar-caps{background:#8B5CF6;color:white;padding:0.3rem 0.8rem;border-radius:6px;border:none;cursor:pointer;font-size:0.7rem;margin-top:0.3rem}
-        .btn-generar-caps:hover{background:#7C3AED}
-        .error-msg{color:#EF4444;text-align:center;padding:1rem}
-        .btn-op2-masivo{background:linear-gradient(135deg,#F59E0B,#EF4444);color:white;border:none;padding:0.6rem 1.2rem;border-radius:8px;font-weight:700;cursor:pointer;transition:0.3s;font-size:0.8rem;display:inline-flex;align-items:center;gap:0.5rem;margin-top:0.5rem}
-        .btn-op2-masivo:hover{transform:scale(1.03);box-shadow:0 4px 20px rgba(245,158,11,0.3)}
-        .btn-op2-masivo:disabled{opacity:0.5;cursor:not-allowed}
-        .btn-caps-series{background:linear-gradient(135deg,#10B981,#34D399);color:white;border:none;padding:0.6rem 1.2rem;border-radius:8px;font-weight:700;cursor:pointer;transition:0.3s;font-size:0.8rem;display:inline-flex;align-items:center;gap:0.5rem;margin-top:0.5rem}
-        .btn-caps-series:hover{transform:scale(1.03);box-shadow:0 4px 20px rgba(16,185,129,0.3)}
-        .btn-caps-series:disabled{opacity:0.5;cursor:not-allowed}
+        .admin-page{padding:1rem;max-width:1200px;margin:0 auto}
+        .admin-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:.5rem}
+        .admin-card{background:rgba(255,255,255,.04);border-radius:12px;padding:1.2rem;border:1px solid rgba(124,58,237,.15);margin-bottom:1rem}
+        body:not(.dark) .admin-card{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1)}
+        .admin-card h3{font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem}
+        .admin-input{width:100%;padding:.6rem;border-radius:8px;border:1px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.9rem;margin-bottom:.5rem}
+        body:not(.dark) .admin-input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
+        .admin-input:focus{outline:none;border-color:#7C3AED}
+        .admin-btn{background:#7C3AED;border:none;color:#fff;padding:.5rem 1.5rem;border-radius:8px;font-weight:700;cursor:pointer}
+        .admin-btn:hover{background:#6D28D9}
+        .admin-btn-danger{background:#EF4444}
+        .admin-btn-danger:hover{background:#DC2626}
+        .admin-btn-success{background:#10B981}
+        .admin-btn-success:hover{background:#059669}
+        .admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+        @media(max-width:768px){.admin-grid{grid-template-columns:1fr}}
+        .admin-item{background:rgba(255,255,255,.02);border-radius:8px;padding:.6rem;border-left:3px solid #7C3AED;margin-bottom:.4rem}
+        body:not(.dark) .admin-item{background:rgba(0,0,0,.02)}
+        .admin-item .title{font-weight:600;font-size:.9rem}
+        .admin-item .meta{font-size:.75rem;color:#94A3B8}
+        body:not(.dark) .admin-item .meta{color:#888}
+        .admin-item .actions{display:flex;gap:.3rem;margin-top:.2rem}
+        .admin-item .actions button{padding:.1rem .6rem;border-radius:4px;border:none;font-size:.7rem;font-weight:600;cursor:pointer}
+        .admin-item .actions .edit{background:rgba(59,130,246,.2);color:#60A5FA}
+        .admin-item .actions .delete{background:rgba(239,68,68,.2);color:#F87171}
+        .admin-item .actions .edit:hover{background:rgba(59,130,246,.3)}
+        .admin-item .actions .delete:hover{background:rgba(239,68,68,.3)}
+        .cap-item-admin{background:rgba(255,255,255,.02);border-radius:4px;padding:.3rem .6rem;margin:.2rem 0;border-left:2px solid #3B82F6;font-size:.8rem}
+        body:not(.dark) .cap-item-admin{background:rgba(0,0,0,.02)}
+        .badge-op2{color:#34D399;font-size:.6rem;font-weight:600}
+        .badge-no-op2{color:#EF4444;font-size:.6rem;font-weight:600}
     </style>
-</head><body>
-<div class="max-w-4xl mx-auto">
-    <div class="header">
+</head>
+<body class="admin-page">
+    <div class="admin-header">
+        <h1 style="background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+            🛠️ Admin TELY
+        </h1>
         <div>
-            <h1><i class="fa fa-link"></i> Admin TELY</h1>
-            <span style="font-size:0.8rem; color:#94A3B8;"><i class="fa fa-database"></i> Firebase: <span id="statusFirebase" class="status-firebase">Conectando...</span></span>
-        </div>
-        <div style="display:flex; gap:0.8rem; align-items:center; flex-wrap:wrap;">
-            <span class="contador" id="contador">0 items</span>
-            <button class="btn btn-refresh btn-small" onclick="recargarTodo()"><i class="fa fa-sync"></i> Recargar</button>
-            <button class="btn btn-exportar btn-small" onclick="exportarDatos()"><i class="fa fa-download"></i> Exportar</button>
-            <button class="btn btn-recargar-index btn-small" onclick="recargarIndex()"><i class="fa fa-globe"></i> Recargar Index</button>
+            <button class="admin-btn admin-btn-success" onclick="cargarDatos()"><i class="fas fa-refresh"></i> Recargar</button>
+            <a href="index.html" class="admin-btn" style="text-decoration:none;display:inline-block;"><i class="fas fa-home"></i> Volver</a>
         </div>
     </div>
 
-    <div id="errorFirebaseContainer"></div>
-
-    <div class="login-banner" id="loginBanner">
-        <div class="info">
-            <i class="fa-solid fa-user-circle"></i>
-            <span class="status logged-out" id="userStatus">❌ Sesión cerrada</span>
-        </div>
-        <div>
-            <button class="btn btn-google btn-small" id="btnLogin" onclick="iniciarSesion()"><i class="fa-brands fa-google"></i> Iniciar sesión</button>
-            <button class="btn btn-danger btn-small oculto" id="btnLogout" onclick="cerrarSesion()"><i class="fa fa-sign-out"></i> Cerrar sesión</button>
-        </div>
-    </div>
-
-    <!-- BOTONES CARGA MASIVA -->
-    <div class="card" style="border:2px solid #7C3AED;">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+    <!-- AGREGAR SERIE -->
+    <div class="admin-card">
+        <h3><i class="fas fa-plus-circle text-purple-500"></i> Agregar Serie</h3>
+        <div class="admin-grid">
             <div>
-                <h3 style="color:#A78BFA;margin:0;"><i class="fa-solid fa-rocket"></i> Carga Masiva</h3>
-                <p style="color:#94A3B8;font-size:0.75rem;margin:0;">Agrega TODAS las películas y series con enlaces automáticos</p>
+                <input class="admin-input" id="sTitulo" placeholder="Título de la serie" value="Aprenderás">
+                <input class="admin-input" id="sAnio" placeholder="Año" value="2024">
+                <input class="admin-input" id="sPortada" placeholder="URL de la portada" value="https://image.tmdb.org/t/p/w342/kqjL17yufvn9OVLyXYpvtyrFfak.jpg">
+                <textarea class="admin-input" id="sSinopsis" rows="2" placeholder="Sinopsis">Serie para aprender a programar</textarea>
             </div>
-            <div class="botones-carga">
-                <button class="btn-carga-peliculas" onclick="agregarPeliculasAutomaticamente()" id="btnAgregarPelis">
-                    <i class="fa-solid fa-film"></i> Películas
-                </button>
-                <button class="btn-carga-series" onclick="agregarSeriesAutomaticamente()" id="btnAgregarSeries">
-                    <i class="fa-solid fa-tv"></i> Series
-                </button>
-                <button class="btn-carga-masiva" onclick="agregarTodoAutomaticamente()" id="btnAgregarTodo">
-                    <i class="fa-solid fa-bolt"></i> 🚀 Agregar Todo
-                </button>
-                <button class="btn-detener" onclick="detenerCargaMasiva()" id="btnDetener" style="display:none;">
-                    <i class="fa-solid fa-stop"></i> Detener
-                </button>
-            </div>
-        </div>
-        <div id="progresoCarga" style="display:none;margin-top:0.5rem;">
-            <div class="progreso-container">
-                <div class="progreso-barra" id="barraProgreso"></div>
-            </div>
-            <p class="progreso-texto" id="textoProgreso">0% - Preparando...</p>
-            <p class="progreso-texto" id="textoDetalle" style="font-size:0.7rem;color:#60A5FA;"></p>
-        </div>
-    </div><div class="tabs">
-    <button class="tab activo" onclick="cambiarTab('tmdb')"><i class="fa fa-film"></i> Películas</button>
-    <button class="tab" onclick="cambiarTab('series')"><i class="fa fa-tv"></i> Series</button>
-    <button class="tab" onclick="cambiarTab('agregar')"><i class="fa fa-plus"></i> Agregar</button>
-</div>
-
-<!-- TAB: PELÍCULAS -->
-<div id="tab-tmdb">
-    <div class="card">
-        <h3><i class="fa fa-film"></i> Películas</h3>
-        <p class="text-gray-400 text-sm mb-3">Agrega enlaces (Opción 1 y Opción 2) a cada película</p>
-        
-        <div style="margin-bottom:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
-            <button class="btn-op2-masivo" onclick="agregarOp2ATodas()" id="btnOp2Masivo">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> Agregar Opción 2 a TODAS
-            </button>
-            <button class="btn-op2-masivo" onclick="agregarOp2AFaltantes()" id="btnOp2Faltantes" style="background:linear-gradient(135deg,#10B981,#34D399);">
-                <i class="fa-solid fa-plus-circle"></i> Solo a las que NO tienen
-            </button>
-            <button class="btn-op2-masivo" onclick="reemplazarTodasOp2()" id="btnReemplazarOp2" style="background:linear-gradient(135deg,#EF4444,#F59E0B);">
-                <i class="fa-solid fa-rotate"></i> Reemplazar TODAS las Op2
-            </button>
-        </div>
-        
-        <div class="buscador">
-            <input type="text" id="buscadorPeliculas" placeholder="Buscar película..." onkeydown="if(event.key==='Enter') buscarPeliculas()">
-            <button class="btn btn-buscar btn-small" onclick="buscarPeliculas()"><i class="fa fa-search"></i> Buscar</button>
-            <button class="btn btn-refresh btn-small" onclick="cargarPeliculas()"><i class="fa fa-times"></i> Limpiar</button>
-        </div>
-        <div id="lista-peliculas" class="grid-peliculas"><div class="cargando"><i class="fa-solid fa-spinner fa-spin"></i> Cargando películas...</div></div>
-        <div class="paginas" id="paginacion" style="display:none;">
-            <button onclick="cambiarPagina(-1)"><i class="fa fa-chevron-left"></i></button>
-            <span id="paginaActual" class="actual">1</span>
-            <button onclick="cambiarPagina(1)"><i class="fa fa-chevron-right"></i></button>
-            <span style="color:#94A3B8; font-size:0.8rem; margin-left:0.5rem;">Página <span id="paginaNum">1</span></span>
-        </div>
-    </div>
-</div>    <!-- TAB: SERIES -->
-    <div id="tab-series" class="oculto">
-        <div class="card">
-            <h3><i class="fa fa-tv"></i> Series</h3>
-            <p class="text-gray-400 text-sm mb-3">Agrega temporadas y capítulos con enlaces</p>
-            
-            <div style="margin-bottom:1rem;">
-                <button class="btn-caps-series" onclick="generarCapsTodasLasSeries()" id="btnCapsSeries">
-                    <i class="fa-solid fa-magic"></i> Generar capítulos para TODAS las series
-                </button>
-                <button class="btn-caps-series" onclick="generarCapsSeriesFaltantes()" id="btnCapsFaltantes" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);">
-                    <i class="fa-solid fa-plus-circle"></i> Solo series sin capítulos
-                </button>
-            </div>
-            
-            <div class="buscador">
-                <input type="text" id="buscadorSeries" placeholder="Buscar serie..." onkeydown="if(event.key==='Enter') buscarSeries()">
-                <button class="btn btn-buscar btn-small" onclick="buscarSeries()"><i class="fa fa-search"></i> Buscar</button>
-                <button class="btn btn-refresh btn-small" onclick="cargarSeries()"><i class="fa fa-times"></i> Limpiar</button>
-            </div>
-            <div id="lista-series" class="grid-peliculas"><div class="cargando"><i class="fa-solid fa-spinner fa-spin"></i> Cargando series...</div></div>
-            <div class="paginas" id="paginacionSeries" style="display:none;">
-                <button onclick="cambiarPaginaSeries(-1)"><i class="fa fa-chevron-left"></i></button>
-                <span id="paginaActualSeries" class="actual">1</span>
-                <button onclick="cambiarPaginaSeries(1)"><i class="fa fa-chevron-right"></i></button>
-                <span style="color:#94A3B8; font-size:0.8rem; margin-left:0.5rem;">Página <span id="paginaNumSeries">1</span></span>
+            <div>
+                <h4 class="text-sm font-bold text-blue-400">Capítulos</h4>
+                <div id="capitulosAdmin">
+                    <div class="cap-item-admin">
+                        <span>Cap 1: </span>
+                        <input class="admin-input" style="display:inline-block;width:auto;" id="c1Titulo" placeholder="Título" value="Introducción">
+                        <input class="admin-input" style="display:inline-block;width:auto;" id="c1Op2" placeholder="Opción 2 (Vidsrc)" value="https://vidsrc.in/embed/tv/1/1/1?lang=es">
+                    </div>
+                    <div class="cap-item-admin">
+                        <span>Cap 2: </span>
+                        <input class="admin-input" style="display:inline-block;width:auto;" id="c2Titulo" placeholder="Título" value="Variables">
+                        <input class="admin-input" style="display:inline-block;width:auto;" id="c2Op2" placeholder="Opción 2 (Vidsrc)" value="https://vidsrc.in/embed/tv/1/1/2?lang=es">
+                    </div>
+                    <div class="cap-item-admin">
+                        <span>Cap 3: </span>
+                        <input class="admin-input" style="display:inline-block;width:auto;" id="c3Titulo" placeholder="Título" value="Funciones">
+                        <input class="admin-input" style="display:inline-block;width:auto;" id="c3Op2" placeholder="Opción 2 (Vidsrc)" value="https://vidsrc.in/embed/tv/1/1/3?lang=es">
+                    </div>
+                </div>
+                <button class="admin-btn" onclick="guardarSerie()"><i class="fas fa-save"></i> Guardar Serie</button>
             </div>
         </div>
     </div>
 
-    <!-- TAB: AGREGAR -->
-    <div id="tab-agregar" class="oculto">
-        <div class="form-agregar" style="background:#1E293B;border-radius:12px;padding:1.2rem;margin-bottom:1rem;border:2px dashed #334155;">
-            <h3 style="color:#F59E0B;margin-bottom:0.8rem;font-size:1.1rem;"><i class="fa fa-plus-circle"></i> Agregar Contenido</h3>
-            <p class="text-gray-400 text-sm mb-3">Crea una película o serie desde cero</p>
-            <select id="tipoContenido" onchange="toggleCamposContenido()">
-                <option value="pelicula">Película</option>
-                <option value="serie">Serie</option>
-            </select>
-            <div class="fila" style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
-                <input type="text" id="nuevoTitulo" placeholder="Título *">
-                <input type="text" id="nuevoAnio" placeholder="Año (ej: 2024)">
-            </div>
-            <input type="text" id="nuevaPortada" placeholder="URL de la portada">
-            <textarea id="nuevaSinopsis" rows="2" placeholder="Sinopsis..."></textarea>
-            <div class="fila" style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
-                <input type="text" id="nuevoGenero" placeholder="Género">
-                <input type="text" id="nuevoRating" placeholder="Calificación (ej: 7.5)">
-            </div>
-            <select id="nuevaCategoriaContenido">
-                <option value="peliculas">🎬 Películas</option>
-                <option value="series">📺 Series</option>
-                <option value="anime">🇯🇵 Anime</option>
-                <option value="terror">👻 Terror</option>
-                <option value="comedia">😂 Comedia</option>
-                <option value="accion">💥 Acción</option>
-                <option value="drama">🎭 Drama</option>
-            </select>
-            <div id="camposPelicula">
-                <h4 class="text-sm text-gray-300 mt-2 mb-1">🎬 Enlaces de video</h4>
-                <input type="text" id="nuevaUrl1" placeholder="Opción 1 (URL)">
-                <input type="text" id="nuevaUrl2" placeholder="Opción 2 (URL)">
-            </div>
-            <div id="camposSerie" class="oculto">
-                <h4 class="text-sm text-gray-300 mt-2 mb-1">📺 Temporadas y Capítulos</h4>
-                <div id="temporadasContainer"></div>
-                <button type="button" class="btn-agregar-temp" onclick="agregarTemporadaUI()"><i class="fa fa-plus"></i> Agregar temporada</button>
-                <button type="button" class="btn-generar-caps" onclick="generarCapsAutomaticamente()"><i class="fa fa-magic"></i> Generar capítulos automáticos</button>
-            </div>
-            <button class="btn btn-guardar" onclick="agregarContenidoPersonalizado()" style="margin-top:0.5rem;"><i class="fa fa-save"></i> Guardar</button>
+    <!-- LISTA DE SERIES -->
+    <div class="admin-card">
+        <h3><i class="fas fa-list text-emerald-500"></i> Series en Firebase</h3>
+        <div id="listaSeries" class="max-h-96 overflow-y-auto">
+            <p style="color:#64748B;font-size:.9rem;">Cargando series...</p>
         </div>
     </div>
-</div><!-- MODAL EDITOR SERIE -->
-<div id="modalEditorSerie" class="modal-editor">
-    <div class="modal-content" id="modalEditorContent">
-        <h3 id="editorTitulo"><i class="fa fa-tv"></i> Editar Serie</h3>
-        <p class="text-gray-400 text-sm mb-3">Selecciona una temporada para ver sus capítulos</p>
-        
-        <div class="selector-temp-editor" style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;background:#0F172A;padding:0.5rem 1rem;border-radius:8px;border:1px solid #334155;">
-            <button class="btn btn-refresh btn-small" onclick="cambiarTempEditor(-1)" id="btnTempAntEditor">
-                <i class="fa fa-chevron-left"></i>
-            </button>
-            <span id="tempActualEditor" style="font-weight:600;color:#10B981;min-width:120px;text-align:center;">Temporada 1</span>
-            <button class="btn btn-refresh btn-small" onclick="cambiarTempEditor(1)" id="btnTempSigEditor">
-                <i class="fa fa-chevron-right"></i>
-            </button>
-            <span style="color:#94A3B8;font-size:0.8rem;margin-left:0.5rem;" id="totalTempsEditor">de 1</span>
-        </div>
-        
-        <div id="editTemporadasContainer"></div>
-        <button class="btn-agregar-temp" onclick="agregarTemporadaEdit()"><i class="fa fa-plus"></i> Agregar temporada</button>
-        <button class="btn-generar-caps" onclick="generarCapsEnEditor()"><i class="fa fa-magic"></i> Generar todos los capítulos</button>
-        <div class="modal-footer" style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
-            <button class="btn btn-guardar" onclick="guardarSeriesCambios()"><i class="fa fa-save"></i> Guardar cambios</button>
-            <button class="btn btn-danger" onclick="cerrarEditorSerie()"><i class="fa fa-times"></i> Cerrar</button>
-        </div>
-    </div>
-</div>
 
-<!-- TOAST -->
-<div id="toast">
-    <i class="fa fa-check-circle"></i> <span id="toastMensaje">Guardado</span>
-</div><script>
-// ==============================================
-// 🔧 FIREBASE
-// ==============================================
-const firebaseConfig = {
-    apiKey: "AIzaSyCwLATDpQN1RWv3rLPjJXbNnIBkyo_BUfI",
-    authDomain: "tely-ap.firebaseapp.com",
-    databaseURL: "https://tely-ap-default-rtdb.firebaseio.com",
-    projectId: "tely-ap",
-    storageBucket: "tely-ap.firebasestorage.app",
-    messagingSenderId: "760862940967",
-    appId: "1:760862940967:web:69bbbbfee0de40f68a1302"
-};
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth(), db = firebase.database();
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        let serieKeyActual = null;
 
-// ==============================================
-// 🔑 TMDB - DIRECTO CON TIMEOUT
-// ==============================================
-const TMDB_API_KEY = "8dd99b5a15acfdd98e3b249d5f890af4";
-const TMDB_BASE = "https://api.themoviedb.org/3";
-const TMDB_IMG = "https://image.tmdb.org/t/p/w154";
-const TMDB_LANG = "es-ES";
+        // ----- GUARDAR SERIE -----
+        async function guardarSerie() {
+            const titulo = document.getElementById('sTitulo').value.trim() || 'Aprenderás';
+            const serie = {
+                titulo: titulo,
+                anio: document.getElementById('sAnio').value.trim() || '2024',
+                sinopsis: document.getElementById('sSinopsis').value.trim() || 'Sin sinopsis',
+                portada: document.getElementById('sPortada').value.trim() || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
+                tipo: 'serie',
+                categoria: 'series',
+                genero: 'Educativo',
+                opcion2: '',
+                plataforma2: 'vidsrc',
+                temporadas: [{
+                    numero: 1,
+                    nombre: 'Temporada 1',
+                    capitulos: [
+                        {
+                            numero: 1,
+                            titulo: document.getElementById('c1Titulo').value.trim() || 'Capítulo 1',
+                            sinopsis: '',
+                            url: generarEnlaceMultiplataforma(1, 'serie', 'unlimplay', 1, 1),
+                            opcion2: document.getElementById('c1Op2').value.trim() || '',
+                            plataforma2: 'vidsrc'
+                        },
+                        {
+                            numero: 2,
+                            titulo: document.getElementById('c2Titulo').value.trim() || 'Capítulo 2',
+                            sinopsis: '',
+                            url: generarEnlaceMultiplataforma(1, 'serie', 'unlimplay', 1, 2),
+                            opcion2: document.getElementById('c2Op2').value.trim() || '',
+                            plataforma2: 'vidsrc'
+                        },
+                        {
+                            numero: 3,
+                            titulo: document.getElementById('c3Titulo').value.trim() || 'Capítulo 3',
+                            sinopsis: '',
+                            url: generarEnlaceMultiplataforma(1, 'serie', 'unlimplay', 1, 3),
+                            opcion2: document.getElementById('c3Op2').value.trim() || '',
+                            plataforma2: 'vidsrc'
+                        }
+                    ]
+                }]
+            };
 
-async function fetchTMDB(path, params = {}) {
-    const queryParams = new URLSearchParams();
-    queryParams.append('api_key', TMDB_API_KEY);
-    queryParams.append('language', TMDB_LANG);
-    Object.keys(params).forEach(key => queryParams.append(key, params[key]));
-    const url = `${TMDB_BASE}/${path}?${queryParams.toString()}`;
-    
-    console.log('📡 Llamando a TMDB:', url);
-    
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-    try {
-        const response = await fetch(url, { signal: controller.signal });
-        clearTimeout(timeout);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return await response.json();
-    } catch (error) {
-        clearTimeout(timeout);
-        if (error.name === 'AbortError') {
-            throw new Error('Timeout - TMDB no responde');
-        }
-        throw error;
-    }
-}
-
-// ==============================================
-// 📦 VARIABLES
-// ==============================================
-let peliculas = [], peliculasAdmin = [], seriesAdmin = [];
-let paginaActual = 1, totalPaginas = 1;
-let paginaSeries = 1, totalPaginasSeries = 1;
-let busquedaActual = '', busquedaSeriesActual = '';
-let serieEditandoId = null, tempActualEditor = 0, totalTempsEditor = 0;
-let detenerCarga = false;
-let cargandoPeliculas = false;// ==============================================
-// 📥 GENERAR ENLACE UNLIMPLAY
-// ==============================================
-function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    if (tipo === 'pelicula') {
-        return `https://unlimplay.com/play/embed/movie/${tmdb_id}`;
-    } else {
-        return `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temporada}/${capitulo}`;
-    }
-}
-
-// ==============================================
-// 🎬 GENERAR ENLACE OPCIÓN 2 AUTOMÁTICO
-// ==============================================
-function generarEnlaceOpcion2(titulo, tmdb_id) {
-    const tituloLimpio = titulo.toLowerCase()
-        .replace(/[^a-z0-9]/g, '')
-        .substring(0, 20);
-    const randomId = Math.random().toString(36).substring(2, 8);
-    return `https://vidmoly.biz/embed-${tituloLimpio}-${randomId}.html`;
-}
-
-// ==============================================
-// 🎬 GENERAR TODOS LOS CAPÍTULOS
-// ==============================================
-function generarCapitulosSerie(tmdb_id, totalTemporadas, capitulosPorTemporada) {
-    const temporadas = [];
-    for (let t = 1; t <= totalTemporadas; t++) {
-        const numCaps = capitulosPorTemporada[t-1] || 10;
-        const capitulos = [];
-        for (let c = 1; c <= numCaps; c++) {
-            capitulos.push({
-                numero: c,
-                titulo: `Capítulo ${c}`,
-                url: generarEnlaceUnlimplay(tmdb_id, 'serie', t, c),
-                opcion2: ''
-            });
-        }
-        temporadas.push({
-            numero: t,
-            nombre: `Temporada ${t}`,
-            capitulos: capitulos
-        });
-    }
-    return temporadas;
-}
-
-// ==============================================
-// 📥 OBTENER DATOS DE SERIE DESDE TMDB
-// ==============================================
-async function obtenerDatosSerieTMDB(tmdb_id) {
-    try {
-        const data = await fetchTMDB(`tv/${tmdb_id}`);
-        if (!data) throw new Error('No se encontró la serie');
-        
-        const seasons = data.seasons?.filter(s => s.season_number > 0) || [];
-        const totalTemps = seasons.length || 1;
-        const capsPorTemp = [];
-        
-        for (const season of seasons) {
             try {
-                const seasonData = await fetchTMDB(`tv/${tmdb_id}/season/${season.season_number}`);
-                capsPorTemp.push(seasonData.episodes?.length || 10);
+                if (serieKeyActual) {
+                    await db.ref(`series_personalizadas/${serieKeyActual}`).update(serie);
+                    mostrarToast('✅ Serie actualizada', 'success');
+                } else {
+                    await db.ref('series_personalizadas').push(serie);
+                    mostrarToast('✅ Serie guardada', 'success');
+                }
+                cargarSeries();
+                serieKeyActual = null;
+                document.getElementById('sTitulo').value = 'Aprenderás';
+                document.getElementById('sAnio').value = '2024';
+                document.getElementById('sSinopsis').value = 'Serie para aprender a programar';
             } catch(e) {
-                capsPorTemp.push(10);
+                mostrarToast('❌ Error: ' + e.message, 'error');
             }
         }
-        if (capsPorTemp.length === 0) capsPorTemp.push(10);
-        
-        return {
-            titulo: data.name || 'Sin título',
-            anio: data.first_air_date ? data.first_air_date.split('-')[0] : 'N/D',
-            portada: data.poster_path ? `${TMDB_IMG}${data.poster_path}` : '',
-            sinopsis: data.overview || 'Sin sinopsis',
-            puntuacion: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
-            genero: data.genres?.[0]?.name || 'Serie',
-            totalTemporadas: totalTemps,
-            capitulosPorTemporada: capsPorTemp
-        };
-    } catch(e) {
-        console.error('Error obteniendo datos de TMDB:', e);
-        return null;
-    }
-}
 
-// ==============================================
-// 🍞 TOAST
-// ==============================================
-function mostrarToast(mensaje, tipo = 'success') {
-    const toast = document.getElementById('toast');
-    const mensajeEl = document.getElementById('toastMensaje');
-    toast.className = tipo;
-    mensajeEl.textContent = mensaje;
-    toast.style.display = 'block';
-    toast.style.opacity = '1';
-    clearTimeout(toast._timeout);
-    toast._timeout = setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => { toast.style.display = 'none'; toast.className = ''; }, 300);
-    }, 4000);
-}
-
-// ==============================================
-// 🔄 RECARGAR INDEX
-// ==============================================
-function recargarIndex() {
-    window.open('https://tely-xi.vercel.app', '_blank');
-    mostrarToast('🔄 Abriendo Index...', 'warning');
-}// ==============================================
-// 🔥 FIREBASE CONEXIÓN
-// ==============================================
-function verificarConexionFirebase() {
-    const status = document.getElementById("statusFirebase");
-    status.textContent = "🔄 Conectando...";
-    status.className = "status-firebase";
-    db.ref(".info/connected").on("value", function(snap) {
-        if (snap.val() === true) { 
-            status.textContent = "✅ Conectado"; 
-            status.className = "status-firebase"; 
-        } else {
-            status.textContent = "❌ Desconectado"; 
-            status.className = "status-firebase error"; 
-        }
-    });
-    const testRef = db.ref('_test_connection');
-    testRef.set({ test: true, fecha: new Date().toISOString() }).then(() => {
-        status.textContent = "✅ Conectado"; 
-        status.className = "status-firebase";
-        testRef.remove();
-    }).catch((err) => {
-        status.textContent = "⚠️ Error"; 
-        status.className = "status-firebase error";
-        document.getElementById('errorFirebaseContainer').innerHTML = `
-            <div class="error-box">
-                <strong>⚠️ ERROR: Firebase no permite escritura</strong>
-                <p style="margin:0.5rem 0;">Error: ${err.message}</p>
-                <p>Ve a Firebase Console → Realtime Database → Reglas y cambia a:</p>
-                <code>{ "rules": { ".read": true, ".write": true } }</code>
-                <br><br><button class="btn btn-refresh btn-small" onclick="location.reload()"><i class="fa fa-sync"></i> Recargar</button>
-            </div>
-        `;
-    });
-}
-
-// ==============================================
-// 🔐 LOGIN
-// ==============================================
-function iniciarSesion() {
-    const btn = document.getElementById('btnLogin');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Conectando...';
-    
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ 'prompt': 'select_account' });
-    
-    auth.signInWithPopup(provider)
-        .then((result) => {
-            mostrarToast('✅ Sesión iniciada correctamente');
-            document.getElementById("userStatus").textContent = "✅ Sesión iniciada";
-            document.getElementById("userStatus").className = "status logged";
-            document.getElementById("btnLogin").classList.add('oculto');
-            document.getElementById("btnLogout").classList.remove('oculto');
-            setTimeout(() => recargarTodo(), 500);
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-brands fa-google"></i> Iniciar sesión';
-        })
-        .catch((error) => {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-brands fa-google"></i> Iniciar sesión';
-            if (error.code === 'auth/popup-closed-by-user') {
-                mostrarToast('⚠️ Cerraste la ventana de Google. Intenta de nuevo.', 'warning');
-            } else {
-                mostrarToast('❌ Error: ' + error.message, 'error');
+        // ----- CARGAR SERIES -----
+        async function cargarSeries() {
+            const container = document.getElementById('listaSeries');
+            container.innerHTML = '<p style="color:#64748B;font-size:.9rem;">Cargando series...</p>';
+            try {
+                const snap = await db.ref('series_personalizadas').once('value');
+                const data = snap.val();
+                if (!data) {
+                    container.innerHTML = '<p style="color:#64748B;font-size:.9rem;">No hay series guardadas</p>';
+                    return;
+                }
+                container.innerHTML = '';
+                Object.entries(data).forEach(([key, s]) => {
+                    const caps = s.temporadas?.[0]?.capitulos || [];
+                    const capInfo = caps.map((cap, i) => {
+                        const tieneOp2 = cap.opcion2 && cap.opcion2.trim() !== '';
+                        return `<span class="${tieneOp2 ? 'badge-op2' : 'badge-no-op2'}">Cap${i+1} ${tieneOp2 ? '✅ Op2' : '❌ Sin Op2'}</span>`;
+                    }).join(' ');
+                    const div = document.createElement('div');
+                    div.className = 'admin-item';
+                    div.innerHTML = `
+                        <div class="title">${s.titulo}</div>
+                        <div class="meta">${s.anio} • ${s.genero || 'Serie'}</div>
+                        <div class="meta">${capInfo}</div>
+                        <div class="actions">
+                            <button class="edit" onclick="editarSerie('${key}')"><i class="fas fa-pen"></i> Editar</button>
+                            <button class="delete" onclick="eliminarSerie('${key}')"><i class="fas fa-trash"></i> Eliminar</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch(e) {
+                container.innerHTML = '<p style="color:#EF4444;font-size:.9rem;">Error al cargar</p>';
             }
-            console.error('Error de login:', error);
+        }
+
+        // ----- EDITAR SERIE -----
+        async function editarSerie(key) {
+            try {
+                const snap = await db.ref(`series_personalizadas/${key}`).once('value');
+                const s = snap.val();
+                if (!s) return;
+                serieKeyActual = key;
+                document.getElementById('sTitulo').value = s.titulo || '';
+                document.getElementById('sAnio').value = s.anio || '';
+                document.getElementById('sSinopsis').value = s.sinopsis || '';
+                document.getElementById('sPortada').value = s.portada || '';
+                const caps = s.temporadas?.[0]?.capitulos || [];
+                if (caps[0]) {
+                    document.getElementById('c1Titulo').value = caps[0].titulo || '';
+                    document.getElementById('c1Op2').value = caps[0].opcion2 || '';
+                }
+                if (caps[1]) {
+                    document.getElementById('c2Titulo').value = caps[1].titulo || '';
+                    document.getElementById('c2Op2').value = caps[1].opcion2 || '';
+                }
+                if (caps[2]) {
+                    document.getElementById('c3Titulo').value = caps[2].titulo || '';
+                    document.getElementById('c3Op2').value = caps[2].opcion2 || '';
+                }
+                mostrarToast('📝 Editando: ' + s.titulo, 'warning');
+            } catch(e) {
+                mostrarToast('❌ Error al cargar: ' + e.message, 'error');
+            }
+        }
+
+        // ----- ELIMINAR SERIE -----
+        async function eliminarSerie(key) {
+            if (!confirm('¿Eliminar esta serie?')) return;
+            try {
+                await db.ref(`series_personalizadas/${key}`).remove();
+                if (serieKeyActual === key) serieKeyActual = null;
+                cargarSeries();
+                mostrarToast('🗑️ Serie eliminada', 'warning');
+            } catch(e) {
+                mostrarToast('❌ Error: ' + e.message, 'error');
+            }
+        }
+
+        // ----- RECARGAR DATOS -----
+        function cargarDatos() {
+            cargarSeries();
+            mostrarToast('🔄 Datos recargados', 'success');
+        }
+
+        // ----- FUNCIONES AUXILIARES -----
+        function mostrarToast(mensaje, tipo = 'success') {
+            const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444' };
+            const t = document.createElement('div');
+            t.style.cssText = `
+                position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+                background:${colores[tipo] || '#10B981'};color:#fff;padding:10px 20px;
+                border-radius:10px;z-index:9999;font-weight:600;max-width:90%;
+                text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);
+                transition:opacity 0.3s;
+            `;
+            t.textContent = mensaje;
+            document.body.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+        }
+
+        // ----- INICIO -----
+        cargarSeries();
+
+        // Escuchar cambios en tiempo real
+        db.ref('series_personalizadas').on('value', () => {
+            console.log('🔄 Cambio detectado en series');
+            cargarSeries();
         });
-}
 
-function cerrarSesion() {
-    auth.signOut().then(() => {
-        document.getElementById("userStatus").textContent = "❌ Sesión cerrada";
-        document.getElementById("userStatus").className = "status logged-out";
-        document.getElementById("btnLogin").classList.remove('oculto');
-        document.getElementById("btnLogout").classList.add('oculto');
-        mostrarToast('✅ Sesión cerrada');
-        peliculas = [];
-        peliculasAdmin = [];
-        document.getElementById("lista-peliculas").innerHTML = '<div class="cargando">🔐 Inicia sesión para administrar contenido</div>';
-        document.getElementById("contador").textContent = "0 items";
-    }).catch((error) => { 
-        mostrarToast('❌ Error: ' + error.message, 'error'); 
-    });
-}
-
-auth.onAuthStateChanged(user => {
-    if (user) {
-        document.getElementById("userStatus").textContent = "✅ Sesión iniciada";
-        document.getElementById("userStatus").className = "status logged";
-        document.getElementById("btnLogin").classList.add('oculto');
-        document.getElementById("btnLogout").classList.remove('oculto');
-        setTimeout(() => {
-            cargarPeliculas();
-            cargarSeries();
-        }, 300);
-    } else {
-        document.getElementById("userStatus").textContent = "❌ Sesión cerrada";
-        document.getElementById("userStatus").className = "status logged-out";
-        document.getElementById("btnLogin").classList.remove('oculto');
-        document.getElementById("btnLogout").classList.add('oculto');
-    }
-});
-
-function usuarioPuedeEscribir() {
-    if (!auth.currentUser) { 
-        mostrarToast('⚠️ Debes iniciar sesión para modificar datos.', 'warning'); 
-        return false; 
-    }
-    return true;
-}
-
-function corregirEnlaceYouTube(url) {
-    if (!url) return '';
-    const patterns = [/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/, /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/];
-    for (const p of patterns) { const m = url.match(p); if (m) return `https://www.youtube.com/embed/${m[1]}?autoplay=1`; }
-    return url;
-}
-
-// ==============================================
-// 📋 TABS
-// ==============================================
-function cambiarTab(tab) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'));
-    document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.add('oculto'));
-    const map = { 'tmdb': 'tab-tmdb', 'series': 'tab-series', 'agregar': 'tab-agregar' };
-    const el = map[tab]; if (el) document.getElementById(el).classList.remove('oculto');
-    document.querySelectorAll('.tab').forEach(t => {
-        const text = t.textContent;
-        if ((tab === 'tmdb' && text.includes('Películas')) ||
-            (tab === 'series' && text.includes('Series')) ||
-            (tab === 'agregar' && text.includes('Agregar'))) t.classList.add('activo');
-    });
-    if (tab === 'tmdb') cargarPeliculas();
-    else if (tab === 'series') cargarSeries();
-}// ==============================================
-// 📥 CARGAR PELÍCULAS - CON BÚSQUEDA EN FIREBASE
-// ==============================================
-async function cargarPeliculas() {
-    if (cargandoPeliculas) return;
-    cargandoPeliculas = true;
-    const contenedor = document.getElementById("lista-peliculas");
-    contenedor.innerHTML = '<div class="cargando"><i class="fa-solid fa-spinner fa-spin"></i> Cargando películas...</div>';
-    
-    try {
-        // ⭐ 1. CARGAR DESDE FIREBASE
-        const snapshot = await db.ref("contenido_personalizado").once("value");
-        let todasLasPeliculas = snapshot.val() ? Object.values(snapshot.val()) : [];
-        console.log("📥 Películas totales en Firebase:", todasLasPeliculas.length);
-        
-        // ⭐ 2. FILTRAR POR BÚSQUEDA
-        let peliculasFiltradas = todasLasPeliculas;
-        if (busquedaActual && busquedaActual.trim() !== '') {
-            const busqueda = busquedaActual.toLowerCase().trim();
-            peliculasFiltradas = todasLasPeliculas.filter(p => 
-                p.titulo && p.titulo.toLowerCase().includes(busqueda)
-            );
-            console.log(`🔍 Filtradas por "${busqueda}": ${peliculasFiltradas.length} resultados`);
-        }
-        
-        // ⭐ 3. PAGINAR (20 por página)
-        const inicio = (paginaActual - 1) * 20;
-        const fin = inicio + 20;
-        const firebasePaginadas = peliculasFiltradas.slice(inicio, fin);
-        
-        // ⭐ 4. CONVERTIR A FORMATO DE VISUALIZACIÓN
-        if (firebasePaginadas.length > 0) {
-            peliculas = firebasePaginadas.map(a => ({
-                id: a.tmdb_id || a.id,
-                tmdb_id: a.tmdb_id || a.id,
-                titulo: a.titulo || "Sin título",
-                anio: a.anio || "N/D",
-                portada: a.portada || "",
-                sinopsis: a.sinopsis || "Sin sinopsis",
-                puntuacion: a.puntuacion || "N/A",
-                genero: a.genero || "Película",
-                url: a.url || generarEnlaceUnlimplay(a.tmdb_id || a.id, 'pelicula'),
-                opcion2: a.opcion2 || "",
-                categoria: a.categoria || "peliculas",
-                adminId: a.id || null
-            }));
-            totalPaginas = Math.ceil(peliculasFiltradas.length / 20) || 1;
-        } else {
-            peliculas = [];
-            totalPaginas = 1;
-        }
-        
-        // ⭐ 5. SI NO HAY RESULTADOS EN FIREBASE Y HAY BÚSQUEDA, INTENTAR TMDB
-        if (peliculas.length === 0 && busquedaActual && busquedaActual.trim() !== '') {
-            try {
-                const url = `${TMDB_BASE}/search/movie?api_key=${TMDB_API_KEY}&language=${TMDB_LANG}&query=${encodeURIComponent(busquedaActual)}&page=1`;
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 8000);
-                const res = await fetch(url, { signal: controller.signal });
-                clearTimeout(timeout);
-                
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.results && data.results.length > 0) {
-                        const tmdbPelis = data.results.slice(0, 20).map(p => {
-                            return { 
-                                id: p.id, 
-                                tmdb_id: p.id, 
-                                titulo: p.title || "Sin título", 
-                                anio: p.release_date ? p.release_date.split("-")[0] : "N/D", 
-                                portada: p.poster_path ? `${TMDB_IMG}${p.poster_path}` : "", 
-                                sinopsis: p.overview || "Sin sinopsis", 
-                                puntuacion: p.vote_average ? p.vote_average.toFixed(1) : "N/A", 
-                                genero: "Película", 
-                                url: generarEnlaceUnlimplay(p.id, 'pelicula'),
-                                opcion2: "",
-                                categoria: "peliculas", 
-                                adminId: null 
-                            };
-                        });
-                        peliculas = tmdbPelis;
-                        totalPaginas = Math.ceil(data.total_results / 20) || 1;
-                        mostrarToast(`🔍 ${peliculas.length} resultados de TMDB para "${busquedaActual}"`, 'warning');
-                    }
-                }
-            } catch (e) {
-                console.warn('⚠️ TMDB no disponible para búsqueda:', e.message);
-            }
-        }
-        
-        // ⭐ 6. MOSTRAR
-        if (!peliculas || peliculas.length === 0) {
-            if (busquedaActual && busquedaActual.trim() !== '') {
-                contenedor.innerHTML = `<div class="cargando">🔍 No se encontraron resultados para "${busquedaActual}"</div>`;
-            } else if (todasLasPeliculas.length > 0) {
-                contenedor.innerHTML = `<div class="cargando">No hay películas en la página ${paginaActual}. <button class="btn btn-refresh btn-small" onclick="cargarPeliculas()"><i class="fa fa-sync"></i> Recargar</button></div>`;
-            } else {
-                contenedor.innerHTML = `<div class="cargando">No hay películas en Firebase. <button class="btn btn-carga-peliculas btn-small" onclick="agregarPeliculasAutomaticamente()" style="padding:0.3rem 0.8rem;font-size:0.7rem;"><i class="fa fa-download"></i> Cargar películas</button></div>`;
-            }
-            document.getElementById("paginacion").style.display = "none";
-            cargandoPeliculas = false;
-            return;
-        }
-        
-        document.getElementById("paginacion").style.display = "flex";
-        document.getElementById("paginaActual").textContent = paginaActual;
-        document.getElementById("paginaNum").textContent = `${paginaActual} de ${totalPaginas}`;
-        mostrarPeliculas();
-        cargandoPeliculas = false;
-        
-    } catch (err) { 
-        console.error("❌ Error cargando películas:", err);
-        contenedor.innerHTML = `<div class="error-msg"><i class="fa-solid fa-triangle-exclamation"></i> Error: ${err.message}<br><br><button class="btn btn-refresh btn-small" onclick="cargarPeliculas()"><i class="fa fa-sync"></i> Reintentar</button></div>`;
-        cargandoPeliculas = false;
-    }
-}
-
-function buscarPeliculas() { 
-    busquedaActual = document.getElementById('buscadorPeliculas').value.trim(); 
-    paginaActual = 1; 
-    cargarPeliculas(); 
-}
-
-function cambiarPagina(d) { 
-    const n = paginaActual + d; 
-    if (n < 1) return; 
-    paginaActual = n; 
-    cargarPeliculas(); 
-}
-
-// ==============================================
-// 📥 CARGAR SERIES - CON BÚSQUEDA EN FIREBASE
-// ==============================================
-async function cargarSeries() {
-    const contenedor = document.getElementById("lista-series");
-    contenedor.innerHTML = '<div class="cargando"><i class="fa-solid fa-spinner fa-spin"></i> Cargando series...</div>';
-    
-    try {
-        // ⭐ 1. CARGAR DESDE FIREBASE
-        const snapshot = await db.ref("series_personalizadas").once("value");
-        let todasLasSeries = snapshot.val() ? Object.values(snapshot.val()) : [];
-        console.log("📥 Series totales en Firebase:", todasLasSeries.length);
-        
-        // ⭐ 2. FILTRAR POR BÚSQUEDA
-        let seriesFiltradas = todasLasSeries;
-        if (busquedaSeriesActual && busquedaSeriesActual.trim() !== '') {
-            const busqueda = busquedaSeriesActual.toLowerCase().trim();
-            seriesFiltradas = todasLasSeries.filter(s => 
-                s.titulo && s.titulo.toLowerCase().includes(busqueda)
-            );
-            console.log(`🔍 Filtradas por "${busqueda}": ${seriesFiltradas.length} resultados`);
-        }
-        
-        // ⭐ 3. PAGINAR (20 por página)
-        const inicio = (paginaSeries - 1) * 20;
-        const fin = inicio + 20;
-        const firebasePaginadas = seriesFiltradas.slice(inicio, fin);
-        
-        // ⭐ 4. SI HAY SERIES EN FIREBASE, MOSTRARLAS
-        if (firebasePaginadas.length > 0) {
-            const series = firebasePaginadas.map(s => ({
-                id: s.tmdb_id || s.id,
-                tmdb_id: s.tmdb_id || s.id,
-                titulo: s.titulo || "Sin título",
-                anio: s.anio || "N/D",
-                portada: s.portada || "",
-                sinopsis: s.sinopsis || "Sin sinopsis",
-                puntuacion: s.puntuacion || "N/A",
-                genero: s.genero || "Serie",
-                adminId: s.id || null,
-                temporadas: s.temporadas || [],
-                categoria: s.categoria || "series"
-            }));
-            
-            totalPaginasSeries = Math.ceil(seriesFiltradas.length / 20) || 1;
-            document.getElementById("paginacionSeries").style.display = "flex";
-            document.getElementById("paginaActualSeries").textContent = paginaSeries;
-            document.getElementById("paginaNumSeries").textContent = `${paginaSeries} de ${totalPaginasSeries}`;
-            mostrarSeries(series);
-            return;
-        }
-        
-        // ⭐ 5. SI NO HAY EN FIREBASE Y HAY BÚSQUEDA, INTENTAR TMDB
-        if (busquedaSeriesActual && busquedaSeriesActual.trim() !== '') {
-            try {
-                const url = `${TMDB_BASE}/search/tv?api_key=${TMDB_API_KEY}&language=${TMDB_LANG}&query=${encodeURIComponent(busquedaSeriesActual)}&page=${paginaSeries}`;
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 8000);
-                const res = await fetch(url, { signal: controller.signal });
-                clearTimeout(timeout);
-                
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.results && data.results.length > 0) {
-                        const series = data.results.slice(0, 20).map(s => ({
-                            id: s.id, tmdb_id: s.id,
-                            titulo: s.name || "Sin título",
-                            anio: s.first_air_date ? s.first_air_date.split("-")[0] : "N/D",
-                            portada: s.poster_path ? `${TMDB_IMG}${s.poster_path}` : "",
-                            sinopsis: s.overview || "Sin sinopsis",
-                            puntuacion: s.vote_average ? s.vote_average.toFixed(1) : "N/A",
-                            genero: "Serie",
-                            adminId: null,
-                            temporadas: [],
-                            categoria: "series"
-                        }));
-                        totalPaginasSeries = Math.ceil(data.total_results / 20) || 1;
-                        document.getElementById("paginacionSeries").style.display = "flex";
-                        document.getElementById("paginaActualSeries").textContent = paginaSeries;
-                        document.getElementById("paginaNumSeries").textContent = `${paginaSeries} de ${totalPaginasSeries}`;
-                        mostrarSeries(series);
-                        mostrarToast(`🔍 ${series.length} resultados de TMDB para "${busquedaSeriesActual}"`, 'warning');
-                        return;
-                    }
-                }
-            } catch (e) {
-                console.warn('⚠️ TMDB no disponible para búsqueda de series:', e.message);
-            }
-        }
-        
-        // ⭐ 6. NO HAY RESULTADOS
-        if (busquedaSeriesActual && busquedaSeriesActual.trim() !== '') {
-            contenedor.innerHTML = `<div class="cargando">🔍 No se encontraron resultados para "${busquedaSeriesActual}"</div>`;
-        } else {
-            contenedor.innerHTML = `<div class="cargando">No hay series en Firebase. <button class="btn btn-carga-series btn-small" onclick="agregarSeriesAutomaticamente()" style="padding:0.3rem 0.8rem;font-size:0.7rem;"><i class="fa fa-download"></i> Cargar series</button></div>`;
-        }
-        document.getElementById("paginacionSeries").style.display = "none";
-        
-    } catch (err) {
-        console.error("❌ Error cargando series:", err);
-        contenedor.innerHTML = `<div class="error-msg"><i class="fa-solid fa-triangle-exclamation"></i> Error: ${err.message}</div>`;
-    }
-}
-
-function buscarSeries() { 
-    busquedaSeriesActual = document.getElementById('buscadorSeries').value.trim(); 
-    paginaSeries = 1; 
-    cargarSeries(); 
-}
-
-function cambiarPaginaSeries(d) { 
-    const n = paginaSeries + d; 
-    if (n < 1 || n > totalPaginasSeries) return; 
-    paginaSeries = n; 
-    cargarSeries(); 
-}    // ==============================================
-    // 📋 MOSTRAR PELÍCULAS
-    // ==============================================
-    function mostrarPeliculas() {
-        const contenedor = document.getElementById("lista-peliculas");
-        const contador = document.getElementById("contador");
-        if (!peliculas || !peliculas.length) { 
-            contenedor.innerHTML = '<div class="cargando">No hay películas disponibles</div>'; 
-            contador.textContent = "0 películas"; 
-            return; 
-        }
-        contador.textContent = `${peliculas.length} películas (Pág ${paginaActual} de ${totalPaginas})`;
-        contenedor.innerHTML = peliculas.map(p => {
-            const t1 = p.url && p.url.trim();
-            const t2 = p.opcion2 && p.opcion2.trim();
-            const cat = p.categoria || 'peliculas';
-            const tieneFirebase = p.adminId ? '☁️' : '';
-            return `<div class="pelicula-item" data-id="${p.tmdb_id}">
-                <div class="info">
-                    <div class="info-peli">${p.portada ? `<img src="${p.portada}" class="portada-mini" loading="lazy" onerror="this.style.display='none'">` : ''}
-                        <div><span class="titulo">${p.titulo}</span><span class="anio">${p.anio}</span><span class="categoria-tag categoria-${cat}">${cat}</span></div>
-                    </div>
-                    <div>${t1 ? '<span class="badge badge-con-enlace" style="background:#10B981;color:white;">✅ Op1</span>' : '<span class="badge badge-sin-enlace">❌ Op1</span>'}
-                         ${t2 ? '<span class="badge badge-op2">✅ Op2</span>' : '<span class="badge badge-sin-enlace">❌ Op2</span>'}
-                         ${tieneFirebase ? '<span class="badge badge-firebase">☁️</span>' : ''}
-                         <span class="badge badge-peli">TMDB</span>
-                    </div>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:0.3rem;">
-                    <div style="display:flex;gap:0.3rem;flex-wrap:wrap;align-items:center;">
-                        <input type="text" class="input-opcion1" placeholder="Opción 1 (URL)" value="${p.url || ''}" style="flex:2;min-width:120px;padding:0.3rem 0.5rem;font-size:0.75rem;border-radius:4px;border:1px solid #334155;background:#0F172A;color:#F8FAFC;">
-                        <button class="btn-op1-guardar" onclick="guardarOp1Pelicula('${p.tmdb_id}')"><i class="fa fa-save"></i> Guardar Op1</button>
-                        ${t1 ? `<button class="btn btn-probar btn-xxs" onclick="probarVideo('${p.url}')"><i class="fa fa-play"></i></button>` : ''}
-                    </div>
-                    <div style="display:flex;gap:0.3rem;flex-wrap:wrap;align-items:center;">
-                        <input type="text" class="input-opcion2" placeholder="Opción 2 (URL)" value="${p.opcion2 || ''}" style="flex:2;min-width:120px;padding:0.3rem 0.5rem;font-size:0.75rem;border-radius:4px;border:1px solid #334155;background:#0F172A;color:#F8FAFC;">
-                        <button class="btn-op2-guardar" onclick="guardarOp2Pelicula('${p.tmdb_id}')"><i class="fa fa-save"></i> Guardar Op2</button>
-                        ${t2 ? `<button class="btn btn-probar btn-xxs" onclick="probarVideo('${p.opcion2}')"><i class="fa fa-play"></i></button>` : ''}
-                    </div>
-                    <div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-top:0.2rem;">
-                        <select class="input-categoria" style="flex:1;min-width:100px;margin-bottom:0;padding:0.2rem 0.4rem;font-size:0.7rem;border-radius:4px;border:1px solid #334155;background:#0F172A;color:#F8FAFC;">
-                            <option value="peliculas" ${cat === 'peliculas' ? 'selected' : ''}>🎬 Películas</option>
-                            <option value="series" ${cat === 'series' ? 'selected' : ''}>📺 Series</option>
-                            <option value="anime" ${cat === 'anime' ? 'selected' : ''}>🇯🇵 Anime</option>
-                            <option value="terror" ${cat === 'terror' ? 'selected' : ''}>👻 Terror</option>
-                            <option value="comedia" ${cat === 'comedia' ? 'selected' : ''}>😂 Comedia</option>
-                            <option value="accion" ${cat === 'accion' ? 'selected' : ''}>💥 Acción</option>
-                            <option value="drama" ${cat === 'drama' ? 'selected' : ''}>🎭 Drama</option>
-                        </select>
-                        ${p.adminId ? `<button class="btn btn-danger btn-xxs" onclick="eliminarEnlacesPelicula('${p.adminId}','${p.tmdb_id}')"><i class="fa fa-trash"></i> Eliminar</button>` : ''}
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
-    }
-
-    // ==============================================
-    // 💾 GUARDAR OPCIÓN 1
-    // ==============================================
-    function guardarOp1Pelicula(tmdbId) {
-        if (!usuarioPuedeEscribir()) return;
-        const item = document.querySelector(`.pelicula-item[data-id="${tmdbId}"]`);
-        if (!item) return;
-        let url = item.querySelector('.input-opcion1').value.trim();
-        if (!url) { mostrarToast('⚠️ Agrega una URL para la Opción 1', 'warning'); return; }
-        url = corregirEnlaceYouTube(url);
-        
-        const peli = peliculas.find(p => p.tmdb_id == tmdbId);
-        if (!peli) return;
-        let existe = peliculasAdmin.find(a => a.tmdb_id == tmdbId);
-        let opcion2Actual = existe?.opcion2 || peli.opcion2 || '';
-        
-        const datos = { 
-            tmdb_id: tmdbId, 
-            titulo: peli.titulo, 
-            anio: peli.anio,
-            tipo: "pelicula", 
-            categoria: item.querySelector('.input-categoria').value || "peliculas",
-            portada: peli.portada, 
-            sinopsis: peli.sinopsis || "Sin sinopsis",
-            puntuacion: peli.puntuacion || "N/A", 
-            genero: peli.genero || "Película",
-            url: url, 
-            opcion2: opcion2Actual,
-            fecha_actualizacion: new Date().toISOString() 
-        };
-        
-        const ref = existe ? db.ref(`contenido_personalizado/${existe.id}`) : db.ref("contenido_personalizado").push();
-        ref.set(datos).then(() => {
-            mostrarToast(`✅ Opción 1 guardada para "${peli.titulo}"`, 'success');
-            if (!existe) { 
-                datos.id = ref.key; 
-                peliculasAdmin.push(datos); 
-                existe = datos;
-            } else { 
-                const idx = peliculasAdmin.findIndex(a => a.tmdb_id == tmdbId); 
-                if (idx !== -1) peliculasAdmin[idx] = { ...peliculasAdmin[idx], ...datos }; 
-            }
-            peli.url = url; 
-            peli.opcion2 = opcion2Actual; 
-            peli.adminId = existe?.id || ref.key;
-            mostrarPeliculas();
-        }).catch(err => mostrarToast("❌ Error: " + err.message, 'error'));
-    }
-
-    // ==============================================
-    // 💾 GUARDAR OPCIÓN 2
-    // ==============================================
-    function guardarOp2Pelicula(tmdbId) {
-        if (!usuarioPuedeEscribir()) {
-            mostrarToast('⚠️ Debes iniciar sesión para guardar', 'warning');
-            return;
-        }
-        
-        const item = document.querySelector(`.pelicula-item[data-id="${tmdbId}"]`);
-        if (!item) {
-            mostrarToast('❌ No se encontró la película', 'error');
-            return;
-        }
-        
-        let opcion2 = item.querySelector('.input-opcion2').value.trim();
-        if (!opcion2) { 
-            mostrarToast('⚠️ Agrega una URL para la Opción 2', 'warning'); 
-            return; 
-        }
-        
-        if (opcion2.includes('youtube.com') || opcion2.includes('youtu.be')) {
-            opcion2 = corregirEnlaceYouTube(opcion2);
-        }
-        
-        const peli = peliculas.find(p => p.tmdb_id == tmdbId);
-        if (!peli) return;
-        
-        let existe = peliculasAdmin.find(a => a.tmdb_id == tmdbId);
-        let urlActual = existe?.url || peli.url || '';
-        
-        const datos = { 
-            tmdb_id: tmdbId, 
-            titulo: peli.titulo, 
-            anio: peli.anio,
-            tipo: "pelicula", 
-            categoria: item.querySelector('.input-categoria').value || "peliculas",
-            portada: peli.portada, 
-            sinopsis: peli.sinopsis || "Sin sinopsis",
-            puntuacion: peli.puntuacion || "N/A", 
-            genero: peli.genero || "Película",
-            url: urlActual, 
-            opcion2: opcion2,
-            fecha_actualizacion: new Date().toISOString() 
-        };
-        
-        const ref = existe ? db.ref(`contenido_personalizado/${existe.id}`) : db.ref("contenido_personalizado").push();
-        
-        ref.set(datos)
-            .then(() => {
-                mostrarToast(`✅ Opción 2 guardada para "${peli.titulo}"`, 'success');
-                
-                if (!existe) { 
-                    datos.id = ref.key; 
-                    peliculasAdmin.push(datos); 
-                    existe = datos;
-                } else { 
-                    const idx = peliculasAdmin.findIndex(a => a.tmdb_id == tmdbId); 
-                    if (idx !== -1) peliculasAdmin[idx] = { ...peliculasAdmin[idx], ...datos }; 
-                }
-                
-                peli.url = urlActual; 
-                peli.opcion2 = opcion2; 
-                peli.adminId = existe?.id || ref.key;
-                mostrarPeliculas();
-            })
-            .catch(err => {
-                mostrarToast("❌ Error guardando Opción 2: " + err.message, 'error');
-            });
-    }
-
-    function eliminarEnlacesPelicula(adminId, tmdbId) {
-        if (!usuarioPuedeEscribir()) return;
-        if (!confirm('¿Eliminar TODOS los enlaces de esta película de Firebase?')) return;
-        db.ref(`contenido_personalizado/${adminId}`).remove().then(() => {
-            mostrarToast('✅ Enlaces eliminados');
-            peliculasAdmin = peliculasAdmin.filter(a => a.id !== adminId);
-            const peli = peliculas.find(p => p.tmdb_id == tmdbId);
-            if (peli) { peli.url = ''; peli.opcion2 = ''; peli.adminId = null; }
-            mostrarPeliculas();
-        }).catch(err => mostrarToast('❌ Error: ' + err.message, 'error'));
-    }
-
-    // ==============================================
-    // 🎬 PROBAR VIDEO
-    // ==============================================
-    function probarVideo(url) {
-        if (!url) { mostrarToast('❌ No hay enlace disponible', 'warning'); return; }
-        let enlace = url;
-        if (enlace.includes('youtube.com') || enlace.includes('youtu.be')) {
-            enlace = corregirEnlaceYouTube(url);
-        }
-        window.open(enlace, '_blank');
-    }
-
-    // ==============================================
-    // 📋 MOSTRAR SERIES
-    // ==============================================
-    function mostrarSeries(series) {
-        const contenedor = document.getElementById("lista-series");
-        const contador = document.getElementById("contador");
-        if (!series.length) { 
-            contenedor.innerHTML = '<div class="cargando">No hay series disponibles</div>'; 
-            contador.textContent = "0 series"; 
-            return; 
-        }
-        contador.textContent = `${series.length} series (Pág ${paginaSeries})`;
-        contenedor.innerHTML = series.map(s => {
-            const tiene = s.temporadas && s.temporadas.length > 0 && s.temporadas.some(t => t.capitulos && t.capitulos.some(c => c.url));
-            const cat = s.categoria || 'series';
-            return `<div class="serie-item" data-id="${s.tmdb_id}">
-                <div class="info">
-                    <div class="info-peli">${s.portada ? `<img src="${s.portada}" class="portada-mini" loading="lazy" onerror="this.style.display='none'">` : ''}
-                        <div><span class="titulo">${s.titulo}</span><span class="anio">${s.anio}</span><span class="categoria-tag categoria-${cat}">${cat}</span></div>
-                    </div>
-                    <div>${tiene ? '<span class="badge badge-con-enlace">✅ Con enlaces</span>' : '<span class="badge badge-sin-enlace">❌ Sin enlaces</span>'}
-                         ${s.adminId ? '<span class="badge badge-firebase">☁️</span>' : ''}
-                         <span class="badge badge-serie">Serie</span>
-                    </div>
-                </div>
-                <div class="temporadas">${s.temporadas && s.temporadas.length > 0 ? 
-                    s.temporadas.map((temp, idx) => `<div class="temp-card"><div class="temp-titulo">T${temp.numero}: ${temp.nombre}</div><div class="capitulos">${temp.capitulos ? temp.capitulos.length : 0} capítulos</div></div>`).join('') : 
-                    '<span style="color:#94A3B8; font-size:0.75rem;">Sin temporadas</span>'}</div>
-                <div style="margin-top:0.3rem;">
-                    <button class="btn btn-guardar btn-small" onclick="abrirEditorSerie('${s.tmdb_id}')"><i class="fa fa-edit"></i> ${s.adminId ? 'Editar enlaces' : 'Agregar enlaces'}</button>
-                    <button class="btn btn-generar-caps" onclick="generarCapsDesdeLista('${s.tmdb_id}')"><i class="fa fa-magic"></i> Generar capítulos</button>
-                    ${s.adminId ? `<button class="btn btn-danger btn-small" onclick="eliminarSerie('${s.adminId}')"><i class="fa fa-trash"></i> Eliminar serie</button>` : ''}
-                </div>
-            </div>`;
-        }).join('');
-    }
-
-    function eliminarSerie(adminId) {
-        if (!usuarioPuedeEscribir()) return;
-        if (!confirm('¿Eliminar esta serie COMPLETA de Firebase?')) return;
-        db.ref(`series_personalizadas/${adminId}`).remove().then(() => {
-            mostrarToast('✅ Serie eliminada');
-            seriesAdmin = seriesAdmin.filter(s => s.id !== adminId);
-            cargarSeries();
-        }).catch(err => mostrarToast('❌ Error: ' + err.message, 'error'));
-    }
-
-    // ==============================================
-    // ⚡ INICIO - CARGA INICIAL
-    // ==============================================
-    verificarConexionFirebase();
-    document.addEventListener('keydown', function(e) { 
-        if (e.key === 'Escape') { 
-            if (document.getElementById('modalEditorSerie').classList.contains('abierto')) cerrarEditorSerie(); 
-        } 
-    });
-    toggleCamposContenido();
-
-    if (auth.currentUser) {
-        setTimeout(() => {
-            cargarPeliculas();
-            cargarSeries();
-        }, 500);
-    } else {
-        document.getElementById("lista-peliculas").innerHTML = '<div class="cargando">🔐 Inicia sesión para administrar contenido</div>';
-        document.getElementById("lista-series").innerHTML = '<div class="cargando">🔐 Inicia sesión para administrar contenido</div>';
-    }
-
-    console.log('✅ Admin TELY cargado - Búsqueda funcionando en Firebase');
+        console.log('✅ Admin TELY cargado');
     </script>
 </body>
 </html>
