@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>TELY 🎬 - Películas</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- NAVEGACIÓN -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/logo.png" alt="TELY" class="logo-img">
+                <span class="logo-text">TELY</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Inicio</a>
+                <a href="peliculas.html" class="nav-link active"><i class="fas fa-film"></i> Películas</a>
+                <a href="series.html" class="nav-link"><i class="fas fa-tv"></i> Series</a>
+                <a href="populares.html" class="nav-link"><i class="fas fa-fire"></i> Populares</a>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="user-menu">
+                    <button class="user-btn" onclick="toggleUserMenu()">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="user-info">
+                            <span id="userName">👤 Invitado</span>
+                        </div>
+                        <hr>
+                        <a href="perfil.html" class="dropdown-item"><i class="fas fa-user"></i> Mi perfil</a>
+                        <hr>
+                        <a href="#" class="dropdown-item" id="loginBtn" onclick="irALogin()"><i class="fas fa-sign-in-alt"></i> Iniciar sesión</a>
+                        <a href="#" class="dropdown-item" id="logoutBtn" style="display:none;" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- FILTROS -->
+    <div class="filter-section">
+        <div class="filter-container">
+            <div class="filter-group">
+                <label>Año</label>
+                <select id="filterYear">
+                    <option value="">Todos</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Género</label>
+                <select id="filterGenre">
+                    <option value="">Todos</option>
+                    <option value="28">Acción</option>
+                    <option value="35">Comedia</option>
+                    <option value="18">Drama</option>
+                    <option value="27">Terror</option>
+                    <option value="878">Ciencia Ficción</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Ordenar</label>
+                <select id="filterOrder">
+                    <option value="popular">Más populares</option>
+                    <option value="rating">Mejor valoradas</option>
+                    <option value="date">Más recientes</option>
+                </select>
+            </div>
+            <button class="filter-apply" onclick="aplicarFiltros()"><i class="fas fa-filter"></i> Aplicar</button>
+        </div>
+    </div>
+
+    <!-- CONTENIDO -->
+    <main class="main-content">
+        <div class="section-header">
+            <h2><i class="fas fa-film"></i> Películas</h2>
+            <span class="total-count" id="totalPeliculas">0</span>
+        </div>
+        <div class="grid-peliculas grid-5" id="listaPeliculas">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+        </div>
+        <div class="load-more">
+            <button class="load-more-btn" onclick="cargarMasPeliculas()">
+                <i class="fas fa-plus"></i> Cargar más
+            </button>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>TELY</h3>
+                <p>Tu plataforma de entretenimiento</p>
+            </div>
+            <div class="footer-links">
+                <a href="#">Términos</a>
+                <a href="#">Privacidad</a>
+                <a href="#">Ayuda</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 TELY - Todos los derechos reservados</p>
+        </div>
+    </footer>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
