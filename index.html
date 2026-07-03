@@ -166,94 +166,103 @@
     <div class="load-more"><button onclick="cargarMas()"><i class="fas fa-plus"></i> Cargar más</button></div>
 </main>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-<script>
+<script type="importmap">
+{
+    "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js",
+        "firebase/database": "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"
+    }
+}
+</script>
+<script type="module">
+import { initializeApp } from "firebase/app";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { getDatabase, ref, get, child, onValue } from "firebase/database";
+
 const firebaseConfig = {
-    apiKey: "AIzaSyCwLATDpQN1RWv3rLPjJXbNnIBkyo_BUfI",
-    authDomain: "tely-ap.firebaseapp.com",
-    databaseURL: "https://tely-ap-default-rtdb.firebaseio.com",
-    projectId: "tely-ap",
-    storageBucket: "tely-ap.firebasestorage.app",
-    messagingSenderId: "760862940967",
-    appId: "1:760862940967:web:69bbbbfee0de40f68a1302"
+    apiKey: "AIzaSyBPBDEVUR7hjNrxCYrefF9Sbl0Wofp3VoQ",
+    authDomain: "telyx-23210.firebaseapp.com",
+    projectId: "telyx-23210",
+    storageBucket: "telyx-23210.firebasestorage.app",
+    messagingSenderId: "10164285015",
+    appId: "1:10164285015:web:5cf32bd2831de126c67d12",
+    measurementId: "G-0YEZMJYMJS"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
 // ⭐ BOTÓN ATRÁS
 history.pushState(null, '', window.location.href);
-window.addEventListener('popstate', function(e) {
-    const modal = document.querySelector('.modal-reproductor');
-    if (modal && modal.classList.contains('abierto')) {
-        cerrarReproductor();
-        e.preventDefault();
-        history.pushState(null, '', window.location.href);
-        return false;
-    }
-    return true;
-});
-document.addEventListener('backbutton', function(e) {
-    const modal = document.querySelector('.modal-reproductor');
-    if (modal && modal.classList.contains('abierto')) {
-        cerrarReproductor();
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-    }
-}, false);
+window.addEventListener('popstate', function(e) { return true; });
+document.addEventListener('backbutton', function(e) { return true; }, false);
 
-// 🔐 AUTENTICACIÓN
-function irALogin() { window.location.href = 'login.html'; }
-function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
-function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
-document.addEventListener('click', (e) => {
-    const menu = document.getElementById('userDropdown');
-    if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
-});
-auth.onAuthStateChanged(user => {
+// ⭐ FUNCIONES GLOBALES
+window.irALogin = function() { window.location.href = 'login.html'; };
+window.cerrarSesion = function() { 
+    signOut(auth).then(() => { location.reload(); });
+};
+window.toggleUserMenu = function() {
+    document.getElementById('userDropdown').classList.toggle('show');
+};
+window.toggleTheme = function() {
+    const body = document.body;
+    const btn = document.getElementById('themeBtn');
+    if (body.classList.contains('dark')) { 
+        body.classList.remove('dark'); 
+        btn.innerHTML = '<i class="fas fa-moon"></i>'; 
+        localStorage.setItem('theme', 'light'); 
+    } else { 
+        body.classList.add('dark'); 
+        btn.innerHTML = '<i class="fas fa-sun"></i>'; 
+        localStorage.setItem('theme', 'dark'); 
+    }
+};
+
+// ⭐ MODO OSCURO
+if (localStorage.getItem('theme') === 'light') { 
+    document.body.classList.remove('dark'); 
+    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>';
+} else { 
+    document.body.classList.add('dark'); 
+    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>';
+}
+
+// ⭐ AUTENTICACIÓN
+onAuthStateChanged(auth, (user) => {
     document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
     document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
 });
 
-// 🌓 MODO OSCURO
-function toggleTheme() {
-    const body = document.body;
-    const btn = document.getElementById('themeBtn');
-    if (body.classList.contains('dark')) {
-        body.classList.remove('dark');
-        btn.innerHTML = '<i class="fas fa-moon"></i>';
-        localStorage.setItem('theme', 'light');
-    } else {
-        body.classList.add('dark');
-        btn.innerHTML = '<i class="fas fa-sun"></i>';
-        localStorage.setItem('theme', 'dark');
-    }
-}
-if (localStorage.getItem('theme') === 'light') {
-    document.body.classList.remove('dark');
-    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>';
-} else {
-    document.body.classList.add('dark');
-    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>';
-}
+// ⭐ MENÚ USUARIO
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('userDropdown');
+    if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
+});
 
+// ⭐ FUNCIONES DE API
 function getImagenUrl(path, size = 'w342') {
     if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
     return `https://image.tmdb.org/t/p/${size}${path}`;
+}
+
+function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    if (tipo === 'pelicula') {
+        return `https://unlimplay.co/play/movie/${tmdb_id}`;
+    } else {
+        return `https://unlimplay.co/play/tv/${tmdb_id}/${temporada}/${capitulo}`;
+    }
 }
 
 function crearTarjeta(item, esSerie = false) {
     const div = document.createElement('div');
     div.className = 'movie-card';
     const tipo = esSerie ? '📺' : '🎬';
-    const tieneOp2 = item.opcion2 && item.opcion2.trim() !== '';
     div.innerHTML = `
         <span class="badge-year">${item.anio || 'N/D'}</span>
         <span class="badge-type">${tipo}</span>
-        ${tieneOp2 ? '<span class="badge-op2">🔗 Op2</span>' : ''}
         <img src="${item.portada}" alt="${item.titulo}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
         <div class="info"><h4>${item.titulo}</h4><div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div></div>
     `;
@@ -263,18 +272,26 @@ function crearTarjeta(item, esSerie = false) {
             params.set('play', item.tmdb_id || item.id);
             params.set('tipo', item.tipo || 'pelicula');
             window.location.href = `reproductor.html?${params.toString()}`;
-        } else {
-            window.location.href = 'login.html';
-        }
+        } else { window.location.href = 'login.html'; }
     };
     return div;
+}
+
+async function fetchTMDB(path, params = {}) {
+    const queryParams = new URLSearchParams();
+    queryParams.append('path', path);
+    Object.keys(params).forEach(key => queryParams.append(key, params[key]));
+    const url = `https://tely-xi.vercel.app/api/tmdb?${queryParams.toString()}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    return response.json();
 }
 
 async function cargarContenido() {
     try {
         const [pelis, series] = await Promise.all([
-            fetch('https://tely-xi.vercel.app/api/tmdb?path=movie/popular&page=1').then(r => r.json()).catch(() => ({ results: [] })),
-            fetch('https://tely-xi.vercel.app/api/tmdb?path=tv/popular&page=1').then(r => r.json()).catch(() => ({ results: [] }))
+            fetchTMDB('movie/popular', { page: 1 }),
+            fetchTMDB('tv/popular', { page: 1 })
         ]);
 
         const pelisContainer = document.getElementById('peliculasPopulares');
@@ -282,7 +299,8 @@ async function cargarContenido() {
         pelisContainer.innerHTML = '';
         seriesContainer.innerHTML = '';
 
-        const adminSnap = await db.ref('contenido_personalizado').once('value');
+        const dbRef = ref(db);
+        const adminSnap = await get(child(dbRef, 'contenido_personalizado'));
         const adminData = adminSnap.val() || {};
         const adminMap = {};
         Object.values(adminData).forEach(i => { adminMap[i.tmdb_id] = i; });
@@ -296,8 +314,7 @@ async function cargarContenido() {
                 tipo: 'pelicula',
                 portada: a?.portada || getImagenUrl(p.poster_path, 'w342'),
                 puntuacion: a?.puntuacion || (p.vote_average ? p.vote_average.toFixed(1) : 'N/A'),
-                url: a?.url || `https://unlimplay.com/play/embed/movie/${p.id}?lang=es-MX`,
-                opcion2: a?.opcion2 || `https://vidsrc.in/embed/movie/${p.id}?lang=es`
+                url: a?.url || generarEnlaceUnlimplay(p.id, 'pelicula')
             };
             pelisContainer.appendChild(crearTarjeta(item));
         });
@@ -311,8 +328,7 @@ async function cargarContenido() {
                 tipo: 'serie',
                 portada: a?.portada || getImagenUrl(s.poster_path, 'w342'),
                 puntuacion: a?.puntuacion || (s.vote_average ? s.vote_average.toFixed(1) : 'N/A'),
-                url: a?.url || `https://unlimplay.com/play/embed/tv/${s.id}/1/1?lang=es-MX`,
-                opcion2: a?.opcion2 || `https://vidsrc.in/embed/tv/${s.id}/1/1?lang=es`
+                url: a?.url || generarEnlaceUnlimplay(s.id, 'serie', 1, 1)
             };
             seriesContainer.appendChild(crearTarjeta(item, true));
         });
@@ -350,13 +366,13 @@ function cargarContinuarViendo() {
     });
 }
 
-async function mostrarSugerencias(texto) {
+window.mostrarSugerencias = async function(texto) {
     const container = document.getElementById('searchResults');
     if (!texto || texto.length < 2) { container.classList.remove('show'); return; }
     try {
         const [pelis, series] = await Promise.all([
-            fetch(`https://tely-xi.vercel.app/api/tmdb?path=search/movie&query=${encodeURIComponent(texto)}&page=1`).then(r => r.json()).catch(() => ({ results: [] })),
-            fetch(`https://tely-xi.vercel.app/api/tmdb?path=search/tv&query=${encodeURIComponent(texto)}&page=1`).then(r => r.json()).catch(() => ({ results: [] }))
+            fetchTMDB('search/movie', { query: texto, page: 1 }),
+            fetchTMDB('search/tv', { query: texto, page: 1 })
         ]);
         const resultados = [...(pelis.results || []), ...(series.results || [])];
         if (!resultados.length) { container.classList.remove('show'); return; }
@@ -380,16 +396,16 @@ async function mostrarSugerencias(texto) {
         });
         container.classList.add('show');
     } catch(e) { container.classList.remove('show'); }
-}
+};
 
-function buscarGlobal() {
+window.buscarGlobal = function() {
     const input = document.getElementById('searchInput');
-    if (input.value.trim()) mostrarSugerencias(input.value);
-}
+    if (input.value.trim()) window.mostrarSugerencias(input.value);
+};
 
-function cargarMas() {
+window.cargarMas = function() {
     mostrarToast('🔄 Cargando más contenido...', 'info');
-}
+};
 
 function mostrarToast(msg, tipo = 'success') {
     const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
@@ -400,8 +416,15 @@ function mostrarToast(msg, tipo = 'success') {
     setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
 }
 
+// 🔥 ESCUCHAR CAMBIOS EN FIREBASE
+const dbRef = ref(db);
+onValue(child(dbRef, 'contenido_personalizado'), () => {
+    console.log('🔄 Cambio detectado en contenido - Recargando...');
+    cargarContenido();
+});
+
 cargarContenido();
-console.log('✅ TELY cargado - Botón atrás protegido');
+console.log('✅ TELY cargado - Botón atrás protegido - Nueva API Firebase');
 </script>
 </body>
 </html>
