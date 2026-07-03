@@ -4,12 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>TELY 🎬 - Admin</title>
-    <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .admin-page{padding:1rem;max-width:1200px;margin:0 auto}
-        .admin-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:.5rem}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;transition:background 0.3s, color 0.3s;display:flex}
+        body.dark{background:#0A0A0F;color:#fff}
+        body:not(.dark){background:#f0f0f0;color:#111}
+        
+        .sidebar{position:fixed;top:0;left:0;bottom:0;width:72px;background:rgba(10,10,15,.97);backdrop-filter:blur(12px);border-right:1px solid rgba(124,58,237,.12);z-index:100;display:flex;flex-direction:column;align-items:center;padding:.8rem 0;overflow-y:auto;transition:width 0.3s}
+        body:not(.dark) .sidebar{background:rgba(255,255,255,.97);border-color:rgba(0,0,0,.08)}
+        .sidebar:hover{width:200px}
+        .sidebar:hover .sidebar-link span{display:inline}
+        .sidebar-logo{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:1.5rem;text-align:center;width:100%;padding:0 .5rem}
+        .sidebar-logo small{display:block;font-size:.55rem;color:#64748B;-webkit-text-fill-color:#64748B}
+        .sidebar-nav{display:flex;flex-direction:column;gap:.2rem;width:100%;padding:0 .3rem}
+        .sidebar-link{display:flex;align-items:center;gap:.8rem;padding:.6rem .8rem;border-radius:10px;color:#94A3B8;text-decoration:none;font-weight:600;font-size:.85rem;transition:.3s;white-space:nowrap}
+        .sidebar-link:hover{background:rgba(124,58,237,.12);color:#fff}
+        .sidebar-link.active{background:rgba(124,58,237,.2);color:#fff}
+        .sidebar-link i{font-size:1.2rem;min-width:24px;text-align:center}
+        .sidebar-link span{display:none}
+        .sidebar:hover .sidebar-link span{display:inline}
+        body:not(.dark) .sidebar-link{color:#555}
+        body:not(.dark) .sidebar-link:hover{background:rgba(124,58,237,.08);color:#111}
+        body:not(.dark) .sidebar-link.active{background:rgba(124,58,237,.12);color:#7C3AED}
+        .sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:.2rem;width:100%;padding:0 .3rem}
+        
+        .main-content{flex:1;margin-left:72px;padding:1rem;max-width:calc(100% - 72px)}
+        @media(max-width:768px){.sidebar{width:56px}.main-content{margin-left:56px;max-width:calc(100% - 56px)}}
+        
+        .top-header{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0 1rem;flex-wrap:wrap;gap:.5rem}
+        .top-header h1{font-size:1.3rem;font-weight:700;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .top-actions{display:flex;align-items:center;gap:.5rem}
+        .theme-btn{background:rgba(255,255,255,.05);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:.9rem;transition:.3s}
+        .theme-btn:hover{background:rgba(255,255,255,.1)}
+        body:not(.dark) .theme-btn{background:rgba(0,0,0,.05);color:#111}
+        body:not(.dark) .theme-btn:hover{background:rgba(0,0,0,.1)}
+        .user-btn{background:rgba(124,58,237,.15);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;transition:.3s}
+        .user-btn:hover{background:rgba(124,58,237,.3)}
+        body:not(.dark) .user-btn{color:#111}
+        
         .admin-card{background:rgba(255,255,255,.04);border-radius:12px;padding:1.2rem;border:1px solid rgba(124,58,237,.15);margin-bottom:1rem}
         body:not(.dark) .admin-card{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1)}
         .admin-card h3{font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem}
@@ -39,31 +73,64 @@
         body:not(.dark) .cap-item-admin{background:rgba(0,0,0,.02)}
         .badge-op2{color:#34D399;font-size:.6rem;font-weight:600}
         .badge-no-op2{color:#EF4444;font-size:.6rem;font-weight:600}
+        .user-dropdown{position:absolute;right:0;top:calc(100% + 8px);background:rgba(26,26,46,.95);border-radius:12px;width:200px;border:1px solid rgba(124,58,237,.15);padding:.4rem 0;display:none;z-index:50;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+        .user-dropdown.show{display:block}
+        body:not(.dark) .user-dropdown{background:rgba(255,255,255,.95);border-color:rgba(0,0,0,.1)}
+        .user-dropdown a{display:flex;align-items:center;gap:.6rem;padding:.4rem 1rem;color:#CBD5E1;text-decoration:none;font-size:.85rem;transition:.2s}
+        .user-dropdown a:hover{background:rgba(124,58,237,.08);color:#fff}
+        body:not(.dark) .user-dropdown a{color:#333}
+        body:not(.dark) .user-dropdown a:hover{background:rgba(124,58,237,.08);color:#111}
+        .user-dropdown hr{margin:.2rem 0;border:none;border-top:1px solid rgba(124,58,237,.08)}
+        .user-menu{position:relative}
+        .load-more{display:flex;justify-content:center;padding:1rem 0}
     </style>
 </head>
-<body class="admin-page">
-    <div class="admin-header">
-        <h1 style="background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
-            🛠️ Admin TELY
-        </h1>
-        <div>
-            <button class="admin-btn admin-btn-success" onclick="cargarDatos()"><i class="fas fa-refresh"></i> Recargar</button>
-            <a href="index.html" class="admin-btn" style="text-decoration:none;display:inline-block;"><i class="fas fa-home"></i> Volver</a>
+<body>
+
+<nav class="sidebar">
+    <div class="sidebar-logo">TELY<small>🍿</small></div>
+    <div class="sidebar-nav">
+        <a href="index.html" class="sidebar-link"><i class="fas fa-home"></i><span>Inicio</span></a>
+        <a href="peliculas.html" class="sidebar-link"><i class="fas fa-film"></i><span>Películas</span></a>
+        <a href="series.html" class="sidebar-link"><i class="fas fa-tv"></i><span>Series</span></a>
+        <a href="populares.html" class="sidebar-link"><i class="fas fa-fire"></i><span>Populares</span></a>
+    </div>
+    <div class="sidebar-bottom">
+        <a href="perfil.html" class="sidebar-link"><i class="fas fa-user"></i><span>Perfil</span></a>
+        <a href="admin.html" class="sidebar-link active"><i class="fas fa-cog"></i><span>Admin</span></a>
+    </div>
+</nav>
+
+<main class="main-content">
+    <div class="top-header">
+        <h1><i class="fas fa-cog"></i> Administración</h1>
+        <div class="top-actions">
+            <button class="theme-btn" onclick="toggleTheme()" id="themeBtn"><i class="fas fa-moon"></i></button>
+            <div class="user-menu">
+                <button class="user-btn" onclick="toggleUserMenu()"><i class="fas fa-user-circle"></i></button>
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="perfil.html"><i class="fas fa-user"></i> Mi perfil</a>
+                    <hr>
+                    <a href="#" id="loginBtn" onclick="irALogin()"><i class="fas fa-sign-in-alt"></i> Iniciar sesión</a>
+                    <a href="#" id="logoutBtn" style="display:none;" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- AGREGAR SERIE -->
     <div class="admin-card">
-        <h3><i class="fas fa-plus-circle text-purple-500"></i> Agregar Serie</h3>
+        <h3><i class="fas fa-plus-circle text-purple-500"></i> Agregar Serie a Firebase</h3>
         <div class="admin-grid">
             <div>
                 <input class="admin-input" id="sTitulo" placeholder="Título de la serie" value="Aprenderás">
                 <input class="admin-input" id="sAnio" placeholder="Año" value="2024">
                 <input class="admin-input" id="sPortada" placeholder="URL de la portada" value="https://image.tmdb.org/t/p/w342/kqjL17yufvn9OVLyXYpvtyrFfak.jpg">
                 <textarea class="admin-input" id="sSinopsis" rows="2" placeholder="Sinopsis">Serie para aprender a programar</textarea>
+                <input class="admin-input" id="sGenero" placeholder="Género" value="Educativo">
             </div>
             <div>
-                <h4 class="text-sm font-bold text-blue-400">Capítulos</h4>
+                <h4 class="text-sm font-bold text-blue-400">Capítulos (Opción 2)</h4>
                 <div id="capitulosAdmin">
                     <div class="cap-item-admin">
                         <span>Cap 1: </span>
@@ -81,199 +148,264 @@
                         <input class="admin-input" style="display:inline-block;width:auto;" id="c3Op2" placeholder="Opción 2 (Vidsrc)" value="https://vidsrc.in/embed/tv/1/1/3?lang=es">
                     </div>
                 </div>
-                <button class="admin-btn" onclick="guardarSerie()"><i class="fas fa-save"></i> Guardar Serie</button>
+                <div style="display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap">
+                    <button class="admin-btn" onclick="guardarSerie()"><i class="fas fa-save"></i> Guardar Serie</button>
+                    <button class="admin-btn admin-btn-success" onclick="cargarSeries()"><i class="fas fa-refresh"></i> Recargar</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- LISTA DE SERIES -->
+    <!-- LISTA DE SERIES GUARDADAS -->
     <div class="admin-card">
-        <h3><i class="fas fa-list text-emerald-500"></i> Series en Firebase</h3>
+        <h3><i class="fas fa-list text-emerald-500"></i> Series guardadas en Firebase</h3>
         <div id="listaSeries" class="max-h-96 overflow-y-auto">
             <p style="color:#64748B;font-size:.9rem;">Cargando series...</p>
         </div>
     </div>
+</main>
 
-    <script src="js/firebase-config.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/api.js"></script>
-    <script>
-        let serieKeyActual = null;
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyCwLATDpQN1RWv3rLPjJXbNnIBkyo_BUfI",
+    authDomain: "tely-ap.firebaseapp.com",
+    databaseURL: "https://tely-ap-default-rtdb.firebaseio.com",
+    projectId: "tely-ap",
+    storageBucket: "tely-ap.firebasestorage.app",
+    messagingSenderId: "760862940967",
+    appId: "1:760862940967:web:69bbbbfee0de40f68a1302"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
 
-        // ----- GUARDAR SERIE -----
-        async function guardarSerie() {
-            const titulo = document.getElementById('sTitulo').value.trim() || 'Aprenderás';
-            const serie = {
-                titulo: titulo,
-                anio: document.getElementById('sAnio').value.trim() || '2024',
-                sinopsis: document.getElementById('sSinopsis').value.trim() || 'Sin sinopsis',
-                portada: document.getElementById('sPortada').value.trim() || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
-                tipo: 'serie',
-                categoria: 'series',
-                genero: 'Educativo',
-                opcion2: '',
-                plataforma2: 'vidsrc',
-                temporadas: [{
+history.pushState(null, '', window.location.href);
+window.addEventListener('popstate', function(e) { return true; });
+document.addEventListener('backbutton', function(e) { return true; }, false);
+
+let serieKeyActual = null;
+
+function irALogin() { window.location.href = 'login.html'; }
+function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
+function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
+document.addEventListener('click', (e) => { const menu = document.getElementById('userDropdown'); if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show'); });
+auth.onAuthStateChanged(user => {
+    document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
+    document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
+});
+
+function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('themeBtn');
+    if (body.classList.contains('dark')) { body.classList.remove('dark'); btn.innerHTML = '<i class="fas fa-moon"></i>'; localStorage.setItem('theme', 'light'); }
+    else { body.classList.add('dark'); btn.innerHTML = '<i class="fas fa-sun"></i>'; localStorage.setItem('theme', 'dark'); }
+}
+if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
+else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
+
+function generarEnlaceMultiplataforma(tmdb_id, tipo, plataforma, temporada = 1, capitulo = 1) {
+    const plataformas = {
+        'unlimplay': {
+            pelicula: (id) => `https://unlimplay.com/play/embed/movie/${id}?lang=es-MX&autoplay=1&controls=1&logo=0`,
+            serie: (id, t, c) => `https://unlimplay.com/play/embed/tv/${id}/${t}/${c}?lang=es-MX&autoplay=1&controls=1&logo=0`
+        },
+        'vidsrc': {
+            pelicula: (id) => `https://vidsrc.in/embed/movie/${id}?lang=es`,
+            serie: (id, t, c) => `https://vidsrc.in/embed/tv/${id}/${t}/${c}?lang=es`
+        }
+    };
+    const plat = plataformas[plataforma] || plataformas['unlimplay'];
+    if (tipo === 'pelicula') return plat.pelicula(tmdb_id);
+    else return plat.serie(tmdb_id, temporada, capitulo);
+}
+
+function mostrarToast(msg, tipo = 'success') {
+    const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
+    const t = document.createElement('div');
+    t.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:10px 20px;border-radius:10px;z-index:9999;font-weight:600;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+}
+
+// ==============================================
+// 📥 GUARDAR SERIE EN FIREBASE
+// ==============================================
+async function guardarSerie() {
+    const titulo = document.getElementById('sTitulo').value.trim() || 'Aprenderás';
+    const serie = {
+        titulo: titulo,
+        anio: document.getElementById('sAnio').value.trim() || '2024',
+        sinopsis: document.getElementById('sSinopsis').value.trim() || 'Sin sinopsis',
+        portada: document.getElementById('sPortada').value.trim() || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
+        genero: document.getElementById('sGenero').value.trim() || 'Educativo',
+        tipo: 'serie',
+        categoria: 'series',
+        opcion2: '',
+        plataforma2: 'vidsrc',
+        temporadas: [{
+            numero: 1,
+            nombre: 'Temporada 1',
+            capitulos: [
+                {
                     numero: 1,
-                    nombre: 'Temporada 1',
-                    capitulos: [
-                        {
-                            numero: 1,
-                            titulo: document.getElementById('c1Titulo').value.trim() || 'Capítulo 1',
-                            sinopsis: '',
-                            url: generarEnlaceMultiplataforma(1, 'serie', 'unlimplay', 1, 1),
-                            opcion2: document.getElementById('c1Op2').value.trim() || '',
-                            plataforma2: 'vidsrc'
-                        },
-                        {
-                            numero: 2,
-                            titulo: document.getElementById('c2Titulo').value.trim() || 'Capítulo 2',
-                            sinopsis: '',
-                            url: generarEnlaceMultiplataforma(1, 'serie', 'unlimplay', 1, 2),
-                            opcion2: document.getElementById('c2Op2').value.trim() || '',
-                            plataforma2: 'vidsrc'
-                        },
-                        {
-                            numero: 3,
-                            titulo: document.getElementById('c3Titulo').value.trim() || 'Capítulo 3',
-                            sinopsis: '',
-                            url: generarEnlaceMultiplataforma(1, 'serie', 'unlimplay', 1, 3),
-                            opcion2: document.getElementById('c3Op2').value.trim() || '',
-                            plataforma2: 'vidsrc'
-                        }
-                    ]
-                }]
-            };
-
-            try {
-                if (serieKeyActual) {
-                    await db.ref(`series_personalizadas/${serieKeyActual}`).update(serie);
-                    mostrarToast('✅ Serie actualizada', 'success');
-                } else {
-                    await db.ref('series_personalizadas').push(serie);
-                    mostrarToast('✅ Serie guardada', 'success');
+                    titulo: document.getElementById('c1Titulo').value.trim() || 'Capítulo 1',
+                    sinopsis: '',
+                    url: generarEnlaceMultiplataforma(1, 'serie', 'unlimplay', 1, 1),
+                    opcion2: document.getElementById('c1Op2').value.trim() || '',
+                    plataforma2: 'vidsrc'
+                },
+                {
+                    numero: 2,
+                    titulo: document.getElementById('c2Titulo').value.trim() || 'Capítulo 2',
+                    sinopsis: '',
+                    url: generarEnlaceMultiplataforma(1, 'serie', 'unlimplay', 1, 2),
+                    opcion2: document.getElementById('c2Op2').value.trim() || '',
+                    plataforma2: 'vidsrc'
+                },
+                {
+                    numero: 3,
+                    titulo: document.getElementById('c3Titulo').value.trim() || 'Capítulo 3',
+                    sinopsis: '',
+                    url: generarEnlaceMultiplataforma(1, 'serie', 'unlimplay', 1, 3),
+                    opcion2: document.getElementById('c3Op2').value.trim() || '',
+                    plataforma2: 'vidsrc'
                 }
-                cargarSeries();
-                serieKeyActual = null;
-                document.getElementById('sTitulo').value = 'Aprenderás';
-                document.getElementById('sAnio').value = '2024';
-                document.getElementById('sSinopsis').value = 'Serie para aprender a programar';
-            } catch(e) {
-                mostrarToast('❌ Error: ' + e.message, 'error');
-            }
-        }
+            ]
+        }]
+    };
 
-        // ----- CARGAR SERIES -----
-        async function cargarSeries() {
-            const container = document.getElementById('listaSeries');
-            container.innerHTML = '<p style="color:#64748B;font-size:.9rem;">Cargando series...</p>';
-            try {
-                const snap = await db.ref('series_personalizadas').once('value');
-                const data = snap.val();
-                if (!data) {
-                    container.innerHTML = '<p style="color:#64748B;font-size:.9rem;">No hay series guardadas</p>';
-                    return;
-                }
-                container.innerHTML = '';
-                Object.entries(data).forEach(([key, s]) => {
-                    const caps = s.temporadas?.[0]?.capitulos || [];
-                    const capInfo = caps.map((cap, i) => {
-                        const tieneOp2 = cap.opcion2 && cap.opcion2.trim() !== '';
-                        return `<span class="${tieneOp2 ? 'badge-op2' : 'badge-no-op2'}">Cap${i+1} ${tieneOp2 ? '✅ Op2' : '❌ Sin Op2'}</span>`;
-                    }).join(' ');
-                    const div = document.createElement('div');
-                    div.className = 'admin-item';
-                    div.innerHTML = `
-                        <div class="title">${s.titulo}</div>
-                        <div class="meta">${s.anio} • ${s.genero || 'Serie'}</div>
-                        <div class="meta">${capInfo}</div>
-                        <div class="actions">
-                            <button class="edit" onclick="editarSerie('${key}')"><i class="fas fa-pen"></i> Editar</button>
-                            <button class="delete" onclick="eliminarSerie('${key}')"><i class="fas fa-trash"></i> Eliminar</button>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-            } catch(e) {
-                container.innerHTML = '<p style="color:#EF4444;font-size:.9rem;">Error al cargar</p>';
-            }
+    try {
+        if (serieKeyActual) {
+            await db.ref(`series_personalizadas/${serieKeyActual}`).update(serie);
+            mostrarToast('✅ Serie actualizada en Firebase', 'success');
+            serieKeyActual = null;
+        } else {
+            await db.ref('series_personalizadas').push(serie);
+            mostrarToast('✅ Serie guardada en Firebase', 'success');
         }
-
-        // ----- EDITAR SERIE -----
-        async function editarSerie(key) {
-            try {
-                const snap = await db.ref(`series_personalizadas/${key}`).once('value');
-                const s = snap.val();
-                if (!s) return;
-                serieKeyActual = key;
-                document.getElementById('sTitulo').value = s.titulo || '';
-                document.getElementById('sAnio').value = s.anio || '';
-                document.getElementById('sSinopsis').value = s.sinopsis || '';
-                document.getElementById('sPortada').value = s.portada || '';
-                const caps = s.temporadas?.[0]?.capitulos || [];
-                if (caps[0]) {
-                    document.getElementById('c1Titulo').value = caps[0].titulo || '';
-                    document.getElementById('c1Op2').value = caps[0].opcion2 || '';
-                }
-                if (caps[1]) {
-                    document.getElementById('c2Titulo').value = caps[1].titulo || '';
-                    document.getElementById('c2Op2').value = caps[1].opcion2 || '';
-                }
-                if (caps[2]) {
-                    document.getElementById('c3Titulo').value = caps[2].titulo || '';
-                    document.getElementById('c3Op2').value = caps[2].opcion2 || '';
-                }
-                mostrarToast('📝 Editando: ' + s.titulo, 'warning');
-            } catch(e) {
-                mostrarToast('❌ Error al cargar: ' + e.message, 'error');
-            }
-        }
-
-        // ----- ELIMINAR SERIE -----
-        async function eliminarSerie(key) {
-            if (!confirm('¿Eliminar esta serie?')) return;
-            try {
-                await db.ref(`series_personalizadas/${key}`).remove();
-                if (serieKeyActual === key) serieKeyActual = null;
-                cargarSeries();
-                mostrarToast('🗑️ Serie eliminada', 'warning');
-            } catch(e) {
-                mostrarToast('❌ Error: ' + e.message, 'error');
-            }
-        }
-
-        // ----- RECARGAR DATOS -----
-        function cargarDatos() {
-            cargarSeries();
-            mostrarToast('🔄 Datos recargados', 'success');
-        }
-
-        // ----- FUNCIONES AUXILIARES -----
-        function mostrarToast(mensaje, tipo = 'success') {
-            const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444' };
-            const t = document.createElement('div');
-            t.style.cssText = `
-                position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-                background:${colores[tipo] || '#10B981'};color:#fff;padding:10px 20px;
-                border-radius:10px;z-index:9999;font-weight:600;max-width:90%;
-                text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);
-                transition:opacity 0.3s;
-            `;
-            t.textContent = mensaje;
-            document.body.appendChild(t);
-            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
-        }
-
-        // ----- INICIO -----
+        // Limpiar campos
+        document.getElementById('sTitulo').value = 'Aprenderás';
+        document.getElementById('sAnio').value = '2024';
+        document.getElementById('sSinopsis').value = 'Serie para aprender a programar';
+        document.getElementById('sPortada').value = 'https://image.tmdb.org/t/p/w342/kqjL17yufvn9OVLyXYpvtyrFfak.jpg';
+        document.getElementById('sGenero').value = 'Educativo';
+        document.getElementById('c1Titulo').value = 'Introducción';
+        document.getElementById('c1Op2').value = 'https://vidsrc.in/embed/tv/1/1/1?lang=es';
+        document.getElementById('c2Titulo').value = 'Variables';
+        document.getElementById('c2Op2').value = 'https://vidsrc.in/embed/tv/1/1/2?lang=es';
+        document.getElementById('c3Titulo').value = 'Funciones';
+        document.getElementById('c3Op2').value = 'https://vidsrc.in/embed/tv/1/1/3?lang=es';
         cargarSeries();
+    } catch(e) {
+        mostrarToast('❌ Error: ' + e.message, 'error');
+        console.error(e);
+    }
+}
 
-        // Escuchar cambios en tiempo real
-        db.ref('series_personalizadas').on('value', () => {
-            console.log('🔄 Cambio detectado en series');
-            cargarSeries();
+// ==============================================
+// 📋 CARGAR SERIES DESDE FIREBASE
+// ==============================================
+async function cargarSeries() {
+    const container = document.getElementById('listaSeries');
+    container.innerHTML = '<p style="color:#64748B;font-size:.9rem;">Cargando series...</p>';
+    try {
+        const snap = await db.ref('series_personalizadas').once('value');
+        const data = snap.val();
+        if (!data) {
+            container.innerHTML = '<p style="color:#64748B;font-size:.9rem;">No hay series guardadas en Firebase</p>';
+            return;
+        }
+        container.innerHTML = '';
+        Object.entries(data).forEach(([key, s]) => {
+            const caps = s.temporadas?.[0]?.capitulos || [];
+            const capInfo = caps.map((cap, i) => {
+                const tieneOp2 = cap.opcion2 && cap.opcion2.trim() !== '';
+                return `<span class="${tieneOp2 ? 'badge-op2' : 'badge-no-op2'}">Cap${i+1} ${tieneOp2 ? '✅ Op2' : '❌ Sin Op2'}</span>`;
+            }).join(' ');
+            const div = document.createElement('div');
+            div.className = 'admin-item';
+            div.innerHTML = `
+                <div class="title">${s.titulo}</div>
+                <div class="meta">${s.anio} • ${s.genero || 'Serie'}</div>
+                <div class="meta">${capInfo}</div>
+                <div class="actions">
+                    <button class="edit" onclick="editarSerie('${key}')"><i class="fas fa-pen"></i> Editar</button>
+                    <button class="delete" onclick="eliminarSerie('${key}')"><i class="fas fa-trash"></i> Eliminar</button>
+                </div>
+            `;
+            container.appendChild(div);
         });
+    } catch(e) {
+        container.innerHTML = '<p style="color:#EF4444;font-size:.9rem;">Error al cargar</p>';
+        console.error(e);
+    }
+}
 
-        console.log('✅ Admin TELY cargado');
-    </script>
+// ==============================================
+// ✏️ EDITAR SERIE
+// ==============================================
+async function editarSerie(key) {
+    try {
+        const snap = await db.ref(`series_personalizadas/${key}`).once('value');
+        const s = snap.val();
+        if (!s) return;
+        serieKeyActual = key;
+        document.getElementById('sTitulo').value = s.titulo || '';
+        document.getElementById('sAnio').value = s.anio || '';
+        document.getElementById('sSinopsis').value = s.sinopsis || '';
+        document.getElementById('sPortada').value = s.portada || '';
+        document.getElementById('sGenero').value = s.genero || '';
+        const caps = s.temporadas?.[0]?.capitulos || [];
+        if (caps[0]) {
+            document.getElementById('c1Titulo').value = caps[0].titulo || '';
+            document.getElementById('c1Op2').value = caps[0].opcion2 || '';
+        }
+        if (caps[1]) {
+            document.getElementById('c2Titulo').value = caps[1].titulo || '';
+            document.getElementById('c2Op2').value = caps[1].opcion2 || '';
+        }
+        if (caps[2]) {
+            document.getElementById('c3Titulo').value = caps[2].titulo || '';
+            document.getElementById('c3Op2').value = caps[2].opcion2 || '';
+        }
+        mostrarToast('📝 Editando: ' + s.titulo, 'info');
+    } catch(e) {
+        mostrarToast('❌ Error al cargar: ' + e.message, 'error');
+    }
+}
+
+// ==============================================
+// 🗑️ ELIMINAR SERIE
+// ==============================================
+async function eliminarSerie(key) {
+    if (!confirm('¿Eliminar esta serie de Firebase?')) return;
+    try {
+        await db.ref(`series_personalizadas/${key}`).remove();
+        if (serieKeyActual === key) serieKeyActual = null;
+        cargarSeries();
+        mostrarToast('🗑️ Serie eliminada', 'warning');
+    } catch(e) {
+        mostrarToast('❌ Error: ' + e.message, 'error');
+    }
+}
+
+// ==============================================
+// 🔥 ESCUCHAR CAMBIOS EN TIEMPO REAL
+// ==============================================
+db.ref('series_personalizadas').on('value', () => {
+    console.log('🔄 Cambio detectado en series - Recargando...');
+    cargarSeries();
+});
+
+// ==============================================
+// ⚡ INICIO
+// ==============================================
+cargarSeries();
+console.log('✅ Admin TELY cargado - Listo para agregar series');
+</script>
 </body>
 </html>
