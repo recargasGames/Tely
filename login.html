@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>TELY 🎬 - Iniciar Sesión</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0A0A0F;padding:1rem}
+        .login-container{background:rgba(26,26,46,.95);border-radius:20px;padding:2.5rem;width:100%;max-width:420px;border:1px solid rgba(124,58,237,.15)}
+        .login-header{text-align:center;margin-bottom:2rem}
+        .login-header .logo{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .login-header p{color:#94A3B8;font-size:.95rem;margin-top:.3rem}
+        .login-input{width:100%;padding:.8rem 1rem;border-radius:12px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:1rem;margin-bottom:1rem;transition:.3s}
+        .login-input:focus{outline:none;border-color:#7C3AED;background:rgba(255,255,255,.08)}
+        .login-input::placeholder{color:#64748B}
+        .login-btn{width:100%;padding:.8rem;border-radius:12px;border:none;background:#7C3AED;color:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;transition:.3s}
+        .login-btn:hover{background:#6D28D9}
+        .login-btn:disabled{opacity:.5;cursor:not-allowed}
+        .login-divider{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;color:#64748B;font-size:.85rem}
+        .login-divider::before,.login-divider::after{content:"";flex:1;height:1px;background:rgba(124,58,237,.15)}
+        .social-btn{width:100%;padding:.8rem;border-radius:12px;border:2px solid rgba(124,58,237,.15);background:transparent;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;transition:.3s;display:flex;align-items:center;justify-content:center;gap:.5rem}
+        .social-btn:hover{background:rgba(124,58,237,.1);border-color:#7C3AED}
+        .social-btn.google{color:#EA4335}
+        .social-btn.github{color:#fff}
+        .login-footer{text-align:center;margin-top:1.5rem;color:#94A3B8;font-size:.9rem}
+        .login-footer a{color:#A78BFA;text-decoration:none;font-weight:600}
+        .login-footer a:hover{text-decoration:underline}
+        .error-msg{color:#EF4444;font-size:.85rem;text-align:center;margin-top:.5rem;display:none}
+        .success-msg{color:#34D399;font-size:.85rem;text-align:center;margin-top:.5rem;display:none}
+        body:not(.dark) .login-page{background:#f0f0f0}
+        body:not(.dark) .login-container{background:#fff;border-color:rgba(0,0,0,.1)}
+        body:not(.dark) .login-input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
+        body:not(.dark) .login-input::placeholder{color:#888}
+        body:not(.dark) .login-footer{color:#555}
+        body:not(.dark) .login-footer a{color:#7C3AED}
+        body:not(.dark) .social-btn{color:#111;border-color:rgba(0,0,0,.1)}
+        body:not(.dark) .social-btn:hover{background:rgba(124,58,237,.05)}
+        body:not(.dark) .login-divider{color:#888}
+        body:not(.dark) .login-divider::before,body:not(.dark) .login-divider::after{background:rgba(0,0,0,.1)}
+        body:not(.dark) .login-header p{color:#555}
+    </style>
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-header">
+            <div class="logo">TELY</div>
+            <p>Inicia sesión para disfrutar del contenido</p>
+        </div>
+
+        <div id="errorMsg" class="error-msg"></div>
+        <div id="successMsg" class="success-msg"></div>
+
+        <form id="loginForm" onsubmit="event.preventDefault(); iniciarSesionEmail()">
+            <input type="email" class="login-input" id="loginEmail" placeholder="📧 Correo electrónico" required>
+            <input type="password" class="login-input" id="loginPassword" placeholder="🔒 Contraseña" required>
+            <button type="submit" class="login-btn" id="loginBtnMain">
+                <i class="fas fa-sign-in-alt"></i> Iniciar sesión
+            </button>
+        </form>
+
+        <div class="login-divider">o continúa con</div>
+
+        <button class="social-btn google" onclick="iniciarConGoogle()">
+            <i class="fab fa-google"></i> Google
+        </button>
+
+        <div class="login-footer">
+            ¿No tienes cuenta? <a href="registro.html">Regístrate aquí</a>
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Verificar si ya está logueado
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>
