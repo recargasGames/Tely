@@ -129,7 +129,6 @@
         .search-admin select:focus{outline:none;border-color:#7C3AED}
         .edit-mode-indicator{display:inline-block;padding:.1rem .6rem;border-radius:4px;background:rgba(245,158,11,.15);color:#F59E0B;font-size:.6rem;font-weight:600}
         
-        /* Capítulos expandidos */
         .capitulo-detalle{background:rgba(255,255,255,.02);border-radius:6px;padding:.3rem .5rem;margin:.2rem 0;border-left:2px solid rgba(59,130,246,.3)}
         .capitulo-detalle .cap-titulo{font-size:.7rem;font-weight:500;color:#E2E8F0}
         body:not(.dark) .capitulo-detalle .cap-titulo{color:#111}
@@ -140,7 +139,6 @@
         .toggle-series-btn:hover{background:rgba(59,130,246,.25)}
         .temporada-titulo{font-size:.7rem;font-weight:600;color:#34D399;margin:.3rem 0 .1rem;display:flex;align-items:center;gap:.3rem}
         
-        /* Paginación */
         .paginacion{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.5rem 0;flex-wrap:wrap}
         .paginacion button{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.2rem .8rem;border-radius:6px;font-size:.75rem;cursor:pointer;transition:.2s}
         .paginacion button:hover{background:rgba(124,58,237,.3)}
@@ -213,7 +211,7 @@
             <p style="color:#94A3B8;font-size:.95rem;margin:.3rem 0;">
                 Genera <strong>TODAS</strong> las películas y series de TMDB<br>
                 <span class="badge-no-op2">🔗 Solo Opción 1 - Unlimplay</span>
-                <span class="edit-mode-indicator ml-2">✏️ Opción 2 se agrega manualmente</span>
+                <span class="edit-mode-indicator ml-2">✏️ Opción 2 se agrega MANUALMENTE</span>
             </p>
             
             <div class="stats" id="statsContainer">
@@ -259,7 +257,6 @@
             <p class="loading-text">Cargando contenido...</p>
         </div>
         
-        <!-- ⭐ PAGINACIÓN -->
         <div class="paginacion" id="paginacionContainer" style="display:none;">
             <button onclick="cambiarPagina(-1)" id="btnPaginaPrev"><i class="fas fa-chevron-left"></i></button>
             <span class="info-pagina" id="infoPagina">Página 1 de 1</span>
@@ -298,7 +295,6 @@ let totalPeliculas = 0, totalSeries = 0, totalCaps = 0, generando = false, esAdm
 let itemsEditando = {};
 let seriesExpandidas = {};
 
-// ⭐ VARIABLES DE PAGINACIÓN
 let paginaActual = 1;
 let itemsPorPagina = 20;
 let peliculasLista = [];
@@ -458,7 +454,7 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
-// ⭐ EDITAR ENLACE
+// ⭐ EDITAR ENLACE (SOLO OPCIÓN 1)
 window.editarEnlace = function(id, tipo, key) {
     document.querySelectorAll('.edit-input').forEach(el => el.remove());
     document.querySelectorAll('.edit-mode-indicator').forEach(el => el.remove());
@@ -548,7 +544,7 @@ window.guardarEnlace = async function(key, tipo) {
     }
 };
 
-// ⭐ AGREGAR OPCIÓN 2
+// ⭐ AGREGAR OPCIÓN 2 - MANUAL
 window.agregarOpcion2 = async function(key, tipo, tmdbId) {
     const container = document.getElementById(`item-${key}`);
     const op2Div = container.querySelector('.op2-enlace') || container.querySelector('.enlace:last-child');
@@ -565,7 +561,7 @@ window.agregarOpcion2 = async function(key, tipo, tmdbId) {
     nuevoOp2Div.style.marginTop = '.2rem';
     nuevoOp2Div.innerHTML = `
         <div style="font-size:.6rem;color:#3B82F6;font-weight:600;">🔗 Opción 2 (agregar manualmente):</div>
-        <input class="edit-input" id="op2-input-${key}" placeholder="https://vidsrc.in/embed/movie/12345?lang=es" style="margin-top:.1rem;">
+        <input class="edit-input" id="op2-input-${key}" placeholder="Pega aquí el enlace de Vidmoly, BigMoly, etc..." style="margin-top:.1rem;">
         <div style="margin-top:.2rem;display:flex;gap:.3rem;">
             <button class="save-btn" onclick="guardarOpcion2('${key}', '${tipo}', '${tmdbId}')"><i class="fas fa-check"></i> Guardar Op2</button>
             <button class="cancel-btn" onclick="cancelarOpcion2('${key}')"><i class="fas fa-times"></i> Cancelar</button>
@@ -594,7 +590,7 @@ window.editarOpcion2 = function(key, tipo, tmdbId) {
     
     op2Div.innerHTML = `
         <div style="font-size:.6rem;color:#3B82F6;font-weight:600;">🔗 Opción 2 (editar):</div>
-        <input class="edit-input" id="op2-input-${key}" value="${currentUrl}" placeholder="https://vidsrc.in/embed/movie/12345?lang=es" style="margin-top:.1rem;">
+        <input class="edit-input" id="op2-input-${key}" value="${currentUrl}" placeholder="Pega aquí el enlace de Vidmoly, BigMoly, etc..." style="margin-top:.1rem;">
         <div style="margin-top:.2rem;display:flex;gap:.3rem;">
             <button class="save-btn" onclick="guardarOpcion2('${key}', '${tipo}', '${tmdbId}')"><i class="fas fa-check"></i> Guardar Op2</button>
             <button class="cancel-btn" onclick="cancelarOpcion2('${key}')"><i class="fas fa-times"></i> Cancelar</button>
@@ -767,11 +763,9 @@ function mostrarPagina() {
     const container = document.getElementById('listaContenido');
     const pagContainer = document.getElementById('paginacionContainer');
     
-    // Calcular índices
     const inicio = (paginaActual - 1) * itemsPorPagina;
     const fin = Math.min(inicio + itemsPorPagina, peliculasLista.length);
     
-    // Mostrar solo los elementos de la página actual
     const items = container.querySelectorAll('.admin-item');
     items.forEach((item, index) => {
         if (index >= inicio && index < fin) {
@@ -781,7 +775,6 @@ function mostrarPagina() {
         }
     });
     
-    // Actualizar info de paginación
     const totalPaginas = Math.ceil(peliculasLista.length / itemsPorPagina);
     document.getElementById('infoPagina').textContent = `Página ${paginaActual} de ${totalPaginas || 1}`;
     document.getElementById('btnPaginaPrev').disabled = paginaActual <= 1;
@@ -790,11 +783,11 @@ function mostrarPagina() {
     pagContainer.style.display = peliculasLista.length > itemsPorPagina ? 'flex' : 'none';
 }
 
-// ⭐ BOTÓN MÁGICO
+// ⭐ BOTÓN MÁGICO - SOLO OPCIÓN 1
 window.generarTodo = async function() {
     if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
     if (generando) { mostrarToast('⏳ Ya está generando...', 'warning'); return; }
-    if (!confirm('⚠️ ¿Generar TODAS las películas y series de TMDB?\nSOLO Opción 1 (Unlimplay)\nLa Opción 2 la agregarás manualmente después.')) return;
+    if (!confirm('⚠️ ¿Generar TODAS las películas y series de TMDB?\nSOLO Opción 1 (Unlimplay)\nLa Opción 2 la agregarás MANUALMENTE después.')) return;
     
     generando = true;
     const btn = document.querySelector('.admin-btn-magic');
@@ -847,6 +840,7 @@ window.generarTodo = async function() {
                     tmdb_id: p.id,
                     puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A',
                     url: generarEnlaceUnlimplay(p.id, 'pelicula'),
+                    // ⭐ SIN OPCIÓN 2 - SE AGREGA MANUALMENTE
                     creado: Date.now()
                 });
                 totalPeliculas++;
@@ -889,6 +883,7 @@ window.generarTodo = async function() {
                             titulo: ep.name || `Capítulo ${ep.episode_number}`,
                             sinopsis: ep.overview || 'Sin sinopsis',
                             url: generarEnlaceUnlimplay(s.id, 'serie', t, ep.episode_number)
+                            // ⭐ SIN OPCIÓN 2 - SE AGREGA MANUALMENTE
                         }));
                         capsSerie += capitulos.length;
                         temporadas.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
@@ -907,6 +902,7 @@ window.generarTodo = async function() {
                         puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A',
                         temporadas: temporadas,
                         url: generarEnlaceUnlimplay(s.id, 'serie', 1, 1),
+                        // ⭐ SIN OPCIÓN 2 - SE AGREGA MANUALMENTE
                         creado: Date.now()
                     });
                     totalSeries++;
@@ -977,7 +973,6 @@ window.filtrarContenido = function() {
         item.style.display = match ? 'block' : 'none';
     });
     
-    // Actualizar contador visible
     const visibles = document.querySelectorAll('.admin-item[style*="display: block"]').length;
     const total = document.querySelectorAll('.admin-item').length;
     document.getElementById('infoPagina').textContent = `Mostrando ${visibles} de ${total}`;
@@ -1032,7 +1027,7 @@ window.cargarContenido = async function() {
                 item.dataset.tipo = 'pelicula';
                 item.style.borderLeftColor = '#10B981';
                 const urlDisplay = p.url || 'Sin enlace';
-                const op2Display = p.opcion2 || '❌ Sin Opción 2';
+                const op2Display = p.opcion2 || '❌ Sin Opción 2 (agregar manual)';
                 item.innerHTML = `
                     <div class="title">${p.titulo} <span style="font-size:.6rem;color:#94A3B8;">(TMDB: ${p.tmdb_id})</span></div>
                     <div class="meta">${p.anio} • ⭐ ${p.puntuacion || 'N/A'}</div>
@@ -1059,7 +1054,7 @@ window.cargarContenido = async function() {
                 const capsCount = s.temporadas ? s.temporadas.reduce((sum, t) => sum + (t.capitulos ? t.capitulos.length : 0), 0) : 0;
                 const isExpanded = seriesExpandidas[key] || false;
                 const urlDisplay = s.url || 'Sin enlace (ver capítulos)';
-                const op2Display = s.opcion2 || '❌ Sin Opción 2';
+                const op2Display = s.opcion2 || '❌ Sin Opción 2 (agregar manual)';
                 
                 const item = document.createElement('div');
                 item.className = 'admin-item serie-expandida';
@@ -1123,7 +1118,6 @@ window.cargarContenido = async function() {
             container.appendChild(div);
         }
         
-        // ⭐ APLICAR PAGINACIÓN
         paginaActual = 1;
         mostrarPagina();
         
@@ -1146,7 +1140,7 @@ window.eliminarItem = async function(key, tipo) {
 };
 
 db.ref().on('value', () => { if (esAdmin) cargarContenido(); });
-console.log('✅ Admin TELY - Con paginación (20 items por página)');
+console.log('✅ Admin TELY - Opción 2 solo MANUAL');
 </script>
 </body>
 </html>
