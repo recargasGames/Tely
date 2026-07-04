@@ -13,7 +13,7 @@
         .player-wrapper{position:relative;background:#0A0A0F;border-radius:12px;overflow:hidden;aspect-ratio:16/9;width:100%}
         .player-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
         .player-info{padding:.8rem 0}
-        .player-info h1{font-size:1.3rem;font-weight:700}
+        .player-info h1{font-size:1.3rem;font-weight:700;color:#fff}
         .player-info .meta{color:#94A3B8;font-size:.85rem;display:flex;gap:1rem;flex-wrap:wrap}
         .player-info .sinopsis{color:#94A3B8;font-size:.85rem;margin-top:.3rem;line-height:1.4}
         .player-controls{display:flex;gap:.5rem;flex-wrap:wrap;margin:.3rem 0}
@@ -22,12 +22,14 @@
         .player-controls .btn:hover{border-color:#7C3AED}
         .player-controls .btn.sin-enlace{border-color:rgba(239,68,68,.2)!important;color:#EF4444!important;cursor:not-allowed;opacity:.6}
         .player-controls .btn.sin-enlace:hover{border-color:rgba(239,68,68,.2)!important;background:none!important}
+        .player-controls .btn-nueva-ventana{border-color:rgba(239,68,68,.3)!important;color:#EF4444!important}
+        .player-controls .btn-nueva-ventana:hover{background:rgba(239,68,68,.15)!important}
         .capitulos-section{background:rgba(255,255,255,.03);border-radius:10px;padding:.6rem;border:1px solid rgba(124,58,237,.06);margin-top:.3rem}
         .capitulos-section .temp-selector{display:flex;align-items:center;justify-content:center;gap:.6rem;margin-bottom:.3rem}
         .capitulos-section .temp-selector button{background:rgba(255,255,255,.06);border:none;color:#fff;padding:.1rem .5rem;border-radius:9999px;cursor:pointer;font-size:.8rem}
         .capitulos-section .temp-selector button:hover{background:rgba(124,58,237,.2)}
         .capitulos-section .temp-selector button:disabled{opacity:.3;cursor:not-allowed}
-        .capitulos-section .temp-selector span{font-weight:700;font-size:.9rem}
+        .capitulos-section .temp-selector span{font-weight:700;font-size:.9rem;color:#fff}
         .capitulos-list{display:flex;flex-direction:column;gap:.2rem;max-height:250px;overflow-y:auto}
         .capitulo-item{display:flex;flex-direction:column;padding:.2rem .5rem;background:rgba(255,255,255,.04);border-radius:6px;cursor:pointer;border:1px solid transparent;transition:.2s}
         .capitulo-item:hover{background:rgba(255,255,255,.08)}
@@ -49,6 +51,10 @@
         .loading-spinner{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#0A0A0F;color:#A78BFA;gap:1rem}
         .loading-spinner i{font-size:3rem;color:#7C3AED;animation:spin 1s linear infinite}
         @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        body:not(.dark) .player-info h1{color:#111}
+        body:not(.dark) .capitulos-section .temp-selector span{color:#111}
+        body:not(.dark) .capitulo-item .titulo{color:#111}
+        body:not(.dark) .capitulo-item .sinopsis{color:#555}
     </style>
 </head>
 <body>
@@ -85,7 +91,7 @@
     </div>
     
     <div style="margin-top:.5rem;">
-        <h4 style="font-weight:700;margin-bottom:.2rem;font-size:.9rem;">Te podría gustar</h4>
+        <h4 style="font-weight:700;margin-bottom:.2rem;font-size:.9rem;color:#fff;">Te podría gustar</h4>
         <div class="recomendaciones" id="recomendaciones"></div>
     </div>
 </div>
@@ -118,11 +124,11 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
+// ⭐ BOTÓN ATRÁS
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) {
-    const modal = document.querySelector('.modal-reproductor');
-    if (modal && modal.classList.contains('abierto')) {
-        cerrarReproductor();
+    if (document.querySelector('.player-wrapper iframe')) {
+        document.querySelector('.player-wrapper').innerHTML = '';
         e.preventDefault();
         history.pushState(null, '', window.location.href);
         return false;
@@ -130,15 +136,15 @@ window.addEventListener('popstate', function(e) {
     return true;
 });
 document.addEventListener('backbutton', function(e) {
-    const modal = document.querySelector('.modal-reproductor');
-    if (modal && modal.classList.contains('abierto')) {
-        cerrarReproductor();
+    if (document.querySelector('.player-wrapper iframe')) {
+        document.querySelector('.player-wrapper').innerHTML = '';
         e.preventDefault();
         e.stopPropagation();
         return false;
     }
 }, false);
 
+// ⭐ OBTENER PARÁMETROS
 const params = new URLSearchParams(window.location.search);
 const tmdbId = params.get('play');
 const tipo = params.get('tipo') || 'pelicula';
@@ -151,14 +157,18 @@ let tempActualIndex = 0;
 let opcionActiva = 1;
 let contenido = [];
 
+// ⭐ FUNCIÓN PRINCIPAL - GENERAR ENLACE UNLIMPLAY CON /embed/
+function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    if (tipo === 'pelicula') {
+        return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+    } else {
+        return `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+    }
+}
+
 function getImagenUrl(path, size = 'w342') {
     if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
     return `https://image.tmdb.org/t/p/${size}${path}`;
-}
-
-function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    if (tipo === 'pelicula') return `https://unlimplay.co/play/movie/${tmdb_id}`;
-    else return `https://unlimplay.co/play/tv/${tmdb_id}/${temporada}/${capitulo}`;
 }
 
 function mostrarToast(msg, tipo = 'success') {
@@ -198,6 +208,55 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
+// ⭐ REPRODUCIR CON ENLACE CORRECTO
+function reproducir(url) {
+    const wrapper = document.getElementById('playerWrapper');
+    
+    // ⭐ ASEGURAR QUE EL ENLACE TENGA EL FORMATO CORRECTO
+    let finalUrl = url;
+    
+    // Si no tiene los parámetros, agregarlos
+    if (!finalUrl.includes('autoplay')) {
+        if (finalUrl.includes('?')) {
+            finalUrl += '&autoplay=1&controls=1&logo=0';
+        } else {
+            finalUrl += '?autoplay=1&controls=1&logo=0';
+        }
+    }
+    
+    // ⭐ VERIFICAR QUE EL ENLACE TENGA /embed/ EN EL MEDIO
+    if (finalUrl.includes('unlimplay.com/play/') && !finalUrl.includes('unlimplay.com/play/embed/')) {
+        finalUrl = finalUrl.replace('unlimplay.com/play/', 'unlimplay.com/play/embed/');
+    }
+    
+    wrapper.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#0A0A0F;color:#A78BFA;gap:1rem;">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size:3rem;color:#7C3AED;"></i>
+            <span>Cargando video...</span>
+            <span style="font-size:0.6rem;color:#64748B;max-width:90%;word-break:break-all;">${finalUrl}</span>
+        </div>
+    `;
+    
+    const iframe = document.createElement('iframe');
+    iframe.src = finalUrl;
+    iframe.frameborder = "0";
+    iframe.referrerpolicy = "origin";
+    iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+    iframe.allowfullscreen = true;
+    iframe.style.cssText = "width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;";
+    
+    wrapper.appendChild(iframe);
+    
+    // Quitar el spinner después de 5 segundos
+    setTimeout(() => {
+        const spinner = wrapper.querySelector('.fa-spinner')?.closest('div');
+        if (spinner) {
+            spinner.style.display = 'none';
+        }
+    }, 5000);
+}
+
+// ⭐ CARGAR CONTENIDO Y GENERAR ENLACE AUTOMÁTICO
 async function cargarContenidoReproductor() {
     const wrapper = document.getElementById('playerWrapper');
     wrapper.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner"></i><span>Cargando...</span></div>`;
@@ -214,9 +273,9 @@ async function cargarContenidoReproductor() {
         
         let item = contenido.find(c => c.tmdb_id == tmdbId);
         
-        // ⭐ SI NO EXISTE, GENERAR BAJO DEMANDA
+        // ⭐ SI NO EXISTE EN FIREBASE, GENERAR BAJO DEMANDA
         if (!item && tmdbId) {
-            console.log(`🔍 Contenido no encontrado. Generando bajo demanda...`);
+            console.log(`🔍 Generando contenido bajo demanda: ${tmdbId} (${tipo})`);
             mostrarToast('⏳ Generando contenido...', 'info');
             
             if (tipo === 'pelicula') {
@@ -237,13 +296,13 @@ async function cargarContenidoReproductor() {
                     };
                     await push(ref(db, 'contenido_personalizado'), pelicula);
                     item = pelicula;
-                    mostrarToast('✅ Película generada', 'success');
+                    mostrarToast('✅ Película generada automáticamente', 'success');
                 }
             } else {
                 const data = await fetchTMDB(`tv/${tmdbId}`);
                 if (data && data.id) {
                     const temporadas = [];
-                    for (let t = 1; t <= Math.min(data.number_of_seasons || 1, 5); t++) {
+                    for (let t = 1; t <= Math.min(data.number_of_seasons || 1, 10); t++) {
                         try {
                             const seasonData = await fetchTMDB(`tv/${tmdbId}/season/${t}`);
                             if (!seasonData || !seasonData.episodes) continue;
@@ -272,7 +331,7 @@ async function cargarContenidoReproductor() {
                         };
                         await push(ref(db, 'series_personalizadas'), serie);
                         item = serie;
-                        mostrarToast('✅ Serie generada', 'success');
+                        mostrarToast('✅ Serie generada automáticamente', 'success');
                     }
                 }
             }
@@ -285,6 +344,7 @@ async function cargarContenidoReproductor() {
             wrapper.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#EF4444;gap:1rem;">
                 <i class="fas fa-exclamation-triangle" style="font-size:3rem;"></i>
                 <span>Contenido no encontrado</span>
+                <span style="font-size:.7rem;color:#64748B;">ID: ${tmdbId} - Tipo: ${tipo}</span>
             </div>`;
         }
     } catch(e) {
@@ -323,9 +383,10 @@ function cargarReproductor(peli, tempRestaurar = null, capRestaurar = null) {
         mostrarTemporada(tempIndex, capIndex);
         const pc = obtenerCapitulo(tempIndex, 0);
         
+        // ⭐ OPCIÓN 1 - UNLIMPLAY
         const b1 = document.createElement('button');
         b1.className = 'btn active';
-        b1.innerHTML = '<i class="fas fa-play"></i> Opción 1';
+        b1.innerHTML = '<i class="fas fa-play"></i> Opción 1 (Unlimplay)';
         b1.onclick = () => {
             document.querySelectorAll('.player-controls .btn').forEach(b => b.classList.remove('active'));
             b1.classList.add('active');
@@ -341,9 +402,10 @@ function cargarReproductor(peli, tempRestaurar = null, capRestaurar = null) {
         };
         controls.appendChild(b1);
         
+        // ⭐ OPCIÓN 2 - VIDSRC (RESPALDO)
         const b2 = document.createElement('button');
         b2.className = 'btn';
-        b2.innerHTML = '<i class="fas fa-play"></i> Opción 2';
+        b2.innerHTML = '<i class="fas fa-play"></i> Opción 2 (Vidsrc)';
         b2.onclick = () => {
             document.querySelectorAll('.player-controls .btn').forEach(b => b.classList.remove('active'));
             b2.classList.add('active');
@@ -360,8 +422,9 @@ function cargarReproductor(peli, tempRestaurar = null, capRestaurar = null) {
         if (pc?.opcion2 && pc.opcion2.trim() !== '') { controls.appendChild(b2); } 
         else { b2.className = 'btn sin-enlace'; b2.innerHTML = '<i class="fas fa-link-slash"></i> Opción 2 (Sin enlace)'; }
         
+        // ⭐ NUEVA VENTANA
         const b3 = document.createElement('button');
-        b3.className = 'btn';
+        b3.className = 'btn btn-nueva-ventana';
         b3.innerHTML = '<i class="fas fa-external-link-alt"></i> Nueva ventana';
         b3.onclick = () => {
             const capActivo = document.querySelector('.capitulo-item.activo');
@@ -389,12 +452,14 @@ function cargarReproductor(peli, tempRestaurar = null, capRestaurar = null) {
         agregarAlHistorial(peli, tempIndex, capIndex);
         
     } else {
+        // ⭐ PELÍCULA
         document.getElementById('capitulosSection').style.display = 'none';
         const finalUrl = peli.url || generarEnlaceUnlimplay(peli.tmdb_id, 'pelicula');
         
+        // Opción 1 - Unlimplay
         const b1 = document.createElement('button');
         b1.className = 'btn active';
-        b1.innerHTML = '<i class="fas fa-play"></i> Opción 1';
+        b1.innerHTML = '<i class="fas fa-play"></i> Opción 1 (Unlimplay)';
         b1.onclick = () => {
             document.querySelectorAll('.player-controls .btn').forEach(b => b.classList.remove('active'));
             b1.classList.add('active');
@@ -403,24 +468,26 @@ function cargarReproductor(peli, tempRestaurar = null, capRestaurar = null) {
         };
         controls.appendChild(b1);
         
+        // Opción 2 - Vidsrc (respaldo)
         const b2 = document.createElement('button');
         b2.className = 'btn';
-        b2.innerHTML = '<i class="fas fa-play"></i> Opción 2';
+        b2.innerHTML = '<i class="fas fa-play"></i> Opción 2 (Vidsrc)';
         b2.onclick = () => {
             document.querySelectorAll('.player-controls .btn').forEach(b => b.classList.remove('active'));
             b2.classList.add('active');
             opcionActiva = 2;
-            const u = peli.opcion2 || finalUrl.replace('unlimplay.co', 'vidsrc.in');
+            const u = peli.opcion2 || finalUrl.replace('unlimplay.com/play/embed/', 'vidsrc.in/embed/');
             if (u) reproducir(u);
         };
-        if (peli.opcion2) { controls.appendChild(b2); } 
+        if (peli.opcion2 || finalUrl) { controls.appendChild(b2); } 
         else { b2.className = 'btn sin-enlace'; b2.innerHTML = '<i class="fas fa-link-slash"></i> Opción 2 (Sin enlace)'; }
         
+        // Nueva ventana
         const b3 = document.createElement('button');
-        b3.className = 'btn';
+        b3.className = 'btn btn-nueva-ventana';
         b3.innerHTML = '<i class="fas fa-external-link-alt"></i> Nueva ventana';
         b3.onclick = () => {
-            const u = opcionActiva === 1 ? finalUrl : (peli.opcion2 || finalUrl.replace('unlimplay.co', 'vidsrc.in'));
+            const u = opcionActiva === 1 ? finalUrl : (peli.opcion2 || finalUrl.replace('unlimplay.com/play/embed/', 'vidsrc.in/embed/'));
             if (u) window.open(u, '_blank'); else alert('❌ No hay enlace disponible');
         };
         controls.appendChild(b3);
@@ -429,20 +496,6 @@ function cargarReproductor(peli, tempRestaurar = null, capRestaurar = null) {
         cargarRecomendaciones(peli.tmdb_id);
         agregarAlHistorial(peli);
     }
-}
-
-function reproducir(url) {
-    const wrapper = document.getElementById('playerWrapper');
-    wrapper.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner"></i><span>Cargando video...</span></div>`;
-    const iframe = document.createElement('iframe');
-    iframe.src = url;
-    iframe.frameborder = "0";
-    iframe.referrerpolicy = "origin";
-    iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
-    iframe.allowfullscreen = true;
-    iframe.style.cssText = "width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;";
-    iframe.onload = () => { wrapper.innerHTML = ''; wrapper.appendChild(iframe); };
-    setTimeout(() => { if (wrapper.querySelector('.fa-spinner')) { wrapper.innerHTML = ''; wrapper.appendChild(iframe); } }, 3000);
 }
 
 function obtenerCapitulo(tempIdx, capIdx) {
@@ -536,8 +589,9 @@ async function cargarRecomendaciones(tmdbId) {
         data.results.slice(0, 8).forEach(p => {
             const div = document.createElement('div');
             div.className = 'recomendacion';
+            const imgUrl = p.poster_path ? getImagenUrl(p.poster_path, 'w185') : 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
             div.innerHTML = `
-                <img src="${getImagenUrl(p.poster_path, 'w185')}" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+                <img src="${imgUrl}" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
                 <p>${p.title || p.name}</p>
             `;
             div.onclick = () => {
@@ -549,8 +603,10 @@ async function cargarRecomendaciones(tmdbId) {
     } catch(e) { container.innerHTML = '<p style="color:#64748B;font-size:.7rem;">Sin recomendaciones</p>'; }
 }
 
-if (tmdbId) { cargarContenidoReproductor(); } 
-else {
+// ⭐ INICIO
+if (tmdbId) { 
+    cargarContenidoReproductor(); 
+} else {
     document.getElementById('playerWrapper').innerHTML = `
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#EF4444;gap:1rem;">
             <i class="fas fa-exclamation-triangle" style="font-size:3rem;"></i>
@@ -559,7 +615,9 @@ else {
     `;
 }
 
-console.log('✅ Reproductor cargado - Con generación bajo demanda');
+console.log('✅ Reproductor TELY - Generación automática de enlaces');
+console.log('📌 Formato: https://unlimplay.com/play/embed/movie/ID');
+console.log('📌 Formato: https://unlimplay.com/play/embed/tv/ID/T/E');
 </script>
 </body>
 </html>
