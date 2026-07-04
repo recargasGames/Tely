@@ -189,8 +189,8 @@
             <h2 style="font-size:1.5rem;font-weight:800;color:#F59E0B;">¡BOTÓN MÁGICO!</h2>
             <p style="color:#94A3B8;font-size:.95rem;margin:.3rem 0;">
                 Genera <strong>TODAS</strong> las películas y series de TMDB<br>
-                <span class="badge-no-op2">❌ Solo Opción 1 - Unlimplay</span>
-                <span class="edit-mode-indicator ml-2">✏️ Enlaces editables manualmente</span>
+                <span class="badge-no-op2">🔗 Solo Opción 1 - Unlimplay</span>
+                <span class="edit-mode-indicator ml-2">✏️ Opción 2 se agrega manualmente</span>
             </p>
             
             <div class="stats" id="statsContainer">
@@ -200,11 +200,11 @@
             </div>
 
             <button class="admin-btn admin-btn-magic" onclick="generarTodo()" style="width:100%;font-size:1.2rem;padding:1rem;">
-                <i class="fas fa-wand-magic-sparkles"></i> ⚡ GENERAR TODO ⚡
+                <i class="fas fa-wand-magic-sparkles"></i> ⚡ GENERAR TODO (Solo Op1) ⚡
             </button>
             
             <div class="progress-bar" id="progressBar"><div class="fill" id="progressFill"></div></div>
-            <div class="info" id="progressInfo">Listo para generar todo el contenido...</div>
+            <div class="info" id="progressInfo">Listo para generar solo la Opción 1...</div>
             
             <div style="display:flex;gap:.5rem;justify-content:center;margin-top:.5rem;flex-wrap:wrap">
                 <button class="admin-btn admin-btn-green" onclick="limpiarTodo()" style="font-size:.75rem;padding:.3rem 1rem;">
@@ -389,14 +389,6 @@ function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     }
 }
 
-function generarEnlaceVidsrc(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    if (tipo === 'pelicula') {
-        return `https://vidsrc.in/embed/movie/${tmdb_id}?lang=es`;
-    } else {
-        return `https://vidsrc.in/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es`;
-    }
-}
-
 function getImagenUrl(path, size = 'w342') {
     if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
     return `https://image.tmdb.org/t/p/${size}${path}`;
@@ -421,6 +413,7 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
+// ⭐ EDITAR ENLACE (SOLO OPCIÓN 1)
 window.editarEnlace = function(id, tipo, key) {
     document.querySelectorAll('.edit-input').forEach(el => el.remove());
     document.querySelectorAll('.edit-mode-indicator').forEach(el => el.remove());
@@ -438,7 +431,7 @@ window.editarEnlace = function(id, tipo, key) {
     itemsEditando[key] = true;
     
     enlaceDiv.innerHTML = `
-        <input class="edit-input" id="edit-input-${key}" value="${currentUrl}" placeholder="Pega el nuevo enlace aquí...">
+        <input class="edit-input" id="edit-input-${key}" value="${currentUrl}" placeholder="Pega el nuevo enlace de Opción 1 aquí...">
         <div style="margin-top:.2rem;display:flex;gap:.3rem;">
             <button class="save-btn" onclick="guardarEnlace('${key}', '${tipo}')"><i class="fas fa-check"></i> Guardar</button>
             <button class="cancel-btn" onclick="cancelarEdicion('${key}')"><i class="fas fa-times"></i> Cancelar</button>
@@ -478,7 +471,7 @@ window.cancelarEdicion = function(key) {
     
     const editBtn = actionsDiv.querySelector('.edit-btn');
     if (editBtn) {
-        editBtn.textContent = '✏️ Editar enlace';
+        editBtn.textContent = '✏️ Editar Op1';
         editBtn.style.background = 'rgba(245,158,11,.15)';
         editBtn.style.color = '#F59E0B';
         editBtn.style.borderColor = 'rgba(245,158,11,.2)';
@@ -502,7 +495,7 @@ window.guardarEnlace = async function(key, tipo) {
             await db.ref(`series_personalizadas/${key}`).update({ url: nuevoEnlace });
         }
         
-        mostrarToast('✅ Enlace actualizado correctamente', 'success');
+        mostrarToast('✅ Opción 1 actualizada correctamente', 'success');
         delete itemsEditando[key];
         cargarContenido();
     } catch(e) {
@@ -510,10 +503,104 @@ window.guardarEnlace = async function(key, tipo) {
     }
 };
 
+// ⭐ AGREGAR OPCIÓN 2 MANUALMENTE
+window.agregarOpcion2 = async function(key, tipo, tmdbId) {
+    const container = document.getElementById(`item-${key}`);
+    const op2Div = container.querySelector('.op2-enlace') || container.querySelector('.enlace:last-child');
+    const actionsDiv = container.querySelector('.item-actions');
+    
+    // Verificar si ya existe opción 2
+    if (op2Div && op2Div.textContent.includes('Opción 2')) {
+        // Si ya existe, editarla
+        editarOpcion2(key, tipo, tmdbId);
+        return;
+    }
+    
+    // Crear input para agregar Opción 2
+    const nuevoOp2Div = document.createElement('div');
+    nuevoOp2Div.className = 'enlace op2-enlace';
+    nuevoOp2Div.style.borderColor = 'rgba(59,130,246,.2)';
+    nuevoOp2Div.style.marginTop = '.2rem';
+    nuevoOp2Div.innerHTML = `
+        <div style="font-size:.6rem;color:#3B82F6;font-weight:600;">🔗 Opción 2 (agregar manualmente):</div>
+        <input class="edit-input" id="op2-input-${key}" placeholder="https://vidsrc.in/embed/movie/12345?lang=es" style="margin-top:.1rem;">
+        <div style="margin-top:.2rem;display:flex;gap:.3rem;">
+            <button class="save-btn" onclick="guardarOpcion2('${key}', '${tipo}', '${tmdbId}')"><i class="fas fa-check"></i> Guardar Op2</button>
+            <button class="cancel-btn" onclick="cancelarOpcion2('${key}')"><i class="fas fa-times"></i> Cancelar</button>
+        </div>
+    `;
+    
+    // Insertar antes de los actions
+    container.insertBefore(nuevoOp2Div, actionsDiv);
+    
+    // Ocultar botón de agregar si existe
+    const agregarBtn = actionsDiv.querySelector('.agregar-op2-btn');
+    if (agregarBtn) agregarBtn.style.display = 'none';
+    
+    setTimeout(() => {
+        const input = document.getElementById(`op2-input-${key}`);
+        if (input) input.focus();
+    }, 100);
+};
+
+window.editarOpcion2 = function(key, tipo, tmdbId) {
+    const container = document.getElementById(`item-${key}`);
+    const op2Div = container.querySelector('.op2-enlace') || container.querySelector('.enlace:last-child');
+    const actionsDiv = container.querySelector('.item-actions');
+    
+    if (!op2Div) return;
+    
+    // Obtener el enlace actual
+    const currentUrl = op2Div.textContent.replace('🔗 Opción 2:', '').trim();
+    
+    op2Div.innerHTML = `
+        <div style="font-size:.6rem;color:#3B82F6;font-weight:600;">🔗 Opción 2 (editar):</div>
+        <input class="edit-input" id="op2-input-${key}" value="${currentUrl}" placeholder="https://vidsrc.in/embed/movie/12345?lang=es" style="margin-top:.1rem;">
+        <div style="margin-top:.2rem;display:flex;gap:.3rem;">
+            <button class="save-btn" onclick="guardarOpcion2('${key}', '${tipo}', '${tmdbId}')"><i class="fas fa-check"></i> Guardar Op2</button>
+            <button class="cancel-btn" onclick="cancelarOpcion2('${key}')"><i class="fas fa-times"></i> Cancelar</button>
+        </div>
+    `;
+    
+    setTimeout(() => {
+        const input = document.getElementById(`op2-input-${key}`);
+        if (input) input.focus();
+    }, 100);
+};
+
+window.guardarOpcion2 = async function(key, tipo, tmdbId) {
+    const input = document.getElementById(`op2-input-${key}`);
+    if (!input) return;
+    
+    const nuevoEnlace = input.value.trim();
+    if (!nuevoEnlace) {
+        mostrarToast('❌ El enlace de Opción 2 no puede estar vacío', 'error');
+        return;
+    }
+    
+    try {
+        if (tipo === 'pelicula') {
+            await db.ref(`contenido_personalizado/${key}`).update({ opcion2: nuevoEnlace });
+        } else {
+            await db.ref(`series_personalizadas/${key}`).update({ opcion2: nuevoEnlace });
+        }
+        
+        mostrarToast('✅ Opción 2 guardada correctamente', 'success');
+        cargarContenido();
+    } catch(e) {
+        mostrarToast('❌ Error al guardar Op2: ' + e.message, 'error');
+    }
+};
+
+window.cancelarOpcion2 = function(key) {
+    cargarContenido();
+};
+
+// ⭐ BOTÓN MÁGICO - SOLO OPCIÓN 1
 window.generarTodo = async function() {
     if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
     if (generando) { mostrarToast('⏳ Ya está generando...', 'warning'); return; }
-    if (!confirm('⚠️ ¿Generar TODAS las películas y series de TMDB?\nEsto puede tomar varios minutos.')) return;
+    if (!confirm('⚠️ ¿Generar TODAS las películas y series de TMDB?\nSOLO Opción 1 (Unlimplay)\nLa Opción 2 la agregarás manualmente después.')) return;
     
     generando = true;
     const btn = document.querySelector('.admin-btn-magic');
@@ -522,9 +609,9 @@ window.generarTodo = async function() {
     const originalText = btn.innerHTML;
     
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando (Solo Op1)...';
     fill.style.width = '0%';
-    info.textContent = '🚀 Iniciando generación masiva...';
+    info.textContent = '🚀 Iniciando generación masiva (solo Opción 1)...';
     
     totalPeliculas = 0;
     totalSeries = 0;
@@ -551,7 +638,7 @@ window.generarTodo = async function() {
             } catch(e) { hasMorePelis = false; }
         }
         
-        info.textContent = `🎬 Generando ${peliculasTotales.length} películas...`;
+        info.textContent = `🎬 Generando ${peliculasTotales.length} películas (solo Op1)...`;
         for (let i = 0; i < peliculasTotales.length; i++) {
             try {
                 const p = peliculasTotales[i];
@@ -566,7 +653,7 @@ window.generarTodo = async function() {
                     tmdb_id: p.id,
                     puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A',
                     url: generarEnlaceUnlimplay(p.id, 'pelicula'),
-                    opcion2: generarEnlaceVidsrc(p.id, 'pelicula'),
+                    // ⭐ SIN OPCIÓN 2 - SE AGREGA MANUALMENTE
                     creado: Date.now()
                 });
                 totalPeliculas++;
@@ -594,7 +681,7 @@ window.generarTodo = async function() {
             } catch(e) { hasMoreSeries = false; }
         }
         
-        info.textContent = `📺 Generando ${seriesTotales.length} series...`;
+        info.textContent = `📺 Generando ${seriesTotales.length} series (solo Op1)...`;
         for (let i = 0; i < seriesTotales.length; i++) {
             try {
                 const s = seriesTotales[i];
@@ -608,8 +695,8 @@ window.generarTodo = async function() {
                             numero: ep.episode_number,
                             titulo: ep.name || `Capítulo ${ep.episode_number}`,
                             sinopsis: ep.overview || 'Sin sinopsis',
-                            url: generarEnlaceUnlimplay(s.id, 'serie', t, ep.episode_number),
-                            opcion2: generarEnlaceVidsrc(s.id, 'serie', t, ep.episode_number)
+                            url: generarEnlaceUnlimplay(s.id, 'serie', t, ep.episode_number)
+                            // ⭐ SIN OPCIÓN 2 - SE AGREGA MANUALMENTE
                         }));
                         capsSerie += capitulos.length;
                         temporadas.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
@@ -628,7 +715,7 @@ window.generarTodo = async function() {
                         puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A',
                         temporadas: temporadas,
                         url: generarEnlaceUnlimplay(s.id, 'serie', 1, 1),
-                        opcion2: generarEnlaceVidsrc(s.id, 'serie', 1, 1),
+                        // ⭐ SIN OPCIÓN 2 - SE AGREGA MANUALMENTE
                         creado: Date.now()
                     });
                     totalSeries++;
@@ -648,7 +735,7 @@ window.generarTodo = async function() {
         document.getElementById('totalPeliculas').textContent = totalPeliculas;
         document.getElementById('totalSeries').textContent = totalSeries;
         document.getElementById('totalCaps').textContent = totalCaps;
-        mostrarToast(`✅ ${totalPeliculas} películas y ${totalSeries} series generadas!`, 'success');
+        mostrarToast(`✅ ${totalPeliculas} películas y ${totalSeries} series generadas (solo Op1)`, 'success');
         cargarContenido();
     } catch(e) {
         info.textContent = `❌ Error: ${e.message}`;
@@ -741,14 +828,15 @@ window.cargarContenido = async function() {
                 item.dataset.tipo = 'pelicula';
                 item.style.borderLeftColor = '#10B981';
                 const urlDisplay = p.url || 'Sin enlace';
-                const op2Display = p.opcion2 || 'Sin opción 2';
+                const op2Display = p.opcion2 || '❌ Sin Opción 2';
                 item.innerHTML = `
                     <div class="title">${p.titulo} <span style="font-size:.6rem;color:#94A3B8;">(TMDB: ${p.tmdb_id})</span></div>
                     <div class="meta">${p.anio} • ⭐ ${p.puntuacion || 'N/A'}</div>
                     <div class="enlace" style="border-color:rgba(16,185,129,.2);">🔗 Op1: ${urlDisplay}</div>
-                    <div class="enlace" style="border-color:rgba(59,130,246,.2);margin-top:.2rem;">🔗 Op2: ${op2Display}</div>
+                    <div class="enlace op2-enlace" style="border-color:rgba(59,130,246,.2);margin-top:.2rem;">🔗 Op2: ${op2Display}</div>
                     <div class="item-actions" style="margin-top:.2rem;display:flex;gap:.3rem;flex-wrap:wrap;">
-                        <button class="edit-btn" onclick="editarEnlace('${p.tmdb_id}', 'pelicula', '${key}')"><i class="fas fa-pen"></i> Editar enlace</button>
+                        <button class="edit-btn" onclick="editarEnlace('${p.tmdb_id}', 'pelicula', '${key}')"><i class="fas fa-pen"></i> Editar Op1</button>
+                        <button class="agregar-op2-btn" style="padding:.1rem .6rem;border-radius:4px;font-size:.6rem;font-weight:600;border:1px solid rgba(59,130,246,.2);color:#3B82F6;background:rgba(59,130,246,.15);cursor:pointer;" onclick="agregarOpcion2('${key}', 'pelicula', '${p.tmdb_id}')"><i class="fas fa-plus-circle"></i> Agregar Op2</button>
                         <button class="admin-btn-danger" style="padding:.1rem .6rem;border-radius:4px;font-size:.6rem;font-weight:600;border:none;color:#F87171;background:rgba(239,68,68,.15);cursor:pointer;" onclick="eliminarItem('${key}', 'pelicula')"><i class="fas fa-trash"></i></button>
                     </div>
                 `;
@@ -770,14 +858,15 @@ window.cargarContenido = async function() {
                 item.dataset.tipo = 'serie';
                 item.style.borderLeftColor = '#34D399';
                 const urlDisplay = s.url || 'Sin enlace (ver capítulos)';
-                const op2Display = s.opcion2 || 'Sin opción 2';
+                const op2Display = s.opcion2 || '❌ Sin Opción 2';
                 item.innerHTML = `
                     <div class="title">${s.titulo} <span style="font-size:.6rem;color:#94A3B8;">(TMDB: ${s.tmdb_id})</span></div>
                     <div class="meta">${s.anio} • ${s.temporadas?.length || 0} temps • ${capsCount} caps • ⭐ ${s.puntuacion || 'N/A'}</div>
                     <div class="enlace" style="border-color:rgba(16,185,129,.2);">🔗 Op1: ${urlDisplay}</div>
-                    <div class="enlace" style="border-color:rgba(59,130,246,.2);margin-top:.2rem;">🔗 Op2: ${op2Display}</div>
+                    <div class="enlace op2-enlace" style="border-color:rgba(59,130,246,.2);margin-top:.2rem;">🔗 Op2: ${op2Display}</div>
                     <div class="item-actions" style="margin-top:.2rem;display:flex;gap:.3rem;flex-wrap:wrap;">
-                        <button class="edit-btn" onclick="editarEnlace('${s.tmdb_id}', 'serie', '${key}')"><i class="fas fa-pen"></i> Editar enlace</button>
+                        <button class="edit-btn" onclick="editarEnlace('${s.tmdb_id}', 'serie', '${key}')"><i class="fas fa-pen"></i> Editar Op1</button>
+                        <button class="agregar-op2-btn" style="padding:.1rem .6rem;border-radius:4px;font-size:.6rem;font-weight:600;border:1px solid rgba(59,130,246,.2);color:#3B82F6;background:rgba(59,130,246,.15);cursor:pointer;" onclick="agregarOpcion2('${key}', 'serie', '${s.tmdb_id}')"><i class="fas fa-plus-circle"></i> Agregar Op2</button>
                         <button class="admin-btn-danger" style="padding:.1rem .6rem;border-radius:4px;font-size:.6rem;font-weight:600;border:none;color:#F87171;background:rgba(239,68,68,.15);cursor:pointer;" onclick="eliminarItem('${key}', 'serie')"><i class="fas fa-trash"></i></button>
                     </div>
                 `;
@@ -803,7 +892,7 @@ window.eliminarItem = async function(key, tipo) {
 };
 
 db.ref().on('value', () => { if (esAdmin) cargarContenido(); });
-console.log('✅ Admin TELY - Con edición manual de enlaces y doble opción');
+console.log('✅ Admin TELY - Botón Mágico SOLO Opción 1 | Opción 2 manual');
 </script>
 </body>
 </html>
