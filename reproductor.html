@@ -29,16 +29,74 @@
         .player-wrapper{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;width:100%;margin:.5rem 0}
         .player-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;background:#000}
         
+        /* ⭐ CONTROLES - OPCIÓN 2 RESALTADA */
         .player-controls{display:flex;gap:.5rem;flex-wrap:wrap;margin:.3rem 0}
         .btn-opcion{background:rgba(255,255,255,.06);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.4rem 1.2rem;border-radius:8px;font-weight:600;font-size:.8rem;cursor:pointer;transition:.3s}
         .btn-opcion.active{border-color:#7C3AED;background:#7C3AED;color:#fff}
         .btn-opcion:hover{border-color:#7C3AED}
-        .btn-opcion.sin-enlace{border-color:rgba(239,68,68,.2)!important;color:#EF4444!important;cursor:not-allowed;opacity:.6}
-        .btn-opcion.sin-enlace:hover{border-color:rgba(239,68,68,.2)!important;background:none!important}
+        
+        /* ⭐ OPCIÓN 2 RESALTADA - SIEMPRE VISIBLE */
+        .btn-opcion.opcion2{
+            border-color:rgba(59,130,246,.4);
+            background:rgba(59,130,246,.08);
+            color:#60A5FA;
+            box-shadow:0 0 15px rgba(59,130,246,.1);
+        }
+        .btn-opcion.opcion2:hover{
+            background:rgba(59,130,246,.2);
+            border-color:#3B82F6;
+            box-shadow:0 0 25px rgba(59,130,246,.3);
+        }
+        .btn-opcion.opcion2.active{
+            background:#3B82F6;
+            border-color:#3B82F6;
+            color:#fff;
+            box-shadow:0 0 30px rgba(59,130,246,.5);
+        }
+        .btn-opcion.opcion2 i{
+            color:#60A5FA;
+        }
+        .btn-opcion.opcion2.active i{
+            color:#fff;
+        }
+        .btn-opcion.opcion2.sin-enlace{
+            border-color:rgba(239,68,68,.2)!important;
+            color:#EF4444!important;
+            background:rgba(239,68,68,.05)!important;
+            box-shadow:none!important;
+            cursor:not-allowed;
+            opacity:.6;
+        }
+        .btn-opcion.opcion2.sin-enlace:hover{
+            border-color:rgba(239,68,68,.2)!important;
+            background:rgba(239,68,68,.05)!important;
+            box-shadow:none!important;
+        }
+        
         .btn-nueva-ventana{background:rgba(255,255,255,.06);border:1px solid rgba(239,68,68,.2);color:#EF4444;padding:.4rem 1.2rem;border-radius:8px;font-weight:600;font-size:.8rem;cursor:pointer;transition:.3s}
         .btn-nueva-ventana:hover{background:rgba(239,68,68,.15)}
         .btn-recargar{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.2);color:#34D399;padding:.4rem 1.2rem;border-radius:8px;font-weight:600;font-size:.8rem;cursor:pointer;transition:.3s}
         .btn-recargar:hover{background:rgba(16,185,129,.25)}
+        
+        /* ⭐ INDICADOR DE OPCIÓN 2 */
+        .badge-opcion2{
+            display:inline-block;
+            background:#3B82F6;
+            color:#fff;
+            font-size:.5rem;
+            font-weight:700;
+            padding:.05rem .4rem;
+            border-radius:4px;
+            margin-left:.3rem;
+            vertical-align:middle;
+            text-transform:uppercase;
+            letter-spacing:.5px;
+            animation:pulse-op2 2s infinite;
+        }
+        @keyframes pulse-op2{
+            0%,100%{opacity:1}
+            50%{opacity:.5}
+        }
         
         .capitulos-section{background:rgba(255,255,255,.03);border-radius:10px;padding:.6rem;border:1px solid rgba(124,58,237,.06);margin-top:.3rem}
         .capitulos-section .temp-selector{display:flex;align-items:center;justify-content:center;gap:.6rem;margin-bottom:.3rem}
@@ -55,7 +113,7 @@
         .capitulo-item .numero{font-size:.65rem;color:#A78BFA;font-weight:700;min-width:25px}
         .capitulo-item .titulo{font-size:.7rem;color:#E2E8F0;font-weight:500;flex:1}
         .capitulo-item .play{font-size:.55rem;color:#34D399;font-weight:600}
-        .capitulo-item .play.op2{color:#3B82F6}
+        .capitulo-item .play.op2{color:#3B82F6;background:rgba(59,130,246,.1);padding:.05rem .4rem;border-radius:4px;border:1px solid rgba(59,130,246,.2)}
         .capitulo-item .sinopsis{font-size:.6rem;color:#64748B;margin-top:.05rem;padding-left:2rem;line-height:1.2}
         
         .recomendaciones{display:flex;gap:.5rem;overflow-x:auto;padding:.3rem 0}
@@ -83,6 +141,9 @@
         body:not(.dark) .capitulo-item .sinopsis{color:#555}
         body:not(.dark) .btn-opcion{color:#111;border-color:rgba(0,0,0,.1)}
         body:not(.dark) .btn-opcion.active{background:#7C3AED;color:#fff}
+        body:not(.dark) .btn-opcion.opcion2{color:#2563EB;border-color:rgba(59,130,246,.3);background:rgba(59,130,246,.05)}
+        body:not(.dark) .btn-opcion.opcion2:hover{background:rgba(59,130,246,.15)}
+        body:not(.dark) .btn-opcion.opcion2.active{background:#3B82F6;color:#fff}
         body:not(.dark) .btn-nueva-ventana{color:#EF4444}
         body:not(.dark) .btn-recargar{color:#059669}
         body:not(.dark) .titulo-recomendadas{color:#111}
@@ -110,9 +171,12 @@
         </div>
     </div>
     
+    <!-- ⭐ CONTROLES - OPCIÓN 2 RESALTADA -->
     <div class="player-controls" id="playerControls">
         <button class="btn-opcion active" id="btnOp1" onclick="reproducirOpcion(1)"><i class="fas fa-play"></i> Opción 1</button>
-        <button class="btn-opcion" id="btnOp2" onclick="reproducirOpcion(2)"><i class="fas fa-play"></i> Opción 2</button>
+        <button class="btn-opcion opcion2" id="btnOp2" onclick="reproducirOpcion(2)">
+            <i class="fas fa-play"></i> Opción 2 <span class="badge-opcion2">⭐ Recomendada</span>
+        </button>
         <button class="btn-recargar" onclick="recargarVideo()"><i class="fas fa-rotate"></i></button>
         <button class="btn-nueva-ventana" onclick="abrirNuevaVentana()"><i class="fas fa-external-link-alt"></i></button>
     </div>
@@ -150,19 +214,16 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ⭐ MANEJO DEL BOTÓN ATRÁS - SOLUCIÓN ROBUSTA ✅
+// ⭐ MANEJO DEL BOTÓN ATRÁS
 (function() {
-    // Método 1: Historial del navegador
     window.history.pushState({ page: 1 }, "", "");
     
     window.addEventListener('popstate', function(e) {
-        // Redirige a index.html
         window.location.href = 'index.html';
         e.preventDefault();
         return false;
     });
     
-    // Método 2: Para dispositivos Android (WebView)
     if (typeof document !== 'undefined') {
         document.addEventListener('backbutton', function(e) {
             window.location.href = 'index.html';
@@ -172,7 +233,6 @@ const db = firebase.database();
         }, false);
     }
     
-    // Método 3: Para algunas versiones de Android
     if (typeof window !== 'undefined') {
         window.onBackPressed = function() {
             window.location.href = 'index.html';
@@ -590,7 +650,7 @@ function mostrarTemporada(index, capSeleccionado = 0) {
                 <span class="numero">Cap ${cap.numero || idx + 1}</span>
                 <span class="titulo">${cap.titulo || 'Capítulo ' + (idx + 1)}</span>
                 ${tieneOp1 ? `<span class="play">▶ Op1</span>` : ''}
-                ${tieneOp2 ? `<span class="play op2">▶ Op2</span>` : ''}
+                ${tieneOp2 ? `<span class="play op2">▶ Op2 ⭐</span>` : ''}
                 ${!tieneOp1 && !tieneOp2 ? '<span style="color:#EF4444;font-size:.55rem;">🔒 Sin enlace</span>' : ''}
             </div>
             ${cap.sinopsis ? `<div class="sinopsis">${cap.sinopsis}</div>` : ''}
@@ -694,7 +754,7 @@ if (tmdbId) {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
 
-console.log('✅ Reproductor TELY - Botón atrás del teléfono va a index.html');
+console.log('✅ Reproductor TELY - Opción 2 resaltada');
 console.log('🔍 ID recibido:', tmdbId);
 </script>
 </body>
