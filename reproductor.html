@@ -10,22 +10,30 @@
         *{margin:0;padding:0;box-sizing:border-box}
         body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh}
         .player-container{max-width:1200px;margin:0 auto;padding:1rem}
-        .player-wrapper{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;width:100%}
+        
+        /* INFO ARRIBA */
+        .info-top{padding:.5rem 0 .8rem}
+        .info-top h1{font-size:1.3rem;font-weight:700;color:#fff;margin-bottom:.2rem}
+        .info-top .meta{color:#94A3B8;font-size:.85rem;display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:.3rem}
+        .info-top .sinopsis{color:#94A3B8;font-size:.85rem;line-height:1.4;margin-top:.3rem}
+        
+        /* REPRODUCTOR EN EL MEDIO */
+        .player-wrapper{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;width:100%;margin:.5rem 0}
         .player-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;background:#000}
-        .player-info{padding:.8rem 0}
-        .player-info h1{font-size:1.3rem;font-weight:700;color:#fff}
-        .player-info .meta{color:#94A3B8;font-size:.85rem;display:flex;gap:1rem;flex-wrap:wrap}
-        .player-info .sinopsis{color:#94A3B8;font-size:.85rem;margin-top:.3rem;line-height:1.4}
+        
+        /* CONTROLES */
         .player-controls{display:flex;gap:.5rem;flex-wrap:wrap;margin:.3rem 0}
-        .btn-opcion{background:rgba(255,255,255,.06);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.5rem 1.5rem;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer;transition:.3s}
+        .btn-opcion{background:rgba(255,255,255,.06);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.4rem 1.2rem;border-radius:8px;font-weight:600;font-size:.8rem;cursor:pointer;transition:.3s}
         .btn-opcion.active{border-color:#7C3AED;background:#7C3AED;color:#fff}
         .btn-opcion:hover{border-color:#7C3AED}
         .btn-opcion.sin-enlace{border-color:rgba(239,68,68,.2)!important;color:#EF4444!important;cursor:not-allowed;opacity:.6}
         .btn-opcion.sin-enlace:hover{border-color:rgba(239,68,68,.2)!important;background:none!important}
-        .btn-nueva-ventana{background:rgba(255,255,255,.06);border:1px solid rgba(239,68,68,.2);color:#EF4444;padding:.5rem 1.5rem;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer;transition:.3s}
+        .btn-nueva-ventana{background:rgba(255,255,255,.06);border:1px solid rgba(239,68,68,.2);color:#EF4444;padding:.4rem 1.2rem;border-radius:8px;font-weight:600;font-size:.8rem;cursor:pointer;transition:.3s}
         .btn-nueva-ventana:hover{background:rgba(239,68,68,.15)}
-        .btn-recargar{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.2);color:#34D399;padding:.5rem 1.5rem;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer;transition:.3s}
+        .btn-recargar{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.2);color:#34D399;padding:.4rem 1.2rem;border-radius:8px;font-weight:600;font-size:.8rem;cursor:pointer;transition:.3s}
         .btn-recargar:hover{background:rgba(16,185,129,.25)}
+        
+        /* CAPÍTULOS */
         .capitulos-section{background:rgba(255,255,255,.03);border-radius:10px;padding:.6rem;border:1px solid rgba(124,58,237,.06);margin-top:.3rem}
         .capitulos-section .temp-selector{display:flex;align-items:center;justify-content:center;gap:.6rem;margin-bottom:.3rem}
         .capitulos-section .temp-selector button{background:rgba(255,255,255,.06);border:none;color:#fff;padding:.1rem .5rem;border-radius:9999px;cursor:pointer;font-size:.8rem}
@@ -43,6 +51,8 @@
         .capitulo-item .play{font-size:.55rem;color:#34D399;font-weight:600}
         .capitulo-item .play.op2{color:#3B82F6}
         .capitulo-item .sinopsis{font-size:.6rem;color:#64748B;margin-top:.05rem;padding-left:2rem;line-height:1.2}
+        
+        /* RECOMENDACIONES */
         .recomendaciones{display:flex;gap:.5rem;overflow-x:auto;padding:.3rem 0}
         .recomendacion{flex:0 0 auto;width:70px;cursor:pointer;border-radius:6px;overflow:hidden}
         .recomendacion:hover{transform:scale(1.05)}
@@ -56,7 +66,10 @@
         .error-video{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#0A0A0F;color:#EF4444;gap:1rem;text-align:center;padding:1rem}
         .error-video i{font-size:3rem}
         .error-video .sub{color:#64748B;font-size:.8rem}
-        body:not(.dark) .player-info h1{color:#111}
+        .titulo-recomendadas{font-weight:700;margin-bottom:.2rem;font-size:.9rem;color:#fff}
+        
+        /* MODO CLARO */
+        body:not(.dark) .info-top h1{color:#111}
         body:not(.dark) .capitulos-section .temp-selector span{color:#111}
         body:not(.dark) .capitulo-item .titulo{color:#111}
         body:not(.dark) .capitulo-item .sinopsis{color:#555}
@@ -64,20 +77,15 @@
         body:not(.dark) .btn-opcion.active{background:#7C3AED;color:#fff}
         body:not(.dark) .btn-nueva-ventana{color:#EF4444}
         body:not(.dark) .btn-recargar{color:#059669}
+        body:not(.dark) .titulo-recomendadas{color:#111}
     </style>
 </head>
 <body>
 <div class="player-container">
     <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Volver</a>
     
-    <div class="player-wrapper" id="playerWrapper">
-        <div class="loading-spinner">
-            <i class="fas fa-spinner"></i>
-            <span>Cargando reproductor...</span>
-        </div>
-    </div>
-    
-    <div class="player-info">
+    <!-- ⭐ SINOPSIS ARRIBA -->
+    <div class="info-top">
         <h1 id="playerTitulo">Título</h1>
         <div class="meta">
             <span id="playerAnio">2024</span>
@@ -88,7 +96,15 @@
         <div class="sinopsis" id="playerSinopsis">Sinopsis...</div>
     </div>
     
-    <!-- CONTROLES CON DOBLE OPCIÓN -->
+    <!-- ⭐ REPRODUCTOR EN EL MEDIO -->
+    <div class="player-wrapper" id="playerWrapper">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner"></i>
+            <span>Cargando reproductor...</span>
+        </div>
+    </div>
+    
+    <!-- ⭐ CONTROLES -->
     <div class="player-controls" id="playerControls">
         <button class="btn-opcion active" id="btnOp1" onclick="reproducirOpcion(1)"><i class="fas fa-play"></i> Opción 1</button>
         <button class="btn-opcion" id="btnOp2" onclick="reproducirOpcion(2)"><i class="fas fa-play"></i> Opción 2</button>
@@ -96,6 +112,7 @@
         <button class="btn-nueva-ventana" onclick="abrirNuevaVentana()"><i class="fas fa-external-link-alt"></i></button>
     </div>
     
+    <!-- ⭐ CAPÍTULOS -->
     <div class="capitulos-section" id="capitulosSection" style="display:none;">
         <div class="temp-selector">
             <button onclick="cambiarTemp(-1)" id="tempPrev"><i class="fas fa-chevron-left"></i></button>
@@ -105,8 +122,9 @@
         <div class="capitulos-list" id="capitulosList"></div>
     </div>
     
+    <!-- ⭐ RECOMENDACIONES -->
     <div style="margin-top:.5rem;">
-        <h4 style="font-weight:700;margin-bottom:.2rem;font-size:.9rem;color:#fff;">Te podría gustar</h4>
+        <h4 class="titulo-recomendadas">Te podría gustar</h4>
         <div class="recomendaciones" id="recomendaciones"></div>
     </div>
 </div>
@@ -150,6 +168,7 @@ document.addEventListener('backbutton', function(e) {
     }
 }, false);
 
+// ⭐ VARIABLES
 const params = new URLSearchParams(window.location.search);
 const tmdbId = params.get('play');
 const tipo = params.get('tipo') || 'pelicula';
@@ -164,6 +183,7 @@ let urlActual = null;
 let urlOp1 = null;
 let urlOp2 = null;
 
+// ⭐ FUNCIONES DE ENLACES
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     if (tipo === 'pelicula') {
         return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
@@ -222,7 +242,13 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
+// ⭐ REPRODUCIR
+let reproduciendo = false;
+
 function reproducir(url) {
+    if (reproduciendo && urlActual === url) return;
+    reproduciendo = true;
+    
     const wrapper = document.getElementById('playerWrapper');
     urlActual = url;
     
@@ -261,17 +287,19 @@ function reproducir(url) {
     iframe.onload = function() {
         const spinner = wrapper.querySelector('.loading-spinner');
         if (spinner) spinner.style.display = 'none';
+        reproduciendo = false;
     };
     
     setTimeout(() => {
         const spinner = wrapper.querySelector('.loading-spinner');
         if (spinner) spinner.style.display = 'none';
+        reproduciendo = false;
     }, 8000);
     
     wrapper.appendChild(iframe);
 }
 
-// ⭐ REPRODUCIR OPCIÓN (1 o 2)
+// ⭐ REPRODUCIR OPCIÓN
 window.reproducirOpcion = function(opcion) {
     opcionActiva = opcion;
     document.querySelectorAll('.btn-opcion').forEach(b => b.classList.remove('active'));
@@ -309,6 +337,7 @@ window.abrirNuevaVentana = function() {
     }
 };
 
+// ⭐ CARGAR CONTENIDO
 async function cargarContenidoReproductor() {
     const wrapper = document.getElementById('playerWrapper');
     wrapper.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner"></i><span>Cargando...</span></div>`;
@@ -398,6 +427,8 @@ async function cargarContenidoReproductor() {
 
 function cargarReproductor(peli, tempRestaurar = null, capRestaurar = null) {
     peliculaActual = peli;
+    
+    // ⭐ INFO ARRIBA
     document.getElementById('playerTitulo').textContent = peli.titulo;
     document.getElementById('playerAnio').textContent = peli.anio || '2024';
     document.getElementById('playerRating').textContent = peli.puntuacion || '7.0';
@@ -420,7 +451,6 @@ function cargarReproductor(peli, tempRestaurar = null, capRestaurar = null) {
         mostrarTemporada(tempIndex, capIndex);
         const pc = obtenerCapitulo(tempIndex, 0);
         
-        // Configurar URLs para las opciones
         if (pc) {
             urlOp1 = pc.url;
             urlOp2 = pc.opcion2;
@@ -521,7 +551,6 @@ function mostrarTemporada(index, capSeleccionado = 0) {
                 reproducir(cap.opcion2);
                 agregarAlHistorial(peliculaActual, tempActualIndex, idx);
             } else if (cap.url) {
-                // Si la opción activa no tiene enlace pero la otra sí, usar la otra
                 document.querySelectorAll('.capitulo-item').forEach(el => el.classList.remove('activo'));
                 d.classList.add('activo');
                 urlOp1 = cap.url;
@@ -599,13 +628,14 @@ async function cargarRecomendaciones(tmdbId) {
     }
 }
 
+// ⭐ INICIAR
 if (tmdbId) {
     cargarContenidoReproductor();
 } else {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
 
-console.log('✅ Reproductor TELY - Doble opción');
+console.log('✅ Reproductor TELY - Sinopsis arriba, reproductor al medio');
 </script>
 </body>
 </html>
