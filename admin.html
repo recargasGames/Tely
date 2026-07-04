@@ -142,7 +142,6 @@
     </div>
     <div class="sidebar-bottom">
         <a href="perfil.html" class="sidebar-link"><i class="fas fa-user"></i><span>Perfil</span></a>
-        <a href="admin.html" class="sidebar-link active"><i class="fas fa-cog"></i><span>Admin</span></a>
     </div>
 </nav>
 
@@ -239,20 +238,10 @@
     </div>
 </main>
 
-<script type="importmap">
-{
-    "imports": {
-        "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
-        "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js",
-        "firebase/database": "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"
-    }
-}
-</script>
-<script type="module">
-import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { getDatabase, ref, get, push, update, remove, child, onValue, set } from "firebase/database";
-
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script>
 const firebaseConfig = {
     apiKey: "AIzaSyBPBDEVUR7hjNrxCYrefF9Sbl0Wofp3VoQ",
     authDomain: "telyx-23210.firebaseapp.com",
@@ -263,12 +252,11 @@ const firebaseConfig = {
     measurementId: "G-0YEZMJYMJS"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
 
-// ⭐ USUARIOS AUTORIZADOS
-const ADMIN_EMAILS = ['aa3964063@gmail.com']; // ⭐ CAMBIA ESTO
+const ADMIN_EMAILS = ['aa3964063@gmail.com'];
 
 let totalPeliculas = 0, totalSeries = 0, totalCaps = 0, generando = false, esAdmin = false;
 let itemsEditando = {};
@@ -311,7 +299,7 @@ window.iniciarSesionAdmin = function() {
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando...';
     
-    signInWithEmailAndPassword(auth, email, password)
+    auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
             const user = userCredential.user;
             if (ADMIN_EMAILS.includes(user.email)) {
@@ -323,7 +311,7 @@ window.iniciarSesionAdmin = function() {
             } else {
                 errorEl.textContent = '⛔ No tienes permisos de administrador';
                 errorEl.style.display = 'block';
-                signOut(auth);
+                auth.signOut();
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar sesión';
             }
@@ -342,7 +330,7 @@ window.iniciarSesionAdmin = function() {
 };
 
 window.cerrarSesionAdmin = function() {
-    signOut(auth).then(() => {
+    auth.signOut().then(() => {
         esAdmin = false;
         document.getElementById('loginOverlay').classList.remove('oculto');
         document.getElementById('userDropdown').classList.remove('show');
@@ -375,14 +363,14 @@ function actualizarUIAdmin(isAdmin) {
     }
 }
 
-onAuthStateChanged(auth, (user) => {
+auth.onAuthStateChanged((user) => {
     if (user && ADMIN_EMAILS.includes(user.email)) {
         esAdmin = true;
         document.getElementById('loginOverlay').classList.add('oculto');
         actualizarUIAdmin(true);
         cargarContenido();
     } else if (user) {
-        signOut(auth);
+        auth.signOut();
         esAdmin = false;
         document.getElementById('loginOverlay').classList.remove('oculto');
         actualizarUIAdmin(false);
@@ -393,7 +381,6 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// ⭐ GENERAR ENLACE UNLIMPLAY
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     if (tipo === 'pelicula') {
         return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
@@ -402,9 +389,26 @@ function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     }
 }
 
+function generarEnlaceVidsrc(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    if (tipo === 'pelicula') {
+        return `https://vidsrc.in/embed/movie/${tmdb_id}?lang=es`;
+    } else {
+        return `https://vidsrc.in/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es`;
+    }
+}
+
 function getImagenUrl(path, size = 'w342') {
     if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
     return `https://image.tmdb.org/t/p/${size}${path}`;
+}
+
+function mostrarToast(msg, tipo = 'success') {
+    const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
+    const t = document.createElement('div');
+    t.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:10px 20px;border-radius:10px;z-index:9999;font-weight:600;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
 }
 
 async function fetchTMDB(path, params = {}) {
@@ -417,18 +421,7 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
-function mostrarToast(msg, tipo = 'success') {
-    const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
-    const t = document.createElement('div');
-    t.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:10px 20px;border-radius:10px;z-index:9999;font-weight:600;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
-    t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
-}
-
-// ⭐⭐ EDITAR ENLACE MANUALMENTE ⭐⭐
 window.editarEnlace = function(id, tipo, key) {
-    // Cerrar cualquier edición abierta
     document.querySelectorAll('.edit-input').forEach(el => el.remove());
     document.querySelectorAll('.edit-mode-indicator').forEach(el => el.remove());
     
@@ -437,17 +430,13 @@ window.editarEnlace = function(id, tipo, key) {
     const actionsDiv = container.querySelector('.item-actions');
     
     if (itemsEditando[key]) {
-        // Si ya está en modo edición, cancelar
         cancelarEdicion(key);
         return;
     }
     
     const currentUrl = enlaceDiv.textContent.trim();
-    
-    // Guardar estado de edición
     itemsEditando[key] = true;
     
-    // Reemplazar el enlace con un input
     enlaceDiv.innerHTML = `
         <input class="edit-input" id="edit-input-${key}" value="${currentUrl}" placeholder="Pega el nuevo enlace aquí...">
         <div style="margin-top:.2rem;display:flex;gap:.3rem;">
@@ -456,7 +445,6 @@ window.editarEnlace = function(id, tipo, key) {
         </div>
     `;
     
-    // Cambiar el texto del botón editar
     const editBtn = actionsDiv.querySelector('.edit-btn');
     if (editBtn) {
         editBtn.textContent = '✏️ Editando...';
@@ -465,7 +453,6 @@ window.editarEnlace = function(id, tipo, key) {
         editBtn.style.borderColor = 'rgba(239,68,68,.2)';
     }
     
-    // Enfocar el input
     setTimeout(() => {
         const input = document.getElementById(`edit-input-${key}`);
         if (input) {
@@ -510,10 +497,9 @@ window.guardarEnlace = async function(key, tipo) {
     
     try {
         if (tipo === 'pelicula') {
-            await update(ref(db, `contenido_personalizado/${key}`), { url: nuevoEnlace });
+            await db.ref(`contenido_personalizado/${key}`).update({ url: nuevoEnlace });
         } else {
-            // Para series, actualizar el enlace principal y el de los capítulos
-            await update(ref(db, `series_personalizadas/${key}`), { url: nuevoEnlace });
+            await db.ref(`series_personalizadas/${key}`).update({ url: nuevoEnlace });
         }
         
         mostrarToast('✅ Enlace actualizado correctamente', 'success');
@@ -524,7 +510,6 @@ window.guardarEnlace = async function(key, tipo) {
     }
 };
 
-// ⭐ GENERAR TODO (500 PÁGINAS = 10,000)
 window.generarTodo = async function() {
     if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
     if (generando) { mostrarToast('⏳ Ya está generando...', 'warning'); return; }
@@ -547,10 +532,9 @@ window.generarTodo = async function() {
     let errores = 0;
     let pagePelis = 1;
     let pageSeries = 1;
-    const MAX_PAGES = 500; // ⭐ 500 PÁGINAS = 10,000
+    const MAX_PAGES = 500;
     
     try {
-        // PELÍCULAS
         info.textContent = '🎬 Obteniendo películas de TMDB...';
         let peliculasTotales = [];
         let hasMorePelis = true;
@@ -571,7 +555,7 @@ window.generarTodo = async function() {
         for (let i = 0; i < peliculasTotales.length; i++) {
             try {
                 const p = peliculasTotales[i];
-                await push(ref(db, 'contenido_personalizado'), {
+                await db.ref('contenido_personalizado').push({
                     titulo: p.title || `Película ${p.id}`,
                     anio: p.release_date ? p.release_date.split('-')[0] : 'N/D',
                     sinopsis: p.overview || 'Sin sinopsis',
@@ -582,6 +566,7 @@ window.generarTodo = async function() {
                     tmdb_id: p.id,
                     puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A',
                     url: generarEnlaceUnlimplay(p.id, 'pelicula'),
+                    opcion2: generarEnlaceVidsrc(p.id, 'pelicula'),
                     creado: Date.now()
                 });
                 totalPeliculas++;
@@ -593,7 +578,6 @@ window.generarTodo = async function() {
             }
         }
         
-        // SERIES
         info.textContent = '📺 Obteniendo series de TMDB...';
         let seriesTotales = [];
         let hasMoreSeries = true;
@@ -624,14 +608,15 @@ window.generarTodo = async function() {
                             numero: ep.episode_number,
                             titulo: ep.name || `Capítulo ${ep.episode_number}`,
                             sinopsis: ep.overview || 'Sin sinopsis',
-                            url: generarEnlaceUnlimplay(s.id, 'serie', t, ep.episode_number)
+                            url: generarEnlaceUnlimplay(s.id, 'serie', t, ep.episode_number),
+                            opcion2: generarEnlaceVidsrc(s.id, 'serie', t, ep.episode_number)
                         }));
                         capsSerie += capitulos.length;
                         temporadas.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
                     } catch(e) {}
                 }
                 if (temporadas.length > 0) {
-                    await push(ref(db, 'series_personalizadas'), {
+                    await db.ref('series_personalizadas').push({
                         titulo: s.name || `Serie ${s.id}`,
                         anio: s.first_air_date ? s.first_air_date.split('-')[0] : 'N/D',
                         sinopsis: s.overview || 'Sin sinopsis',
@@ -642,6 +627,8 @@ window.generarTodo = async function() {
                         tmdb_id: s.id,
                         puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A',
                         temporadas: temporadas,
+                        url: generarEnlaceUnlimplay(s.id, 'serie', 1, 1),
+                        opcion2: generarEnlaceVidsrc(s.id, 'serie', 1, 1),
                         creado: Date.now()
                     });
                     totalSeries++;
@@ -674,19 +661,18 @@ window.generarTodo = async function() {
     setTimeout(() => { fill.style.width = '0%'; }, 3000);
 };
 
-// LIMPIAR TODO
 window.limpiarTodo = async function() {
     if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
     if (!confirm('⚠️ ¿Eliminar TODO el contenido de Firebase?\n¡No se puede deshacer!')) return;
     try {
-        const snap = await get(child(ref(db), ''));
+        const snap = await db.ref().once('value');
         const data = snap.val();
         const updates = {};
         if (data) {
             Object.keys(data).forEach(key => {
                 if (key === 'contenido_personalizado' || key === 'series_personalizadas') updates[key] = null;
             });
-            await update(ref(db), updates);
+            await db.ref().update(updates);
         }
         totalPeliculas = totalSeries = totalCaps = 0;
         document.getElementById('totalPeliculas').textContent = '0';
@@ -697,7 +683,6 @@ window.limpiarTodo = async function() {
     } catch(e) { mostrarToast('❌ Error: ' + e.message, 'error'); }
 };
 
-// FILTRAR CONTENIDO
 window.filtrarContenido = function() {
     const searchTerm = document.getElementById('searchAdminInput').value.toLowerCase();
     const tipoFilter = document.getElementById('filterAdminTipo').value;
@@ -715,15 +700,14 @@ window.filtrarContenido = function() {
     });
 };
 
-// CARGAR CONTENIDO CON OPCIÓN DE EDITAR
 window.cargarContenido = async function() {
     if (!esAdmin) return;
     const container = document.getElementById('listaContenido');
     container.innerHTML = '<p class="loading-text">Cargando contenido...</p>';
     try {
         const [pSnap, sSnap] = await Promise.all([
-            get(child(ref(db), 'contenido_personalizado')),
-            get(child(ref(db), 'series_personalizadas'))
+            db.ref('contenido_personalizado').once('value'),
+            db.ref('series_personalizadas').once('value')
         ]);
         const peliculas = pSnap.val() ? Object.values(pSnap.val()) : [];
         const series = sSnap.val() ? Object.values(sSnap.val()) : [];
@@ -745,7 +729,6 @@ window.cargarContenido = async function() {
         
         container.innerHTML = '';
         
-        // PELÍCULAS
         if (peliculas.length) {
             const div = document.createElement('div');
             div.innerHTML = `<div style="font-weight:700;color:#A78BFA;margin:.3rem 0;">🎬 Películas (${peliculas.length})</div>`;
@@ -758,10 +741,12 @@ window.cargarContenido = async function() {
                 item.dataset.tipo = 'pelicula';
                 item.style.borderLeftColor = '#10B981';
                 const urlDisplay = p.url || 'Sin enlace';
+                const op2Display = p.opcion2 || 'Sin opción 2';
                 item.innerHTML = `
                     <div class="title">${p.titulo} <span style="font-size:.6rem;color:#94A3B8;">(TMDB: ${p.tmdb_id})</span></div>
                     <div class="meta">${p.anio} • ⭐ ${p.puntuacion || 'N/A'}</div>
-                    <div class="enlace">${urlDisplay}</div>
+                    <div class="enlace" style="border-color:rgba(16,185,129,.2);">🔗 Op1: ${urlDisplay}</div>
+                    <div class="enlace" style="border-color:rgba(59,130,246,.2);margin-top:.2rem;">🔗 Op2: ${op2Display}</div>
                     <div class="item-actions" style="margin-top:.2rem;display:flex;gap:.3rem;flex-wrap:wrap;">
                         <button class="edit-btn" onclick="editarEnlace('${p.tmdb_id}', 'pelicula', '${key}')"><i class="fas fa-pen"></i> Editar enlace</button>
                         <button class="admin-btn-danger" style="padding:.1rem .6rem;border-radius:4px;font-size:.6rem;font-weight:600;border:none;color:#F87171;background:rgba(239,68,68,.15);cursor:pointer;" onclick="eliminarItem('${key}', 'pelicula')"><i class="fas fa-trash"></i></button>
@@ -772,7 +757,6 @@ window.cargarContenido = async function() {
             container.appendChild(div);
         }
         
-        // SERIES
         if (series.length) {
             const div = document.createElement('div');
             div.innerHTML = `<div style="font-weight:700;color:#34D399;margin:.5rem 0 .3rem;">📺 Series (${series.length})</div>`;
@@ -786,10 +770,12 @@ window.cargarContenido = async function() {
                 item.dataset.tipo = 'serie';
                 item.style.borderLeftColor = '#34D399';
                 const urlDisplay = s.url || 'Sin enlace (ver capítulos)';
+                const op2Display = s.opcion2 || 'Sin opción 2';
                 item.innerHTML = `
                     <div class="title">${s.titulo} <span style="font-size:.6rem;color:#94A3B8;">(TMDB: ${s.tmdb_id})</span></div>
                     <div class="meta">${s.anio} • ${s.temporadas?.length || 0} temps • ${capsCount} caps • ⭐ ${s.puntuacion || 'N/A'}</div>
-                    <div class="enlace">${urlDisplay}</div>
+                    <div class="enlace" style="border-color:rgba(16,185,129,.2);">🔗 Op1: ${urlDisplay}</div>
+                    <div class="enlace" style="border-color:rgba(59,130,246,.2);margin-top:.2rem;">🔗 Op2: ${op2Display}</div>
                     <div class="item-actions" style="margin-top:.2rem;display:flex;gap:.3rem;flex-wrap:wrap;">
                         <button class="edit-btn" onclick="editarEnlace('${s.tmdb_id}', 'serie', '${key}')"><i class="fas fa-pen"></i> Editar enlace</button>
                         <button class="admin-btn-danger" style="padding:.1rem .6rem;border-radius:4px;font-size:.6rem;font-weight:600;border:none;color:#F87171;background:rgba(239,68,68,.15);cursor:pointer;" onclick="eliminarItem('${key}', 'serie')"><i class="fas fa-trash"></i></button>
@@ -804,12 +790,11 @@ window.cargarContenido = async function() {
     }
 };
 
-// ELIMINAR ITEM
 window.eliminarItem = async function(key, tipo) {
     if (!confirm(`¿Eliminar este ${tipo} de Firebase?`)) return;
     try {
         const path = tipo === 'pelicula' ? 'contenido_personalizado' : 'series_personalizadas';
-        await remove(ref(db, `${path}/${key}`));
+        await db.ref(`${path}/${key}`).remove();
         mostrarToast(`🗑️ ${tipo} eliminado`, 'warning');
         cargarContenido();
     } catch(e) {
@@ -817,8 +802,8 @@ window.eliminarItem = async function(key, tipo) {
     }
 };
 
-onValue(child(ref(db), ''), () => { if (esAdmin) cargarContenido(); });
-console.log('✅ Admin TELY - Con edición manual de enlaces');
+db.ref().on('value', () => { if (esAdmin) cargarContenido(); });
+console.log('✅ Admin TELY - Con edición manual de enlaces y doble opción');
 </script>
 </body>
 </html>
