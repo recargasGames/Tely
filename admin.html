@@ -55,12 +55,24 @@
         .admin-btn-green:hover{background:#059669}
         .admin-btn-danger{background:#EF4444}
         .admin-btn-danger:hover{background:#DC2626}
+        .admin-btn-blue{background:#3B82F6}
+        .admin-btn-blue:hover{background:#2563EB}
         
         .admin-item{background:rgba(255,255,255,.02);border-radius:8px;padding:.6rem;border-left:3px solid #7C3AED;margin-bottom:.4rem}
         body:not(.dark) .admin-item{background:rgba(0,0,0,.02)}
         .admin-item .title{font-weight:600;font-size:.9rem}
         .admin-item .meta{font-size:.75rem;color:#94A3B8}
         body:not(.dark) .admin-item .meta{color:#888}
+        .admin-item .enlace{font-size:.7rem;color:#60A5FA;word-break:break-all;margin-top:.1rem;padding:.2rem .4rem;background:rgba(59,130,246,.08);border-radius:4px;border:1px solid rgba(59,130,246,.1)}
+        .admin-item .edit-btn{background:rgba(245,158,11,.15);color:#F59E0B;border:1px solid rgba(245,158,11,.2);padding:.1rem .6rem;border-radius:4px;font-size:.6rem;font-weight:600;cursor:pointer;transition:.2s}
+        .admin-item .edit-btn:hover{background:rgba(245,158,11,.25)}
+        .admin-item .edit-input{width:100%;padding:.3rem .5rem;border-radius:4px;border:1px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.7rem;margin-top:.2rem}
+        body:not(.dark) .admin-item .edit-input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
+        .admin-item .edit-input:focus{outline:none;border-color:#7C3AED}
+        .admin-item .save-btn{background:rgba(16,185,129,.15);color:#34D399;border:1px solid rgba(16,185,129,.2);padding:.1rem .6rem;border-radius:4px;font-size:.6rem;font-weight:600;cursor:pointer;transition:.2s;margin-left:.3rem}
+        .admin-item .save-btn:hover{background:rgba(16,185,129,.25)}
+        .admin-item .cancel-btn{background:rgba(239,68,68,.15);color:#F87171;border:1px solid rgba(239,68,68,.2);padding:.1rem .6rem;border-radius:4px;font-size:.6rem;font-weight:600;cursor:pointer;transition:.2s;margin-left:.3rem}
+        .admin-item .cancel-btn:hover{background:rgba(239,68,68,.25)}
         
         .user-dropdown{position:absolute;right:0;top:calc(100% + 8px);background:rgba(26,26,46,.95);border-radius:12px;width:200px;border:1px solid rgba(124,58,237,.15);padding:.4rem 0;display:none;z-index:50;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
@@ -108,6 +120,14 @@
         body:not(.dark) .login-footer{color:#555}
         .login-footer a{color:#A78BFA;text-decoration:none;font-weight:600}
         body:not(.dark) .login-footer a{color:#7C3AED}
+        .search-admin{display:flex;gap:.5rem;margin-bottom:.5rem;flex-wrap:wrap}
+        .search-admin input{flex:1;padding:.4rem .8rem;border-radius:8px;border:1px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.85rem;min-width:150px}
+        body:not(.dark) .search-admin input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
+        .search-admin input:focus{outline:none;border-color:#7C3AED}
+        .search-admin select{padding:.4rem .8rem;border-radius:8px;border:1px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.85rem;cursor:pointer}
+        body:not(.dark) .search-admin select{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
+        .search-admin select:focus{outline:none;border-color:#7C3AED}
+        .edit-mode-indicator{display:inline-block;padding:.1rem .6rem;border-radius:4px;background:rgba(245,158,11,.15);color:#F59E0B;font-size:.6rem;font-weight:600}
     </style>
 </head>
 <body>
@@ -126,7 +146,6 @@
     </div>
 </nav>
 
-<!-- ⭐ LOGIN OVERLAY - SOLO PARA ADMIN -->
 <div class="login-overlay" id="loginOverlay">
     <div class="login-box">
         <div class="logo">🔐 TELY</div>
@@ -172,6 +191,7 @@
             <p style="color:#94A3B8;font-size:.95rem;margin:.3rem 0;">
                 Genera <strong>TODAS</strong> las películas y series de TMDB<br>
                 <span class="badge-no-op2">❌ Solo Opción 1 - Unlimplay</span>
+                <span class="edit-mode-indicator ml-2">✏️ Enlaces editables manualmente</span>
             </p>
             
             <div class="stats" id="statsContainer">
@@ -191,7 +211,7 @@
                 <button class="admin-btn admin-btn-green" onclick="limpiarTodo()" style="font-size:.75rem;padding:.3rem 1rem;">
                     <i class="fas fa-trash"></i> Limpiar Todo
                 </button>
-                <button class="admin-btn" onclick="cargarContenido()" style="font-size:.75rem;padding:.3rem 1rem;background:#3B82F6;">
+                <button class="admin-btn admin-btn-blue" onclick="cargarContenido()" style="font-size:.75rem;padding:.3rem 1rem;">
                     <i class="fas fa-refresh"></i> Recargar
                 </button>
             </div>
@@ -200,6 +220,19 @@
 
     <div class="admin-card">
         <h3><i class="fas fa-list text-emerald-500"></i> Contenido en Firebase</h3>
+        
+        <div class="search-admin">
+            <input type="text" id="searchAdminInput" placeholder="🔍 Buscar por título..." oninput="filtrarContenido()">
+            <select id="filterAdminTipo" onchange="filtrarContenido()">
+                <option value="todos">Todos</option>
+                <option value="pelicula">🎬 Películas</option>
+                <option value="serie">📺 Series</option>
+            </select>
+            <button class="admin-btn admin-btn-blue" onclick="filtrarContenido()" style="padding:.3rem 1rem;font-size:.75rem;">
+                <i class="fas fa-filter"></i> Filtrar
+            </button>
+        </div>
+        
         <div id="listaContenido" class="max-h-96 overflow-y-auto">
             <p class="loading-text">Cargando contenido...</p>
         </div>
@@ -234,18 +267,18 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// ⭐ CORREOS AUTORIZADOS - SOLO ESTOS PUEDEN ENTRAR
-const ADMIN_EMAILS = [
-    'aa3964063@gmail.com',  // ⭐ CAMBIA ESTO POR TU CORREO
-];
+// ⭐ USUARIOS AUTORIZADOS
+const ADMIN_EMAILS = ['aa3964063@gmail.com']; // ⭐ CAMBIA ESTO
 
 let totalPeliculas = 0, totalSeries = 0, totalCaps = 0, generando = false, esAdmin = false;
+let itemsEditando = {};
 
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) { return true; });
 document.addEventListener('backbutton', function(e) { return true; }, false);
 
-// ⭐ FUNCIONES DE UI
+window.irALogin = function() { window.location.href = 'login.html'; };
+window.toggleUserMenu = function() { document.getElementById('userDropdown').classList.toggle('show'); };
 window.toggleTheme = function() {
     const body = document.body;
     const btn = document.getElementById('themeBtn');
@@ -256,18 +289,11 @@ window.toggleTheme = function() {
 if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
 else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
 
-window.toggleUserMenu = function() { document.getElementById('userDropdown').classList.toggle('show'); };
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('userDropdown');
     if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
 });
 
-window.irALogin = function() {
-    // Redirigir a login normal
-    window.location.href = 'login.html';
-};
-
-// ⭐ INICIAR SESIÓN ADMIN
 window.iniciarSesionAdmin = function() {
     const email = document.getElementById('adminEmail').value.trim();
     const password = document.getElementById('adminPassword').value;
@@ -277,20 +303,17 @@ window.iniciarSesionAdmin = function() {
     
     errorEl.style.display = 'none';
     successEl.style.display = 'none';
-    
     if (!email || !password) {
         errorEl.textContent = '⚠️ Completa todos los campos';
         errorEl.style.display = 'block';
         return;
     }
-    
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando...';
     
     signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
-            // Verificar si es admin
             if (ADMIN_EMAILS.includes(user.email)) {
                 successEl.textContent = '✅ Acceso concedido';
                 successEl.style.display = 'block';
@@ -310,7 +333,7 @@ window.iniciarSesionAdmin = function() {
             if (e.code === 'auth/user-not-found') msg = '❌ Usuario no encontrado';
             else if (e.code === 'auth/wrong-password') msg = '❌ Contraseña incorrecta';
             else if (e.code === 'auth/invalid-email') msg = '❌ Correo inválido';
-            else if (e.code === 'auth/too-many-requests') msg = '❌ Demasiados intentos. Espera un momento';
+            else if (e.code === 'auth/too-many-requests') msg = '❌ Demasiados intentos';
             errorEl.textContent = msg;
             errorEl.style.display = 'block';
             btn.disabled = false;
@@ -318,7 +341,6 @@ window.iniciarSesionAdmin = function() {
         });
 };
 
-// ⭐ CERRAR SESIÓN ADMIN
 window.cerrarSesionAdmin = function() {
     signOut(auth).then(() => {
         esAdmin = false;
@@ -329,7 +351,6 @@ window.cerrarSesionAdmin = function() {
     });
 };
 
-// ⭐ ACTUALIZAR UI SEGÚN ADMIN
 function actualizarUIAdmin(isAdmin) {
     const statusEl = document.getElementById('adminStatus');
     const protectedDiv = document.getElementById('adminProtected');
@@ -340,7 +361,7 @@ function actualizarUIAdmin(isAdmin) {
         protectedDiv.className = 'admin-protected';
         document.querySelector('.admin-btn-magic').style.display = 'block';
         document.querySelector('.admin-btn-green').style.display = 'inline-flex';
-        document.querySelector('.admin-btn').style.display = 'inline-flex';
+        document.querySelector('.admin-btn-blue').style.display = 'inline-flex';
         document.querySelector('.magic-section .stats').style.display = 'grid';
         logoutBtn.style.display = 'flex';
     } else {
@@ -348,13 +369,12 @@ function actualizarUIAdmin(isAdmin) {
         protectedDiv.className = 'admin-protected denied';
         document.querySelector('.admin-btn-magic').style.display = 'none';
         document.querySelector('.admin-btn-green').style.display = 'none';
-        document.querySelector('.admin-btn').style.display = 'none';
+        document.querySelector('.admin-btn-blue').style.display = 'none';
         document.querySelector('.magic-section .stats').style.display = 'none';
         logoutBtn.style.display = 'none';
     }
 }
 
-// ⭐ VERIFICAR ESTADO DE AUTENTICACIÓN
 onAuthStateChanged(auth, (user) => {
     if (user && ADMIN_EMAILS.includes(user.email)) {
         esAdmin = true;
@@ -362,7 +382,6 @@ onAuthStateChanged(auth, (user) => {
         actualizarUIAdmin(true);
         cargarContenido();
     } else if (user) {
-        // Usuario logueado pero no admin
         signOut(auth);
         esAdmin = false;
         document.getElementById('loginOverlay').classList.remove('oculto');
@@ -374,7 +393,7 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// ⭐ FUNCIONES DE ENLACES
+// ⭐ GENERAR ENLACE UNLIMPLAY
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     if (tipo === 'pelicula') {
         return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
@@ -407,76 +426,105 @@ function mostrarToast(msg, tipo = 'success') {
     setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
 }
 
-// ⭐ GENERAR BAJO DEMANDA
-window.generarEnlaceBajoDemanda = async function(tmdb_id, tipo) {
-    if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return null; }
-    console.log(`🔧 Generando bajo demanda: ${tmdb_id} (${tipo})`);
-    try {
-        if (tipo === 'pelicula') {
-            const data = await fetchTMDB(`movie/${tmdb_id}`);
-            if (data && data.id) {
-                const pelicula = {
-                    titulo: data.title || `Película ${tmdb_id}`,
-                    anio: data.release_date ? data.release_date.split('-')[0] : 'N/D',
-                    sinopsis: data.overview || 'Sin sinopsis',
-                    portada: getImagenUrl(data.poster_path, 'w342'),
-                    genero: data.genres ? data.genres.map(g => g.name).join(', ') : 'Película',
-                    tipo: 'pelicula',
-                    categoria: 'peliculas',
-                    tmdb_id: data.id,
-                    puntuacion: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
-                    url: generarEnlaceUnlimplay(data.id, 'pelicula'),
-                    creado: Date.now()
-                };
-                await push(ref(db, 'contenido_personalizado'), pelicula);
-                console.log(`✅ Película ${data.title} generada bajo demanda`);
-                return pelicula;
-            }
-        } else {
-            const data = await fetchTMDB(`tv/${tmdb_id}`);
-            if (data && data.id) {
-                const temporadas = [];
-                for (let t = 1; t <= Math.min(data.number_of_seasons || 1, 10); t++) {
-                    try {
-                        const seasonData = await fetchTMDB(`tv/${tmdb_id}/season/${t}`);
-                        if (!seasonData || !seasonData.episodes) continue;
-                        const capitulos = seasonData.episodes.map(ep => ({
-                            numero: ep.episode_number,
-                            titulo: ep.name || `Capítulo ${ep.episode_number}`,
-                            sinopsis: ep.overview || 'Sin sinopsis',
-                            url: generarEnlaceUnlimplay(data.id, 'serie', t, ep.episode_number)
-                        }));
-                        temporadas.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
-                    } catch(e) {}
-                }
-                if (temporadas.length > 0) {
-                    const serie = {
-                        titulo: data.name || `Serie ${tmdb_id}`,
-                        anio: data.first_air_date ? data.first_air_date.split('-')[0] : 'N/D',
-                        sinopsis: data.overview || 'Sin sinopsis',
-                        portada: getImagenUrl(data.poster_path, 'w342'),
-                        genero: data.genres ? data.genres.map(g => g.name).join(', ') : 'Serie',
-                        tipo: 'serie',
-                        categoria: 'series',
-                        tmdb_id: data.id,
-                        puntuacion: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
-                        temporadas: temporadas,
-                        creado: Date.now()
-                    };
-                    await push(ref(db, 'series_personalizadas'), serie);
-                    console.log(`✅ Serie ${data.name} generada bajo demanda`);
-                    return serie;
-                }
-            }
+// ⭐⭐ EDITAR ENLACE MANUALMENTE ⭐⭐
+window.editarEnlace = function(id, tipo, key) {
+    // Cerrar cualquier edición abierta
+    document.querySelectorAll('.edit-input').forEach(el => el.remove());
+    document.querySelectorAll('.edit-mode-indicator').forEach(el => el.remove());
+    
+    const container = document.getElementById(`item-${key}`);
+    const enlaceDiv = container.querySelector('.enlace');
+    const actionsDiv = container.querySelector('.item-actions');
+    
+    if (itemsEditando[key]) {
+        // Si ya está en modo edición, cancelar
+        cancelarEdicion(key);
+        return;
+    }
+    
+    const currentUrl = enlaceDiv.textContent.trim();
+    
+    // Guardar estado de edición
+    itemsEditando[key] = true;
+    
+    // Reemplazar el enlace con un input
+    enlaceDiv.innerHTML = `
+        <input class="edit-input" id="edit-input-${key}" value="${currentUrl}" placeholder="Pega el nuevo enlace aquí...">
+        <div style="margin-top:.2rem;display:flex;gap:.3rem;">
+            <button class="save-btn" onclick="guardarEnlace('${key}', '${tipo}')"><i class="fas fa-check"></i> Guardar</button>
+            <button class="cancel-btn" onclick="cancelarEdicion('${key}')"><i class="fas fa-times"></i> Cancelar</button>
+        </div>
+    `;
+    
+    // Cambiar el texto del botón editar
+    const editBtn = actionsDiv.querySelector('.edit-btn');
+    if (editBtn) {
+        editBtn.textContent = '✏️ Editando...';
+        editBtn.style.background = 'rgba(239,68,68,.15)';
+        editBtn.style.color = '#F87171';
+        editBtn.style.borderColor = 'rgba(239,68,68,.2)';
+    }
+    
+    // Enfocar el input
+    setTimeout(() => {
+        const input = document.getElementById(`edit-input-${key}`);
+        if (input) {
+            input.focus();
+            input.select();
         }
-        return null;
-    } catch(e) {
-        console.error('❌ Error bajo demanda:', e);
-        return null;
+    }, 100);
+};
+
+window.cancelarEdicion = function(key) {
+    delete itemsEditando[key];
+    const container = document.getElementById(`item-${key}`);
+    if (!container) return;
+    
+    const enlaceDiv = container.querySelector('.enlace');
+    const actionsDiv = container.querySelector('.item-actions');
+    const input = document.getElementById(`edit-input-${key}`);
+    
+    if (input) {
+        const currentUrl = input.value;
+        enlaceDiv.innerHTML = currentUrl || 'Sin enlace';
+    }
+    
+    const editBtn = actionsDiv.querySelector('.edit-btn');
+    if (editBtn) {
+        editBtn.textContent = '✏️ Editar enlace';
+        editBtn.style.background = 'rgba(245,158,11,.15)';
+        editBtn.style.color = '#F59E0B';
+        editBtn.style.borderColor = 'rgba(245,158,11,.2)';
     }
 };
 
-// ⭐ GENERAR TODO
+window.guardarEnlace = async function(key, tipo) {
+    const input = document.getElementById(`edit-input-${key}`);
+    if (!input) return;
+    
+    const nuevoEnlace = input.value.trim();
+    if (!nuevoEnlace) {
+        mostrarToast('❌ El enlace no puede estar vacío', 'error');
+        return;
+    }
+    
+    try {
+        if (tipo === 'pelicula') {
+            await update(ref(db, `contenido_personalizado/${key}`), { url: nuevoEnlace });
+        } else {
+            // Para series, actualizar el enlace principal y el de los capítulos
+            await update(ref(db, `series_personalizadas/${key}`), { url: nuevoEnlace });
+        }
+        
+        mostrarToast('✅ Enlace actualizado correctamente', 'success');
+        delete itemsEditando[key];
+        cargarContenido();
+    } catch(e) {
+        mostrarToast('❌ Error al guardar: ' + e.message, 'error');
+    }
+};
+
+// ⭐ GENERAR TODO (500 PÁGINAS = 10,000)
 window.generarTodo = async function() {
     if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
     if (generando) { mostrarToast('⏳ Ya está generando...', 'warning'); return; }
@@ -499,6 +547,7 @@ window.generarTodo = async function() {
     let errores = 0;
     let pagePelis = 1;
     let pageSeries = 1;
+    const MAX_PAGES = 500; // ⭐ 500 PÁGINAS = 10,000
     
     try {
         // PELÍCULAS
@@ -506,16 +555,15 @@ window.generarTodo = async function() {
         let peliculasTotales = [];
         let hasMorePelis = true;
         
-        while (hasMorePelis) {
+        while (hasMorePelis && pagePelis <= MAX_PAGES) {
             try {
                 const data = await fetchTMDB('movie/popular', { page: pagePelis });
                 if (!data.results || !data.results.length) { hasMorePelis = false; break; }
                 peliculasTotales = [...peliculasTotales, ...data.results];
-                info.textContent = `🎬 Cargando películas... página ${pagePelis} (${peliculasTotales.length})`;
-                fill.style.width = `${Math.min((pagePelis / 50) * 40, 40)}%`;
+                info.textContent = `🎬 Cargando películas... página ${pagePelis} (${peliculasTotales.length} encontradas)`;
+                fill.style.width = `${Math.min((pagePelis / MAX_PAGES) * 40, 40)}%`;
                 pagePelis++;
                 if (!data.total_pages || pagePelis > data.total_pages) hasMorePelis = false;
-                if (pagePelis > 100) hasMorePelis = false;
             } catch(e) { hasMorePelis = false; }
         }
         
@@ -550,16 +598,15 @@ window.generarTodo = async function() {
         let seriesTotales = [];
         let hasMoreSeries = true;
         
-        while (hasMoreSeries) {
+        while (hasMoreSeries && pageSeries <= MAX_PAGES) {
             try {
                 const data = await fetchTMDB('tv/popular', { page: pageSeries });
                 if (!data.results || !data.results.length) { hasMoreSeries = false; break; }
                 seriesTotales = [...seriesTotales, ...data.results];
-                info.textContent = `📺 Cargando series... página ${pageSeries} (${seriesTotales.length})`;
-                fill.style.width = `${70 + Math.min((pageSeries / 50) * 20, 20)}%`;
+                info.textContent = `📺 Cargando series... página ${pageSeries} (${seriesTotales.length} encontradas)`;
+                fill.style.width = `${70 + Math.min((pageSeries / MAX_PAGES) * 20, 20)}%`;
                 pageSeries++;
                 if (!data.total_pages || pageSeries > data.total_pages) hasMoreSeries = false;
-                if (pageSeries > 100) hasMoreSeries = false;
             } catch(e) { hasMoreSeries = false; }
         }
         
@@ -650,7 +697,25 @@ window.limpiarTodo = async function() {
     } catch(e) { mostrarToast('❌ Error: ' + e.message, 'error'); }
 };
 
-// CARGAR CONTENIDO
+// FILTRAR CONTENIDO
+window.filtrarContenido = function() {
+    const searchTerm = document.getElementById('searchAdminInput').value.toLowerCase();
+    const tipoFilter = document.getElementById('filterAdminTipo').value;
+    const items = document.querySelectorAll('.admin-item');
+    
+    items.forEach(item => {
+        const titulo = item.dataset.titulo?.toLowerCase() || '';
+        const tipo = item.dataset.tipo || '';
+        
+        let match = true;
+        if (searchTerm && !titulo.includes(searchTerm)) match = false;
+        if (tipoFilter !== 'todos' && tipo !== tipoFilter) match = false;
+        
+        item.style.display = match ? 'block' : 'none';
+    });
+};
+
+// CARGAR CONTENIDO CON OPCIÓN DE EDITAR
 window.cargarContenido = async function() {
     if (!esAdmin) return;
     const container = document.getElementById('listaContenido');
@@ -662,42 +727,74 @@ window.cargarContenido = async function() {
         ]);
         const peliculas = pSnap.val() ? Object.values(pSnap.val()) : [];
         const series = sSnap.val() ? Object.values(sSnap.val()) : [];
+        
         totalPeliculas = peliculas.length;
         totalSeries = series.length;
         document.getElementById('totalPeliculas').textContent = totalPeliculas;
         document.getElementById('totalSeries').textContent = totalSeries;
+        
         let caps = 0;
         series.forEach(s => { if (s.temporadas) { s.temporadas.forEach(t => { if (t.capitulos) caps += t.capitulos.length; }); } });
         totalCaps = caps;
         document.getElementById('totalCaps').textContent = totalCaps;
+        
         if (!peliculas.length && !series.length) {
             container.innerHTML = '<p class="loading-text">No hay contenido guardado</p>';
             return;
         }
+        
         container.innerHTML = '';
+        
+        // PELÍCULAS
         if (peliculas.length) {
             const div = document.createElement('div');
             div.innerHTML = `<div style="font-weight:700;color:#A78BFA;margin:.3rem 0;">🎬 Películas (${peliculas.length})</div>`;
-            peliculas.slice(0, 20).forEach(p => {
+            peliculas.forEach((p, index) => {
+                const key = Object.keys(pSnap.val())[index];
                 const item = document.createElement('div');
                 item.className = 'admin-item';
+                item.id = `item-${key}`;
+                item.dataset.titulo = p.titulo;
+                item.dataset.tipo = 'pelicula';
                 item.style.borderLeftColor = '#10B981';
-                item.innerHTML = `<div class="title">${p.titulo} <span style="font-size:.6rem;color:#94A3B8;">(TMDB: ${p.tmdb_id})</span></div>
-                    <div class="meta">${p.anio} • ⭐ ${p.puntuacion || 'N/A'} • <span class="badge-count">🔗 ${p.url || 'Sin enlace'}</span></div>`;
+                const urlDisplay = p.url || 'Sin enlace';
+                item.innerHTML = `
+                    <div class="title">${p.titulo} <span style="font-size:.6rem;color:#94A3B8;">(TMDB: ${p.tmdb_id})</span></div>
+                    <div class="meta">${p.anio} • ⭐ ${p.puntuacion || 'N/A'}</div>
+                    <div class="enlace">${urlDisplay}</div>
+                    <div class="item-actions" style="margin-top:.2rem;display:flex;gap:.3rem;flex-wrap:wrap;">
+                        <button class="edit-btn" onclick="editarEnlace('${p.tmdb_id}', 'pelicula', '${key}')"><i class="fas fa-pen"></i> Editar enlace</button>
+                        <button class="admin-btn-danger" style="padding:.1rem .6rem;border-radius:4px;font-size:.6rem;font-weight:600;border:none;color:#F87171;background:rgba(239,68,68,.15);cursor:pointer;" onclick="eliminarItem('${key}', 'pelicula')"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
                 div.appendChild(item);
             });
             container.appendChild(div);
         }
+        
+        // SERIES
         if (series.length) {
             const div = document.createElement('div');
             div.innerHTML = `<div style="font-weight:700;color:#34D399;margin:.5rem 0 .3rem;">📺 Series (${series.length})</div>`;
-            series.slice(0, 10).forEach(s => {
+            series.forEach((s, index) => {
+                const key = Object.keys(sSnap.val())[index];
                 const capsCount = s.temporadas ? s.temporadas.reduce((sum, t) => sum + (t.capitulos ? t.capitulos.length : 0), 0) : 0;
                 const item = document.createElement('div');
                 item.className = 'admin-item';
+                item.id = `item-${key}`;
+                item.dataset.titulo = s.titulo;
+                item.dataset.tipo = 'serie';
                 item.style.borderLeftColor = '#34D399';
-                item.innerHTML = `<div class="title">${s.titulo} <span style="font-size:.6rem;color:#94A3B8;">(TMDB: ${s.tmdb_id})</span></div>
-                    <div class="meta">${s.anio} • ${s.temporadas?.length || 0} temps • ${capsCount} caps • ⭐ ${s.puntuacion || 'N/A'}</div>`;
+                const urlDisplay = s.url || 'Sin enlace (ver capítulos)';
+                item.innerHTML = `
+                    <div class="title">${s.titulo} <span style="font-size:.6rem;color:#94A3B8;">(TMDB: ${s.tmdb_id})</span></div>
+                    <div class="meta">${s.anio} • ${s.temporadas?.length || 0} temps • ${capsCount} caps • ⭐ ${s.puntuacion || 'N/A'}</div>
+                    <div class="enlace">${urlDisplay}</div>
+                    <div class="item-actions" style="margin-top:.2rem;display:flex;gap:.3rem;flex-wrap:wrap;">
+                        <button class="edit-btn" onclick="editarEnlace('${s.tmdb_id}', 'serie', '${key}')"><i class="fas fa-pen"></i> Editar enlace</button>
+                        <button class="admin-btn-danger" style="padding:.1rem .6rem;border-radius:4px;font-size:.6rem;font-weight:600;border:none;color:#F87171;background:rgba(239,68,68,.15);cursor:pointer;" onclick="eliminarItem('${key}', 'serie')"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
                 div.appendChild(item);
             });
             container.appendChild(div);
@@ -707,8 +804,21 @@ window.cargarContenido = async function() {
     }
 };
 
+// ELIMINAR ITEM
+window.eliminarItem = async function(key, tipo) {
+    if (!confirm(`¿Eliminar este ${tipo} de Firebase?`)) return;
+    try {
+        const path = tipo === 'pelicula' ? 'contenido_personalizado' : 'series_personalizadas';
+        await remove(ref(db, `${path}/${key}`));
+        mostrarToast(`🗑️ ${tipo} eliminado`, 'warning');
+        cargarContenido();
+    } catch(e) {
+        mostrarToast('❌ Error: ' + e.message, 'error');
+    }
+};
+
 onValue(child(ref(db), ''), () => { if (esAdmin) cargarContenido(); });
-console.log('✅ Admin TELY - Protegido con login');
+console.log('✅ Admin TELY - Con edición manual de enlaces');
 </script>
 </body>
 </html>
