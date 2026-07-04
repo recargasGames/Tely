@@ -159,50 +159,80 @@
     <div class="load-more"><button onclick="cargarMasPeliculas()"><i class="fas fa-plus"></i> Cargar más</button></div>
 </main>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-<script>
-const firebaseConfig = { apiKey: "AIzaSyCwLATDpQN1RWv3rLPjJXbNnIBkyo_BUfI", authDomain: "tely-ap.firebaseapp.com", databaseURL: "https://tely-ap-default-rtdb.firebaseio.com", projectId: "tely-ap", storageBucket: "tely-ap.firebasestorage.app", messagingSenderId: "760862940967", appId: "1:760862940967:web:69bbbbfee0de40f68a1302" };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+<script type="importmap">
+{
+    "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js",
+        "firebase/database": "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"
+    }
+}
+</script>
+<script type="module">
+import { initializeApp } from "firebase/app";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { getDatabase, ref, get, child } from "firebase/database";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBPBDEVUR7hjNrxCYrefF9Sbl0Wofp3VoQ",
+    authDomain: "telyx-23210.firebaseapp.com",
+    projectId: "telyx-23210",
+    storageBucket: "telyx-23210.firebasestorage.app",
+    messagingSenderId: "10164285015",
+    appId: "1:10164285015:web:5cf32bd2831de126c67d12",
+    measurementId: "G-0YEZMJYMJS"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+let paginaPeliculas = 1;
+let cargandoPeliculas = false;
 
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) { return true; });
 document.addEventListener('backbutton', function(e) { return true; }, false);
 
-function irALogin() { window.location.href = 'login.html'; }
-function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
-function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
-document.addEventListener('click', (e) => { const menu = document.getElementById('userDropdown'); if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show'); });
-auth.onAuthStateChanged(user => {
-    document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
-    document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
-});
-
-function toggleTheme() {
+window.irALogin = function() { window.location.href = 'login.html'; };
+window.cerrarSesion = function() { signOut(auth).then(() => { location.reload(); }); };
+window.toggleUserMenu = function() { document.getElementById('userDropdown').classList.toggle('show'); };
+window.toggleTheme = function() {
     const body = document.body;
     const btn = document.getElementById('themeBtn');
     if (body.classList.contains('dark')) { body.classList.remove('dark'); btn.innerHTML = '<i class="fas fa-moon"></i>'; localStorage.setItem('theme', 'light'); }
     else { body.classList.add('dark'); btn.innerHTML = '<i class="fas fa-sun"></i>'; localStorage.setItem('theme', 'dark'); }
-}
+};
+
 if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
 else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
 
-function getImagenUrl(path, size = 'w342') { if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg'; return `https://image.tmdb.org/t/p/${size}${path}`; }
+onAuthStateChanged(auth, (user) => {
+    document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
+    document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
+});
 
-let paginaPeliculas = 1;
-let cargandoPeliculas = false;
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('userDropdown');
+    if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
+});
+
+function getImagenUrl(path, size = 'w342') {
+    if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
+    return `https://image.tmdb.org/t/p/${size}${path}`;
+}
+
+function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    if (tipo === 'pelicula') return `https://unlimplay.co/play/movie/${tmdb_id}`;
+    else return `https://unlimplay.co/play/tv/${tmdb_id}/${temporada}/${capitulo}`;
+}
 
 function crearTarjetaPelicula(item) {
     const div = document.createElement('div');
     div.className = 'movie-card';
-    const tieneOp2 = item.opcion2 && item.opcion2.trim() !== '';
     div.innerHTML = `
         <span class="badge-year">${item.anio || 'N/D'}</span>
         <span class="badge-type">🎬</span>
-        ${tieneOp2 ? '<span class="badge-op2">🔗 Op2</span>' : ''}
         <img src="${item.portada}" alt="${item.titulo}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
         <div class="info"><h4>${item.titulo}</h4><div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div></div>
     `;
@@ -217,16 +247,27 @@ function crearTarjetaPelicula(item) {
     return div;
 }
 
+async function fetchTMDB(path, params = {}) {
+    const queryParams = new URLSearchParams();
+    queryParams.append('path', path);
+    Object.keys(params).forEach(key => queryParams.append(key, params[key]));
+    const url = `https://tely-xi.vercel.app/api/tmdb?${queryParams.toString()}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    return response.json();
+}
+
 async function cargarPeliculas(page = 1) {
     if (cargandoPeliculas) return;
     cargandoPeliculas = true;
     const container = document.getElementById('listaPeliculas');
     if (page === 1) container.innerHTML = '<div class="skeleton"></div>'.repeat(12);
     try {
-        const data = await fetch(`https://tely-xi.vercel.app/api/tmdb?path=movie/popular&page=${page}`).then(r => r.json()).catch(() => ({ results: [] }));
+        const data = await fetchTMDB('movie/popular', { page });
         if (!data.results || !data.results.length) { cargandoPeliculas = false; return; }
         if (page === 1) container.innerHTML = '';
-        const adminSnap = await db.ref('contenido_personalizado').once('value');
+        const dbRef = ref(db);
+        const adminSnap = await get(child(dbRef, 'contenido_personalizado'));
         const adminData = adminSnap.val() || {};
         const adminMap = {};
         Object.values(adminData).forEach(i => { adminMap[i.tmdb_id] = i; });
@@ -238,8 +279,7 @@ async function cargarPeliculas(page = 1) {
                 anio: a?.anio || (p.release_date ? p.release_date.split('-')[0] : 'N/D'),
                 portada: a?.portada || getImagenUrl(p.poster_path, 'w342'),
                 puntuacion: a?.puntuacion || (p.vote_average ? p.vote_average.toFixed(1) : 'N/A'),
-                url: a?.url || `https://unlimplay.com/play/embed/movie/${p.id}?lang=es-MX`,
-                opcion2: a?.opcion2 || `https://vidsrc.in/embed/movie/${p.id}?lang=es`
+                url: a?.url || generarEnlaceUnlimplay(p.id, 'pelicula')
             };
             container.appendChild(crearTarjetaPelicula(item));
         });
@@ -247,21 +287,21 @@ async function cargarPeliculas(page = 1) {
     cargandoPeliculas = false;
 }
 
-function cargarMasPeliculas() {
+window.cargarMasPeliculas = function() {
     paginaPeliculas++;
     cargarPeliculas(paginaPeliculas);
-}
+};
 
-function aplicarFiltros() {
+window.aplicarFiltros = function() {
     paginaPeliculas = 1;
     cargarPeliculas(1);
-}
+};
 
-async function mostrarSugerencias(texto) {
+window.mostrarSugerencias = async function(texto) {
     const container = document.getElementById('searchResults');
     if (!texto || texto.length < 2) { container.classList.remove('show'); return; }
     try {
-        const data = await fetch(`https://tely-xi.vercel.app/api/tmdb?path=search/movie&query=${encodeURIComponent(texto)}&page=1`).then(r => r.json()).catch(() => ({ results: [] }));
+        const data = await fetchTMDB('search/movie', { query: texto, page: 1 });
         if (!data.results || !data.results.length) { container.classList.remove('show'); return; }
         container.innerHTML = '';
         data.results.slice(0, 8).forEach(item => {
@@ -282,9 +322,12 @@ async function mostrarSugerencias(texto) {
         });
         container.classList.add('show');
     } catch(e) { container.classList.remove('show'); }
-}
+};
 
-function buscarGlobal() { const input = document.getElementById('searchInput'); if (input.value.trim()) mostrarSugerencias(input.value); }
+window.buscarGlobal = function() {
+    const input = document.getElementById('searchInput');
+    if (input.value.trim()) window.mostrarSugerencias(input.value);
+};
 
 cargarPeliculas(1);
 console.log('✅ Películas cargadas');
