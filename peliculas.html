@@ -102,6 +102,12 @@
         .filter-section select{padding:.3rem .8rem;border-radius:8px;border:1px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.8rem;cursor:pointer}
         .filter-section select:focus{outline:none;border-color:#7C3AED}
         body:not(.dark) .filter-section select{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
+        .card-actions{display:flex;gap:4px;margin-top:4px;justify-content:center}
+        .card-actions button{background:none;border:none;cursor:pointer;font-size:.65rem;padding:2px 6px;border-radius:4px;transition:.2s}
+        .card-actions .fav-btn{color:#EF4444}
+        .card-actions .fav-btn:hover{background:rgba(239,68,68,.15)}
+        .card-actions .list-btn{color:#3B82F6}
+        .card-actions .list-btn:hover{background:rgba(59,130,246,.15)}
     </style>
 </head>
 <body>
@@ -171,7 +177,7 @@
 <script type="module">
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { getDatabase, ref, get, child } from "firebase/database";
+import { getDatabase, ref, get, set, remove, child } from "firebase/database";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBPBDEVUR7hjNrxCYrefF9Sbl0Wofp3VoQ",
@@ -217,34 +223,14 @@ document.addEventListener('click', (e) => {
     if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
 });
 
-function getImagenUrl(path, size = 'w342') {
-    if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
-    return `https://image.tmdb.org/t/p/${size}${path}`;
-}
-
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     if (tipo === 'pelicula') return `https://unlimplay.co/play/movie/${tmdb_id}`;
     else return `https://unlimplay.co/play/tv/${tmdb_id}/${temporada}/${capitulo}`;
 }
 
-function crearTarjetaPelicula(item) {
-    const div = document.createElement('div');
-    div.className = 'movie-card';
-    div.innerHTML = `
-        <span class="badge-year">${item.anio || 'N/D'}</span>
-        <span class="badge-type">🎬</span>
-        <img src="${item.portada}" alt="${item.titulo}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-        <div class="info"><h4>${item.titulo}</h4><div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div></div>
-    `;
-    div.onclick = () => {
-        if (auth.currentUser) {
-            const params = new URLSearchParams();
-            params.set('play', item.tmdb_id || item.id);
-            params.set('tipo', 'pelicula');
-            window.location.href = `reproductor.html?${params.toString()}`;
-        } else { window.location.href = 'login.html'; }
-    };
-    return div;
+function getImagenUrl(path, size = 'w342') {
+    if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
+    return `https://image.tmdb.org/t/p/${size}${path}`;
 }
 
 async function fetchTMDB(path, params = {}) {
@@ -257,6 +243,63 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
+function mostrarToast(msg, tipo = 'success') {
+    const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
+    const t = document.createElement('div');
+    t.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:10px 20px;border-radius:10px;z-index:9999;font-weight:600;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+}
+
+// ⭐ FAVORITOS Y LISTA
+window.toggleFavorito = function(item) {
+    if (!auth.currentUser) { window.location.href = 'login.html'; return; }
+    const userId = auth.currentUser.uid;
+    const favRef = ref(db, `usuarios/${userId}/favoritos/${item.id}`);
+    get(favRef).then((snap) => {
+        if (snap.exists()) { remove(favRef); mostrarToast('🗑️ Eliminado de favoritos', 'warning'); }
+        else { set(favRef, { id: item.id, titulo: item.titulo, tipo: item.tipo || 'pelicula', portada: item.portada, tmdb_id: item.tmdb_id }); mostrarToast('❤️ Agregado a favoritos', 'success'); }
+    });
+};
+
+window.toggleMiLista = function(item) {
+    if (!auth.currentUser) { window.location.href = 'login.html'; return; }
+    const userId = auth.currentUser.uid;
+    const listaRef = ref(db, `usuarios/${userId}/milista/${item.id}`);
+    get(listaRef).then((snap) => {
+        if (snap.exists()) { remove(listaRef); mostrarToast('🗑️ Eliminado de Mi Lista', 'warning'); }
+        else { set(listaRef, { id: item.id, titulo: item.titulo, tipo: item.tipo || 'pelicula', portada: item.portada, tmdb_id: item.tmdb_id }); mostrarToast('📝 Agregado a Mi Lista', 'success'); }
+    });
+};
+
+function crearTarjeta(item) {
+    const div = document.createElement('div');
+    div.className = 'movie-card';
+    div.innerHTML = `
+        <span class="badge-year">${item.anio || 'N/D'}</span>
+        <span class="badge-type">🎬</span>
+        <img src="${item.portada}" alt="${item.titulo}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+        <div class="info">
+            <h4>${item.titulo}</h4>
+            <div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div>
+            <div class="card-actions">
+                <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorito(${JSON.stringify(item).replace(/"/g, "'")})"><i class="fas fa-heart"></i></button>
+                <button class="list-btn" onclick="event.stopPropagation(); toggleMiLista(${JSON.stringify(item).replace(/"/g, "'")})"><i class="fas fa-plus-circle"></i></button>
+            </div>
+        </div>
+    `;
+    div.onclick = () => {
+        if (auth.currentUser) {
+            const params = new URLSearchParams();
+            params.set('play', item.tmdb_id || item.id);
+            params.set('tipo', 'pelicula');
+            window.location.href = `reproductor.html?${params.toString()}`;
+        } else { window.location.href = 'login.html'; }
+    };
+    return div;
+}
+
 async function cargarPeliculas(page = 1) {
     if (cargandoPeliculas) return;
     cargandoPeliculas = true;
@@ -267,8 +310,8 @@ async function cargarPeliculas(page = 1) {
         if (!data.results || !data.results.length) { cargandoPeliculas = false; return; }
         if (page === 1) container.innerHTML = '';
         const dbRef = ref(db);
-        const adminSnap = await get(child(dbRef, 'contenido_personalizado'));
-        const adminData = adminSnap.val() || {};
+        const snap = await get(child(dbRef, 'contenido_personalizado'));
+        const adminData = snap.val() || {};
         const adminMap = {};
         Object.values(adminData).forEach(i => { adminMap[i.tmdb_id] = i; });
         data.results.forEach(p => {
@@ -281,21 +324,14 @@ async function cargarPeliculas(page = 1) {
                 puntuacion: a?.puntuacion || (p.vote_average ? p.vote_average.toFixed(1) : 'N/A'),
                 url: a?.url || generarEnlaceUnlimplay(p.id, 'pelicula')
             };
-            container.appendChild(crearTarjetaPelicula(item));
+            container.appendChild(crearTarjeta(item));
         });
     } catch(e) { console.error(e); }
     cargandoPeliculas = false;
 }
 
-window.cargarMasPeliculas = function() {
-    paginaPeliculas++;
-    cargarPeliculas(paginaPeliculas);
-};
-
-window.aplicarFiltros = function() {
-    paginaPeliculas = 1;
-    cargarPeliculas(1);
-};
+window.cargarMasPeliculas = function() { paginaPeliculas++; cargarPeliculas(paginaPeliculas); };
+window.aplicarFiltros = function() { paginaPeliculas = 1; cargarPeliculas(1); };
 
 window.mostrarSugerencias = async function(texto) {
     const container = document.getElementById('searchResults');
