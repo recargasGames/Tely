@@ -44,23 +44,70 @@
         .user-btn:hover{background:rgba(124,58,237,.3)}
         body:not(.dark) .user-btn{color:#111}
         
-        .profile-card{background:rgba(255,255,255,.04);border-radius:16px;padding:2rem;border:1px solid rgba(124,58,237,.15);max-width:500px;margin:0 auto;text-align:center}
+        .profile-card{background:rgba(255,255,255,.04);border-radius:16px;padding:2rem;border:1px solid rgba(124,58,237,.15);max-width:550px;margin:0 auto;text-align:center}
         body:not(.dark) .profile-card{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1)}
-        .profile-avatar{font-size:5rem;color:#7C3AED;margin-bottom:1rem}
+        
+        .profile-avatar{position:relative;width:100px;height:100px;margin:0 auto 1rem;border-radius:50%;overflow:hidden;border:3px solid #7C3AED;cursor:pointer}
+        .profile-avatar img{width:100%;height:100%;object-fit:cover;background:#1A1A2E}
+        .profile-avatar .edit-avatar{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);color:#fff;font-size:.6rem;padding:.2rem;text-align:center;opacity:0;transition:.3s}
+        .profile-avatar:hover .edit-avatar{opacity:1}
         .profile-name{font-size:1.5rem;font-weight:700}
         .profile-email{color:#94A3B8;font-size:.95rem}
         body:not(.dark) .profile-email{color:#888}
         .profile-plan{display:inline-block;padding:.2rem .8rem;border-radius:9999px;background:rgba(16,185,129,.15);color:#34D399;font-size:.75rem;font-weight:600;margin-top:.3rem}
-        .profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:1.5rem 0;padding:1rem 0;border-top:1px solid rgba(124,58,237,.08);border-bottom:1px solid rgba(124,58,237,.08)}
+        
+        .profile-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:1.5rem 0;padding:1rem 0;border-top:1px solid rgba(124,58,237,.08);border-bottom:1px solid rgba(124,58,237,.08)}
         .profile-stats .stat{text-align:center}
         .profile-stats .stat .num{font-size:1.3rem;font-weight:700;color:#7C3AED}
-        .profile-stats .stat .label{font-size:.7rem;color:#94A3B8}
-        .profile-btn{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.6rem 1.5rem;border-radius:10px;font-weight:600;cursor:pointer;transition:.3s;margin:.3rem}
+        .profile-stats .stat .label{font-size:.65rem;color:#94A3B8}
+        
+        .profile-btn{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.6rem 1.5rem;border-radius:10px;font-weight:600;cursor:pointer;transition:.3s;margin:.3rem;font-size:.85rem}
         .profile-btn:hover{background:rgba(124,58,237,.25)}
         .profile-btn.danger{border-color:rgba(239,68,68,.3);color:#EF4444}
         .profile-btn.danger:hover{background:rgba(239,68,68,.15)}
+        .profile-btn.success{border-color:rgba(16,185,129,.3);color:#34D399}
+        .profile-btn.success:hover{background:rgba(16,185,129,.15)}
         body:not(.dark) .profile-btn{color:#111}
         body:not(.dark) .profile-btn.danger{color:#EF4444}
+        body:not(.dark) .profile-btn.success{color:#059669}
+        
+        /* ⭐ ESTILOS PARA PEDIDOS */
+        .pedido-form{text-align:left;margin:1rem 0}
+        .pedido-form .campo{margin-bottom:.8rem}
+        .pedido-form .campo label{display:block;font-size:.75rem;font-weight:600;color:#94A3B8;margin-bottom:.2rem}
+        .pedido-form .campo input,.pedido-form .campo select,.pedido-form .campo textarea{width:100%;padding:.5rem .8rem;border-radius:10px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.85rem;transition:.3s}
+        .pedido-form .campo input:focus,.pedido-form .campo select:focus,.pedido-form .campo textarea:focus{outline:none;border-color:#7C3AED}
+        .pedido-form .campo textarea{min-height:60px;resize:vertical}
+        .pedido-form .campo input::placeholder,.pedido-form .campo textarea::placeholder{color:#64748B}
+        body:not(.dark) .pedido-form .campo input,body:not(.dark) .pedido-form .campo select,body:not(.dark) .pedido-form .campo textarea{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
+        body:not(.dark) .pedido-form .campo label{color:#555}
+        
+        .pedido-item{background:rgba(255,255,255,.03);border-radius:10px;padding:.6rem 1rem;margin:.4rem 0;border-left:3px solid #F59E0B;text-align:left}
+        body:not(.dark) .pedido-item{background:rgba(0,0,0,.02)}
+        .pedido-item .titulo{font-weight:600;font-size:.9rem}
+        .pedido-item .detalles{font-size:.75rem;color:#94A3B8;display:flex;gap:1rem;flex-wrap:wrap}
+        .pedido-item .estado{display:inline-block;padding:.05rem .6rem;border-radius:9999px;font-size:.6rem;font-weight:600}
+        .pedido-item .estado.pendiente{background:rgba(245,158,11,.15);color:#F59E0B}
+        .pedido-item .estado.procesando{background:rgba(59,130,246,.15);color:#3B82F6}
+        .pedido-item .estado.completado{background:rgba(16,185,129,.15);color:#34D399}
+        .pedido-item .fecha{font-size:.65rem;color:#64748B}
+        
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:none;align-items:center;justify-content:center;padding:1rem}
+        .modal-overlay.show{display:flex}
+        .modal-box{background:#1A1A2E;border-radius:16px;padding:1.5rem;max-width:450px;width:100%;border:1px solid rgba(124,58,237,.15);max-height:90vh;overflow-y:auto}
+        body:not(.dark) .modal-box{background:#fff;border-color:rgba(0,0,0,.1)}
+        .modal-box h2{font-size:1.2rem;font-weight:700;margin-bottom:.5rem;text-align:center}
+        .modal-box .sub{color:#94A3B8;font-size:.85rem;text-align:center;margin-bottom:1rem}
+        body:not(.dark) .modal-box .sub{color:#555}
+        .modal-actions{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:.5rem}
+        .modal-actions button{padding:.5rem 1.5rem;border-radius:10px;font-weight:600;border:none;cursor:pointer;transition:.3s}
+        .modal-actions .btn-guardar{background:#7C3AED;color:#fff}
+        .modal-actions .btn-guardar:hover{background:#6D28D9}
+        .modal-actions .btn-guardar:disabled{opacity:.5;cursor:not-allowed}
+        .modal-actions .btn-cancelar{background:rgba(255,255,255,.05);color:#94A3B8}
+        .modal-actions .btn-cancelar:hover{background:rgba(255,255,255,.1)}
+        body:not(.dark) .modal-actions .btn-cancelar{background:rgba(0,0,0,.05);color:#555}
+        
         .user-dropdown{position:absolute;right:0;top:calc(100% + 8px);background:rgba(26,26,46,.95);border-radius:12px;width:200px;border:1px solid rgba(124,58,237,.15);padding:.4rem 0;display:none;z-index:50;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
         body:not(.dark) .user-dropdown{background:rgba(255,255,255,.95);border-color:rgba(0,0,0,.1)}
@@ -70,6 +117,13 @@
         body:not(.dark) .user-dropdown a:hover{background:rgba(124,58,237,.08);color:#111}
         .user-dropdown hr{margin:.2rem 0;border:none;border-top:1px solid rgba(124,58,237,.08)}
         .user-menu{position:relative}
+        
+        .seccion-titulo{font-weight:700;font-size:.9rem;color:#A78BFA;margin:.5rem 0 .3rem;text-align:left;display:flex;align-items:center;gap:.4rem}
+        body:not(.dark) .seccion-titulo{color:#7C3AED}
+        
+        /* ⭐ BADGE DE PEDIDOS */
+        .badge-pedido{display:inline-block;background:#EF4444;color:#fff;border-radius:9999px;padding:.05rem .5rem;font-size:.55rem;font-weight:700;margin-left:.3rem}
+        .no-pedidos{color:#64748B;font-size:.8rem;text-align:center;padding:.5rem 0}
     </style>
 </head>
 <body>
@@ -105,25 +159,112 @@
     </div>
 
     <div class="profile-card">
-        <div class="profile-avatar"><i class="fas fa-user-circle"></i></div>
+        <!-- ⭐ AVATAR -->
+        <div class="profile-avatar" id="avatarContainer">
+            <img id="profileAvatar" src="https://ui-avatars.com/api/?name=Usuario&background=7C3AED&color=fff&size=100" alt="Avatar">
+            <div class="edit-avatar"><i class="fas fa-camera"></i> Cambiar foto</div>
+        </div>
+        
         <div class="profile-name" id="profileName">Invitado</div>
         <div class="profile-email" id="profileEmail">No has iniciado sesión</div>
         <div class="profile-plan" id="profilePlan">🎬 Plan Gratis</div>
 
+        <!-- ⭐ ESTADÍSTICAS -->
         <div class="profile-stats">
             <div class="stat"><div class="num" id="statHistorial">0</div><div class="label">Vistos</div></div>
             <div class="stat"><div class="num" id="statFavoritos">0</div><div class="label">Favoritos</div></div>
             <div class="stat"><div class="num" id="statListas">0</div><div class="label">Listas</div></div>
+            <div class="stat"><div class="num" id="statPedidos">0</div><div class="label">Pedidos</div></div>
         </div>
 
-        <div>
-            <button class="profile-btn" onclick="window.location.href='index.html'"><i class="fas fa-home"></i> Ir al inicio</button>
-            <button class="profile-btn" onclick="window.location.href='peliculas.html'"><i class="fas fa-film"></i> Ver películas</button>
-            <br>
-            <button class="profile-btn danger" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
+        <!-- ⭐ MENÚ DE OPCIONES -->
+        <div class="menu-opciones">
+            <div class="opcion" onclick="abrirModalPedido()">
+                <i class="fas fa-plus-circle"></i>
+                <span class="texto">📝 Hacer un pedido</span>
+                <span class="flecha"><i class="fas fa-chevron-right"></i></span>
+            </div>
+            <div class="opcion" onclick="verMisPedidos()">
+                <i class="fas fa-clipboard-list"></i>
+                <span class="texto">📋 Mis pedidos</span>
+                <span class="badge-pedido" id="badgePedidos">0</span>
+                <span class="flecha"><i class="fas fa-chevron-right"></i></span>
+            </div>
+            <div class="opcion" onclick="window.location.href='index.html'">
+                <i class="fas fa-home"></i>
+                <span class="texto">🏠 Ir al inicio</span>
+                <span class="flecha"><i class="fas fa-chevron-right"></i></span>
+            </div>
+            <div class="opcion" onclick="window.location.href='peliculas.html'">
+                <i class="fas fa-film"></i>
+                <span class="texto">🎬 Ver películas</span>
+                <span class="flecha"><i class="fas fa-chevron-right"></i></span>
+            </div>
         </div>
+
+        <!-- ⭐ BOTÓN CERRAR SESIÓN -->
+        <button class="profile-btn danger" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
     </div>
 </main>
+
+<!-- ⭐ MODAL PARA HACER PEDIDO -->
+<div class="modal-overlay" id="modalPedido">
+    <div class="modal-box">
+        <h2><i class="fas fa-plus-circle" style="color:#7C3AED;"></i> Hacer un pedido</h2>
+        <p class="sub">Solicita una película o serie que no esté en la plataforma</p>
+        
+        <form id="formPedido" onsubmit="event.preventDefault(); enviarPedido()">
+            <div class="pedido-form">
+                <div class="campo">
+                    <label>📌 Tipo de contenido *</label>
+                    <select id="pedidoTipo" required>
+                        <option value="pelicula">🎬 Película</option>
+                        <option value="serie">📺 Serie</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label>📝 Título *</label>
+                    <input type="text" id="pedidoTitulo" placeholder="Ej: El Señor de los Anillos" required>
+                </div>
+                <div class="campo">
+                    <label>📅 Año</label>
+                    <input type="number" id="pedidoAnio" placeholder="Ej: 2024" min="1900" max="2100">
+                </div>
+                <div class="campo">
+                    <label>🎭 Género (opcional)</label>
+                    <input type="text" id="pedidoGenero" placeholder="Ej: Acción, Ciencia Ficción">
+                </div>
+                <div class="campo">
+                    <label>📖 Sinopsis / Descripción (opcional)</label>
+                    <textarea id="pedidoSinopsis" placeholder="Describe de qué trata la película/serie..."></textarea>
+                </div>
+                <div class="campo">
+                    <label>🔗 Enlace de referencia (opcional)</label>
+                    <input type="url" id="pedidoEnlace" placeholder="https://www.imdb.com/title/tt1234567/">
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="submit" class="btn-guardar" id="btnEnviarPedido"><i class="fas fa-paper-plane"></i> Enviar pedido</button>
+                <button type="button" class="btn-cancelar" onclick="cerrarModalPedido()"><i class="fas fa-times"></i> Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ⭐ MODAL PARA VER PEDIDOS -->
+<div class="modal-overlay" id="modalPedidos">
+    <div class="modal-box">
+        <h2><i class="fas fa-clipboard-list" style="color:#F59E0B;"></i> Mis pedidos</h2>
+        <p class="sub" id="subPedidos">Aquí aparecerán tus pedidos</p>
+        <div id="listaPedidos" style="max-height:300px;overflow-y:auto;">
+            <div class="no-pedidos">No tienes pedidos aún</div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn-cancelar" onclick="cerrarModalPedidos()"><i class="fas fa-times"></i> Cerrar</button>
+        </div>
+    </div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -143,13 +284,36 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-history.pushState(null, '', window.location.href);
-window.addEventListener('popstate', function(e) { return true; });
-document.addEventListener('backbutton', function(e) { return true; }, false);
+// ⭐ MANEJO DEL BOTÓN ATRÁS
+(function() {
+    window.history.pushState({ page: 1 }, "", "");
+    window.addEventListener('popstate', function(e) {
+        window.location.href = 'index.html';
+        e.preventDefault();
+        return false;
+    });
+    if (typeof document !== 'undefined') {
+        document.addEventListener('backbutton', function(e) {
+            window.location.href = 'index.html';
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }, false);
+    }
+})();
 
 function irALogin() { window.location.href = 'login.html'; }
-function cerrarSesion() { auth.signOut().then(() => { window.location.href = 'index.html'; }); }
-function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
+
+function cerrarSesion() { 
+    auth.signOut().then(() => { 
+        window.location.href = 'index.html'; 
+    }); 
+}
+
+function toggleUserMenu() { 
+    document.getElementById('userDropdown').classList.toggle('show'); 
+}
+
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('userDropdown');
     if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
@@ -158,25 +322,197 @@ document.addEventListener('click', (e) => {
 function toggleTheme() {
     const body = document.body;
     const btn = document.getElementById('themeBtn');
-    if (body.classList.contains('dark')) { body.classList.remove('dark'); btn.innerHTML = '<i class="fas fa-moon"></i>'; localStorage.setItem('theme', 'light'); }
-    else { body.classList.add('dark'); btn.innerHTML = '<i class="fas fa-sun"></i>'; localStorage.setItem('theme', 'dark'); }
+    if (body.classList.contains('dark')) { 
+        body.classList.remove('dark'); 
+        btn.innerHTML = '<i class="fas fa-moon"></i>'; 
+        localStorage.setItem('theme', 'light'); 
+    } else { 
+        body.classList.add('dark'); 
+        btn.innerHTML = '<i class="fas fa-sun"></i>'; 
+        localStorage.setItem('theme', 'dark'); 
+    }
 }
-if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
-else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
 
-auth.onAuthStateChanged(user => {
+if (localStorage.getItem('theme') === 'light') { 
+    document.body.classList.remove('dark'); 
+    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; 
+} else { 
+    document.body.classList.add('dark'); 
+    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; 
+}
+
+// ⭐ FUNCIONES DE PEDIDOS
+function abrirModalPedido() {
+    const user = auth.currentUser;
+    if (!user) {
+        mostrarToast('⚠️ Inicia sesión para hacer un pedido', 'warning');
+        window.location.href = 'login.html';
+        return;
+    }
+    document.getElementById('modalPedido').classList.add('show');
+    document.getElementById('formPedido').reset();
+}
+
+function cerrarModalPedido() {
+    document.getElementById('modalPedido').classList.remove('show');
+}
+
+function cerrarModalPedidos() {
+    document.getElementById('modalPedidos').classList.remove('show');
+}
+
+function enviarPedido() {
+    const user = auth.currentUser;
+    if (!user) {
+        mostrarToast('⚠️ Inicia sesión para hacer un pedido', 'warning');
+        return;
+    }
+    
+    const btn = document.getElementById('btnEnviarPedido');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+    
+    const pedido = {
+        tipo: document.getElementById('pedidoTipo').value,
+        titulo: document.getElementById('pedidoTitulo').value.trim(),
+        anio: document.getElementById('pedidoAnio').value || 'N/D',
+        genero: document.getElementById('pedidoGenero').value || 'Sin especificar',
+        sinopsis: document.getElementById('pedidoSinopsis').value || 'Sin descripción',
+        enlace: document.getElementById('pedidoEnlace').value || '',
+        usuario: user.uid,
+        email: user.email || 'Sin email',
+        nombre: user.displayName || 'Usuario',
+        fecha: new Date().toISOString(),
+        estado: 'pendiente' // pendiente, procesando, completado
+    };
+    
+    if (!pedido.titulo) {
+        mostrarToast('❌ El título es obligatorio', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar pedido';
+        return;
+    }
+    
+    db.ref('pedidos').push(pedido).then(() => {
+        mostrarToast('✅ ¡Pedido enviado correctamente!', 'success');
+        cerrarModalPedido();
+        actualizarContadorPedidos();
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar pedido';
+    }).catch((e) => {
+        mostrarToast('❌ Error: ' + e.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar pedido';
+    });
+}
+
+function verMisPedidos() {
+    const user = auth.currentUser;
+    if (!user) {
+        mostrarToast('⚠️ Inicia sesión para ver tus pedidos', 'warning');
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    document.getElementById('modalPedidos').classList.add('show');
+    cargarMisPedidos();
+}
+
+function cargarMisPedidos() {
+    const user = auth.currentUser;
+    if (!user) return;
+    
+    const container = document.getElementById('listaPedidos');
+    const sub = document.getElementById('subPedidos');
+    container.innerHTML = '<div style="text-align:center;padding:.5rem;color:#64748B;"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>';
+    
+    db.ref('pedidos').orderByChild('usuario').equalTo(user.uid).once('value').then((snap) => {
+        const data = snap.val();
+        container.innerHTML = '';
+        
+        if (!data) {
+            container.innerHTML = '<div class="no-pedidos">No tienes pedidos aún</div>';
+            sub.textContent = 'Haz un pedido desde el menú principal';
+            return;
+        }
+        
+        const pedidos = Object.values(data);
+        sub.textContent = `Tienes ${pedidos.length} pedido(s)`;
+        
+        // Ordenar por fecha (más reciente primero)
+        pedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+        
+        pedidos.forEach((p) => {
+            const div = document.createElement('div');
+            div.className = 'pedido-item';
+            const estadoClass = p.estado || 'pendiente';
+            const estadoText = {
+                'pendiente': '⏳ Pendiente',
+                'procesando': '🔄 En proceso',
+                'completado': '✅ Completado'
+            }[estadoClass] || '⏳ Pendiente';
+            
+            div.innerHTML = `
+                <div class="titulo">${p.tipo === 'pelicula' ? '🎬' : '📺'} ${p.titulo}</div>
+                <div class="detalles">
+                    <span>📅 ${p.anio || 'N/D'}</span>
+                    <span>🎭 ${p.genero || 'Sin género'}</span>
+                    <span class="estado ${estadoClass}">${estadoText}</span>
+                </div>
+                ${p.sinopsis && p.sinopsis !== 'Sin descripción' ? `<div style="font-size:.7rem;color:#64748B;margin-top:.2rem;">${p.sinopsis.substring(0, 100)}${p.sinopsis.length > 100 ? '...' : ''}</div>` : ''}
+                <div class="fecha">📆 ${new Date(p.fecha).toLocaleDateString()} - ${new Date(p.fecha).toLocaleTimeString()}</div>
+            `;
+            container.appendChild(div);
+        });
+    }).catch(() => {
+        container.innerHTML = '<div style="color:#EF4444;text-align:center;padding:.5rem;">Error al cargar los pedidos</div>';
+    });
+}
+
+function actualizarContadorPedidos() {
+    const user = auth.currentUser;
+    if (!user) return;
+    
+    db.ref('pedidos').orderByChild('usuario').equalTo(user.uid).once('value').then((snap) => {
+        const data = snap.val();
+        const count = data ? Object.keys(data).length : 0;
+        document.getElementById('statPedidos').textContent = count;
+        document.getElementById('badgePedidos').textContent = count;
+        document.getElementById('badgePedidos').style.display = count > 0 ? 'inline-block' : 'none';
+    });
+}
+
+function mostrarToast(msg, tipo = 'success') {
+    const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
+    const t = document.createElement('div');
+    t.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:10px 20px;border-radius:10px;z-index:9999;font-weight:600;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+// ⭐ ACTUALIZAR PERFIL
+function actualizarPerfil(user) {
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
     const name = document.getElementById('profileName');
     const email = document.getElementById('profileEmail');
+    const avatar = document.getElementById('profileAvatar');
 
     if (user) {
         loginBtn.style.display = 'none';
         logoutBtn.style.display = 'flex';
-        name.textContent = user.displayName || user.email || 'Usuario';
+        const displayName = user.displayName || user.email || 'Usuario';
+        name.textContent = displayName;
         email.textContent = user.email || '';
+        
+        // Avatar con iniciales
+        const inicial = displayName.charAt(0).toUpperCase();
+        avatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=7C3AED&color=fff&size=100`;
+        
         const historial = JSON.parse(localStorage.getItem('historialTely')) || [];
         document.getElementById('statHistorial').textContent = historial.length;
+        
         db.ref('usuarios/' + user.uid).once('value').then((snap) => {
             const data = snap.val();
             if (data) {
@@ -191,6 +527,8 @@ auth.onAuthStateChanged(user => {
                 });
             }
         });
+        
+        actualizarContadorPedidos();
     } else {
         loginBtn.style.display = 'flex';
         logoutBtn.style.display = 'none';
@@ -200,8 +538,26 @@ auth.onAuthStateChanged(user => {
         document.getElementById('statHistorial').textContent = '0';
         document.getElementById('statFavoritos').textContent = '0';
         document.getElementById('statListas').textContent = '0';
+        document.getElementById('statPedidos').textContent = '0';
+        document.getElementById('badgePedidos').textContent = '0';
+        document.getElementById('badgePedidos').style.display = 'none';
+        avatar.src = 'https://ui-avatars.com/api/?name=Invitado&background=7C3AED&color=fff&size=100';
+    }
+}
+
+auth.onAuthStateChanged(user => {
+    actualizarPerfil(user);
+});
+
+// ⭐ CERRAR MODALES CON ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarModalPedido();
+        cerrarModalPedidos();
     }
 });
+
+console.log('✅ Perfil TELY - Con sistema de pedidos');
 </script>
 </body>
 </html>
