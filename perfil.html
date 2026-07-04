@@ -126,42 +126,57 @@
     </div>
 </main>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-<script>
+<script type="importmap">
+{
+    "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js",
+        "firebase/database": "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"
+    }
+}
+</script>
+<script type="module">
+import { initializeApp } from "firebase/app";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { getDatabase, ref, get } from "firebase/database";
+
 const firebaseConfig = {
-    apiKey: "AIzaSyCwLATDpQN1RWv3rLPjJXbNnIBkyo_BUfI",
-    authDomain: "tely-ap.firebaseapp.com",
-    databaseURL: "https://tely-ap-default-rtdb.firebaseio.com",
-    projectId: "tely-ap",
-    storageBucket: "tely-ap.firebasestorage.app",
-    messagingSenderId: "760862940967",
-    appId: "1:760862940967:web:69bbbbfee0de40f68a1302"
+    apiKey: "AIzaSyBPBDEVUR7hjNrxCYrefF9Sbl0Wofp3VoQ",
+    authDomain: "telyx-23210.firebaseapp.com",
+    projectId: "telyx-23210",
+    storageBucket: "telyx-23210.firebasestorage.app",
+    messagingSenderId: "10164285015",
+    appId: "1:10164285015:web:5cf32bd2831de126c67d12",
+    measurementId: "G-0YEZMJYMJS"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) { return true; });
 document.addEventListener('backbutton', function(e) { return true; }, false);
 
-function irALogin() { window.location.href = 'login.html'; }
-function cerrarSesion() { auth.signOut().then(() => { window.location.href = 'index.html'; }); }
-function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
-document.addEventListener('click', (e) => { const menu = document.getElementById('userDropdown'); if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show'); });
-
-function toggleTheme() {
+window.irALogin = function() { window.location.href = 'login.html'; };
+window.cerrarSesion = function() { signOut(auth).then(() => { window.location.href = 'index.html'; }); };
+window.toggleUserMenu = function() { document.getElementById('userDropdown').classList.toggle('show'); };
+window.toggleTheme = function() {
     const body = document.body;
     const btn = document.getElementById('themeBtn');
     if (body.classList.contains('dark')) { body.classList.remove('dark'); btn.innerHTML = '<i class="fas fa-moon"></i>'; localStorage.setItem('theme', 'light'); }
     else { body.classList.add('dark'); btn.innerHTML = '<i class="fas fa-sun"></i>'; localStorage.setItem('theme', 'dark'); }
-}
+};
+
 if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
 else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
 
-auth.onAuthStateChanged(user => {
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('userDropdown');
+    if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
+});
+
+onAuthStateChanged(auth, (user) => {
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
     const name = document.getElementById('profileName');
@@ -172,15 +187,11 @@ auth.onAuthStateChanged(user => {
         logoutBtn.style.display = 'flex';
         name.textContent = user.displayName || user.email || 'Usuario';
         email.textContent = user.email || '';
-        // Cargar estadísticas
         const historial = JSON.parse(localStorage.getItem('historialTely')) || [];
         document.getElementById('statHistorial').textContent = historial.length;
-        // Cargar datos de Firebase
-        db.ref('usuarios/' + user.uid).once('value').then((snap) => {
+        get(ref(db, 'usuarios/' + user.uid)).then((snap) => {
             const data = snap.val();
-            if (data) {
-                document.getElementById('profilePlan').textContent = '🎬 Plan ' + (data.plan || 'Gratis');
-            }
+            if (data) document.getElementById('profilePlan').textContent = '🎬 Plan ' + (data.plan || 'Gratis');
         });
     } else {
         loginBtn.style.display = 'flex';
