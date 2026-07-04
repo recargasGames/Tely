@@ -47,8 +47,6 @@
         .admin-card{background:rgba(255,255,255,.04);border-radius:12px;padding:1.2rem;border:1px solid rgba(124,58,237,.15);margin-bottom:1rem}
         body:not(.dark) .admin-card{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1)}
         .admin-card h3{font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem}
-        .admin-card h3 i{color:#7C3AED}
-        
         .admin-btn{background:#7C3AED;border:none;color:#fff;padding:.5rem 1.5rem;border-radius:8px;font-weight:700;cursor:pointer;transition:.3s;font-size:.85rem}
         .admin-btn:hover{background:#6D28D9}
         .admin-btn-magic{background:#F59E0B;color:#111;font-size:1.1rem;padding:.8rem 2rem}
@@ -63,10 +61,6 @@
         .admin-item .title{font-weight:600;font-size:.9rem}
         .admin-item .meta{font-size:.75rem;color:#94A3B8}
         body:not(.dark) .admin-item .meta{color:#888}
-        .admin-item .actions{display:flex;gap:.3rem;margin-top:.2rem;flex-wrap:wrap}
-        .admin-item .actions button{padding:.1rem .6rem;border-radius:4px;border:none;font-size:.7rem;font-weight:600;cursor:pointer}
-        .admin-item .actions .edit{background:rgba(59,130,246,.2);color:#60A5FA}
-        .admin-item .actions .delete{background:rgba(239,68,68,.2);color:#F87171}
         
         .user-dropdown{position:absolute;right:0;top:calc(100% + 8px);background:rgba(26,26,46,.95);border-radius:12px;width:200px;border:1px solid rgba(124,58,237,.15);padding:.4rem 0;display:none;z-index:50;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
@@ -90,6 +84,9 @@
         .progress-bar .fill{height:100%;width:0%;background:linear-gradient(90deg,#F59E0B,#F97316);border-radius:3px;transition:width 0.5s}
         .badge-no-op2{display:inline-block;padding:.05rem .4rem;border-radius:4px;background:rgba(239,68,68,.15);color:#F87171;font-size:.5rem;font-weight:600}
         .badge-count{display:inline-block;padding:.05rem .5rem;border-radius:9999px;background:rgba(124,58,237,.2);color:#A78BFA;font-size:.65rem;font-weight:600}
+        .admin-protected{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:.5rem 1rem;text-align:center;margin-bottom:.5rem;font-size:.8rem;color:#34D399}
+        .admin-protected i{color:#34D399}
+        .admin-protected.denied{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2);color:#F87171}
     </style>
 </head>
 <body>
@@ -123,6 +120,12 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- ⭐ ADMIN PROTEGIDO - SOLO PARA TI -->
+    <div class="admin-protected" id="adminProtected">
+        <i class="fas fa-shield-alt"></i> 
+        <span id="adminStatus">Verificando acceso...</span>
     </div>
 
     <!-- ⭐⭐⭐ BOTÓN MÁGICO ÚNICO - GENERAR TODO ⭐⭐⭐ -->
@@ -189,11 +192,8 @@
 <script type="module">
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { getDatabase, ref, get, push, update, remove, child, onValue } from "firebase/database";
+import { getDatabase, ref, get, push, update, remove, child, onValue, set } from "firebase/database";
 
-// ==============================================
-// 🔥 NUEVA API FIREBASE - SIN RESIDUOS
-// ==============================================
 const firebaseConfig = {
     apiKey: "AIzaSyBPBDEVUR7hjNrxCYrefF9Sbl0Wofp3VoQ",
     authDomain: "telyx-23210.firebaseapp.com",
@@ -209,12 +209,17 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 
 // ==============================================
-// ⭐ VARIABLES GLOBALES
+// ⭐ USUARIOS AUTORIZADOS PARA ADMIN
 // ==============================================
+const ADMIN_EMAILS = [
+    'tucorreo@gmail.com',  // ⭐ CAMBIA ESTO POR TU CORREO
+];
+
 let totalPeliculas = 0;
 let totalSeries = 0;
 let totalCaps = 0;
 let generando = false;
+let esAdmin = false;
 
 // ==============================================
 // ⭐ BOTÓN ATRÁS
@@ -224,7 +229,7 @@ window.addEventListener('popstate', function(e) { return true; });
 document.addEventListener('backbutton', function(e) { return true; }, false);
 
 // ==============================================
-// ⭐ AUTENTICACIÓN Y UI
+// ⭐ AUTENTICACIÓN Y VERIFICACIÓN DE ADMIN
 // ==============================================
 window.irALogin = function() { window.location.href = 'login.html'; };
 window.cerrarSesion = function() { signOut(auth).then(() => { location.reload(); }); };
@@ -239,18 +244,56 @@ window.toggleTheme = function() {
 if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
 else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
 
-onAuthStateChanged(auth, (user) => {
-    document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
-    document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
-});
-
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('userDropdown');
     if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
 });
 
 // ==============================================
-// ⭐ FUNCIONES DE ENLACES (SOLO UNLIMPLAY - SIN OPCIÓN 2)
+// ⭐ VERIFICAR SI ES ADMIN
+// ==============================================
+onAuthStateChanged(auth, (user) => {
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const statusEl = document.getElementById('adminStatus');
+    const protectedDiv = document.getElementById('adminProtected');
+    
+    if (user) {
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'flex';
+        
+        const email = user.email;
+        esAdmin = ADMIN_EMAILS.includes(email);
+        
+        if (esAdmin) {
+            statusEl.textContent = '✅ Acceso de Administrador concedido';
+            protectedDiv.className = 'admin-protected';
+            document.querySelector('.admin-btn-magic').style.display = 'block';
+            document.querySelector('.admin-btn-green').style.display = 'inline-flex';
+            document.querySelector('.admin-btn').style.display = 'inline-flex';
+            document.querySelector('.magic-section .stats').style.display = 'grid';
+        } else {
+            statusEl.textContent = '⛔ Acceso denegado. Solo administradores.';
+            protectedDiv.className = 'admin-protected denied';
+            document.querySelector('.admin-btn-magic').style.display = 'none';
+            document.querySelector('.admin-btn-green').style.display = 'none';
+            document.querySelector('.admin-btn').style.display = 'none';
+            document.querySelector('.magic-section .stats').style.display = 'none';
+        }
+    } else {
+        loginBtn.style.display = 'flex';
+        logoutBtn.style.display = 'none';
+        statusEl.textContent = '🔒 Inicia sesión para acceder al Admin';
+        protectedDiv.className = 'admin-protected denied';
+        document.querySelector('.admin-btn-magic').style.display = 'none';
+        document.querySelector('.admin-btn-green').style.display = 'none';
+        document.querySelector('.admin-btn').style.display = 'none';
+        document.querySelector('.magic-section .stats').style.display = 'none';
+    }
+});
+
+// ==============================================
+// ⭐ FUNCIONES DE ENLACES (SOLO UNLIMPLAY)
 // ==============================================
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     if (tipo === 'pelicula') {
@@ -285,9 +328,94 @@ function mostrarToast(msg, tipo = 'success') {
 }
 
 // ==============================================
+// ⭐⭐⭐ GENERAR ENLACE BAJO DEMANDA (CUANDO FALLA EL ADMIN)
+// ==============================================
+async function generarEnlaceBajoDemanda(tmdb_id, tipo) {
+    console.log(`🔧 Generando enlace bajo demanda para: ${tmdb_id} (${tipo})`);
+    try {
+        if (tipo === 'pelicula') {
+            const data = await fetchTMDB(`movie/${tmdb_id}`);
+            if (data && data.id) {
+                const pelicula = {
+                    titulo: data.title || `Película ${tmdb_id}`,
+                    anio: data.release_date ? data.release_date.split('-')[0] : 'N/D',
+                    sinopsis: data.overview || 'Sin sinopsis',
+                    portada: getImagenUrl(data.poster_path, 'w342'),
+                    genero: data.genres ? data.genres.map(g => g.name).join(', ') : 'Película',
+                    tipo: 'pelicula',
+                    categoria: 'peliculas',
+                    tmdb_id: data.id,
+                    puntuacion: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
+                    url: generarEnlaceUnlimplay(data.id, 'pelicula'),
+                    creado: Date.now()
+                };
+                await push(ref(db, 'contenido_personalizado'), pelicula);
+                console.log(`✅ Película ${data.title} generada bajo demanda`);
+                return pelicula;
+            }
+        } else {
+            const data = await fetchTMDB(`tv/${tmdb_id}`);
+            if (data && data.id) {
+                const numTemps = data.number_of_seasons || 1;
+                const temporadas = [];
+                let capsSerie = 0;
+                
+                for (let t = 1; t <= Math.min(numTemps, 5); t++) {
+                    try {
+                        const seasonData = await fetchTMDB(`tv/${tmdb_id}/season/${t}`);
+                        if (!seasonData || !seasonData.episodes) continue;
+                        
+                        const capitulos = seasonData.episodes.map(ep => ({
+                            numero: ep.episode_number,
+                            titulo: ep.name || `Capítulo ${ep.episode_number}`,
+                            sinopsis: ep.overview || 'Sin sinopsis',
+                            url: generarEnlaceUnlimplay(data.id, 'serie', t, ep.episode_number)
+                        }));
+                        
+                        capsSerie += capitulos.length;
+                        temporadas.push({
+                            numero: t,
+                            nombre: seasonData.name || `Temporada ${t}`,
+                            capitulos: capitulos
+                        });
+                    } catch(e) {}
+                }
+                
+                if (temporadas.length > 0) {
+                    const serie = {
+                        titulo: data.name || `Serie ${tmdb_id}`,
+                        anio: data.first_air_date ? data.first_air_date.split('-')[0] : 'N/D',
+                        sinopsis: data.overview || 'Sin sinopsis',
+                        portada: getImagenUrl(data.poster_path, 'w342'),
+                        genero: data.genres ? data.genres.map(g => g.name).join(', ') : 'Serie',
+                        tipo: 'serie',
+                        categoria: 'series',
+                        tmdb_id: data.id,
+                        puntuacion: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
+                        temporadas: temporadas,
+                        creado: Date.now()
+                    };
+                    await push(ref(db, 'series_personalizadas'), serie);
+                    console.log(`✅ Serie ${data.name} generada bajo demanda con ${capsSerie} capítulos`);
+                    return serie;
+                }
+            }
+        }
+        return null;
+    } catch(e) {
+        console.error('❌ Error generando bajo demanda:', e);
+        return null;
+    }
+}
+
+// ==============================================
 // ⭐⭐⭐ BOTÓN MÁGICO - GENERAR TODO ⭐⭐⭐
 // ==============================================
 window.generarTodo = async function() {
+    if (!esAdmin) {
+        mostrarToast('⛔ No tienes permisos de administrador', 'error');
+        return;
+    }
     if (generando) {
         mostrarToast('⏳ Ya está generando contenido...', 'warning');
         return;
@@ -308,22 +436,24 @@ window.generarTodo = async function() {
     totalPeliculas = 0;
     totalSeries = 0;
     totalCaps = 0;
+    let errores = 0;
+    let exitosPelis = 0;
+    let exitosSeries = 0;
     
     try {
-        // ==========================================
         // 🎬 GENERAR TODAS LAS PELÍCULAS
-        // ==========================================
         info.textContent = '🎬 Obteniendo películas de TMDB...';
         let peliculasTotales = [];
         let pagePelis = 1;
+        const MAX_PAGES_PELIS = 10;
         
-        while (pagePelis <= 10) {
+        while (pagePelis <= MAX_PAGES_PELIS) {
             try {
                 const data = await fetchTMDB('movie/popular', { page: pagePelis });
                 if (!data.results || !data.results.length) break;
                 peliculasTotales = [...peliculasTotales, ...data.results];
                 info.textContent = `🎬 Cargando películas... página ${pagePelis} (${peliculasTotales.length} encontradas)`;
-                fill.style.width = `${(pagePelis / 10) * 40}%`;
+                fill.style.width = `${(pagePelis / MAX_PAGES_PELIS) * 40}%`;
                 pagePelis++;
             } catch(e) { break; }
         }
@@ -331,44 +461,49 @@ window.generarTodo = async function() {
         info.textContent = `🎬 Generando ${peliculasTotales.length} películas...`;
         
         for (let i = 0; i < peliculasTotales.length; i++) {
-            const p = peliculasTotales[i];
-            const pelicula = {
-                titulo: p.title || `Película ${p.id}`,
-                anio: p.release_date ? p.release_date.split('-')[0] : 'N/D',
-                sinopsis: p.overview || 'Sin sinopsis',
-                portada: getImagenUrl(p.poster_path, 'w342'),
-                genero: 'Película',
-                tipo: 'pelicula',
-                categoria: 'peliculas',
-                tmdb_id: p.id,
-                puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A',
-                url: generarEnlaceUnlimplay(p.id, 'pelicula'),
-                creado: Date.now()
-            };
-            await push(ref(db, 'contenido_personalizado'), pelicula);
-            totalPeliculas++;
+            try {
+                const p = peliculasTotales[i];
+                const pelicula = {
+                    titulo: p.title || `Película ${p.id}`,
+                    anio: p.release_date ? p.release_date.split('-')[0] : 'N/D',
+                    sinopsis: p.overview || 'Sin sinopsis',
+                    portada: getImagenUrl(p.poster_path, 'w342'),
+                    genero: 'Película',
+                    tipo: 'pelicula',
+                    categoria: 'peliculas',
+                    tmdb_id: p.id,
+                    puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A',
+                    url: generarEnlaceUnlimplay(p.id, 'pelicula'),
+                    creado: Date.now()
+                };
+                await push(ref(db, 'contenido_personalizado'), pelicula);
+                totalPeliculas++;
+                exitosPelis++;
+            } catch(e) {
+                errores++;
+                console.warn(`⚠️ Error generando película:`, e);
+            }
             
             if (i % 10 === 0) {
                 fill.style.width = `${40 + (i / peliculasTotales.length) * 30}%`;
-                info.textContent = `🎬 Generando película ${i+1}/${peliculasTotales.length}...`;
+                info.textContent = `🎬 Generando película ${i+1}/${peliculasTotales.length}... (${errores} errores)`;
                 document.getElementById('totalPeliculas').textContent = totalPeliculas;
             }
         }
         
-        // ==========================================
         // 📺 GENERAR TODAS LAS SERIES
-        // ==========================================
         info.textContent = '📺 Obteniendo series de TMDB...';
         let seriesTotales = [];
         let pageSeries = 1;
+        const MAX_PAGES_SERIES = 10;
         
-        while (pageSeries <= 10) {
+        while (pageSeries <= MAX_PAGES_SERIES) {
             try {
                 const data = await fetchTMDB('tv/popular', { page: pageSeries });
                 if (!data.results || !data.results.length) break;
                 seriesTotales = [...seriesTotales, ...data.results];
                 info.textContent = `📺 Cargando series... página ${pageSeries} (${seriesTotales.length} encontradas)`;
-                fill.style.width = `${70 + (pageSeries / 10) * 20}%`;
+                fill.style.width = `${70 + (pageSeries / MAX_PAGES_SERIES) * 20}%`;
                 pageSeries++;
             } catch(e) { break; }
         }
@@ -376,70 +511,77 @@ window.generarTodo = async function() {
         info.textContent = `📺 Generando ${seriesTotales.length} series...`;
         
         for (let i = 0; i < seriesTotales.length; i++) {
-            const s = seriesTotales[i];
-            const numTemps = s.number_of_seasons || 1;
-            const temporadas = [];
-            let capsSerie = 0;
-            
-            for (let t = 1; t <= Math.min(numTemps, 5); t++) {
-                try {
-                    const seasonData = await fetchTMDB(`tv/${s.id}/season/${t}`);
-                    if (!seasonData || !seasonData.episodes) continue;
-                    
-                    const capitulos = seasonData.episodes.map(ep => ({
-                        numero: ep.episode_number,
-                        titulo: ep.name || `Capítulo ${ep.episode_number}`,
-                        sinopsis: ep.overview || 'Sin sinopsis',
-                        url: generarEnlaceUnlimplay(s.id, 'serie', t, ep.episode_number)
-                    }));
-                    
-                    capsSerie += capitulos.length;
-                    temporadas.push({
-                        numero: t,
-                        nombre: seasonData.name || `Temporada ${t}`,
-                        capitulos: capitulos
-                    });
-                } catch(e) {}
-            }
-            
-            if (temporadas.length > 0) {
-                const serie = {
-                    titulo: s.name || `Serie ${s.id}`,
-                    anio: s.first_air_date ? s.first_air_date.split('-')[0] : 'N/D',
-                    sinopsis: s.overview || 'Sin sinopsis',
-                    portada: getImagenUrl(s.poster_path, 'w342'),
-                    genero: 'Serie',
-                    tipo: 'serie',
-                    categoria: 'series',
-                    tmdb_id: s.id,
-                    puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A',
-                    temporadas: temporadas,
-                    creado: Date.now()
-                };
-                await push(ref(db, 'series_personalizadas'), serie);
-                totalSeries++;
-                totalCaps += capsSerie;
+            try {
+                const s = seriesTotales[i];
+                const numTemps = s.number_of_seasons || 1;
+                const temporadas = [];
+                let capsSerie = 0;
+                
+                for (let t = 1; t <= Math.min(numTemps, 5); t++) {
+                    try {
+                        const seasonData = await fetchTMDB(`tv/${s.id}/season/${t}`);
+                        if (!seasonData || !seasonData.episodes) continue;
+                        
+                        const capitulos = seasonData.episodes.map(ep => ({
+                            numero: ep.episode_number,
+                            titulo: ep.name || `Capítulo ${ep.episode_number}`,
+                            sinopsis: ep.overview || 'Sin sinopsis',
+                            url: generarEnlaceUnlimplay(s.id, 'serie', t, ep.episode_number)
+                        }));
+                        
+                        capsSerie += capitulos.length;
+                        temporadas.push({
+                            numero: t,
+                            nombre: seasonData.name || `Temporada ${t}`,
+                            capitulos: capitulos
+                        });
+                    } catch(e) {}
+                }
+                
+                if (temporadas.length > 0) {
+                    const serie = {
+                        titulo: s.name || `Serie ${s.id}`,
+                        anio: s.first_air_date ? s.first_air_date.split('-')[0] : 'N/D',
+                        sinopsis: s.overview || 'Sin sinopsis',
+                        portada: getImagenUrl(s.poster_path, 'w342'),
+                        genero: 'Serie',
+                        tipo: 'serie',
+                        categoria: 'series',
+                        tmdb_id: s.id,
+                        puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A',
+                        temporadas: temporadas,
+                        creado: Date.now()
+                    };
+                    await push(ref(db, 'series_personalizadas'), serie);
+                    totalSeries++;
+                    totalCaps += capsSerie;
+                    exitosSeries++;
+                }
+            } catch(e) {
+                errores++;
+                console.warn(`⚠️ Error generando serie:`, e);
             }
             
             if (i % 5 === 0) {
                 fill.style.width = `${90 + (i / seriesTotales.length) * 10}%`;
-                info.textContent = `📺 Generando serie ${i+1}/${seriesTotales.length} (${totalCaps} capítulos)...`;
+                info.textContent = `📺 Generando serie ${i+1}/${seriesTotales.length} (${totalCaps} capítulos)... (${errores} errores)`;
                 document.getElementById('totalSeries').textContent = totalSeries;
                 document.getElementById('totalCaps').textContent = totalCaps;
             }
         }
         
-        // ==========================================
-        // ✅ FINALIZAR
-        // ==========================================
         fill.style.width = '100%';
-        info.textContent = `✅ ¡COMPLETADO! ${totalPeliculas} películas, ${totalSeries} series, ${totalCaps} capítulos generados.`;
+        info.textContent = `✅ ¡COMPLETADO! ${totalPeliculas} películas, ${totalSeries} series, ${totalCaps} capítulos. ${errores} errores.`;
         
         document.getElementById('totalPeliculas').textContent = totalPeliculas;
         document.getElementById('totalSeries').textContent = totalSeries;
         document.getElementById('totalCaps').textContent = totalCaps;
         
-        mostrarToast(`✅ ${totalPeliculas} películas y ${totalSeries} series generadas!`, 'success');
+        if (errores > 0) {
+            mostrarToast(`⚠️ ${errores} errores. Las películas/series fallidas se generarán automáticamente al seleccionarlas.`, 'warning');
+        } else {
+            mostrarToast(`✅ ${totalPeliculas} películas y ${totalSeries} series generadas!`, 'success');
+        }
         cargarContenido();
         
     } catch (e) {
@@ -458,6 +600,10 @@ window.generarTodo = async function() {
 // 🗑️ LIMPIAR TODO
 // ==============================================
 window.limpiarTodo = async function() {
+    if (!esAdmin) {
+        mostrarToast('⛔ No tienes permisos de administrador', 'error');
+        return;
+    }
     if (!confirm('⚠️ ¿Eliminar TODO el contenido de Firebase?\n¡Esta acción no se puede deshacer!')) return;
     
     try {
@@ -489,7 +635,7 @@ window.limpiarTodo = async function() {
 };
 
 // ==============================================
-// 📋 CARGAR CONTENIDO DESDE FIREBASE
+// 📋 CARGAR CONTENIDO
 // ==============================================
 window.cargarContenido = async function() {
     const container = document.getElementById('listaContenido');
@@ -509,7 +655,6 @@ window.cargarContenido = async function() {
         document.getElementById('totalPeliculas').textContent = totalPeliculas;
         document.getElementById('totalSeries').textContent = totalSeries;
         
-        // Contar capítulos totales
         let caps = 0;
         series.forEach(s => {
             if (s.temporadas) {
@@ -528,7 +673,6 @@ window.cargarContenido = async function() {
         
         container.innerHTML = '';
         
-        // Películas
         if (peliculas.length) {
             const div = document.createElement('div');
             div.innerHTML = `<div style="font-weight:700;color:#A78BFA;margin:.3rem 0;">🎬 Películas (${peliculas.length})</div>`;
@@ -552,7 +696,6 @@ window.cargarContenido = async function() {
             container.appendChild(div);
         }
         
-        // Series
         if (series.length) {
             const div = document.createElement('div');
             div.innerHTML = `<div style="font-weight:700;color:#34D399;margin:.5rem 0 .3rem;">📺 Series (${series.length})</div>`;
@@ -584,6 +727,12 @@ window.cargarContenido = async function() {
     }
 };
 
+// ==============================================
+// ⭐ FUNCIÓN PARA GENERAR ENLACE BAJO DEMANDA (EXPORTADA)
+// ==============================================
+// Esta función se puede llamar desde el index/reproductor
+window.generarEnlaceBajoDemanda = generarEnlaceBajoDemanda;
+
 // 🔥 ESCUCHAR CAMBIOS EN TIEMPO REAL
 onValue(child(ref(db), ''), () => {
     console.log('🔄 Cambio detectado - Recargando...');
@@ -591,7 +740,8 @@ onValue(child(ref(db), ''), () => {
 });
 
 cargarContenido();
-console.log('✅ Admin TELY - Generador masivo listo');
+console.log('✅ Admin TELY - Protegido y listo');
+console.log('✅ Si falla al generar, se crea automáticamente al seleccionar');
 </script>
 </body>
 </html>
