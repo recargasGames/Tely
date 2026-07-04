@@ -32,8 +32,6 @@
         .btn-nueva-ventana:hover{background:rgba(239,68,68,.15)}
         .btn-recargar{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.2);color:#34D399;padding:.4rem 1.2rem;border-radius:8px;font-weight:600;font-size:.8rem;cursor:pointer;transition:.3s}
         .btn-recargar:hover{background:rgba(16,185,129,.25)}
-        .btn-regenerar{background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.2);color:#F59E0B;padding:.4rem 1.2rem;border-radius:8px;font-weight:600;font-size:.8rem;cursor:pointer;transition:.3s}
-        .btn-regenerar:hover{background:rgba(251,191,36,.25)}
         
         /* CAPÍTULOS */
         .capitulos-section{background:rgba(255,255,255,.03);border-radius:10px;padding:.6rem;border:1px solid rgba(124,58,237,.06);margin-top:.3rem}
@@ -79,7 +77,6 @@
         body:not(.dark) .btn-opcion.active{background:#7C3AED;color:#fff}
         body:not(.dark) .btn-nueva-ventana{color:#EF4444}
         body:not(.dark) .btn-recargar{color:#059669}
-        body:not(.dark) .btn-regenerar{color:#D97706}
         body:not(.dark) .titulo-recomendadas{color:#111}
     </style>
 </head>
@@ -107,13 +104,12 @@
         </div>
     </div>
     
-    <!-- ⭐ CONTROLES -->
+    <!-- ⭐ CONTROLES - SIN BOTÓN REGENERAR OP2 -->
     <div class="player-controls" id="playerControls">
         <button class="btn-opcion active" id="btnOp1" onclick="reproducirOpcion(1)"><i class="fas fa-play"></i> Opción 1</button>
         <button class="btn-opcion" id="btnOp2" onclick="reproducirOpcion(2)"><i class="fas fa-play"></i> Opción 2</button>
         <button class="btn-recargar" onclick="recargarVideo()"><i class="fas fa-rotate"></i></button>
         <button class="btn-nueva-ventana" onclick="abrirNuevaVentana()"><i class="fas fa-external-link-alt"></i></button>
-        <button class="btn-regenerar" onclick="regenerarOpcion2()"><i class="fas fa-sync-alt"></i> Regenerar Op2</button>
     </div>
     
     <!-- ⭐ CAPÍTULOS -->
@@ -172,7 +168,7 @@ document.addEventListener('backbutton', function(e) {
     }
 }, false);
 
-// ⭐ VARIABLES - CORREGIDO PARA ACEPTAR AMBOS FORMATOS
+// ⭐ VARIABLES - ACEPTA AMBOS FORMATOS DE ID
 const params = new URLSearchParams(window.location.search);
 let tmdbId = params.get('play');
 
@@ -345,86 +341,6 @@ window.abrirNuevaVentana = function() {
         window.open(urlActual, '_blank');
     } else {
         mostrarToast('❌ No hay enlace para abrir', 'error');
-    }
-};
-
-// ⭐ REGENERAR OPCIÓN 2
-window.regenerarOpcion2 = async function() {
-    if (!peliculaActual) {
-        mostrarToast('❌ No hay contenido cargado', 'error');
-        return;
-    }
-    
-    try {
-        mostrarToast('🔄 Regenerando Opción 2...', 'info');
-        
-        const dbRef = db.ref();
-        const tmdbId = peliculaActual.tmdb_id;
-        const tipo = peliculaActual.tipo;
-        
-        let snapshot, key, item;
-        
-        // Buscar en películas
-        const pSnap = await dbRef.child('contenido_personalizado').once('value');
-        const pelis = pSnap.val() || {};
-        for (const [k, v] of Object.entries(pelis)) {
-            if (v.tmdb_id == tmdbId) {
-                snapshot = pSnap;
-                key = k;
-                item = v;
-                break;
-            }
-        }
-        
-        // Si no está en películas, buscar en series
-        if (!item) {
-            const sSnap = await dbRef.child('series_personalizadas').once('value');
-            const series = sSnap.val() || {};
-            for (const [k, v] of Object.entries(series)) {
-                if (v.tmdb_id == tmdbId) {
-                    snapshot = sSnap;
-                    key = k;
-                    item = v;
-                    break;
-                }
-            }
-        }
-        
-        if (!item) {
-            mostrarToast('❌ Contenido no encontrado en Firebase', 'error');
-            return;
-        }
-        
-        // Regenerar opción 2
-        if (tipo === 'pelicula') {
-            item.opcion2 = generarEnlaceVidsrc(tmdbId, 'pelicula');
-        } else {
-            // Para series, regenerar todos los capítulos con opción 2
-            if (item.temporadas) {
-                for (let t = 0; t < item.temporadas.length; t++) {
-                    const temp = item.temporadas[t];
-                    if (temp.capitulos) {
-                        for (let c = 0; c < temp.capitulos.length; c++) {
-                            const cap = temp.capitulos[c];
-                            cap.opcion2 = generarEnlaceVidsrc(tmdbId, 'serie', temp.numero, cap.numero);
-                        }
-                    }
-                }
-            }
-            item.opcion2 = generarEnlaceVidsrc(tmdbId, 'serie', 1, 1);
-        }
-        
-        // Guardar en Firebase
-        await dbRef.child(snapshot.key + '/' + key).set(item);
-        
-        mostrarToast('✅ Opción 2 regenerada correctamente', 'success');
-        
-        // Recargar el contenido
-        cargarReproductor(item, tempRestaurar, capRestaurar);
-        
-    } catch(e) {
-        console.error(e);
-        mostrarToast('❌ Error al regenerar: ' + e.message, 'error');
     }
 };
 
