@@ -104,7 +104,7 @@
         </div>
     </div>
     
-    <!-- ⭐ CONTROLES - SIN BOTÓN REGENERAR OP2 -->
+    <!-- ⭐ CONTROLES -->
     <div class="player-controls" id="playerControls">
         <button class="btn-opcion active" id="btnOp1" onclick="reproducirOpcion(1)"><i class="fas fa-play"></i> Opción 1</button>
         <button class="btn-opcion" id="btnOp2" onclick="reproducirOpcion(2)"><i class="fas fa-play"></i> Opción 2</button>
@@ -147,32 +147,72 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-history.pushState(null, '', window.location.href);
+// ⭐ MANEJO DEL BOTÓN ATRÁS - CORREGIDO
+let atrasBloqueado = false;
+
+// Prevenir que el historial se rompa
+history.pushState({ pagina: 'reproductor' }, '', window.location.href);
+
 window.addEventListener('popstate', function(e) {
+    // Si el reproductor tiene un video y estamos en la página del reproductor
     const wrapper = document.getElementById('playerWrapper');
-    if (wrapper.querySelector('iframe')) {
-        wrapper.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner"></i><span>Cerrando...</span></div>`;
+    if (wrapper && wrapper.querySelector('iframe')) {
+        // Si es el segundo atrás, permitir salir
+        if (atrasBloqueado) {
+            // Permitir que navegue hacia atrás
+            return true;
+        }
+        
+        // Primera vez: mostrar mensaje y bloquear
+        atrasBloqueado = true;
+        mostrarToast('👆 Presiona atrás de nuevo para salir', 'info');
+        
+        // Limpiar el video y volver a poner el estado
+        wrapper.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner"></i><span>Cerrando reproductor...</span></div>`;
+        
+        // Volver a pushear el estado para que el próximo atrás funcione
+        history.pushState({ pagina: 'reproductor' }, '', window.location.href);
+        
+        // Resetear después de 3 segundos
+        setTimeout(() => {
+            atrasBloqueado = false;
+        }, 3000);
+        
         e.preventDefault();
-        history.pushState(null, '', window.location.href);
         return false;
     }
     return true;
-});
+}, false);
+
+// Para dispositivos Android con WebView
 document.addEventListener('backbutton', function(e) {
     const wrapper = document.getElementById('playerWrapper');
-    if (wrapper.querySelector('iframe')) {
-        wrapper.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner"></i><span>Cerrando...</span></div>`;
+    if (wrapper && wrapper.querySelector('iframe')) {
+        if (atrasBloqueado) {
+            // Permitir salir
+            return true;
+        }
+        
+        atrasBloqueado = true;
+        mostrarToast('👆 Presiona atrás de nuevo para salir', 'info');
+        wrapper.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner"></i><span>Cerrando reproductor...</span></div>`;
+        
+        setTimeout(() => {
+            atrasBloqueado = false;
+        }, 3000);
+        
         e.preventDefault();
         e.stopPropagation();
         return false;
     }
+    return true;
 }, false);
 
 // ⭐ VARIABLES - ACEPTA AMBOS FORMATOS DE ID
 const params = new URLSearchParams(window.location.search);
 let tmdbId = params.get('play');
 
-// ✅ Si el ID tiene prefijo "tmdb_", quítalo
+// Si el ID tiene prefijo "tmdb_", quítalo
 if (tmdbId && typeof tmdbId === 'string' && tmdbId.startsWith('tmdb_')) {
     tmdbId = tmdbId.replace('tmdb_', '');
 }
