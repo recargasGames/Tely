@@ -84,7 +84,6 @@
     </div>
     <div class="sidebar-bottom">
         <a href="perfil.html" class="sidebar-link active"><i class="fas fa-user"></i><span>Perfil</span></a>
-        <a href="admin.html" class="sidebar-link"><i class="fas fa-cog"></i><span>Admin</span></a>
     </div>
 </nav>
 
@@ -126,20 +125,10 @@
     </div>
 </main>
 
-<script type="importmap">
-{
-    "imports": {
-        "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
-        "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js",
-        "firebase/database": "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"
-    }
-}
-</script>
-<script type="module">
-import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { getDatabase, ref, get } from "firebase/database";
-
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script>
 const firebaseConfig = {
     apiKey: "AIzaSyBPBDEVUR7hjNrxCYrefF9Sbl0Wofp3VoQ",
     authDomain: "telyx-23210.firebaseapp.com",
@@ -150,33 +139,32 @@ const firebaseConfig = {
     measurementId: "G-0YEZMJYMJS"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
 
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) { return true; });
 document.addEventListener('backbutton', function(e) { return true; }, false);
 
-window.irALogin = function() { window.location.href = 'login.html'; };
-window.cerrarSesion = function() { signOut(auth).then(() => { window.location.href = 'index.html'; }); };
-window.toggleUserMenu = function() { document.getElementById('userDropdown').classList.toggle('show'); };
-window.toggleTheme = function() {
-    const body = document.body;
-    const btn = document.getElementById('themeBtn');
-    if (body.classList.contains('dark')) { body.classList.remove('dark'); btn.innerHTML = '<i class="fas fa-moon"></i>'; localStorage.setItem('theme', 'light'); }
-    else { body.classList.add('dark'); btn.innerHTML = '<i class="fas fa-sun"></i>'; localStorage.setItem('theme', 'dark'); }
-};
-
-if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
-else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
-
+function irALogin() { window.location.href = 'login.html'; }
+function cerrarSesion() { auth.signOut().then(() => { window.location.href = 'index.html'; }); }
+function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('userDropdown');
     if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
 });
 
-onAuthStateChanged(auth, (user) => {
+function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('themeBtn');
+    if (body.classList.contains('dark')) { body.classList.remove('dark'); btn.innerHTML = '<i class="fas fa-moon"></i>'; localStorage.setItem('theme', 'light'); }
+    else { body.classList.add('dark'); btn.innerHTML = '<i class="fas fa-sun"></i>'; localStorage.setItem('theme', 'dark'); }
+}
+if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
+else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
+
+auth.onAuthStateChanged(user => {
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
     const name = document.getElementById('profileName');
@@ -189,9 +177,19 @@ onAuthStateChanged(auth, (user) => {
         email.textContent = user.email || '';
         const historial = JSON.parse(localStorage.getItem('historialTely')) || [];
         document.getElementById('statHistorial').textContent = historial.length;
-        get(ref(db, 'usuarios/' + user.uid)).then((snap) => {
+        db.ref('usuarios/' + user.uid).once('value').then((snap) => {
             const data = snap.val();
-            if (data) document.getElementById('profilePlan').textContent = '🎬 Plan ' + (data.plan || 'Gratis');
+            if (data) {
+                document.getElementById('profilePlan').textContent = '🎬 Plan ' + (data.plan || 'Gratis');
+                db.ref(`usuarios/${user.uid}/favoritos`).once('value').then((s) => {
+                    const favs = s.val();
+                    document.getElementById('statFavoritos').textContent = favs ? Object.keys(favs).length : 0;
+                });
+                db.ref(`usuarios/${user.uid}/milista`).once('value').then((s) => {
+                    const lista = s.val();
+                    document.getElementById('statListas').textContent = lista ? Object.keys(lista).length : 0;
+                });
+            }
         });
     } else {
         loginBtn.style.display = 'flex';
@@ -200,6 +198,8 @@ onAuthStateChanged(auth, (user) => {
         email.textContent = 'No has iniciado sesión';
         document.getElementById('profilePlan').textContent = '🎬 Plan Gratis';
         document.getElementById('statHistorial').textContent = '0';
+        document.getElementById('statFavoritos').textContent = '0';
+        document.getElementById('statListas').textContent = '0';
     }
 });
 </script>
