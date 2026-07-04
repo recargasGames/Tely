@@ -149,50 +149,80 @@
     <div class="load-more"><button onclick="cargarMasSeries()"><i class="fas fa-plus"></i> Cargar más</button></div>
 </main>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-<script>
-const firebaseConfig = { apiKey: "AIzaSyCwLATDpQN1RWv3rLPjJXbNnIBkyo_BUfI", authDomain: "tely-ap.firebaseapp.com", databaseURL: "https://tely-ap-default-rtdb.firebaseio.com", projectId: "tely-ap", storageBucket: "tely-ap.firebasestorage.app", messagingSenderId: "760862940967", appId: "1:760862940967:web:69bbbbfee0de40f68a1302" };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+<script type="importmap">
+{
+    "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js",
+        "firebase/database": "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"
+    }
+}
+</script>
+<script type="module">
+import { initializeApp } from "firebase/app";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { getDatabase, ref, get, child } from "firebase/database";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBPBDEVUR7hjNrxCYrefF9Sbl0Wofp3VoQ",
+    authDomain: "telyx-23210.firebaseapp.com",
+    projectId: "telyx-23210",
+    storageBucket: "telyx-23210.firebasestorage.app",
+    messagingSenderId: "10164285015",
+    appId: "1:10164285015:web:5cf32bd2831de126c67d12",
+    measurementId: "G-0YEZMJYMJS"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+let paginaSeries = 1;
+let cargandoSeries = false;
 
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) { return true; });
 document.addEventListener('backbutton', function(e) { return true; }, false);
 
-function irALogin() { window.location.href = 'login.html'; }
-function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
-function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
-document.addEventListener('click', (e) => { const menu = document.getElementById('userDropdown'); if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show'); });
-auth.onAuthStateChanged(user => {
-    document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
-    document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
-});
-
-function toggleTheme() {
+window.irALogin = function() { window.location.href = 'login.html'; };
+window.cerrarSesion = function() { signOut(auth).then(() => { location.reload(); }); };
+window.toggleUserMenu = function() { document.getElementById('userDropdown').classList.toggle('show'); };
+window.toggleTheme = function() {
     const body = document.body;
     const btn = document.getElementById('themeBtn');
     if (body.classList.contains('dark')) { body.classList.remove('dark'); btn.innerHTML = '<i class="fas fa-moon"></i>'; localStorage.setItem('theme', 'light'); }
     else { body.classList.add('dark'); btn.innerHTML = '<i class="fas fa-sun"></i>'; localStorage.setItem('theme', 'dark'); }
-}
+};
+
 if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
 else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
 
-function getImagenUrl(path, size = 'w342') { if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg'; return `https://image.tmdb.org/t/p/${size}${path}`; }
+onAuthStateChanged(auth, (user) => {
+    document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
+    document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
+});
 
-let paginaSeries = 1;
-let cargandoSeries = false;
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('userDropdown');
+    if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
+});
+
+function getImagenUrl(path, size = 'w342') {
+    if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
+    return `https://image.tmdb.org/t/p/${size}${path}`;
+}
+
+function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    if (tipo === 'pelicula') return `https://unlimplay.co/play/movie/${tmdb_id}`;
+    else return `https://unlimplay.co/play/tv/${tmdb_id}/${temporada}/${capitulo}`;
+}
 
 function crearTarjetaSerie(item) {
     const div = document.createElement('div');
     div.className = 'movie-card';
-    const tieneOp2 = item.opcion2 && item.opcion2.trim() !== '';
     div.innerHTML = `
         <span class="badge-year">${item.anio || 'N/D'}</span>
         <span class="badge-type">📺</span>
-        ${tieneOp2 ? '<span class="badge-op2">🔗 Op2</span>' : ''}
         <img src="${item.portada}" alt="${item.titulo}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
         <div class="info"><h4>${item.titulo}</h4><div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div></div>
     `;
@@ -207,16 +237,27 @@ function crearTarjetaSerie(item) {
     return div;
 }
 
+async function fetchTMDB(path, params = {}) {
+    const queryParams = new URLSearchParams();
+    queryParams.append('path', path);
+    Object.keys(params).forEach(key => queryParams.append(key, params[key]));
+    const url = `https://tely-xi.vercel.app/api/tmdb?${queryParams.toString()}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    return response.json();
+}
+
 async function cargarSeries(page = 1) {
     if (cargandoSeries) return;
     cargandoSeries = true;
     const container = document.getElementById('listaSeries');
     if (page === 1) container.innerHTML = '<div class="skeleton"></div>'.repeat(12);
     try {
-        const data = await fetch(`https://tely-xi.vercel.app/api/tmdb?path=tv/popular&page=${page}`).then(r => r.json()).catch(() => ({ results: [] }));
+        const data = await fetchTMDB('tv/popular', { page });
         if (!data.results || !data.results.length) { cargandoSeries = false; return; }
         if (page === 1) container.innerHTML = '';
-        const adminSnap = await db.ref('series_personalizadas').once('value');
+        const dbRef = ref(db);
+        const adminSnap = await get(child(dbRef, 'series_personalizadas'));
         const adminData = adminSnap.val() || {};
         const adminMap = {};
         Object.values(adminData).forEach(i => { adminMap[i.tmdb_id] = i; });
@@ -228,8 +269,7 @@ async function cargarSeries(page = 1) {
                 anio: a?.anio || (s.first_air_date ? s.first_air_date.split('-')[0] : 'N/D'),
                 portada: a?.portada || getImagenUrl(s.poster_path, 'w342'),
                 puntuacion: a?.puntuacion || (s.vote_average ? s.vote_average.toFixed(1) : 'N/A'),
-                url: a?.url || `https://unlimplay.com/play/embed/tv/${s.id}/1/1?lang=es-MX`,
-                opcion2: a?.opcion2 || `https://vidsrc.in/embed/tv/${s.id}/1/1?lang=es`
+                url: a?.url || generarEnlaceUnlimplay(s.id, 'serie', 1, 1)
             };
             container.appendChild(crearTarjetaSerie(item));
         });
@@ -237,16 +277,16 @@ async function cargarSeries(page = 1) {
     cargandoSeries = false;
 }
 
-function cargarMasSeries() {
+window.cargarMasSeries = function() {
     paginaSeries++;
     cargarSeries(paginaSeries);
-}
+};
 
-async function mostrarSugerencias(texto) {
+window.mostrarSugerencias = async function(texto) {
     const container = document.getElementById('searchResults');
     if (!texto || texto.length < 2) { container.classList.remove('show'); return; }
     try {
-        const data = await fetch(`https://tely-xi.vercel.app/api/tmdb?path=search/tv&query=${encodeURIComponent(texto)}&page=1`).then(r => r.json()).catch(() => ({ results: [] }));
+        const data = await fetchTMDB('search/tv', { query: texto, page: 1 });
         if (!data.results || !data.results.length) { container.classList.remove('show'); return; }
         container.innerHTML = '';
         data.results.slice(0, 8).forEach(item => {
@@ -267,9 +307,12 @@ async function mostrarSugerencias(texto) {
         });
         container.classList.add('show');
     } catch(e) { container.classList.remove('show'); }
-}
+};
 
-function buscarGlobal() { const input = document.getElementById('searchInput'); if (input.value.trim()) mostrarSugerencias(input.value); }
+window.buscarGlobal = function() {
+    const input = document.getElementById('searchInput');
+    if (input.value.trim()) window.mostrarSugerencias(input.value);
+};
 
 cargarSeries(1);
 console.log('✅ Series cargadas');
