@@ -147,60 +147,38 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ⭐ MANEJO DEL BOTÓN ATRÁS - CORREGIDO
+// ⭐ MANEJO DEL BOTÓN ATRÁS
 let atrasBloqueado = false;
 
-// Prevenir que el historial se rompa
 history.pushState({ pagina: 'reproductor' }, '', window.location.href);
 
 window.addEventListener('popstate', function(e) {
-    // Si el reproductor tiene un video y estamos en la página del reproductor
     const wrapper = document.getElementById('playerWrapper');
     if (wrapper && wrapper.querySelector('iframe')) {
-        // Si es el segundo atrás, permitir salir
         if (atrasBloqueado) {
-            // Permitir que navegue hacia atrás
             return true;
         }
-        
-        // Primera vez: mostrar mensaje y bloquear
         atrasBloqueado = true;
         mostrarToast('👆 Presiona atrás de nuevo para salir', 'info');
-        
-        // Limpiar el video y volver a poner el estado
         wrapper.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner"></i><span>Cerrando reproductor...</span></div>`;
-        
-        // Volver a pushear el estado para que el próximo atrás funcione
         history.pushState({ pagina: 'reproductor' }, '', window.location.href);
-        
-        // Resetear después de 3 segundos
-        setTimeout(() => {
-            atrasBloqueado = false;
-        }, 3000);
-        
+        setTimeout(() => { atrasBloqueado = false; }, 3000);
         e.preventDefault();
         return false;
     }
     return true;
 }, false);
 
-// Para dispositivos Android con WebView
 document.addEventListener('backbutton', function(e) {
     const wrapper = document.getElementById('playerWrapper');
     if (wrapper && wrapper.querySelector('iframe')) {
         if (atrasBloqueado) {
-            // Permitir salir
             return true;
         }
-        
         atrasBloqueado = true;
         mostrarToast('👆 Presiona atrás de nuevo para salir', 'info');
         wrapper.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner"></i><span>Cerrando reproductor...</span></div>`;
-        
-        setTimeout(() => {
-            atrasBloqueado = false;
-        }, 3000);
-        
+        setTimeout(() => { atrasBloqueado = false; }, 3000);
         e.preventDefault();
         e.stopPropagation();
         return false;
@@ -208,11 +186,10 @@ document.addEventListener('backbutton', function(e) {
     return true;
 }, false);
 
-// ⭐ VARIABLES - ACEPTA AMBOS FORMATOS DE ID
+// ⭐ VARIABLES
 const params = new URLSearchParams(window.location.search);
 let tmdbId = params.get('play');
 
-// Si el ID tiene prefijo "tmdb_", quítalo
 if (tmdbId && typeof tmdbId === 'string' && tmdbId.startsWith('tmdb_')) {
     tmdbId = tmdbId.replace('tmdb_', '');
 }
@@ -289,7 +266,7 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
-// ⭐ REPRODUCIR
+// ⭐ REPRODUCIR - CORREGIDO PARA ACEPTAR CUALQUIER ENLACE (VIDMOLY, BIGMOLY, ETC)
 let reproduciendo = false;
 
 function reproducir(url) {
@@ -300,17 +277,28 @@ function reproducir(url) {
     urlActual = url;
     
     let finalUrl = url;
-    if (!finalUrl.includes('autoplay')) {
+    
+    // ✅ Solo modificar si es de Unlimplay (no tocar enlaces de Vidmoly, BigMoly, etc.)
+    if (finalUrl.includes('unlimplay.com')) {
+        if (!finalUrl.includes('autoplay')) {
+            if (finalUrl.includes('?')) {
+                finalUrl += '&autoplay=1&controls=1&logo=0';
+            } else {
+                finalUrl += '?autoplay=1&controls=1&logo=0';
+            }
+        }
+        if (finalUrl.includes('unlimplay.com/play/') && !finalUrl.includes('unlimplay.com/play/embed/')) {
+            finalUrl = finalUrl.replace('unlimplay.com/play/', 'unlimplay.com/play/embed/');
+        }
+        finalUrl += '&t=' + Date.now();
+    } else {
+        // ✅ Para Vidmoly, BigMoly, Vidsrc, etc. solo agregar timestamp para evitar caché
         if (finalUrl.includes('?')) {
-            finalUrl += '&autoplay=1&controls=1&logo=0';
+            finalUrl += '&t=' + Date.now();
         } else {
-            finalUrl += '?autoplay=1&controls=1&logo=0';
+            finalUrl += '?t=' + Date.now();
         }
     }
-    if (finalUrl.includes('unlimplay.com/play/') && !finalUrl.includes('unlimplay.com/play/embed/')) {
-        finalUrl = finalUrl.replace('unlimplay.com/play/', 'unlimplay.com/play/embed/');
-    }
-    finalUrl += '&t=' + Date.now();
     
     console.log('🎬 Reproduciendo:', finalUrl);
     
@@ -475,7 +463,6 @@ async function cargarContenidoReproductor() {
 function cargarReproductor(peli, tempRestaurar = null, capRestaurar = null) {
     peliculaActual = peli;
     
-    // ⭐ INFO ARRIBA
     document.getElementById('playerTitulo').textContent = peli.titulo;
     document.getElementById('playerAnio').textContent = peli.anio || '2024';
     document.getElementById('playerRating').textContent = peli.puntuacion || '7.0';
@@ -682,7 +669,7 @@ if (tmdbId) {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
 
-console.log('✅ Reproductor TELY - Sinopsis arriba, reproductor al medio');
+console.log('✅ Reproductor TELY - Compatible con Vidmoly, BigMoly y cualquier enlace');
 console.log('🔍 ID recibido:', tmdbId);
 </script>
 </body>
