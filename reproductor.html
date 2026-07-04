@@ -11,9 +11,19 @@
         body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh}
         .player-container{max-width:1200px;margin:0 auto;padding:1rem}
         
-        /* INFO ARRIBA */
+        /* INFO ARRIBA - TÍTULO RESALTADO */
         .info-top{padding:.5rem 0 .8rem}
-        .info-top h1{font-size:1.3rem;font-weight:700;color:#fff;margin-bottom:.2rem}
+        .info-top h1{
+            font-size:1.5rem;
+            font-weight:800;
+            color:#fff;
+            margin-bottom:.2rem;
+            background:linear-gradient(135deg,#7C3AED,#A78BFA);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+            text-shadow:0 0 30px rgba(124,58,237,.3);
+            letter-spacing:-0.5px;
+        }
         .info-top .meta{color:#94A3B8;font-size:.85rem;display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:.3rem}
         .info-top .sinopsis{color:#94A3B8;font-size:.85rem;line-height:1.4;margin-top:.3rem}
         
@@ -69,7 +79,11 @@
         .titulo-recomendadas{font-weight:700;margin-bottom:.2rem;font-size:.9rem;color:#fff}
         
         /* MODO CLARO */
-        body:not(.dark) .info-top h1{color:#111}
+        body:not(.dark) .info-top h1{
+            color:#7C3AED;
+            -webkit-text-fill-color:#7C3AED;
+            text-shadow:0 0 30px rgba(124,58,237,.15);
+        }
         body:not(.dark) .capitulos-section .temp-selector span{color:#111}
         body:not(.dark) .capitulo-item .titulo{color:#111}
         body:not(.dark) .capitulo-item .sinopsis{color:#555}
@@ -84,7 +98,7 @@
 <div class="player-container">
     <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Volver</a>
     
-    <!-- ⭐ SINOPSIS ARRIBA -->
+    <!-- ⭐ INFO ARRIBA - TÍTULO RESALTADO -->
     <div class="info-top">
         <h1 id="playerTitulo">Título</h1>
         <div class="meta">
@@ -266,7 +280,7 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
-// ⭐ REPRODUCIR - CORREGIDO PARA ACEPTAR CUALQUIER ENLACE (VIDMOLY, BIGMOLY, ETC)
+// ⭐ REPRODUCIR - CORREGIDO PARA ACEPTAR CUALQUIER ENLACE
 let reproduciendo = false;
 
 function reproducir(url) {
@@ -278,7 +292,7 @@ function reproducir(url) {
     
     let finalUrl = url;
     
-    // ✅ Solo modificar si es de Unlimplay (no tocar enlaces de Vidmoly, BigMoly, etc.)
+    // ✅ Solo modificar si es de Unlimplay
     if (finalUrl.includes('unlimplay.com')) {
         if (!finalUrl.includes('autoplay')) {
             if (finalUrl.includes('?')) {
@@ -292,7 +306,7 @@ function reproducir(url) {
         }
         finalUrl += '&t=' + Date.now();
     } else {
-        // ✅ Para Vidmoly, BigMoly, Vidsrc, etc. solo agregar timestamp para evitar caché
+        // ✅ Para Vidmoly, BigMoly, etc. solo agregar timestamp
         if (finalUrl.includes('?')) {
             finalUrl += '&t=' + Date.now();
         } else {
@@ -372,6 +386,47 @@ window.abrirNuevaVentana = function() {
     }
 };
 
+// ⭐ GENERAR ENLACES SI NO EXISTEN
+function generarEnlacesSiNoExisten(item) {
+    if (!item) return item;
+    
+    // Si es película y no tiene enlaces
+    if (item.tipo === 'pelicula') {
+        if (!item.url && item.tmdb_id) {
+            item.url = generarEnlaceUnlimplay(item.tmdb_id, 'pelicula');
+            mostrarToast('🔗 Opción 1 generada (Unlimplay)', 'info');
+        }
+        if (!item.opcion2 && item.tmdb_id) {
+            item.opcion2 = generarEnlaceVidsrc(item.tmdb_id, 'pelicula');
+            mostrarToast('🔗 Opción 2 generada (Vidsrc)', 'info');
+        }
+    }
+    
+    // Si es serie y no tiene enlaces
+    if (item.tipo === 'serie' && item.temporadas) {
+        item.temporadas.forEach((temp, tIdx) => {
+            if (temp.capitulos) {
+                temp.capitulos.forEach((cap, cIdx) => {
+                    if (!cap.url && item.tmdb_id) {
+                        cap.url = generarEnlaceUnlimplay(item.tmdb_id, 'serie', temp.numero || tIdx + 1, cap.numero || cIdx + 1);
+                    }
+                    if (!cap.opcion2 && item.tmdb_id) {
+                        cap.opcion2 = generarEnlaceVidsrc(item.tmdb_id, 'serie', temp.numero || tIdx + 1, cap.numero || cIdx + 1);
+                    }
+                });
+            }
+        });
+        if (!item.url && item.tmdb_id) {
+            item.url = generarEnlaceUnlimplay(item.tmdb_id, 'serie', 1, 1);
+        }
+        if (!item.opcion2 && item.tmdb_id) {
+            item.opcion2 = generarEnlaceVidsrc(item.tmdb_id, 'serie', 1, 1);
+        }
+    }
+    
+    return item;
+}
+
 // ⭐ CARGAR CONTENIDO
 async function cargarContenidoReproductor() {
     const wrapper = document.getElementById('playerWrapper');
@@ -449,6 +504,8 @@ async function cargarContenidoReproductor() {
         }
         
         if (item) {
+            // ⭐ GENERAR ENLACES SI NO EXISTEN
+            item = generarEnlacesSiNoExisten(item);
             peliculaActual = item;
             cargarReproductor(item, tempRestaurar, capRestaurar);
         } else {
@@ -463,6 +520,7 @@ async function cargarContenidoReproductor() {
 function cargarReproductor(peli, tempRestaurar = null, capRestaurar = null) {
     peliculaActual = peli;
     
+    // ⭐ INFO ARRIBA - TÍTULO RESALTADO
     document.getElementById('playerTitulo').textContent = peli.titulo;
     document.getElementById('playerAnio').textContent = peli.anio || '2024';
     document.getElementById('playerRating').textContent = peli.puntuacion || '7.0';
@@ -669,7 +727,7 @@ if (tmdbId) {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
 
-console.log('✅ Reproductor TELY - Compatible con Vidmoly, BigMoly y cualquier enlace');
+console.log('✅ Reproductor TELY - Título resaltado con gradiente');
 console.log('🔍 ID recibido:', tmdbId);
 </script>
 </body>
