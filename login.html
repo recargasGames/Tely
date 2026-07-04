@@ -75,40 +75,51 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-    <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyCwLATDpQN1RWv3rLPjJXbNnIBkyo_BUfI",
-        authDomain: "tely-ap.firebaseapp.com",
-        databaseURL: "https://tely-ap-default-rtdb.firebaseio.com",
-        projectId: "tely-ap",
-        storageBucket: "tely-ap.firebasestorage.app",
-        messagingSenderId: "760862940967",
-        appId: "1:760862940967:web:69bbbbfee0de40f68a1302"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+    <script type="importmap">
+    {
+        "imports": {
+            "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+            "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"
+        }
+    }
+    </script>
+    <script type="module">
+    import { initializeApp } from "firebase/app";
+    import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail, onAuthStateChanged } from "firebase/auth";
 
-    function toggleTheme() {
+    const firebaseConfig = {
+        apiKey: "AIzaSyBPBDEVUR7hjNrxCYrefF9Sbl0Wofp3VoQ",
+        authDomain: "telyx-23210.firebaseapp.com",
+        projectId: "telyx-23210",
+        storageBucket: "telyx-23210.firebasestorage.app",
+        messagingSenderId: "10164285015",
+        appId: "1:10164285015:web:5cf32bd2831de126c67d12",
+        measurementId: "G-0YEZMJYMJS"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.toggleTheme = function() {
         const body = document.body;
         const btn = document.getElementById('themeBtn');
         if (body.classList.contains('dark')) { body.classList.remove('dark'); btn.innerHTML = '<i class="fas fa-moon"></i>'; localStorage.setItem('theme', 'light'); }
         else { body.classList.add('dark'); btn.innerHTML = '<i class="fas fa-sun"></i>'; localStorage.setItem('theme', 'dark'); }
-    }
+    };
+
     if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
     else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
 
     function mostrarError(msg) { const el = document.getElementById('errorMsg'); el.textContent = msg; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 4000); }
     function mostrarExito(msg) { const el = document.getElementById('successMsg'); el.textContent = msg; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 4000); }
 
-    function iniciarSesionEmail() {
+    window.iniciarSesionEmail = function() {
         const email = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value;
         const btn = document.getElementById('loginBtnMain');
         if (!email || !password) { mostrarError('Completa todos los campos'); return; }
         btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando...';
-        auth.signInWithEmailAndPassword(email, password)
+        signInWithEmailAndPassword(auth, email, password)
             .then(() => { mostrarExito('✅ Sesión iniciada'); setTimeout(() => window.location.href = 'index.html', 1000); })
             .catch((e) => {
                 let msg = 'Error al iniciar sesión';
@@ -119,27 +130,27 @@
                 mostrarError(msg);
                 btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar sesión';
             });
-    }
+    };
 
-    function iniciarConGoogle() {
-        const provider = new firebase.auth.GoogleAuthProvider();
+    window.iniciarConGoogle = function() {
+        const provider = new GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
-        auth.signInWithPopup(provider)
+        signInWithPopup(auth, provider)
             .then(() => { window.location.href = 'index.html'; })
             .catch((e) => {
                 if (e.code === 'auth/popup-closed-by-user') mostrarError('⚠️ Cancelaste el inicio de sesión');
                 else mostrarError('❌ Error: ' + e.message);
             });
-    }
+    };
 
-    function recuperarContraseña(email) {
+    window.recuperarContraseña = function(email) {
         if (!email) { mostrarError('⚠️ Ingresa tu correo primero'); return; }
-        auth.sendPasswordResetEmail(email)
+        sendPasswordResetEmail(auth, email)
             .then(() => mostrarExito('✅ Revisa tu correo para restablecer la contraseña'))
             .catch(() => mostrarError('❌ Error al enviar el correo'));
-    }
+    };
 
-    auth.onAuthStateChanged(user => { if (user) window.location.href = 'index.html'; });
+    onAuthStateChanged(auth, user => { if (user) window.location.href = 'index.html'; });
     </script>
 </body>
 </html>
