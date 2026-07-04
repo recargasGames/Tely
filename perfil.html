@@ -44,61 +44,51 @@
         .user-btn:hover{background:rgba(124,58,237,.3)}
         body:not(.dark) .user-btn{color:#111}
         
-        .profile-card{background:rgba(255,255,255,.04);border-radius:16px;padding:2rem;border:1px solid rgba(124,58,237,.15);max-width:550px;margin:0 auto;text-align:center}
+        .profile-card{background:rgba(255,255,255,.04);border-radius:16px;padding:2rem;border:1px solid rgba(124,58,237,.15);max-width:500px;margin:0 auto;text-align:center}
         body:not(.dark) .profile-card{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1)}
         
-        .profile-avatar{position:relative;width:100px;height:100px;margin:0 auto 1rem;border-radius:50%;overflow:hidden;border:3px solid #7C3AED;cursor:pointer}
+        .profile-avatar{width:100px;height:100px;margin:0 auto 1rem;border-radius:50%;overflow:hidden;border:3px solid #7C3AED}
         .profile-avatar img{width:100%;height:100%;object-fit:cover;background:#1A1A2E}
-        .profile-avatar .edit-avatar{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);color:#fff;font-size:.6rem;padding:.2rem;text-align:center;opacity:0;transition:.3s}
-        .profile-avatar:hover .edit-avatar{opacity:1}
         .profile-name{font-size:1.5rem;font-weight:700}
         .profile-email{color:#94A3B8;font-size:.95rem}
         body:not(.dark) .profile-email{color:#888}
         .profile-plan{display:inline-block;padding:.2rem .8rem;border-radius:9999px;background:rgba(16,185,129,.15);color:#34D399;font-size:.75rem;font-weight:600;margin-top:.3rem}
         
-        .profile-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:1.5rem 0;padding:1rem 0;border-top:1px solid rgba(124,58,237,.08);border-bottom:1px solid rgba(124,58,237,.08)}
+        .profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:1.5rem 0;padding:1rem 0;border-top:1px solid rgba(124,58,237,.08);border-bottom:1px solid rgba(124,58,237,.08)}
         .profile-stats .stat{text-align:center}
         .profile-stats .stat .num{font-size:1.3rem;font-weight:700;color:#7C3AED}
-        .profile-stats .stat .label{font-size:.65rem;color:#94A3B8}
+        .profile-stats .stat .label{font-size:.7rem;color:#94A3B8}
         
-        .profile-btn{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.6rem 1.5rem;border-radius:10px;font-weight:600;cursor:pointer;transition:.3s;margin:.3rem;font-size:.85rem}
+        /* ⭐ BOTONES DEL PERFIL */
+        .profile-btn{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.6rem 1.5rem;border-radius:10px;font-weight:600;cursor:pointer;transition:.3s;margin:.3rem;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem}
         .profile-btn:hover{background:rgba(124,58,237,.25)}
         .profile-btn.danger{border-color:rgba(239,68,68,.3);color:#EF4444}
         .profile-btn.danger:hover{background:rgba(239,68,68,.15)}
         .profile-btn.success{border-color:rgba(16,185,129,.3);color:#34D399}
         .profile-btn.success:hover{background:rgba(16,185,129,.15)}
+        .profile-btn.warning{border-color:rgba(245,158,11,.3);color:#F59E0B}
+        .profile-btn.warning:hover{background:rgba(245,158,11,.15)}
         body:not(.dark) .profile-btn{color:#111}
         body:not(.dark) .profile-btn.danger{color:#EF4444}
         body:not(.dark) .profile-btn.success{color:#059669}
+        body:not(.dark) .profile-btn.warning{color:#D97706}
         
-        /* ⭐ ESTILOS PARA PEDIDOS */
-        .pedido-form{text-align:left;margin:1rem 0}
-        .pedido-form .campo{margin-bottom:.8rem}
-        .pedido-form .campo label{display:block;font-size:.75rem;font-weight:600;color:#94A3B8;margin-bottom:.2rem}
-        .pedido-form .campo input,.pedido-form .campo select,.pedido-form .campo textarea{width:100%;padding:.5rem .8rem;border-radius:10px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.85rem;transition:.3s}
-        .pedido-form .campo input:focus,.pedido-form .campo select:focus,.pedido-form .campo textarea:focus{outline:none;border-color:#7C3AED}
-        .pedido-form .campo textarea{min-height:60px;resize:vertical}
-        .pedido-form .campo input::placeholder,.pedido-form .campo textarea::placeholder{color:#64748B}
-        body:not(.dark) .pedido-form .campo input,body:not(.dark) .pedido-form .campo select,body:not(.dark) .pedido-form .campo textarea{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
-        body:not(.dark) .pedido-form .campo label{color:#555}
+        .btn-group{display:flex;flex-direction:column;gap:.4rem;margin:.5rem 0}
+        .btn-group .profile-btn{justify-content:center}
         
-        .pedido-item{background:rgba(255,255,255,.03);border-radius:10px;padding:.6rem 1rem;margin:.4rem 0;border-left:3px solid #F59E0B;text-align:left}
-        body:not(.dark) .pedido-item{background:rgba(0,0,0,.02)}
-        .pedido-item .titulo{font-weight:600;font-size:.9rem}
-        .pedido-item .detalles{font-size:.75rem;color:#94A3B8;display:flex;gap:1rem;flex-wrap:wrap}
-        .pedido-item .estado{display:inline-block;padding:.05rem .6rem;border-radius:9999px;font-size:.6rem;font-weight:600}
-        .pedido-item .estado.pendiente{background:rgba(245,158,11,.15);color:#F59E0B}
-        .pedido-item .estado.procesando{background:rgba(59,130,246,.15);color:#3B82F6}
-        .pedido-item .estado.completado{background:rgba(16,185,129,.15);color:#34D399}
-        .pedido-item .fecha{font-size:.65rem;color:#64748B}
-        
+        /* ⭐ MODALES */
         .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:none;align-items:center;justify-content:center;padding:1rem}
         .modal-overlay.show{display:flex}
-        .modal-box{background:#1A1A2E;border-radius:16px;padding:1.5rem;max-width:450px;width:100%;border:1px solid rgba(124,58,237,.15);max-height:90vh;overflow-y:auto}
+        .modal-box{background:#1A1A2E;border-radius:16px;padding:1.5rem;max-width:420px;width:100%;border:1px solid rgba(124,58,237,.15);max-height:90vh;overflow-y:auto}
         body:not(.dark) .modal-box{background:#fff;border-color:rgba(0,0,0,.1)}
-        .modal-box h2{font-size:1.2rem;font-weight:700;margin-bottom:.5rem;text-align:center}
+        .modal-box h2{font-size:1.2rem;font-weight:700;margin-bottom:.3rem;text-align:center}
         .modal-box .sub{color:#94A3B8;font-size:.85rem;text-align:center;margin-bottom:1rem}
         body:not(.dark) .modal-box .sub{color:#555}
+        .modal-input{width:100%;padding:.6rem 1rem;border-radius:10px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.9rem;margin-bottom:.8rem;transition:.3s}
+        .modal-input:focus{outline:none;border-color:#7C3AED}
+        .modal-input::placeholder{color:#64748B}
+        body:not(.dark) .modal-input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
+        body:not(.dark) .modal-input::placeholder{color:#888}
         .modal-actions{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:.5rem}
         .modal-actions button{padding:.5rem 1.5rem;border-radius:10px;font-weight:600;border:none;cursor:pointer;transition:.3s}
         .modal-actions .btn-guardar{background:#7C3AED;color:#fff}
@@ -107,6 +97,28 @@
         .modal-actions .btn-cancelar{background:rgba(255,255,255,.05);color:#94A3B8}
         .modal-actions .btn-cancelar:hover{background:rgba(255,255,255,.1)}
         body:not(.dark) .modal-actions .btn-cancelar{background:rgba(0,0,0,.05);color:#555}
+        
+        /* ⭐ ESTILOS PEDIDOS */
+        .pedido-form{text-align:left;margin:.5rem 0}
+        .pedido-form .campo{margin-bottom:.6rem}
+        .pedido-form .campo label{display:block;font-size:.75rem;font-weight:600;color:#94A3B8;margin-bottom:.2rem}
+        .pedido-form .campo input,.pedido-form .campo select,.pedido-form .campo textarea{width:100%;padding:.4rem .8rem;border-radius:10px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.85rem;transition:.3s}
+        .pedido-form .campo input:focus,.pedido-form .campo select:focus,.pedido-form .campo textarea:focus{outline:none;border-color:#7C3AED}
+        .pedido-form .campo textarea{min-height:50px;resize:vertical}
+        body:not(.dark) .pedido-form .campo input,body:not(.dark) .pedido-form .campo select,body:not(.dark) .pedido-form .campo textarea{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
+        body:not(.dark) .pedido-form .campo label{color:#555}
+        
+        .pedido-item{background:rgba(255,255,255,.03);border-radius:10px;padding:.5rem .8rem;margin:.3rem 0;border-left:3px solid #F59E0B;text-align:left}
+        body:not(.dark) .pedido-item{background:rgba(0,0,0,.02)}
+        .pedido-item .titulo{font-weight:600;font-size:.85rem}
+        .pedido-item .detalles{font-size:.7rem;color:#94A3B8;display:flex;gap:.8rem;flex-wrap:wrap}
+        .pedido-item .estado{display:inline-block;padding:.05rem .5rem;border-radius:9999px;font-size:.55rem;font-weight:600}
+        .pedido-item .estado.pendiente{background:rgba(245,158,11,.15);color:#F59E0B}
+        .pedido-item .estado.procesando{background:rgba(59,130,246,.15);color:#3B82F6}
+        .pedido-item .estado.completado{background:rgba(16,185,129,.15);color:#34D399}
+        .pedido-item .fecha{font-size:.6rem;color:#64748B}
+        .no-pedidos{color:#64748B;font-size:.8rem;text-align:center;padding:.5rem 0}
+        .badge-pedido{display:inline-block;background:#EF4444;color:#fff;border-radius:9999px;padding:.05rem .5rem;font-size:.55rem;font-weight:700;margin-left:.3rem}
         
         .user-dropdown{position:absolute;right:0;top:calc(100% + 8px);background:rgba(26,26,46,.95);border-radius:12px;width:200px;border:1px solid rgba(124,58,237,.15);padding:.4rem 0;display:none;z-index:50;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
@@ -117,13 +129,6 @@
         body:not(.dark) .user-dropdown a:hover{background:rgba(124,58,237,.08);color:#111}
         .user-dropdown hr{margin:.2rem 0;border:none;border-top:1px solid rgba(124,58,237,.08)}
         .user-menu{position:relative}
-        
-        .seccion-titulo{font-weight:700;font-size:.9rem;color:#A78BFA;margin:.5rem 0 .3rem;text-align:left;display:flex;align-items:center;gap:.4rem}
-        body:not(.dark) .seccion-titulo{color:#7C3AED}
-        
-        /* ⭐ BADGE DE PEDIDOS */
-        .badge-pedido{display:inline-block;background:#EF4444;color:#fff;border-radius:9999px;padding:.05rem .5rem;font-size:.55rem;font-weight:700;margin-left:.3rem}
-        .no-pedidos{color:#64748B;font-size:.8rem;text-align:center;padding:.5rem 0}
     </style>
 </head>
 <body>
@@ -160,9 +165,8 @@
 
     <div class="profile-card">
         <!-- ⭐ AVATAR -->
-        <div class="profile-avatar" id="avatarContainer">
+        <div class="profile-avatar">
             <img id="profileAvatar" src="https://ui-avatars.com/api/?name=Usuario&background=7C3AED&color=fff&size=100" alt="Avatar">
-            <div class="edit-avatar"><i class="fas fa-camera"></i> Cambiar foto</div>
         </div>
         
         <div class="profile-name" id="profileName">Invitado</div>
@@ -173,50 +177,29 @@
         <div class="profile-stats">
             <div class="stat"><div class="num" id="statHistorial">0</div><div class="label">Vistos</div></div>
             <div class="stat"><div class="num" id="statFavoritos">0</div><div class="label">Favoritos</div></div>
-            <div class="stat"><div class="num" id="statListas">0</div><div class="label">Listas</div></div>
             <div class="stat"><div class="num" id="statPedidos">0</div><div class="label">Pedidos</div></div>
         </div>
 
-        <!-- ⭐ MENÚ DE OPCIONES -->
-        <div class="menu-opciones">
-            <div class="opcion" onclick="abrirModalPedido()">
-                <i class="fas fa-plus-circle"></i>
-                <span class="texto">📝 Hacer un pedido</span>
-                <span class="flecha"><i class="fas fa-chevron-right"></i></span>
-            </div>
-            <div class="opcion" onclick="verMisPedidos()">
-                <i class="fas fa-clipboard-list"></i>
-                <span class="texto">📋 Mis pedidos</span>
-                <span class="badge-pedido" id="badgePedidos">0</span>
-                <span class="flecha"><i class="fas fa-chevron-right"></i></span>
-            </div>
-            <div class="opcion" onclick="window.location.href='index.html'">
-                <i class="fas fa-home"></i>
-                <span class="texto">🏠 Ir al inicio</span>
-                <span class="flecha"><i class="fas fa-chevron-right"></i></span>
-            </div>
-            <div class="opcion" onclick="window.location.href='peliculas.html'">
-                <i class="fas fa-film"></i>
-                <span class="texto">🎬 Ver películas</span>
-                <span class="flecha"><i class="fas fa-chevron-right"></i></span>
-            </div>
+        <!-- ⭐ BOTONES -->
+        <div class="btn-group">
+            <button class="profile-btn warning" onclick="abrirModalPedido()"><i class="fas fa-plus-circle"></i> 📝 Hacer pedido</button>
+            <button class="profile-btn" onclick="verMisPedidos()"><i class="fas fa-clipboard-list"></i> 📋 Mis pedidos <span class="badge-pedido" id="badgePedidos">0</span></button>
+            <button class="profile-btn success" onclick="abrirModalCambiarPassword()"><i class="fas fa-key"></i> 🔑 Cambiar contraseña</button>
+            <button class="profile-btn danger" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> 🚪 Cerrar sesión</button>
         </div>
-
-        <!-- ⭐ BOTÓN CERRAR SESIÓN -->
-        <button class="profile-btn danger" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
     </div>
 </main>
 
 <!-- ⭐ MODAL PARA HACER PEDIDO -->
 <div class="modal-overlay" id="modalPedido">
     <div class="modal-box">
-        <h2><i class="fas fa-plus-circle" style="color:#7C3AED;"></i> Hacer un pedido</h2>
+        <h2><i class="fas fa-plus-circle" style="color:#F59E0B;"></i> Hacer pedido</h2>
         <p class="sub">Solicita una película o serie que no esté en la plataforma</p>
         
         <form id="formPedido" onsubmit="event.preventDefault(); enviarPedido()">
             <div class="pedido-form">
                 <div class="campo">
-                    <label>📌 Tipo de contenido *</label>
+                    <label>📌 Tipo *</label>
                     <select id="pedidoTipo" required>
                         <option value="pelicula">🎬 Película</option>
                         <option value="serie">📺 Serie</option>
@@ -231,21 +214,13 @@
                     <input type="number" id="pedidoAnio" placeholder="Ej: 2024" min="1900" max="2100">
                 </div>
                 <div class="campo">
-                    <label>🎭 Género (opcional)</label>
-                    <input type="text" id="pedidoGenero" placeholder="Ej: Acción, Ciencia Ficción">
-                </div>
-                <div class="campo">
-                    <label>📖 Sinopsis / Descripción (opcional)</label>
-                    <textarea id="pedidoSinopsis" placeholder="Describe de qué trata la película/serie..."></textarea>
-                </div>
-                <div class="campo">
-                    <label>🔗 Enlace de referencia (opcional)</label>
-                    <input type="url" id="pedidoEnlace" placeholder="https://www.imdb.com/title/tt1234567/">
+                    <label>📖 Sinopsis (opcional)</label>
+                    <textarea id="pedidoSinopsis" placeholder="Describe de qué trata..."></textarea>
                 </div>
             </div>
             
             <div class="modal-actions">
-                <button type="submit" class="btn-guardar" id="btnEnviarPedido"><i class="fas fa-paper-plane"></i> Enviar pedido</button>
+                <button type="submit" class="btn-guardar" id="btnEnviarPedido"><i class="fas fa-paper-plane"></i> Enviar</button>
                 <button type="button" class="btn-cancelar" onclick="cerrarModalPedido()"><i class="fas fa-times"></i> Cancelar</button>
             </div>
         </form>
@@ -256,13 +231,32 @@
 <div class="modal-overlay" id="modalPedidos">
     <div class="modal-box">
         <h2><i class="fas fa-clipboard-list" style="color:#F59E0B;"></i> Mis pedidos</h2>
-        <p class="sub" id="subPedidos">Aquí aparecerán tus pedidos</p>
+        <p class="sub" id="subPedidos">Tus pedidos aparecerán aquí</p>
         <div id="listaPedidos" style="max-height:300px;overflow-y:auto;">
             <div class="no-pedidos">No tienes pedidos aún</div>
         </div>
         <div class="modal-actions">
             <button type="button" class="btn-cancelar" onclick="cerrarModalPedidos()"><i class="fas fa-times"></i> Cerrar</button>
         </div>
+    </div>
+</div>
+
+<!-- ⭐ MODAL PARA CAMBIAR CONTRASEÑA -->
+<div class="modal-overlay" id="modalPassword">
+    <div class="modal-box">
+        <h2><i class="fas fa-key" style="color:#34D399;"></i> Cambiar contraseña</h2>
+        <p class="sub">Ingresa tu nueva contraseña</p>
+        
+        <form id="formPassword" onsubmit="event.preventDefault(); cambiarPassword()">
+            <input type="password" class="modal-input" id="passActual" placeholder="🔒 Contraseña actual" required>
+            <input type="password" class="modal-input" id="passNueva" placeholder="🔑 Nueva contraseña" required minlength="6">
+            <input type="password" class="modal-input" id="passConfirmar" placeholder="✅ Confirmar nueva contraseña" required>
+            
+            <div class="modal-actions">
+                <button type="submit" class="btn-guardar" id="btnCambiarPass"><i class="fas fa-save"></i> Guardar</button>
+                <button type="button" class="btn-cancelar" onclick="cerrarModalPassword()"><i class="fas fa-times"></i> Cancelar</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -341,7 +335,17 @@ if (localStorage.getItem('theme') === 'light') {
     document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; 
 }
 
-// ⭐ FUNCIONES DE PEDIDOS
+// ⭐ MOSTRAR TOAST
+function mostrarToast(msg, tipo = 'success') {
+    const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
+    const t = document.createElement('div');
+    t.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:10px 20px;border-radius:10px;z-index:9999;font-weight:600;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+// ⭐ PEDIDOS
 function abrirModalPedido() {
     const user = auth.currentUser;
     if (!user) {
@@ -357,16 +361,9 @@ function cerrarModalPedido() {
     document.getElementById('modalPedido').classList.remove('show');
 }
 
-function cerrarModalPedidos() {
-    document.getElementById('modalPedidos').classList.remove('show');
-}
-
 function enviarPedido() {
     const user = auth.currentUser;
-    if (!user) {
-        mostrarToast('⚠️ Inicia sesión para hacer un pedido', 'warning');
-        return;
-    }
+    if (!user) return;
     
     const btn = document.getElementById('btnEnviarPedido');
     btn.disabled = true;
@@ -376,33 +373,31 @@ function enviarPedido() {
         tipo: document.getElementById('pedidoTipo').value,
         titulo: document.getElementById('pedidoTitulo').value.trim(),
         anio: document.getElementById('pedidoAnio').value || 'N/D',
-        genero: document.getElementById('pedidoGenero').value || 'Sin especificar',
         sinopsis: document.getElementById('pedidoSinopsis').value || 'Sin descripción',
-        enlace: document.getElementById('pedidoEnlace').value || '',
         usuario: user.uid,
         email: user.email || 'Sin email',
         nombre: user.displayName || 'Usuario',
         fecha: new Date().toISOString(),
-        estado: 'pendiente' // pendiente, procesando, completado
+        estado: 'pendiente'
     };
     
     if (!pedido.titulo) {
         mostrarToast('❌ El título es obligatorio', 'error');
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar pedido';
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar';
         return;
     }
     
     db.ref('pedidos').push(pedido).then(() => {
-        mostrarToast('✅ ¡Pedido enviado correctamente!', 'success');
+        mostrarToast('✅ ¡Pedido enviado!', 'success');
         cerrarModalPedido();
         actualizarContadorPedidos();
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar pedido';
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar';
     }).catch((e) => {
         mostrarToast('❌ Error: ' + e.message, 'error');
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar pedido';
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar';
     });
 }
 
@@ -413,9 +408,12 @@ function verMisPedidos() {
         window.location.href = 'login.html';
         return;
     }
-    
     document.getElementById('modalPedidos').classList.add('show');
     cargarMisPedidos();
+}
+
+function cerrarModalPedidos() {
+    document.getElementById('modalPedidos').classList.remove('show');
 }
 
 function cargarMisPedidos() {
@@ -438,29 +436,25 @@ function cargarMisPedidos() {
         
         const pedidos = Object.values(data);
         sub.textContent = `Tienes ${pedidos.length} pedido(s)`;
-        
-        // Ordenar por fecha (más reciente primero)
         pedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
         
         pedidos.forEach((p) => {
             const div = document.createElement('div');
             div.className = 'pedido-item';
-            const estadoClass = p.estado || 'pendiente';
             const estadoText = {
                 'pendiente': '⏳ Pendiente',
                 'procesando': '🔄 En proceso',
                 'completado': '✅ Completado'
-            }[estadoClass] || '⏳ Pendiente';
+            }[p.estado] || '⏳ Pendiente';
             
             div.innerHTML = `
                 <div class="titulo">${p.tipo === 'pelicula' ? '🎬' : '📺'} ${p.titulo}</div>
                 <div class="detalles">
                     <span>📅 ${p.anio || 'N/D'}</span>
-                    <span>🎭 ${p.genero || 'Sin género'}</span>
-                    <span class="estado ${estadoClass}">${estadoText}</span>
+                    <span class="estado ${p.estado || 'pendiente'}">${estadoText}</span>
                 </div>
-                ${p.sinopsis && p.sinopsis !== 'Sin descripción' ? `<div style="font-size:.7rem;color:#64748B;margin-top:.2rem;">${p.sinopsis.substring(0, 100)}${p.sinopsis.length > 100 ? '...' : ''}</div>` : ''}
-                <div class="fecha">📆 ${new Date(p.fecha).toLocaleDateString()} - ${new Date(p.fecha).toLocaleTimeString()}</div>
+                ${p.sinopsis && p.sinopsis !== 'Sin descripción' ? `<div style="font-size:.7rem;color:#64748B;margin-top:.2rem;">${p.sinopsis.substring(0, 80)}${p.sinopsis.length > 80 ? '...' : ''}</div>` : ''}
+                <div class="fecha">📆 ${new Date(p.fecha).toLocaleDateString()}</div>
             `;
             container.appendChild(div);
         });
@@ -477,18 +471,68 @@ function actualizarContadorPedidos() {
         const data = snap.val();
         const count = data ? Object.keys(data).length : 0;
         document.getElementById('statPedidos').textContent = count;
-        document.getElementById('badgePedidos').textContent = count;
-        document.getElementById('badgePedidos').style.display = count > 0 ? 'inline-block' : 'none';
+        const badge = document.getElementById('badgePedidos');
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
     });
 }
 
-function mostrarToast(msg, tipo = 'success') {
-    const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
-    const t = document.createElement('div');
-    t.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:10px 20px;border-radius:10px;z-index:9999;font-weight:600;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
-    t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+// ⭐ CAMBIAR CONTRASEÑA
+function abrirModalCambiarPassword() {
+    const user = auth.currentUser;
+    if (!user) {
+        mostrarToast('⚠️ Inicia sesión para cambiar tu contraseña', 'warning');
+        window.location.href = 'login.html';
+        return;
+    }
+    document.getElementById('modalPassword').classList.add('show');
+    document.getElementById('formPassword').reset();
+}
+
+function cerrarModalPassword() {
+    document.getElementById('modalPassword').classList.remove('show');
+}
+
+function cambiarPassword() {
+    const user = auth.currentUser;
+    if (!user) return;
+    
+    const passActual = document.getElementById('passActual').value;
+    const passNueva = document.getElementById('passNueva').value;
+    const passConfirmar = document.getElementById('passConfirmar').value;
+    
+    if (passNueva !== passConfirmar) {
+        mostrarToast('❌ Las contraseñas no coinciden', 'error');
+        return;
+    }
+    
+    if (passNueva.length < 6) {
+        mostrarToast('❌ La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
+    }
+    
+    const btn = document.getElementById('btnCambiarPass');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    
+    // Reautenticar primero
+    const credential = firebase.auth.EmailAuthProvider.credential(user.email, passActual);
+    user.reauthenticateWithCredential(credential).then(() => {
+        user.updatePassword(passNueva).then(() => {
+            mostrarToast('✅ Contraseña cambiada correctamente', 'success');
+            cerrarModalPassword();
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Guardar';
+        }).catch((e) => {
+            mostrarToast('❌ Error: ' + e.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Guardar';
+        });
+    }).catch((e) => {
+        mostrarToast('❌ Contraseña actual incorrecta', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i> Guardar';
+    });
 }
 
 // ⭐ ACTUALIZAR PERFIL
@@ -505,9 +549,6 @@ function actualizarPerfil(user) {
         const displayName = user.displayName || user.email || 'Usuario';
         name.textContent = displayName;
         email.textContent = user.email || '';
-        
-        // Avatar con iniciales
-        const inicial = displayName.charAt(0).toUpperCase();
         avatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=7C3AED&color=fff&size=100`;
         
         const historial = JSON.parse(localStorage.getItem('historialTely')) || [];
@@ -521,13 +562,8 @@ function actualizarPerfil(user) {
                     const favs = s.val();
                     document.getElementById('statFavoritos').textContent = favs ? Object.keys(favs).length : 0;
                 });
-                db.ref(`usuarios/${user.uid}/milista`).once('value').then((s) => {
-                    const lista = s.val();
-                    document.getElementById('statListas').textContent = lista ? Object.keys(lista).length : 0;
-                });
             }
         });
-        
         actualizarContadorPedidos();
     } else {
         loginBtn.style.display = 'flex';
@@ -537,7 +573,6 @@ function actualizarPerfil(user) {
         document.getElementById('profilePlan').textContent = '🎬 Plan Gratis';
         document.getElementById('statHistorial').textContent = '0';
         document.getElementById('statFavoritos').textContent = '0';
-        document.getElementById('statListas').textContent = '0';
         document.getElementById('statPedidos').textContent = '0';
         document.getElementById('badgePedidos').textContent = '0';
         document.getElementById('badgePedidos').style.display = 'none';
@@ -554,10 +589,11 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         cerrarModalPedido();
         cerrarModalPedidos();
+        cerrarModalPassword();
     }
 });
 
-console.log('✅ Perfil TELY - Con sistema de pedidos');
+console.log('✅ Perfil TELY - Simplificado con pedidos y cambio de contraseña');
 </script>
 </body>
 </html>
