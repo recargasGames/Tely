@@ -332,7 +332,12 @@ function cargarFavoritos() {
             `;
             div.onclick = () => {
                 const params = new URLSearchParams();
-                params.set('play', item.tmdb_id || item.id);
+                // ✅ Usar tmdb_id si existe, si no limpiar el prefijo
+                let playId = item.tmdb_id || item.id;
+                if (playId && typeof playId === 'string' && playId.startsWith('tmdb_')) {
+                    playId = playId.replace('tmdb_', '');
+                }
+                params.set('play', playId);
                 params.set('tipo', item.tipo || 'pelicula');
                 window.location.href = `reproductor.html?${params.toString()}`;
             };
@@ -360,7 +365,12 @@ function cargarMiLista() {
             `;
             div.onclick = () => {
                 const params = new URLSearchParams();
-                params.set('play', item.tmdb_id || item.id);
+                // ✅ Usar tmdb_id si existe, si no limpiar el prefijo
+                let playId = item.tmdb_id || item.id;
+                if (playId && typeof playId === 'string' && playId.startsWith('tmdb_')) {
+                    playId = playId.replace('tmdb_', '');
+                }
+                params.set('play', playId);
                 params.set('tipo', item.tipo || 'pelicula');
                 window.location.href = `reproductor.html?${params.toString()}`;
             };
@@ -459,6 +469,7 @@ async function cargarContenido() {
     } catch(e) { console.error(e); }
 }
 
+// ⭐ CONTINUAR VIENDO - CORREGIDO ✅
 function cargarContinuarViendo() {
     const container = document.getElementById('continuarViendo');
     const historial = JSON.parse(localStorage.getItem('historialTely')) || [];
@@ -477,7 +488,12 @@ function cargarContinuarViendo() {
         div.onclick = () => {
             if (auth.currentUser) {
                 const params = new URLSearchParams();
-                params.set('play', entry.id);
+                // ✅ CORREGIDO: Usar tmdb_id si existe, si no limpiar el prefijo
+                let playId = entry.tmdb_id || entry.id;
+                if (playId && typeof playId === 'string' && playId.startsWith('tmdb_')) {
+                    playId = playId.replace('tmdb_', '');
+                }
+                params.set('play', playId);
                 params.set('tipo', entry.tipo || 'pelicula');
                 if (entry.temporada !== null) params.set('temp', entry.temporada);
                 if (entry.capitulo !== null) params.set('cap', entry.capitulo);
@@ -531,7 +547,7 @@ window.cargarMas = function() {
 };
 
 cargarContenido();
-console.log('✅ TELY cargado');
+console.log('✅ TELY cargado - Historial corregido');
 </script>
 </body>
 </html>
