@@ -107,6 +107,12 @@
         .user-dropdown hr{margin:.2rem 0;border:none;border-top:1px solid rgba(124,58,237,.08)}
         .user-menu{position:relative}
         .empty-msg{color:#64748B;font-size:.85rem;padding:.3rem 0}
+        .card-actions{display:flex;gap:4px;margin-top:4px;justify-content:center}
+        .card-actions button{background:none;border:none;cursor:pointer;font-size:.65rem;padding:2px 6px;border-radius:4px;transition:.2s}
+        .card-actions .fav-btn{color:#EF4444}
+        .card-actions .fav-btn:hover{background:rgba(239,68,68,.15)}
+        .card-actions .list-btn{color:#3B82F6}
+        .card-actions .list-btn:hover{background:rgba(59,130,246,.15)}
     </style>
 </head>
 <body>
@@ -151,6 +157,12 @@
     <div class="section-title"><i class="fas fa-clock-rotate-left"></i> Continuar viendo</div>
     <div class="horizontal-scroll" id="continuarViendo"><p class="empty-msg">No has visto nada aún</p></div>
 
+    <div class="section-title"><i class="fas fa-heart text-red-500"></i> Mis Favoritos</div>
+    <div class="horizontal-scroll" id="favoritosContainer"><p class="empty-msg">No tienes favoritos aún</p></div>
+
+    <div class="section-title"><i class="fas fa-list text-blue-400"></i> Mi Lista</div>
+    <div class="horizontal-scroll" id="miListaContainer"><p class="empty-msg">No hay contenido en tu lista</p></div>
+
     <div class="section-title"><i class="fas fa-fire"></i> Películas populares</div>
     <div class="grid-movies" id="peliculasPopulares">
         <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
@@ -178,7 +190,7 @@
 <script type="module">
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { getDatabase, ref, get, child, onValue } from "firebase/database";
+import { getDatabase, ref, get, push, set, remove, child, onValue } from "firebase/database";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBPBDEVUR7hjNrxCYrefF9Sbl0Wofp3VoQ",
@@ -194,87 +206,46 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// ⭐ BOTÓN ATRÁS
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) { return true; });
 document.addEventListener('backbutton', function(e) { return true; }, false);
 
-// ⭐ FUNCIONES GLOBALES
 window.irALogin = function() { window.location.href = 'login.html'; };
-window.cerrarSesion = function() { 
-    signOut(auth).then(() => { location.reload(); });
-};
-window.toggleUserMenu = function() {
-    document.getElementById('userDropdown').classList.toggle('show');
-};
+window.cerrarSesion = function() { signOut(auth).then(() => { location.reload(); }); };
+window.toggleUserMenu = function() { document.getElementById('userDropdown').classList.toggle('show'); };
 window.toggleTheme = function() {
     const body = document.body;
     const btn = document.getElementById('themeBtn');
-    if (body.classList.contains('dark')) { 
-        body.classList.remove('dark'); 
-        btn.innerHTML = '<i class="fas fa-moon"></i>'; 
-        localStorage.setItem('theme', 'light'); 
-    } else { 
-        body.classList.add('dark'); 
-        btn.innerHTML = '<i class="fas fa-sun"></i>'; 
-        localStorage.setItem('theme', 'dark'); 
-    }
+    if (body.classList.contains('dark')) { body.classList.remove('dark'); btn.innerHTML = '<i class="fas fa-moon"></i>'; localStorage.setItem('theme', 'light'); }
+    else { body.classList.add('dark'); btn.innerHTML = '<i class="fas fa-sun"></i>'; localStorage.setItem('theme', 'dark'); }
 };
 
-// ⭐ MODO OSCURO
-if (localStorage.getItem('theme') === 'light') { 
-    document.body.classList.remove('dark'); 
-    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>';
-} else { 
-    document.body.classList.add('dark'); 
-    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>';
-}
+if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
+else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
 
-// ⭐ AUTENTICACIÓN
 onAuthStateChanged(auth, (user) => {
     document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
     document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
+    if (user) {
+        cargarFavoritos();
+        cargarMiLista();
+    }
 });
 
-// ⭐ MENÚ USUARIO
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('userDropdown');
     if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
 });
 
-// ⭐ FUNCIONES DE API
+// ⭐ FUNCIONES DE ENLACES
+function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    if (tipo === 'pelicula') return `https://unlimplay.co/play/movie/${tmdb_id}`;
+    else return `https://unlimplay.co/play/tv/${tmdb_id}/${temporada}/${capitulo}`;
+}
+
 function getImagenUrl(path, size = 'w342') {
     if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
     return `https://image.tmdb.org/t/p/${size}${path}`;
-}
-
-function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    if (tipo === 'pelicula') {
-        return `https://unlimplay.co/play/movie/${tmdb_id}`;
-    } else {
-        return `https://unlimplay.co/play/tv/${tmdb_id}/${temporada}/${capitulo}`;
-    }
-}
-
-function crearTarjeta(item, esSerie = false) {
-    const div = document.createElement('div');
-    div.className = 'movie-card';
-    const tipo = esSerie ? '📺' : '🎬';
-    div.innerHTML = `
-        <span class="badge-year">${item.anio || 'N/D'}</span>
-        <span class="badge-type">${tipo}</span>
-        <img src="${item.portada}" alt="${item.titulo}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-        <div class="info"><h4>${item.titulo}</h4><div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div></div>
-    `;
-    div.onclick = () => {
-        if (auth.currentUser) {
-            const params = new URLSearchParams();
-            params.set('play', item.tmdb_id || item.id);
-            params.set('tipo', item.tipo || 'pelicula');
-            window.location.href = `reproductor.html?${params.toString()}`;
-        } else { window.location.href = 'login.html'; }
-    };
-    return div;
 }
 
 async function fetchTMDB(path, params = {}) {
@@ -287,6 +258,152 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
+function mostrarToast(msg, tipo = 'success') {
+    const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
+    const t = document.createElement('div');
+    t.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:10px 20px;border-radius:10px;z-index:9999;font-weight:600;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+}
+
+// ⭐ FAVORITOS
+window.toggleFavorito = function(item) {
+    if (!auth.currentUser) { window.location.href = 'login.html'; return; }
+    const userId = auth.currentUser.uid;
+    const favRef = ref(db, `usuarios/${userId}/favoritos/${item.id}`);
+    get(favRef).then((snap) => {
+        if (snap.exists()) {
+            remove(favRef);
+            mostrarToast('🗑️ Eliminado de favoritos', 'warning');
+        } else {
+            set(favRef, {
+                id: item.id,
+                titulo: item.titulo,
+                tipo: item.tipo || 'pelicula',
+                portada: item.portada,
+                tmdb_id: item.tmdb_id
+            });
+            mostrarToast('❤️ Agregado a favoritos', 'success');
+        }
+        cargarFavoritos();
+    });
+};
+
+window.toggleMiLista = function(item) {
+    if (!auth.currentUser) { window.location.href = 'login.html'; return; }
+    const userId = auth.currentUser.uid;
+    const listaRef = ref(db, `usuarios/${userId}/milista/${item.id}`);
+    get(listaRef).then((snap) => {
+        if (snap.exists()) {
+            remove(listaRef);
+            mostrarToast('🗑️ Eliminado de Mi Lista', 'warning');
+        } else {
+            set(listaRef, {
+                id: item.id,
+                titulo: item.titulo,
+                tipo: item.tipo || 'pelicula',
+                portada: item.portada,
+                tmdb_id: item.tmdb_id
+            });
+            mostrarToast('📝 Agregado a Mi Lista', 'success');
+        }
+        cargarMiLista();
+    });
+};
+
+function cargarFavoritos() {
+    const container = document.getElementById('favoritosContainer');
+    if (!auth.currentUser) { container.innerHTML = '<p class="empty-msg">Inicia sesión para ver tus favoritos</p>'; return; }
+    const userId = auth.currentUser.uid;
+    onValue(ref(db, `usuarios/${userId}/favoritos`), (snap) => {
+        const data = snap.val();
+        container.innerHTML = '';
+        if (!data) { container.innerHTML = '<p class="empty-msg">No tienes favoritos aún</p>'; return; }
+        Object.values(data).forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'movie-card';
+            div.style.width = '100px';
+            div.style.flexShrink = '0';
+            div.innerHTML = `
+                <img src="${item.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg'}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+                <div class="info"><h4>${item.titulo}</h4></div>
+            `;
+            div.onclick = () => {
+                const params = new URLSearchParams();
+                params.set('play', item.tmdb_id || item.id);
+                params.set('tipo', item.tipo || 'pelicula');
+                window.location.href = `reproductor.html?${params.toString()}`;
+            };
+            container.appendChild(div);
+        });
+    });
+}
+
+function cargarMiLista() {
+    const container = document.getElementById('miListaContainer');
+    if (!auth.currentUser) { container.innerHTML = '<p class="empty-msg">Inicia sesión para ver tu lista</p>'; return; }
+    const userId = auth.currentUser.uid;
+    onValue(ref(db, `usuarios/${userId}/milista`), (snap) => {
+        const data = snap.val();
+        container.innerHTML = '';
+        if (!data) { container.innerHTML = '<p class="empty-msg">No hay contenido en tu lista</p>'; return; }
+        Object.values(data).forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'movie-card';
+            div.style.width = '100px';
+            div.style.flexShrink = '0';
+            div.innerHTML = `
+                <img src="${item.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg'}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+                <div class="info"><h4>${item.titulo}</h4></div>
+            `;
+            div.onclick = () => {
+                const params = new URLSearchParams();
+                params.set('play', item.tmdb_id || item.id);
+                params.set('tipo', item.tipo || 'pelicula');
+                window.location.href = `reproductor.html?${params.toString()}`;
+            };
+            container.appendChild(div);
+        });
+    });
+}
+
+// ⭐ CREAR TARJETA CON FAVORITOS Y LISTA
+function crearTarjeta(item, esSerie = false) {
+    const div = document.createElement('div');
+    div.className = 'movie-card';
+    const tipo = esSerie ? '📺' : '🎬';
+    const tieneOp2 = item.opcion2 && item.opcion2.trim() !== '';
+    div.innerHTML = `
+        <span class="badge-year">${item.anio || 'N/D'}</span>
+        <span class="badge-type">${tipo}</span>
+        ${tieneOp2 ? '<span class="badge-op2">🔗 Op2</span>' : ''}
+        <img src="${item.portada}" alt="${item.titulo}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+        <div class="info">
+            <h4>${item.titulo}</h4>
+            <div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div>
+            <div class="card-actions">
+                <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorito(${JSON.stringify(item).replace(/"/g, "'")})">
+                    <i class="fas fa-heart"></i>
+                </button>
+                <button class="list-btn" onclick="event.stopPropagation(); toggleMiLista(${JSON.stringify(item).replace(/"/g, "'")})">
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    div.onclick = () => {
+        if (auth.currentUser) {
+            const params = new URLSearchParams();
+            params.set('play', item.tmdb_id || item.id);
+            params.set('tipo', item.tipo || 'pelicula');
+            window.location.href = `reproductor.html?${params.toString()}`;
+        } else { window.location.href = 'login.html'; }
+    };
+    return div;
+}
+
+// ⭐ CARGAR CONTENIDO PRINCIPAL
 async function cargarContenido() {
     try {
         const [pelis, series] = await Promise.all([
@@ -300,10 +417,15 @@ async function cargarContenido() {
         seriesContainer.innerHTML = '';
 
         const dbRef = ref(db);
-        const adminSnap = await get(child(dbRef, 'contenido_personalizado'));
-        const adminData = adminSnap.val() || {};
+        const [pSnap, sSnap] = await Promise.all([
+            get(child(dbRef, 'contenido_personalizado')),
+            get(child(dbRef, 'series_personalizadas'))
+        ]);
+        const pData = pSnap.val() || {};
+        const sData = sSnap.val() || {};
         const adminMap = {};
-        Object.values(adminData).forEach(i => { adminMap[i.tmdb_id] = i; });
+        Object.values(pData).forEach(i => { adminMap[i.tmdb_id] = i; });
+        Object.values(sData).forEach(i => { adminMap[i.tmdb_id] = i; });
 
         (pelis.results || []).slice(0, 12).forEach(p => {
             const a = adminMap[p.id];
@@ -366,6 +488,7 @@ function cargarContinuarViendo() {
     });
 }
 
+// ⭐ BÚSQUEDA
 window.mostrarSugerencias = async function(texto) {
     const container = document.getElementById('searchResults');
     if (!texto || texto.length < 2) { container.classList.remove('show'); return; }
@@ -407,24 +530,8 @@ window.cargarMas = function() {
     mostrarToast('🔄 Cargando más contenido...', 'info');
 };
 
-function mostrarToast(msg, tipo = 'success') {
-    const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
-    const t = document.createElement('div');
-    t.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:10px 20px;border-radius:10px;z-index:9999;font-weight:600;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
-    t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
-}
-
-// 🔥 ESCUCHAR CAMBIOS EN FIREBASE
-const dbRef = ref(db);
-onValue(child(dbRef, 'contenido_personalizado'), () => {
-    console.log('🔄 Cambio detectado en contenido - Recargando...');
-    cargarContenido();
-});
-
 cargarContenido();
-console.log('✅ TELY cargado - Botón atrás protegido - Nueva API Firebase');
+console.log('✅ TELY cargado - Con favoritos y lista');
 </script>
 </body>
 </html>
