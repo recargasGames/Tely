@@ -11,7 +11,6 @@
         body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh}
         .player-container{max-width:1200px;margin:0 auto;padding:1rem}
         
-        /* INFO ARRIBA - TÍTULO RESALTADO */
         .info-top{padding:.5rem 0 .8rem}
         .info-top h1{
             font-size:1.5rem;
@@ -27,11 +26,9 @@
         .info-top .meta{color:#94A3B8;font-size:.85rem;display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:.3rem}
         .info-top .sinopsis{color:#94A3B8;font-size:.85rem;line-height:1.4;margin-top:.3rem}
         
-        /* REPRODUCTOR EN EL MEDIO */
         .player-wrapper{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;width:100%;margin:.5rem 0}
         .player-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;background:#000}
         
-        /* CONTROLES */
         .player-controls{display:flex;gap:.5rem;flex-wrap:wrap;margin:.3rem 0}
         .btn-opcion{background:rgba(255,255,255,.06);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.4rem 1.2rem;border-radius:8px;font-weight:600;font-size:.8rem;cursor:pointer;transition:.3s}
         .btn-opcion.active{border-color:#7C3AED;background:#7C3AED;color:#fff}
@@ -43,7 +40,6 @@
         .btn-recargar{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.2);color:#34D399;padding:.4rem 1.2rem;border-radius:8px;font-weight:600;font-size:.8rem;cursor:pointer;transition:.3s}
         .btn-recargar:hover{background:rgba(16,185,129,.25)}
         
-        /* CAPÍTULOS */
         .capitulos-section{background:rgba(255,255,255,.03);border-radius:10px;padding:.6rem;border:1px solid rgba(124,58,237,.06);margin-top:.3rem}
         .capitulos-section .temp-selector{display:flex;align-items:center;justify-content:center;gap:.6rem;margin-bottom:.3rem}
         .capitulos-section .temp-selector button{background:rgba(255,255,255,.06);border:none;color:#fff;padding:.1rem .5rem;border-radius:9999px;cursor:pointer;font-size:.8rem}
@@ -62,7 +58,6 @@
         .capitulo-item .play.op2{color:#3B82F6}
         .capitulo-item .sinopsis{font-size:.6rem;color:#64748B;margin-top:.05rem;padding-left:2rem;line-height:1.2}
         
-        /* RECOMENDACIONES */
         .recomendaciones{display:flex;gap:.5rem;overflow-x:auto;padding:.3rem 0}
         .recomendacion{flex:0 0 auto;width:70px;cursor:pointer;border-radius:6px;overflow:hidden}
         .recomendacion:hover{transform:scale(1.05)}
@@ -78,7 +73,6 @@
         .error-video .sub{color:#64748B;font-size:.8rem}
         .titulo-recomendadas{font-weight:700;margin-bottom:.2rem;font-size:.9rem;color:#fff}
         
-        /* MODO CLARO */
         body:not(.dark) .info-top h1{
             color:#7C3AED;
             -webkit-text-fill-color:#7C3AED;
@@ -98,7 +92,6 @@
 <div class="player-container">
     <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Volver</a>
     
-    <!-- ⭐ INFO ARRIBA - TÍTULO RESALTADO -->
     <div class="info-top">
         <h1 id="playerTitulo">Título</h1>
         <div class="meta">
@@ -110,7 +103,6 @@
         <div class="sinopsis" id="playerSinopsis">Sinopsis...</div>
     </div>
     
-    <!-- ⭐ REPRODUCTOR EN EL MEDIO -->
     <div class="player-wrapper" id="playerWrapper">
         <div class="loading-spinner">
             <i class="fas fa-spinner"></i>
@@ -118,7 +110,6 @@
         </div>
     </div>
     
-    <!-- ⭐ CONTROLES -->
     <div class="player-controls" id="playerControls">
         <button class="btn-opcion active" id="btnOp1" onclick="reproducirOpcion(1)"><i class="fas fa-play"></i> Opción 1</button>
         <button class="btn-opcion" id="btnOp2" onclick="reproducirOpcion(2)"><i class="fas fa-play"></i> Opción 2</button>
@@ -126,7 +117,6 @@
         <button class="btn-nueva-ventana" onclick="abrirNuevaVentana()"><i class="fas fa-external-link-alt"></i></button>
     </div>
     
-    <!-- ⭐ CAPÍTULOS -->
     <div class="capitulos-section" id="capitulosSection" style="display:none;">
         <div class="temp-selector">
             <button onclick="cambiarTemp(-1)" id="tempPrev"><i class="fas fa-chevron-left"></i></button>
@@ -136,7 +126,6 @@
         <div class="capitulos-list" id="capitulosList"></div>
     </div>
     
-    <!-- ⭐ RECOMENDACIONES -->
     <div style="margin-top:.5rem;">
         <h4 class="titulo-recomendadas">Te podría gustar</h4>
         <div class="recomendaciones" id="recomendaciones"></div>
@@ -161,27 +150,36 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ⭐ MANEJO DEL BOTÓN ATRÁS DEL TELÉFONO - CORREGIDO ✅
-// Al presionar atrás, va a index.html en lugar de salir de la app
-
-// Prevenir que el historial se rompa
-history.pushState({ pagina: 'reproductor' }, '', window.location.href);
-
-window.addEventListener('popstate', function(e) {
-    // Redirigir a index.html al presionar atrás
-    window.location.href = 'index.html';
-    e.preventDefault();
-    return false;
-}, false);
-
-// Para dispositivos Android con WebView - Botón físico de atrás
-document.addEventListener('backbutton', function(e) {
-    // Redirigir a index.html
-    window.location.href = 'index.html';
-    e.preventDefault();
-    e.stopPropagation();
-    return false;
-}, false);
+// ⭐ MANEJO DEL BOTÓN ATRÁS - SOLUCIÓN ROBUSTA ✅
+(function() {
+    // Método 1: Historial del navegador
+    window.history.pushState({ page: 1 }, "", "");
+    
+    window.addEventListener('popstate', function(e) {
+        // Redirige a index.html
+        window.location.href = 'index.html';
+        e.preventDefault();
+        return false;
+    });
+    
+    // Método 2: Para dispositivos Android (WebView)
+    if (typeof document !== 'undefined') {
+        document.addEventListener('backbutton', function(e) {
+            window.location.href = 'index.html';
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }, false);
+    }
+    
+    // Método 3: Para algunas versiones de Android
+    if (typeof window !== 'undefined') {
+        window.onBackPressed = function() {
+            window.location.href = 'index.html';
+            return false;
+        };
+    }
+})();
 
 // ⭐ VARIABLES
 const params = new URLSearchParams(window.location.search);
@@ -203,7 +201,6 @@ let urlActual = null;
 let urlOp1 = null;
 let urlOp2 = null;
 
-// ⭐ FUNCIONES DE ENLACES
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     if (tipo === 'pelicula') {
         return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
@@ -263,7 +260,6 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
-// ⭐ REPRODUCIR - CORREGIDO PARA ACEPTAR CUALQUIER ENLACE
 let reproduciendo = false;
 
 function reproducir(url) {
@@ -275,7 +271,6 @@ function reproducir(url) {
     
     let finalUrl = url;
     
-    // ✅ Solo modificar si es de Unlimplay
     if (finalUrl.includes('unlimplay.com')) {
         if (!finalUrl.includes('autoplay')) {
             if (finalUrl.includes('?')) {
@@ -289,7 +284,6 @@ function reproducir(url) {
         }
         finalUrl += '&t=' + Date.now();
     } else {
-        // ✅ Para Vidmoly, BigMoly, etc. solo agregar timestamp
         if (finalUrl.includes('?')) {
             finalUrl += '&t=' + Date.now();
         } else {
@@ -331,7 +325,6 @@ function reproducir(url) {
     wrapper.appendChild(iframe);
 }
 
-// ⭐ REPRODUCIR OPCIÓN
 window.reproducirOpcion = function(opcion) {
     opcionActiva = opcion;
     document.querySelectorAll('.btn-opcion').forEach(b => b.classList.remove('active'));
@@ -369,7 +362,6 @@ window.abrirNuevaVentana = function() {
     }
 };
 
-// ⭐ GENERAR ENLACES SI NO EXISTEN
 function generarEnlacesSiNoExisten(item) {
     if (!item) return item;
     
@@ -406,7 +398,6 @@ function generarEnlacesSiNoExisten(item) {
     return item;
 }
 
-// ⭐ CARGAR CONTENIDO
 async function cargarContenidoReproductor() {
     const wrapper = document.getElementById('playerWrapper');
     wrapper.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner"></i><span>Cargando...</span></div>`;
@@ -697,7 +688,6 @@ async function cargarRecomendaciones(tmdbId) {
     }
 }
 
-// ⭐ INICIAR
 if (tmdbId) {
     cargarContenidoReproductor();
 } else {
