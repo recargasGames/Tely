@@ -128,6 +128,27 @@
         body:not(.dark) .search-admin select{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
         .search-admin select:focus{outline:none;border-color:#7C3AED}
         .edit-mode-indicator{display:inline-block;padding:.1rem .6rem;border-radius:4px;background:rgba(245,158,11,.15);color:#F59E0B;font-size:.6rem;font-weight:600}
+        
+        .capitulo-detalle{background:rgba(255,255,255,.02);border-radius:6px;padding:.3rem .5rem;margin:.2rem 0;border-left:2px solid rgba(59,130,246,.3)}
+        .capitulo-detalle .cap-titulo{font-size:.7rem;font-weight:500;color:#E2E8F0}
+        body:not(.dark) .capitulo-detalle .cap-titulo{color:#111}
+        .capitulo-detalle .cap-meta{font-size:.6rem;color:#64748B}
+        .capitulo-detalle .cap-enlace{font-size:.6rem;color:#60A5FA;word-break:break-all}
+        .serie-expandida{border-left-color:#34D399!important}
+        .toggle-series-btn{background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.2);color:#3B82F6;padding:.1rem .6rem;border-radius:4px;font-size:.6rem;font-weight:600;cursor:pointer;transition:.2s}
+        .toggle-series-btn:hover{background:rgba(59,130,246,.25)}
+        .temporada-titulo{font-size:.7rem;font-weight:600;color:#34D399;margin:.3rem 0 .1rem;display:flex;align-items:center;gap:.3rem}
+        
+        .paginacion{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.5rem 0;flex-wrap:wrap}
+        .paginacion button{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.2rem .8rem;border-radius:6px;font-size:.75rem;cursor:pointer;transition:.2s}
+        .paginacion button:hover{background:rgba(124,58,237,.3)}
+        .paginacion button:disabled{opacity:.3;cursor:not-allowed}
+        .paginacion .pagina-actual{background:#7C3AED;color:#fff;padding:.2rem .8rem;border-radius:6px;font-size:.75rem;font-weight:700}
+        body:not(.dark) .paginacion button{color:#111;background:rgba(124,58,237,.08)}
+        body:not(.dark) .paginacion button:hover{background:rgba(124,58,237,.2)}
+        .paginacion .info-pagina{color:#94A3B8;font-size:.7rem}
+        .paginacion select{padding:.2rem .4rem;border-radius:4px;background:rgba(255,255,255,.05);color:#fff;border:1px solid rgba(124,58,237,.2);font-size:.7rem}
+        body:not(.dark) .paginacion select{background:rgba(0,0,0,.05);color:#111}
     </style>
 </head>
 <body>
@@ -190,7 +211,7 @@
             <p style="color:#94A3B8;font-size:.95rem;margin:.3rem 0;">
                 Genera <strong>TODAS</strong> las películas y series de TMDB<br>
                 <span class="badge-no-op2">🔗 Solo Opción 1 - Unlimplay</span>
-                <span class="edit-mode-indicator ml-2">✏️ Opción 2 se agrega manualmente</span>
+                <span class="edit-mode-indicator ml-2">✏️ Opción 2 se agrega MANUALMENTE</span>
             </p>
             
             <div class="stats" id="statsContainer">
@@ -235,6 +256,18 @@
         <div id="listaContenido" class="max-h-96 overflow-y-auto">
             <p class="loading-text">Cargando contenido...</p>
         </div>
+        
+        <div class="paginacion" id="paginacionContainer" style="display:none;">
+            <button onclick="cambiarPagina(-1)" id="btnPaginaPrev"><i class="fas fa-chevron-left"></i></button>
+            <span class="info-pagina" id="infoPagina">Página 1 de 1</span>
+            <button onclick="cambiarPagina(1)" id="btnPaginaNext"><i class="fas fa-chevron-right"></i></button>
+            <select id="selectPaginaSize" onchange="cambiarPaginaSize()">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
     </div>
 </main>
 
@@ -260,6 +293,14 @@ const ADMIN_EMAILS = ['aa3964063@gmail.com'];
 
 let totalPeliculas = 0, totalSeries = 0, totalCaps = 0, generando = false, esAdmin = false;
 let itemsEditando = {};
+let seriesExpandidas = {};
+
+let paginaActual = 1;
+let itemsPorPagina = 20;
+let peliculasLista = [];
+let seriesLista = [];
+let peliculasKeys = [];
+let seriesKeys = [];
 
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) { return true; });
@@ -503,37 +544,32 @@ window.guardarEnlace = async function(key, tipo) {
     }
 };
 
-// ⭐ AGREGAR OPCIÓN 2 MANUALMENTE
+// ⭐ AGREGAR OPCIÓN 2 - MANUAL
 window.agregarOpcion2 = async function(key, tipo, tmdbId) {
     const container = document.getElementById(`item-${key}`);
     const op2Div = container.querySelector('.op2-enlace') || container.querySelector('.enlace:last-child');
     const actionsDiv = container.querySelector('.item-actions');
     
-    // Verificar si ya existe opción 2
     if (op2Div && op2Div.textContent.includes('Opción 2')) {
-        // Si ya existe, editarla
         editarOpcion2(key, tipo, tmdbId);
         return;
     }
     
-    // Crear input para agregar Opción 2
     const nuevoOp2Div = document.createElement('div');
     nuevoOp2Div.className = 'enlace op2-enlace';
     nuevoOp2Div.style.borderColor = 'rgba(59,130,246,.2)';
     nuevoOp2Div.style.marginTop = '.2rem';
     nuevoOp2Div.innerHTML = `
         <div style="font-size:.6rem;color:#3B82F6;font-weight:600;">🔗 Opción 2 (agregar manualmente):</div>
-        <input class="edit-input" id="op2-input-${key}" placeholder="https://vidsrc.in/embed/movie/12345?lang=es" style="margin-top:.1rem;">
+        <input class="edit-input" id="op2-input-${key}" placeholder="Pega aquí el enlace de Vidmoly, BigMoly, etc..." style="margin-top:.1rem;">
         <div style="margin-top:.2rem;display:flex;gap:.3rem;">
             <button class="save-btn" onclick="guardarOpcion2('${key}', '${tipo}', '${tmdbId}')"><i class="fas fa-check"></i> Guardar Op2</button>
             <button class="cancel-btn" onclick="cancelarOpcion2('${key}')"><i class="fas fa-times"></i> Cancelar</button>
         </div>
     `;
     
-    // Insertar antes de los actions
     container.insertBefore(nuevoOp2Div, actionsDiv);
     
-    // Ocultar botón de agregar si existe
     const agregarBtn = actionsDiv.querySelector('.agregar-op2-btn');
     if (agregarBtn) agregarBtn.style.display = 'none';
     
@@ -550,12 +586,11 @@ window.editarOpcion2 = function(key, tipo, tmdbId) {
     
     if (!op2Div) return;
     
-    // Obtener el enlace actual
     const currentUrl = op2Div.textContent.replace('🔗 Opción 2:', '').trim();
     
     op2Div.innerHTML = `
         <div style="font-size:.6rem;color:#3B82F6;font-weight:600;">🔗 Opción 2 (editar):</div>
-        <input class="edit-input" id="op2-input-${key}" value="${currentUrl}" placeholder="https://vidsrc.in/embed/movie/12345?lang=es" style="margin-top:.1rem;">
+        <input class="edit-input" id="op2-input-${key}" value="${currentUrl}" placeholder="Pega aquí el enlace de Vidmoly, BigMoly, etc..." style="margin-top:.1rem;">
         <div style="margin-top:.2rem;display:flex;gap:.3rem;">
             <button class="save-btn" onclick="guardarOpcion2('${key}', '${tipo}', '${tmdbId}')"><i class="fas fa-check"></i> Guardar Op2</button>
             <button class="cancel-btn" onclick="cancelarOpcion2('${key}')"><i class="fas fa-times"></i> Cancelar</button>
@@ -596,11 +631,163 @@ window.cancelarOpcion2 = function(key) {
     cargarContenido();
 };
 
+// ⭐ TOGGLE SERIE
+window.toggleSerie = function(key) {
+    seriesExpandidas[key] = !seriesExpandidas[key];
+    const container = document.getElementById(`serie-detalle-${key}`);
+    const btn = document.getElementById(`toggle-btn-${key}`);
+    
+    if (seriesExpandidas[key]) {
+        container.style.display = 'block';
+        btn.innerHTML = '<i class="fas fa-chevron-up"></i> Ocultar capítulos';
+    } else {
+        container.style.display = 'none';
+        btn.innerHTML = '<i class="fas fa-chevron-down"></i> Ver capítulos';
+    }
+};
+
+// ⭐ EDITAR CAPÍTULO SERIE
+window.editarCapituloSerie = function(serieKey, tempIndex, capIndex) {
+    const inputId = `cap-input-${serieKey}-${tempIndex}-${capIndex}`;
+    const input = document.getElementById(inputId);
+    const display = document.getElementById(`cap-display-${serieKey}-${tempIndex}-${capIndex}`);
+    const saveBtn = document.getElementById(`cap-save-${serieKey}-${tempIndex}-${capIndex}`);
+    
+    if (input.style.display === 'none' || !input.style.display) {
+        input.style.display = 'block';
+        display.style.display = 'none';
+        saveBtn.style.display = 'inline-block';
+        input.focus();
+        input.select();
+    }
+};
+
+window.guardarCapituloSerie = async function(serieKey, tempIndex, capIndex) {
+    const inputId = `cap-input-${serieKey}-${tempIndex}-${capIndex}`;
+    const input = document.getElementById(inputId);
+    const display = document.getElementById(`cap-display-${serieKey}-${tempIndex}-${capIndex}`);
+    const saveBtn = document.getElementById(`cap-save-${serieKey}-${tempIndex}-${capIndex}`);
+    
+    const nuevoEnlace = input.value.trim();
+    if (!nuevoEnlace) {
+        mostrarToast('❌ El enlace no puede estar vacío', 'error');
+        return;
+    }
+    
+    try {
+        const snap = await db.ref(`series_personalizadas/${serieKey}`).once('value');
+        const serie = snap.val();
+        if (!serie) { mostrarToast('❌ Serie no encontrada', 'error'); return; }
+        
+        serie.temporadas[tempIndex].capitulos[capIndex].url = nuevoEnlace;
+        await db.ref(`series_personalizadas/${serieKey}`).update({ temporadas: serie.temporadas });
+        
+        mostrarToast('✅ Capítulo actualizado', 'success');
+        
+        input.style.display = 'none';
+        display.style.display = 'block';
+        display.textContent = nuevoEnlace;
+        saveBtn.style.display = 'none';
+        
+        cargarContenido();
+    } catch(e) {
+        mostrarToast('❌ Error: ' + e.message, 'error');
+    }
+};
+
+window.editarCapituloSerieOp2 = function(serieKey, tempIndex, capIndex) {
+    const inputId = `cap-op2-input-${serieKey}-${tempIndex}-${capIndex}`;
+    const input = document.getElementById(inputId);
+    const display = document.getElementById(`cap-op2-display-${serieKey}-${tempIndex}-${capIndex}`);
+    const saveBtn = document.getElementById(`cap-op2-save-${serieKey}-${tempIndex}-${capIndex}`);
+    
+    if (input.style.display === 'none' || !input.style.display) {
+        input.style.display = 'block';
+        display.style.display = 'none';
+        saveBtn.style.display = 'inline-block';
+        input.focus();
+        input.select();
+    }
+};
+
+window.guardarCapituloSerieOp2 = async function(serieKey, tempIndex, capIndex) {
+    const inputId = `cap-op2-input-${serieKey}-${tempIndex}-${capIndex}`;
+    const input = document.getElementById(inputId);
+    const display = document.getElementById(`cap-op2-display-${serieKey}-${tempIndex}-${capIndex}`);
+    const saveBtn = document.getElementById(`cap-op2-save-${serieKey}-${tempIndex}-${capIndex}`);
+    
+    const nuevoEnlace = input.value.trim();
+    if (!nuevoEnlace) {
+        mostrarToast('❌ El enlace no puede estar vacío', 'error');
+        return;
+    }
+    
+    try {
+        const snap = await db.ref(`series_personalizadas/${serieKey}`).once('value');
+        const serie = snap.val();
+        if (!serie) { mostrarToast('❌ Serie no encontrada', 'error'); return; }
+        
+        serie.temporadas[tempIndex].capitulos[capIndex].opcion2 = nuevoEnlace;
+        await db.ref(`series_personalizadas/${serieKey}`).update({ temporadas: serie.temporadas });
+        
+        mostrarToast('✅ Opción 2 del capítulo actualizada', 'success');
+        
+        input.style.display = 'none';
+        display.style.display = 'block';
+        display.textContent = nuevoEnlace;
+        saveBtn.style.display = 'none';
+        
+        cargarContenido();
+    } catch(e) {
+        mostrarToast('❌ Error: ' + e.message, 'error');
+    }
+};
+
+// ⭐ PAGINACIÓN
+function cambiarPagina(dir) {
+    const totalPaginas = Math.ceil(peliculasLista.length / itemsPorPagina);
+    const nuevaPagina = paginaActual + dir;
+    if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas) {
+        paginaActual = nuevaPagina;
+        mostrarPagina();
+    }
+}
+
+function cambiarPaginaSize() {
+    itemsPorPagina = parseInt(document.getElementById('selectPaginaSize').value);
+    paginaActual = 1;
+    mostrarPagina();
+}
+
+function mostrarPagina() {
+    const container = document.getElementById('listaContenido');
+    const pagContainer = document.getElementById('paginacionContainer');
+    
+    const inicio = (paginaActual - 1) * itemsPorPagina;
+    const fin = Math.min(inicio + itemsPorPagina, peliculasLista.length);
+    
+    const items = container.querySelectorAll('.admin-item');
+    items.forEach((item, index) => {
+        if (index >= inicio && index < fin) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    
+    const totalPaginas = Math.ceil(peliculasLista.length / itemsPorPagina);
+    document.getElementById('infoPagina').textContent = `Página ${paginaActual} de ${totalPaginas || 1}`;
+    document.getElementById('btnPaginaPrev').disabled = paginaActual <= 1;
+    document.getElementById('btnPaginaNext').disabled = paginaActual >= totalPaginas;
+    
+    pagContainer.style.display = peliculasLista.length > itemsPorPagina ? 'flex' : 'none';
+}
+
 // ⭐ BOTÓN MÁGICO - SOLO OPCIÓN 1
 window.generarTodo = async function() {
     if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
     if (generando) { mostrarToast('⏳ Ya está generando...', 'warning'); return; }
-    if (!confirm('⚠️ ¿Generar TODAS las películas y series de TMDB?\nSOLO Opción 1 (Unlimplay)\nLa Opción 2 la agregarás manualmente después.')) return;
+    if (!confirm('⚠️ ¿Generar TODAS las películas y series de TMDB?\nSOLO Opción 1 (Unlimplay)\nLa Opción 2 la agregarás MANUALMENTE después.')) return;
     
     generando = true;
     const btn = document.querySelector('.admin-btn-magic');
@@ -785,6 +972,10 @@ window.filtrarContenido = function() {
         
         item.style.display = match ? 'block' : 'none';
     });
+    
+    const visibles = document.querySelectorAll('.admin-item[style*="display: block"]').length;
+    const total = document.querySelectorAll('.admin-item').length;
+    document.getElementById('infoPagina').textContent = `Mostrando ${visibles} de ${total}`;
 };
 
 window.cargarContenido = async function() {
@@ -796,31 +987,39 @@ window.cargarContenido = async function() {
             db.ref('contenido_personalizado').once('value'),
             db.ref('series_personalizadas').once('value')
         ]);
-        const peliculas = pSnap.val() ? Object.values(pSnap.val()) : [];
-        const series = sSnap.val() ? Object.values(sSnap.val()) : [];
         
-        totalPeliculas = peliculas.length;
-        totalSeries = series.length;
+        const pData = pSnap.val() || {};
+        const sData = sSnap.val() || {};
+        
+        peliculasLista = Object.values(pData);
+        seriesLista = Object.values(sData);
+        peliculasKeys = Object.keys(pData);
+        seriesKeys = Object.keys(sData);
+        
+        totalPeliculas = peliculasLista.length;
+        totalSeries = seriesLista.length;
         document.getElementById('totalPeliculas').textContent = totalPeliculas;
         document.getElementById('totalSeries').textContent = totalSeries;
         
         let caps = 0;
-        series.forEach(s => { if (s.temporadas) { s.temporadas.forEach(t => { if (t.capitulos) caps += t.capitulos.length; }); } });
+        seriesLista.forEach(s => { if (s.temporadas) { s.temporadas.forEach(t => { if (t.capitulos) caps += t.capitulos.length; }); } });
         totalCaps = caps;
         document.getElementById('totalCaps').textContent = totalCaps;
         
-        if (!peliculas.length && !series.length) {
+        if (!peliculasLista.length && !seriesLista.length) {
             container.innerHTML = '<p class="loading-text">No hay contenido guardado</p>';
+            document.getElementById('paginacionContainer').style.display = 'none';
             return;
         }
         
         container.innerHTML = '';
         
-        if (peliculas.length) {
+        // ⭐ PELÍCULAS
+        if (peliculasLista.length) {
             const div = document.createElement('div');
-            div.innerHTML = `<div style="font-weight:700;color:#A78BFA;margin:.3rem 0;">🎬 Películas (${peliculas.length})</div>`;
-            peliculas.forEach((p, index) => {
-                const key = Object.keys(pSnap.val())[index];
+            div.innerHTML = `<div style="font-weight:700;color:#A78BFA;margin:.3rem 0;">🎬 Películas (${peliculasLista.length})</div>`;
+            peliculasLista.forEach((p, index) => {
+                const key = peliculasKeys[index];
                 const item = document.createElement('div');
                 item.className = 'admin-item';
                 item.id = `item-${key}`;
@@ -828,7 +1027,7 @@ window.cargarContenido = async function() {
                 item.dataset.tipo = 'pelicula';
                 item.style.borderLeftColor = '#10B981';
                 const urlDisplay = p.url || 'Sin enlace';
-                const op2Display = p.opcion2 || '❌ Sin Opción 2';
+                const op2Display = p.opcion2 || '❌ Sin Opción 2 (agregar manual)';
                 item.innerHTML = `
                     <div class="title">${p.titulo} <span style="font-size:.6rem;color:#94A3B8;">(TMDB: ${p.tmdb_id})</span></div>
                     <div class="meta">${p.anio} • ⭐ ${p.puntuacion || 'N/A'}</div>
@@ -845,20 +1044,58 @@ window.cargarContenido = async function() {
             container.appendChild(div);
         }
         
-        if (series.length) {
+        // ⭐ SERIES
+        if (seriesLista.length) {
             const div = document.createElement('div');
-            div.innerHTML = `<div style="font-weight:700;color:#34D399;margin:.5rem 0 .3rem;">📺 Series (${series.length})</div>`;
-            series.forEach((s, index) => {
-                const key = Object.keys(sSnap.val())[index];
+            div.innerHTML = `<div style="font-weight:700;color:#34D399;margin:.5rem 0 .3rem;">📺 Series (${seriesLista.length})</div>`;
+            
+            seriesLista.forEach((s, index) => {
+                const key = seriesKeys[index];
                 const capsCount = s.temporadas ? s.temporadas.reduce((sum, t) => sum + (t.capitulos ? t.capitulos.length : 0), 0) : 0;
+                const isExpanded = seriesExpandidas[key] || false;
+                const urlDisplay = s.url || 'Sin enlace (ver capítulos)';
+                const op2Display = s.opcion2 || '❌ Sin Opción 2 (agregar manual)';
+                
                 const item = document.createElement('div');
-                item.className = 'admin-item';
+                item.className = 'admin-item serie-expandida';
                 item.id = `item-${key}`;
                 item.dataset.titulo = s.titulo;
                 item.dataset.tipo = 'serie';
                 item.style.borderLeftColor = '#34D399';
-                const urlDisplay = s.url || 'Sin enlace (ver capítulos)';
-                const op2Display = s.opcion2 || '❌ Sin Opción 2';
+                
+                let capitulosHTML = '';
+                if (s.temporadas && s.temporadas.length) {
+                    s.temporadas.forEach((temp, tempIdx) => {
+                        capitulosHTML += `<div class="temporada-titulo">📺 Temporada ${temp.numero || tempIdx + 1}</div>`;
+                        if (temp.capitulos && temp.capitulos.length) {
+                            temp.capitulos.forEach((cap, capIdx) => {
+                                const capUrl = cap.url || 'Sin enlace';
+                                const capOp2 = cap.opcion2 || 'Sin Op2';
+                                capitulosHTML += `
+                                    <div class="capitulo-detalle">
+                                        <div class="cap-titulo">Cap ${cap.numero || capIdx + 1}: ${cap.titulo || 'Sin título'}</div>
+                                        <div class="cap-meta">${cap.sinopsis || 'Sin sinopsis'}</div>
+                                        <div class="cap-enlace" style="margin-top:.1rem;">
+                                            <span style="color:#34D399;">▶ Op1:</span>
+                                            <span id="cap-display-${key}-${tempIdx}-${capIdx}">${capUrl}</span>
+                                            <input class="edit-input" id="cap-input-${key}-${tempIdx}-${capIdx}" value="${capUrl}" style="display:none;font-size:.6rem;padding:.1rem .3rem;margin-top:.1rem;">
+                                            <button class="edit-btn" style="font-size:.5rem;padding:.05rem .4rem;" onclick="editarCapituloSerie('${key}', ${tempIdx}, ${capIdx})"><i class="fas fa-pen"></i></button>
+                                            <button class="save-btn" id="cap-save-${key}-${tempIdx}-${capIdx}" style="display:none;font-size:.5rem;padding:.05rem .4rem;" onclick="guardarCapituloSerie('${key}', ${tempIdx}, ${capIdx})"><i class="fas fa-check"></i></button>
+                                        </div>
+                                        <div class="cap-enlace" style="margin-top:.05rem;">
+                                            <span style="color:#3B82F6;">▶ Op2:</span>
+                                            <span id="cap-op2-display-${key}-${tempIdx}-${capIdx}">${capOp2}</span>
+                                            <input class="edit-input" id="cap-op2-input-${key}-${tempIdx}-${capIdx}" value="${capOp2}" style="display:none;font-size:.6rem;padding:.1rem .3rem;margin-top:.1rem;">
+                                            <button class="edit-btn" style="font-size:.5rem;padding:.05rem .4rem;border-color:rgba(59,130,246,.2);color:#3B82F6;" onclick="editarCapituloSerieOp2('${key}', ${tempIdx}, ${capIdx})"><i class="fas fa-pen"></i></button>
+                                            <button class="save-btn" id="cap-op2-save-${key}-${tempIdx}-${capIdx}" style="display:none;font-size:.5rem;padding:.05rem .4rem;" onclick="guardarCapituloSerieOp2('${key}', ${tempIdx}, ${capIdx})"><i class="fas fa-check"></i></button>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        }
+                    });
+                }
+                
                 item.innerHTML = `
                     <div class="title">${s.titulo} <span style="font-size:.6rem;color:#94A3B8;">(TMDB: ${s.tmdb_id})</span></div>
                     <div class="meta">${s.anio} • ${s.temporadas?.length || 0} temps • ${capsCount} caps • ⭐ ${s.puntuacion || 'N/A'}</div>
@@ -867,15 +1104,26 @@ window.cargarContenido = async function() {
                     <div class="item-actions" style="margin-top:.2rem;display:flex;gap:.3rem;flex-wrap:wrap;">
                         <button class="edit-btn" onclick="editarEnlace('${s.tmdb_id}', 'serie', '${key}')"><i class="fas fa-pen"></i> Editar Op1</button>
                         <button class="agregar-op2-btn" style="padding:.1rem .6rem;border-radius:4px;font-size:.6rem;font-weight:600;border:1px solid rgba(59,130,246,.2);color:#3B82F6;background:rgba(59,130,246,.15);cursor:pointer;" onclick="agregarOpcion2('${key}', 'serie', '${s.tmdb_id}')"><i class="fas fa-plus-circle"></i> Agregar Op2</button>
+                        <button class="toggle-series-btn" id="toggle-btn-${key}" onclick="toggleSerie('${key}')">
+                            <i class="fas fa-chevron-${isExpanded ? 'up' : 'down'}"></i> ${isExpanded ? 'Ocultar' : 'Ver'} capítulos
+                        </button>
                         <button class="admin-btn-danger" style="padding:.1rem .6rem;border-radius:4px;font-size:.6rem;font-weight:600;border:none;color:#F87171;background:rgba(239,68,68,.15);cursor:pointer;" onclick="eliminarItem('${key}', 'serie')"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div id="serie-detalle-${key}" style="display:${isExpanded ? 'block' : 'none'};margin-top:.3rem;">
+                        ${capitulosHTML}
                     </div>
                 `;
                 div.appendChild(item);
             });
             container.appendChild(div);
         }
+        
+        paginaActual = 1;
+        mostrarPagina();
+        
     } catch(e) {
         container.innerHTML = '<p style="color:#EF4444;">Error al cargar</p>';
+        console.error(e);
     }
 };
 
@@ -892,7 +1140,7 @@ window.eliminarItem = async function(key, tipo) {
 };
 
 db.ref().on('value', () => { if (esAdmin) cargarContenido(); });
-console.log('✅ Admin TELY - Botón Mágico SOLO Opción 1 | Opción 2 manual');
+console.log('✅ Admin TELY - Opción 2 solo MANUAL');
 </script>
 </body>
 </html>
