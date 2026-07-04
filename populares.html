@@ -76,7 +76,6 @@
         .movie-card .info .meta{display:flex;justify-content:space-between;font-size:.55rem;color:#94A3B8}
         .movie-card .badge-year{position:absolute;top:.3rem;left:.3rem;background:rgba(124,58,237,.85);color:#fff;padding:.1rem .4rem;border-radius:3px;font-size:.5rem;font-weight:700}
         .movie-card .badge-type{position:absolute;top:.3rem;right:.3rem;background:rgba(0,0,0,.7);color:#fff;padding:.1rem .4rem;border-radius:3px;font-size:.45rem;font-weight:600}
-        .movie-card .badge-op2{position:absolute;bottom:.3rem;right:.3rem;background:rgba(59,130,246,.85);color:#fff;padding:.05rem .3rem;border-radius:3px;font-size:.4rem;font-weight:600}
         
         .section-title{font-size:1rem;font-weight:700;margin:.8rem 0 .5rem;display:flex;align-items:center;gap:.4rem}
         .section-title i{color:#7C3AED}
@@ -98,6 +97,12 @@
         body:not(.dark) .user-dropdown a:hover{background:rgba(124,58,237,.08);color:#111}
         .user-dropdown hr{margin:.2rem 0;border:none;border-top:1px solid rgba(124,58,237,.08)}
         .user-menu{position:relative}
+        .card-actions{display:flex;gap:4px;margin-top:4px;justify-content:center}
+        .card-actions button{background:none;border:none;cursor:pointer;font-size:.65rem;padding:2px 6px;border-radius:4px;transition:.2s}
+        .card-actions .fav-btn{color:#EF4444}
+        .card-actions .fav-btn:hover{background:rgba(239,68,68,.15)}
+        .card-actions .list-btn{color:#3B82F6}
+        .card-actions .list-btn:hover{background:rgba(59,130,246,.15)}
     </style>
 </head>
 <body>
@@ -112,7 +117,6 @@
     </div>
     <div class="sidebar-bottom">
         <a href="perfil.html" class="sidebar-link"><i class="fas fa-user"></i><span>Perfil</span></a>
-        <a href="admin.html" class="sidebar-link"><i class="fas fa-cog"></i><span>Admin</span></a>
     </div>
 </nav>
 
@@ -149,20 +153,10 @@
     <div class="load-more"><button onclick="cargarMasPopulares()"><i class="fas fa-plus"></i> Cargar más</button></div>
 </main>
 
-<script type="importmap">
-{
-    "imports": {
-        "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
-        "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js",
-        "firebase/database": "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"
-    }
-}
-</script>
-<script type="module">
-import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { getDatabase, ref, get, child } from "firebase/database";
-
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script>
 const firebaseConfig = {
     apiKey: "AIzaSyBPBDEVUR7hjNrxCYrefF9Sbl0Wofp3VoQ",
     authDomain: "telyx-23210.firebaseapp.com",
@@ -173,9 +167,9 @@ const firebaseConfig = {
     measurementId: "G-0YEZMJYMJS"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
 
 let paginaPopulares = 1;
 let cargandoPopulares = false;
@@ -184,58 +178,49 @@ history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) { return true; });
 document.addEventListener('backbutton', function(e) { return true; }, false);
 
-window.irALogin = function() { window.location.href = 'login.html'; };
-window.cerrarSesion = function() { signOut(auth).then(() => { location.reload(); }); };
-window.toggleUserMenu = function() { document.getElementById('userDropdown').classList.toggle('show'); };
-window.toggleTheme = function() {
-    const body = document.body;
-    const btn = document.getElementById('themeBtn');
-    if (body.classList.contains('dark')) { body.classList.remove('dark'); btn.innerHTML = '<i class="fas fa-moon"></i>'; localStorage.setItem('theme', 'light'); }
-    else { body.classList.add('dark'); btn.innerHTML = '<i class="fas fa-sun"></i>'; localStorage.setItem('theme', 'dark'); }
-};
-
-if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
-else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
-
-onAuthStateChanged(auth, (user) => {
-    document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
-    document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
-});
-
+function irALogin() { window.location.href = 'login.html'; }
+function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
+function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('userDropdown');
     if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
 });
+auth.onAuthStateChanged(user => {
+    document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
+    document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
+});
+
+function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('themeBtn');
+    if (body.classList.contains('dark')) { body.classList.remove('dark'); btn.innerHTML = '<i class="fas fa-moon"></i>'; localStorage.setItem('theme', 'light'); }
+    else { body.classList.add('dark'); btn.innerHTML = '<i class="fas fa-sun"></i>'; localStorage.setItem('theme', 'dark'); }
+}
+if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
+else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
+
+function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    if (tipo === 'pelicula') return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+    else return `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+}
+
+function generarEnlaceVidsrc(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    if (tipo === 'pelicula') return `https://vidsrc.in/embed/movie/${tmdb_id}?lang=es`;
+    else return `https://vidsrc.in/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es`;
+}
 
 function getImagenUrl(path, size = 'w342') {
     if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
     return `https://image.tmdb.org/t/p/${size}${path}`;
 }
 
-function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    if (tipo === 'pelicula') return `https://unlimplay.co/play/movie/${tmdb_id}`;
-    else return `https://unlimplay.co/play/tv/${tmdb_id}/${temporada}/${capitulo}`;
-}
-
-function crearTarjeta(item, esSerie = false) {
-    const div = document.createElement('div');
-    div.className = 'movie-card';
-    const tipo = esSerie ? '📺' : '🎬';
-    div.innerHTML = `
-        <span class="badge-year">${item.anio || 'N/D'}</span>
-        <span class="badge-type">${tipo}</span>
-        <img src="${item.portada}" alt="${item.titulo}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-        <div class="info"><h4>${item.titulo}</h4><div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div></div>
-    `;
-    div.onclick = () => {
-        if (auth.currentUser) {
-            const params = new URLSearchParams();
-            params.set('play', item.tmdb_id || item.id);
-            params.set('tipo', item.tipo || 'pelicula');
-            window.location.href = `reproductor.html?${params.toString()}`;
-        } else { window.location.href = 'login.html'; }
-    };
-    return div;
+function mostrarToast(msg, tipo = 'success') {
+    const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
+    const t = document.createElement('div');
+    t.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:10px 20px;border-radius:10px;z-index:9999;font-weight:600;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
 }
 
 async function fetchTMDB(path, params = {}) {
@@ -248,6 +233,55 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
+function toggleFavorito(item) {
+    if (!auth.currentUser) { window.location.href = 'login.html'; return; }
+    const userId = auth.currentUser.uid;
+    const favRef = db.ref(`usuarios/${userId}/favoritos/${item.id}`);
+    favRef.once('value').then((snap) => {
+        if (snap.exists()) { favRef.remove(); mostrarToast('🗑️ Eliminado de favoritos', 'warning'); }
+        else { favRef.set({ id: item.id, titulo: item.titulo, tipo: item.tipo || 'pelicula', portada: item.portada, tmdb_id: item.tmdb_id }); mostrarToast('❤️ Agregado a favoritos', 'success'); }
+    });
+}
+
+function toggleMiLista(item) {
+    if (!auth.currentUser) { window.location.href = 'login.html'; return; }
+    const userId = auth.currentUser.uid;
+    const listaRef = db.ref(`usuarios/${userId}/milista/${item.id}`);
+    listaRef.once('value').then((snap) => {
+        if (snap.exists()) { listaRef.remove(); mostrarToast('🗑️ Eliminado de Mi Lista', 'warning'); }
+        else { listaRef.set({ id: item.id, titulo: item.titulo, tipo: item.tipo || 'pelicula', portada: item.portada, tmdb_id: item.tmdb_id }); mostrarToast('📝 Agregado a Mi Lista', 'success'); }
+    });
+}
+
+function crearTarjeta(item) {
+    const div = document.createElement('div');
+    div.className = 'movie-card';
+    const tipo = item.tipo === 'serie' ? '📺' : '🎬';
+    const itemStr = JSON.stringify(item).replace(/"/g, "'");
+    div.innerHTML = `
+        <span class="badge-year">${item.anio || 'N/D'}</span>
+        <span class="badge-type">${tipo}</span>
+        <img src="${item.portada}" alt="${item.titulo}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+        <div class="info">
+            <h4>${item.titulo}</h4>
+            <div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div>
+            <div class="card-actions">
+                <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorito(${itemStr})"><i class="fas fa-heart"></i></button>
+                <button class="list-btn" onclick="event.stopPropagation(); toggleMiLista(${itemStr})"><i class="fas fa-plus-circle"></i></button>
+            </div>
+        </div>
+    `;
+    div.onclick = () => {
+        if (auth.currentUser) {
+            const params = new URLSearchParams();
+            params.set('play', item.tmdb_id || item.id);
+            params.set('tipo', item.tipo || 'pelicula');
+            window.location.href = `reproductor.html?${params.toString()}`;
+        } else { window.location.href = 'login.html'; }
+    };
+    return div;
+}
+
 async function cargarPopulares(page = 1) {
     if (cargandoPopulares) return;
     cargandoPopulares = true;
@@ -257,11 +291,16 @@ async function cargarPopulares(page = 1) {
         const data = await fetchTMDB('movie/popular', { page });
         if (!data.results || !data.results.length) { cargandoPopulares = false; return; }
         if (page === 1) container.innerHTML = '';
-        const dbRef = ref(db);
-        const adminSnap = await get(child(dbRef, 'contenido_personalizado'));
-        const adminData = adminSnap.val() || {};
+        const dbRef = db.ref();
+        const [pSnap, sSnap] = await Promise.all([
+            dbRef.child('contenido_personalizado').once('value'),
+            dbRef.child('series_personalizadas').once('value')
+        ]);
+        const pData = pSnap.val() || {};
+        const sData = sSnap.val() || {};
         const adminMap = {};
-        Object.values(adminData).forEach(i => { adminMap[i.tmdb_id] = i; });
+        Object.values(pData).forEach(i => { adminMap[i.tmdb_id] = i; });
+        Object.values(sData).forEach(i => { adminMap[i.tmdb_id] = i; });
         data.results.forEach(p => {
             const a = adminMap[p.id];
             const item = {
@@ -271,7 +310,8 @@ async function cargarPopulares(page = 1) {
                 tipo: 'pelicula',
                 portada: a?.portada || getImagenUrl(p.poster_path, 'w342'),
                 puntuacion: a?.puntuacion || (p.vote_average ? p.vote_average.toFixed(1) : 'N/A'),
-                url: a?.url || generarEnlaceUnlimplay(p.id, 'pelicula')
+                url: a?.url || generarEnlaceUnlimplay(p.id, 'pelicula'),
+                opcion2: a?.opcion2 || generarEnlaceVidsrc(p.id, 'pelicula')
             };
             container.appendChild(crearTarjeta(item));
         });
@@ -279,10 +319,7 @@ async function cargarPopulares(page = 1) {
     cargandoPopulares = false;
 }
 
-window.cargarMasPopulares = function() {
-    paginaPopulares++;
-    cargarPopulares(paginaPopulares);
-};
+window.cargarMasPopulares = function() { paginaPopulares++; cargarPopulares(paginaPopulares); };
 
 window.mostrarSugerencias = async function(texto) {
     const container = document.getElementById('searchResults');
