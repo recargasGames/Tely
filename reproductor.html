@@ -102,7 +102,7 @@
 <script type="module">
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getDatabase, ref, get, child } from "firebase/database";
+import { getDatabase, ref, get, push, child } from "firebase/database";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBPBDEVUR7hjNrxCYrefF9Sbl0Wofp3VoQ",
@@ -118,7 +118,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// ⭐ BOTÓN ATRÁS
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) {
     const modal = document.querySelector('.modal-reproductor');
@@ -140,7 +139,6 @@ document.addEventListener('backbutton', function(e) {
     }
 }, false);
 
-// ⭐ VARIABLES
 const params = new URLSearchParams(window.location.search);
 const tmdbId = params.get('play');
 const tipo = params.get('tipo') || 'pelicula';
@@ -153,7 +151,6 @@ let tempActualIndex = 0;
 let opcionActiva = 1;
 let contenido = [];
 
-// ⭐ FUNCIONES
 function getImagenUrl(path, size = 'w342') {
     if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
     return `https://image.tmdb.org/t/p/${size}${path}`;
@@ -217,40 +214,67 @@ async function cargarContenidoReproductor() {
         
         let item = contenido.find(c => c.tmdb_id == tmdbId);
         
+        // ⭐ SI NO EXISTE, GENERAR BAJO DEMANDA
         if (!item && tmdbId) {
-            const data = await fetchTMDB(tipo === 'serie' ? `tv/${tmdbId}` : `movie/${tmdbId}`);
-            if (data) {
-                let temps = [];
-                if (tipo === 'serie' && data.seasons) {
-                    for (const season of data.seasons) {
-                        const epData = await fetchTMDB(`tv/${tmdbId}/season/${season.season_number}`);
-                        const capitulos = (epData.episodes || []).map(ep => ({
-                            numero: ep.episode_number,
-                            titulo: ep.name || `Capítulo ${ep.episode_number}`,
-                            sinopsis: ep.overview || 'Sin sinopsis',
-                            url: generarEnlaceUnlimplay(tmdbId, 'serie', season.season_number, ep.episode_number),
-                            opcion2: ''
-                        }));
-                        temps.push({
-                            numero: season.season_number || 1,
-                            nombre: season.name || `Temporada ${season.season_number || 1}`,
-                            capitulos: capitulos
-                        });
+            console.log(`🔍 Contenido no encontrado. Generando bajo demanda...`);
+            mostrarToast('⏳ Generando contenido...', 'info');
+            
+            if (tipo === 'pelicula') {
+                const data = await fetchTMDB(`movie/${tmdbId}`);
+                if (data && data.id) {
+                    const pelicula = {
+                        titulo: data.title || `Película ${tmdbId}`,
+                        anio: data.release_date ? data.release_date.split('-')[0] : 'N/D',
+                        sinopsis: data.overview || 'Sin sinopsis',
+                        portada: getImagenUrl(data.poster_path, 'w342'),
+                        genero: data.genres ? data.genres.map(g => g.name).join(', ') : 'Película',
+                        tipo: 'pelicula',
+                        categoria: 'peliculas',
+                        tmdb_id: data.id,
+                        puntuacion: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
+                        url: generarEnlaceUnlimplay(data.id, 'pelicula'),
+                        creado: Date.now()
+                    };
+                    await push(ref(db, 'contenido_personalizado'), pelicula);
+                    item = pelicula;
+                    mostrarToast('✅ Película generada', 'success');
+                }
+            } else {
+                const data = await fetchTMDB(`tv/${tmdbId}`);
+                if (data && data.id) {
+                    const temporadas = [];
+                    for (let t = 1; t <= Math.min(data.number_of_seasons || 1, 5); t++) {
+                        try {
+                            const seasonData = await fetchTMDB(`tv/${tmdbId}/season/${t}`);
+                            if (!seasonData || !seasonData.episodes) continue;
+                            const capitulos = seasonData.episodes.map(ep => ({
+                                numero: ep.episode_number,
+                                titulo: ep.name || `Capítulo ${ep.episode_number}`,
+                                sinopsis: ep.overview || 'Sin sinopsis',
+                                url: generarEnlaceUnlimplay(data.id, 'serie', t, ep.episode_number)
+                            }));
+                            temporadas.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
+                        } catch(e) {}
+                    }
+                    if (temporadas.length > 0) {
+                        const serie = {
+                            titulo: data.name || `Serie ${tmdbId}`,
+                            anio: data.first_air_date ? data.first_air_date.split('-')[0] : 'N/D',
+                            sinopsis: data.overview || 'Sin sinopsis',
+                            portada: getImagenUrl(data.poster_path, 'w342'),
+                            genero: data.genres ? data.genres.map(g => g.name).join(', ') : 'Serie',
+                            tipo: 'serie',
+                            categoria: 'series',
+                            tmdb_id: data.id,
+                            puntuacion: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
+                            temporadas: temporadas,
+                            creado: Date.now()
+                        };
+                        await push(ref(db, 'series_personalizadas'), serie);
+                        item = serie;
+                        mostrarToast('✅ Serie generada', 'success');
                     }
                 }
-                item = {
-                    id: `tmdb_${tmdbId}`,
-                    tmdb_id: parseInt(tmdbId),
-                    titulo: data.title || data.name || 'Sin título',
-                    anio: (data.release_date || data.first_air_date || 'N/D').split('-')[0],
-                    tipo: tipo,
-                    portada: getImagenUrl(data.poster_path, 'w342'),
-                    sinopsis: data.overview || 'Sin sinopsis',
-                    puntuacion: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
-                    genero: data.genres ? data.genres.map(g => g.name).join(', ') : (tipo === 'serie' ? 'Serie' : 'Película'),
-                    url: generarEnlaceUnlimplay(tmdbId, tipo),
-                    temporadas: temps
-                };
             }
         }
         
@@ -267,7 +291,7 @@ async function cargarContenidoReproductor() {
         console.error(e);
         wrapper.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#EF4444;gap:1rem;">
             <i class="fas fa-exclamation-triangle" style="font-size:3rem;"></i>
-            <span>Error al cargar el contenido</span>
+            <span>Error: ${e.message}</span>
         </div>`;
     }
 }
@@ -535,7 +559,7 @@ else {
     `;
 }
 
-console.log('✅ Reproductor cargado - Botón atrás protegido');
+console.log('✅ Reproductor cargado - Con generación bajo demanda');
 </script>
 </body>
 </html>
