@@ -87,6 +87,27 @@
         .admin-protected{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:.5rem 1rem;text-align:center;margin-bottom:.5rem;font-size:.8rem;color:#34D399}
         .admin-protected i{color:#34D399}
         .admin-protected.denied{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2);color:#F87171}
+        .login-overlay{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem}
+        .login-overlay.oculto{display:none}
+        .login-box{background:rgba(26,26,46,.95);border-radius:20px;padding:2.5rem;width:100%;max-width:400px;border:1px solid rgba(124,58,237,.15)}
+        body:not(.dark) .login-box{background:#fff;border-color:rgba(0,0,0,.1)}
+        .login-box .logo{font-size:2.5rem;font-weight:800;text-align:center;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.3rem}
+        .login-box .sub{text-align:center;color:#94A3B8;font-size:.9rem;margin-bottom:1.5rem}
+        body:not(.dark) .login-box .sub{color:#555}
+        .login-input{width:100%;padding:.8rem 1rem;border-radius:12px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:1rem;margin-bottom:1rem;transition:.3s}
+        .login-input:focus{outline:none;border-color:#7C3AED;background:rgba(255,255,255,.08)}
+        .login-input::placeholder{color:#64748B}
+        body:not(.dark) .login-input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
+        body:not(.dark) .login-input::placeholder{color:#888}
+        .login-btn{width:100%;padding:.8rem;border-radius:12px;border:none;background:#7C3AED;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;transition:.3s}
+        .login-btn:hover{background:#6D28D9}
+        .login-btn:disabled{opacity:.5;cursor:not-allowed}
+        .login-error{color:#EF4444;font-size:.85rem;text-align:center;margin-top:.5rem;display:none}
+        .login-success{color:#34D399;font-size:.85rem;text-align:center;margin-top:.5rem;display:none}
+        .login-footer{text-align:center;margin-top:1rem;color:#94A3B8;font-size:.85rem}
+        body:not(.dark) .login-footer{color:#555}
+        .login-footer a{color:#A78BFA;text-decoration:none;font-weight:600}
+        body:not(.dark) .login-footer a{color:#7C3AED}
     </style>
 </head>
 <body>
@@ -105,6 +126,24 @@
     </div>
 </nav>
 
+<!-- ⭐ LOGIN OVERLAY - SOLO PARA ADMIN -->
+<div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+        <div class="logo">🔐 TELY</div>
+        <p class="sub">Inicia sesión para acceder al panel de administración</p>
+        <div id="loginError" class="login-error"></div>
+        <div id="loginSuccess" class="login-success"></div>
+        <form id="adminLoginForm" onsubmit="event.preventDefault(); iniciarSesionAdmin()">
+            <input type="email" class="login-input" id="adminEmail" placeholder="📧 Correo electrónico" required>
+            <input type="password" class="login-input" id="adminPassword" placeholder="🔒 Contraseña" required>
+            <button type="submit" class="login-btn" id="adminLoginBtn"><i class="fas fa-sign-in-alt"></i> Iniciar sesión</button>
+        </form>
+        <div class="login-footer">
+            <a href="#" onclick="irALogin()">¿Olvidaste tu contraseña?</a>
+        </div>
+    </div>
+</div>
+
 <main class="main-content">
     <div class="top-header">
         <h1><i class="fas fa-cog"></i> Administración</h1>
@@ -115,27 +154,24 @@
                 <div class="user-dropdown" id="userDropdown">
                     <a href="perfil.html"><i class="fas fa-user"></i> Mi perfil</a>
                     <hr>
-                    <a href="#" id="loginBtn" onclick="irALogin()"><i class="fas fa-sign-in-alt"></i> Iniciar sesión</a>
-                    <a href="#" id="logoutBtn" style="display:none;" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+                    <a href="#" id="logoutBtn" onclick="cerrarSesionAdmin()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ADMIN PROTEGIDO -->
     <div class="admin-protected" id="adminProtected">
         <i class="fas fa-shield-alt"></i> 
         <span id="adminStatus">Verificando acceso...</span>
     </div>
 
-    <!-- BOTÓN MÁGICO -->
     <div class="admin-card" style="border-color:rgba(245,158,11,.4)">
         <div class="magic-section">
             <div class="big-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
             <h2 style="font-size:1.5rem;font-weight:800;color:#F59E0B;">¡BOTÓN MÁGICO!</h2>
             <p style="color:#94A3B8;font-size:.95rem;margin:.3rem 0;">
-                Genera <strong>TODAS</strong> las películas y series de TMDB con enlaces <strong>Unlimplay</strong><br>
-                <span class="badge-no-op2">❌ Solo Opción 1 - Sin Opción 2</span>
+                Genera <strong>TODAS</strong> las películas y series de TMDB<br>
+                <span class="badge-no-op2">❌ Solo Opción 1 - Unlimplay</span>
             </p>
             
             <div class="stats" id="statsContainer">
@@ -162,7 +198,6 @@
         </div>
     </div>
 
-    <!-- LISTA DE CONTENIDO -->
     <div class="admin-card">
         <h3><i class="fas fa-list text-emerald-500"></i> Contenido en Firebase</h3>
         <div id="listaContenido" class="max-h-96 overflow-y-auto">
@@ -182,7 +217,7 @@
 </script>
 <script type="module">
 import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getDatabase, ref, get, push, update, remove, child, onValue, set } from "firebase/database";
 
 const firebaseConfig = {
@@ -199,8 +234,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// ⭐ USUARIOS AUTORIZADOS - CAMBIA ESTO POR TU CORREO
-const ADMIN_EMAILS = ['aa3964063@gmail.com'];
+// ⭐ CORREOS AUTORIZADOS - SOLO ESTOS PUEDEN ENTRAR
+const ADMIN_EMAILS = [
+    'aa3964063@gmail.com',  // ⭐ CAMBIA ESTO POR TU CORREO
+];
 
 let totalPeliculas = 0, totalSeries = 0, totalCaps = 0, generando = false, esAdmin = false;
 
@@ -208,9 +245,7 @@ history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) { return true; });
 document.addEventListener('backbutton', function(e) { return true; }, false);
 
-window.irALogin = function() { window.location.href = 'login.html'; };
-window.cerrarSesion = function() { signOut(auth).then(() => { location.reload(); }); };
-window.toggleUserMenu = function() { document.getElementById('userDropdown').classList.toggle('show'); };
+// ⭐ FUNCIONES DE UI
 window.toggleTheme = function() {
     const body = document.body;
     const btn = document.getElementById('themeBtn');
@@ -221,53 +256,131 @@ window.toggleTheme = function() {
 if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
 else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
 
+window.toggleUserMenu = function() { document.getElementById('userDropdown').classList.toggle('show'); };
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('userDropdown');
     if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
 });
 
-onAuthStateChanged(auth, (user) => {
-    const loginBtn = document.getElementById('loginBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
+window.irALogin = function() {
+    // Redirigir a login normal
+    window.location.href = 'login.html';
+};
+
+// ⭐ INICIAR SESIÓN ADMIN
+window.iniciarSesionAdmin = function() {
+    const email = document.getElementById('adminEmail').value.trim();
+    const password = document.getElementById('adminPassword').value;
+    const btn = document.getElementById('adminLoginBtn');
+    const errorEl = document.getElementById('loginError');
+    const successEl = document.getElementById('loginSuccess');
+    
+    errorEl.style.display = 'none';
+    successEl.style.display = 'none';
+    
+    if (!email || !password) {
+        errorEl.textContent = '⚠️ Completa todos los campos';
+        errorEl.style.display = 'block';
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando...';
+    
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            // Verificar si es admin
+            if (ADMIN_EMAILS.includes(user.email)) {
+                successEl.textContent = '✅ Acceso concedido';
+                successEl.style.display = 'block';
+                document.getElementById('loginOverlay').classList.add('oculto');
+                esAdmin = true;
+                actualizarUIAdmin(true);
+            } else {
+                errorEl.textContent = '⛔ No tienes permisos de administrador';
+                errorEl.style.display = 'block';
+                signOut(auth);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar sesión';
+            }
+        })
+        .catch((e) => {
+            let msg = '❌ Error al iniciar sesión';
+            if (e.code === 'auth/user-not-found') msg = '❌ Usuario no encontrado';
+            else if (e.code === 'auth/wrong-password') msg = '❌ Contraseña incorrecta';
+            else if (e.code === 'auth/invalid-email') msg = '❌ Correo inválido';
+            else if (e.code === 'auth/too-many-requests') msg = '❌ Demasiados intentos. Espera un momento';
+            errorEl.textContent = msg;
+            errorEl.style.display = 'block';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar sesión';
+        });
+};
+
+// ⭐ CERRAR SESIÓN ADMIN
+window.cerrarSesionAdmin = function() {
+    signOut(auth).then(() => {
+        esAdmin = false;
+        document.getElementById('loginOverlay').classList.remove('oculto');
+        document.getElementById('userDropdown').classList.remove('show');
+        actualizarUIAdmin(false);
+        mostrarToast('✅ Sesión cerrada', 'success');
+    });
+};
+
+// ⭐ ACTUALIZAR UI SEGÚN ADMIN
+function actualizarUIAdmin(isAdmin) {
     const statusEl = document.getElementById('adminStatus');
     const protectedDiv = document.getElementById('adminProtected');
+    const logoutBtn = document.getElementById('logoutBtn');
     
-    if (user) {
-        loginBtn.style.display = 'none';
+    if (isAdmin) {
+        statusEl.textContent = '✅ Acceso de Administrador concedido';
+        protectedDiv.className = 'admin-protected';
+        document.querySelector('.admin-btn-magic').style.display = 'block';
+        document.querySelector('.admin-btn-green').style.display = 'inline-flex';
+        document.querySelector('.admin-btn').style.display = 'inline-flex';
+        document.querySelector('.magic-section .stats').style.display = 'grid';
         logoutBtn.style.display = 'flex';
-        const email = user.email;
-        esAdmin = ADMIN_EMAILS.includes(email);
-        
-        if (esAdmin) {
-            statusEl.textContent = '✅ Acceso de Administrador concedido';
-            protectedDiv.className = 'admin-protected';
-            document.querySelector('.admin-btn-magic').style.display = 'block';
-            document.querySelector('.admin-btn-green').style.display = 'inline-flex';
-            document.querySelector('.admin-btn').style.display = 'inline-flex';
-            document.querySelector('.magic-section .stats').style.display = 'grid';
-        } else {
-            statusEl.textContent = '⛔ Acceso denegado. Solo administradores.';
-            protectedDiv.className = 'admin-protected denied';
-            document.querySelector('.admin-btn-magic').style.display = 'none';
-            document.querySelector('.admin-btn-green').style.display = 'none';
-            document.querySelector('.admin-btn').style.display = 'none';
-            document.querySelector('.magic-section .stats').style.display = 'none';
-        }
     } else {
-        loginBtn.style.display = 'flex';
-        logoutBtn.style.display = 'none';
-        statusEl.textContent = '🔒 Inicia sesión para acceder al Admin';
+        statusEl.textContent = '⛔ Acceso denegado. Inicia sesión.';
         protectedDiv.className = 'admin-protected denied';
         document.querySelector('.admin-btn-magic').style.display = 'none';
         document.querySelector('.admin-btn-green').style.display = 'none';
         document.querySelector('.admin-btn').style.display = 'none';
         document.querySelector('.magic-section .stats').style.display = 'none';
+        logoutBtn.style.display = 'none';
+    }
+}
+
+// ⭐ VERIFICAR ESTADO DE AUTENTICACIÓN
+onAuthStateChanged(auth, (user) => {
+    if (user && ADMIN_EMAILS.includes(user.email)) {
+        esAdmin = true;
+        document.getElementById('loginOverlay').classList.add('oculto');
+        actualizarUIAdmin(true);
+        cargarContenido();
+    } else if (user) {
+        // Usuario logueado pero no admin
+        signOut(auth);
+        esAdmin = false;
+        document.getElementById('loginOverlay').classList.remove('oculto');
+        actualizarUIAdmin(false);
+    } else {
+        esAdmin = false;
+        document.getElementById('loginOverlay').classList.remove('oculto');
+        actualizarUIAdmin(false);
     }
 });
 
+// ⭐ FUNCIONES DE ENLACES
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    if (tipo === 'pelicula') return `https://unlimplay.co/play/movie/${tmdb_id}`;
-    else return `https://unlimplay.co/play/tv/${tmdb_id}/${temporada}/${capitulo}`;
+    if (tipo === 'pelicula') {
+        return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+    } else {
+        return `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+    }
 }
 
 function getImagenUrl(path, size = 'w342') {
@@ -294,8 +407,9 @@ function mostrarToast(msg, tipo = 'success') {
     setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
 }
 
-// ⭐ GENERAR BAJO DEMANDA (cuando falla el admin)
+// ⭐ GENERAR BAJO DEMANDA
 window.generarEnlaceBajoDemanda = async function(tmdb_id, tipo) {
+    if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return null; }
     console.log(`🔧 Generando bajo demanda: ${tmdb_id} (${tipo})`);
     try {
         if (tipo === 'pelicula') {
@@ -321,9 +435,8 @@ window.generarEnlaceBajoDemanda = async function(tmdb_id, tipo) {
         } else {
             const data = await fetchTMDB(`tv/${tmdb_id}`);
             if (data && data.id) {
-                const numTemps = data.number_of_seasons || 1;
                 const temporadas = [];
-                for (let t = 1; t <= Math.min(numTemps, 5); t++) {
+                for (let t = 1; t <= Math.min(data.number_of_seasons || 1, 10); t++) {
                     try {
                         const seasonData = await fetchTMDB(`tv/${tmdb_id}/season/${t}`);
                         if (!seasonData || !seasonData.episodes) continue;
@@ -384,21 +497,26 @@ window.generarTodo = async function() {
     totalSeries = 0;
     totalCaps = 0;
     let errores = 0;
+    let pagePelis = 1;
+    let pageSeries = 1;
     
     try {
         // PELÍCULAS
         info.textContent = '🎬 Obteniendo películas de TMDB...';
         let peliculasTotales = [];
-        let pagePelis = 1;
-        while (pagePelis <= 10) {
+        let hasMorePelis = true;
+        
+        while (hasMorePelis) {
             try {
                 const data = await fetchTMDB('movie/popular', { page: pagePelis });
-                if (!data.results || !data.results.length) break;
+                if (!data.results || !data.results.length) { hasMorePelis = false; break; }
                 peliculasTotales = [...peliculasTotales, ...data.results];
                 info.textContent = `🎬 Cargando películas... página ${pagePelis} (${peliculasTotales.length})`;
-                fill.style.width = `${(pagePelis / 10) * 40}%`;
+                fill.style.width = `${Math.min((pagePelis / 50) * 40, 40)}%`;
                 pagePelis++;
-            } catch(e) { break; }
+                if (!data.total_pages || pagePelis > data.total_pages) hasMorePelis = false;
+                if (pagePelis > 100) hasMorePelis = false;
+            } catch(e) { hasMorePelis = false; }
         }
         
         info.textContent = `🎬 Generando ${peliculasTotales.length} películas...`;
@@ -420,7 +538,7 @@ window.generarTodo = async function() {
                 });
                 totalPeliculas++;
             } catch(e) { errores++; }
-            if (i % 10 === 0) {
+            if (i % 20 === 0) {
                 fill.style.width = `${40 + (i / peliculasTotales.length) * 30}%`;
                 info.textContent = `🎬 ${i+1}/${peliculasTotales.length} (${errores} errores)`;
                 document.getElementById('totalPeliculas').textContent = totalPeliculas;
@@ -430,16 +548,19 @@ window.generarTodo = async function() {
         // SERIES
         info.textContent = '📺 Obteniendo series de TMDB...';
         let seriesTotales = [];
-        let pageSeries = 1;
-        while (pageSeries <= 10) {
+        let hasMoreSeries = true;
+        
+        while (hasMoreSeries) {
             try {
                 const data = await fetchTMDB('tv/popular', { page: pageSeries });
-                if (!data.results || !data.results.length) break;
+                if (!data.results || !data.results.length) { hasMoreSeries = false; break; }
                 seriesTotales = [...seriesTotales, ...data.results];
                 info.textContent = `📺 Cargando series... página ${pageSeries} (${seriesTotales.length})`;
-                fill.style.width = `${70 + (pageSeries / 10) * 20}%`;
+                fill.style.width = `${70 + Math.min((pageSeries / 50) * 20, 20)}%`;
                 pageSeries++;
-            } catch(e) { break; }
+                if (!data.total_pages || pageSeries > data.total_pages) hasMoreSeries = false;
+                if (pageSeries > 100) hasMoreSeries = false;
+            } catch(e) { hasMoreSeries = false; }
         }
         
         info.textContent = `📺 Generando ${seriesTotales.length} series...`;
@@ -448,7 +569,7 @@ window.generarTodo = async function() {
                 const s = seriesTotales[i];
                 const temporadas = [];
                 let capsSerie = 0;
-                for (let t = 1; t <= Math.min(s.number_of_seasons || 1, 5); t++) {
+                for (let t = 1; t <= Math.min(s.number_of_seasons || 1, 10); t++) {
                     try {
                         const seasonData = await fetchTMDB(`tv/${s.id}/season/${t}`);
                         if (!seasonData || !seasonData.episodes) continue;
@@ -493,7 +614,7 @@ window.generarTodo = async function() {
         document.getElementById('totalPeliculas').textContent = totalPeliculas;
         document.getElementById('totalSeries').textContent = totalSeries;
         document.getElementById('totalCaps').textContent = totalCaps;
-        mostrarToast(`✅ ${totalPeliculas} películas y ${totalSeries} series!`, 'success');
+        mostrarToast(`✅ ${totalPeliculas} películas y ${totalSeries} series generadas!`, 'success');
         cargarContenido();
     } catch(e) {
         info.textContent = `❌ Error: ${e.message}`;
@@ -531,6 +652,7 @@ window.limpiarTodo = async function() {
 
 // CARGAR CONTENIDO
 window.cargarContenido = async function() {
+    if (!esAdmin) return;
     const container = document.getElementById('listaContenido');
     container.innerHTML = '<p class="loading-text">Cargando contenido...</p>';
     try {
@@ -585,9 +707,8 @@ window.cargarContenido = async function() {
     }
 };
 
-onValue(child(ref(db), ''), () => { cargarContenido(); });
-cargarContenido();
-console.log('✅ Admin TELY - Protegido y listo');
+onValue(child(ref(db), ''), () => { if (esAdmin) cargarContenido(); });
+console.log('✅ Admin TELY - Protegido con login');
 </script>
 </body>
 </html>
