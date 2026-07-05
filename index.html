@@ -21,7 +21,6 @@
         body.dark{background:#0A0A0F;color:#fff}
         body:not(.dark){background:#f0f0f0;color:#111}
         
-        /* ⭐ SIDEBAR MÁS COMPACTO */
         .sidebar{position:fixed;top:0;left:0;bottom:0;width:52px;background:rgba(10,10,15,.97);backdrop-filter:blur(12px);border-right:1px solid rgba(124,58,237,.12);z-index:100;display:flex;flex-direction:column;align-items:center;padding:.5rem 0;overflow-y:auto;transition:width 0.3s}
         body:not(.dark) .sidebar{background:rgba(255,255,255,.97);border-color:rgba(0,0,0,.08)}
         .sidebar:hover{width:150px}
@@ -54,7 +53,7 @@
             z-index:50;
             background:rgba(10,10,15,.92);
             backdrop-filter:blur(12px);
-            padding:.4rem .3rem .5rem;
+            padding:.3rem .3rem .4rem;
             border-bottom:1px solid rgba(124,58,237,.1);
         }
         body:not(.dark) .header-flotante{
@@ -62,7 +61,7 @@
             border-bottom-color:rgba(0,0,0,.08);
         }
         
-        .top-header{display:flex;justify-content:space-between;align-items:center;padding:.2rem 0 .3rem;flex-wrap:wrap;gap:.3rem}
+        .top-header{display:flex;justify-content:space-between;align-items:center;padding:.1rem 0 .2rem;flex-wrap:wrap;gap:.3rem}
         .top-header h1{font-size:.9rem;font-weight:700;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
         .top-actions{display:flex;align-items:center;gap:.3rem}
         .theme-btn{background:rgba(255,255,255,.05);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.7rem;transition:.3s}
@@ -74,9 +73,9 @@
         body:not(.dark) .user-btn{color:#111}
         
         /* ⭐ PESTAÑAS HORIZONTALES (Inicio / Películas / Series) */
-        .tabs-container{display:flex;gap:.2rem;margin:.2rem 0 .3rem;background:rgba(255,255,255,.03);border-radius:10px;padding:.2rem;border:1px solid rgba(124,58,237,.08)}
+        .tabs-container{display:flex;gap:.2rem;margin:.1rem 0 .2rem;background:rgba(255,255,255,.03);border-radius:8px;padding:.15rem;border:1px solid rgba(124,58,237,.08)}
         body:not(.dark) .tabs-container{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.06)}
-        .tab-btn{flex:1;padding:.25rem .2rem;border:none;border-radius:8px;font-size:.7rem;font-weight:600;cursor:pointer;transition:.3s;background:transparent;color:#94A3B8}
+        .tab-btn{flex:1;padding:.2rem .1rem;border:none;border-radius:6px;font-size:.65rem;font-weight:600;cursor:pointer;transition:.3s;background:transparent;color:#94A3B8}
         .tab-btn.active{background:#7C3AED;color:#fff}
         .tab-btn:hover:not(.active){background:rgba(124,58,237,.1);color:#fff}
         body:not(.dark) .tab-btn{color:#555}
@@ -84,25 +83,25 @@
         body:not(.dark) .tab-btn:hover:not(.active){background:rgba(124,58,237,.08);color:#111}
         
         /* ⭐ BUSCADOR FLOTANTE */
-        .search-bar{display:flex;align-items:center;gap:.3rem;position:relative;margin:.2rem 0}
-        .search-bar input{flex:1;padding:.3rem .6rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.75rem;transition:.3s}
+        .search-bar{display:flex;align-items:center;gap:.3rem;position:relative;margin:.1rem 0}
+        .search-bar input{flex:1;padding:.25rem .5rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.7rem;transition:.3s}
         .search-bar input:focus{outline:none;border-color:#7C3AED;background:rgba(255,255,255,.08)}
-        .search-bar input::placeholder{color:#64748B;font-size:.7rem}
+        .search-bar input::placeholder{color:#64748B;font-size:.65rem}
         body:not(.dark) .search-bar input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
         body:not(.dark) .search-bar input::placeholder{color:#888}
-        .search-bar button{padding:.2rem .8rem;border-radius:9999px;border:none;background:#7C3AED;color:#fff;font-size:.7rem;cursor:pointer;transition:.3s}
+        .search-bar button{padding:.15rem .6rem;border-radius:9999px;border:none;background:#7C3AED;color:#fff;font-size:.65rem;cursor:pointer;transition:.3s}
         .search-bar button:hover{background:#6D28D9}
-        .search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:rgba(26,26,46,.98);border-radius:10px;max-height:200px;overflow-y:auto;display:none;z-index:60;border:1px solid rgba(124,58,237,.15);padding:.2rem 0}
+        .search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:rgba(26,26,46,.98);border-radius:8px;max-height:180px;overflow-y:auto;display:none;z-index:60;border:1px solid rgba(124,58,237,.15);padding:.15rem 0}
         .search-results.show{display:block}
         body:not(.dark) .search-results{background:rgba(255,255,255,.98);border-color:rgba(0,0,0,.1)}
-        .search-result{display:flex;align-items:center;gap:.4rem;padding:.25rem .5rem;cursor:pointer;transition:.2s}
+        .search-result{display:flex;align-items:center;gap:.3rem;padding:.2rem .4rem;cursor:pointer;transition:.2s}
         .search-result:hover{background:rgba(124,58,237,.1)}
-        .search-result img{width:24px;height:36px;object-fit:cover;border-radius:4px}
+        .search-result img{width:20px;height:30px;object-fit:cover;border-radius:3px}
         .search-result .info{flex:1}
-        .search-result .info .title{font-weight:600;font-size:.7rem}
-        .search-result .info .detail{font-size:.55rem;color:#94A3B8}
+        .search-result .info .title{font-weight:600;font-size:.65rem}
+        .search-result .info .detail{font-size:.5rem;color:#94A3B8}
         
-        /* ⭐ TARJETAS MÁS PEQUEÑAS */
+        /* ⭐ TARJETAS PEQUEÑAS */
         .grid-movies{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.4rem;padding:.2rem 0}
         @media(min-width:768px){.grid-movies{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}}
         @media(min-width:1024px){.grid-movies{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}}
@@ -111,62 +110,47 @@
         .movie-card:hover{transform:translateY(-2px);border-color:rgba(124,58,237,.2)}
         body:not(.dark) .movie-card{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.06)}
         .movie-card .poster{width:100%;aspect-ratio:2/3;object-fit:cover;background:#1A1A2E}
-        .movie-card .info{padding:.2rem .25rem}
-        .movie-card .info h4{font-size:.6rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .movie-card .info{padding:.15rem .2rem}
+        .movie-card .info h4{font-size:.55rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         body:not(.dark) .movie-card .info h4{color:#111}
-        .movie-card .info .meta{display:flex;justify-content:space-between;font-size:.45rem;color:#94A3B8}
-        .movie-card .badge-year{position:absolute;top:.2rem;left:.2rem;background:rgba(124,58,237,.85);color:#fff;padding:.05rem .3rem;border-radius:3px;font-size:.4rem;font-weight:700}
-        .movie-card .badge-type{position:absolute;top:.2rem;right:.2rem;background:rgba(0,0,0,.7);color:#fff;padding:.05rem .3rem;border-radius:3px;font-size:.35rem;font-weight:600}
-        .movie-card .badge-op2{position:absolute;bottom:.2rem;right:.2rem;background:rgba(59,130,246,.85);color:#fff;padding:.03rem .2rem;border-radius:3px;font-size:.3rem;font-weight:600}
+        .movie-card .info .meta{display:flex;justify-content:space-between;font-size:.4rem;color:#94A3B8}
+        .movie-card .badge-year{position:absolute;top:.15rem;left:.15rem;background:rgba(124,58,237,.85);color:#fff;padding:.03rem .25rem;border-radius:3px;font-size:.35rem;font-weight:700}
+        .movie-card .badge-type{position:absolute;top:.15rem;right:.15rem;background:rgba(0,0,0,.7);color:#fff;padding:.03rem .25rem;border-radius:3px;font-size:.3rem;font-weight:600}
+        .movie-card .badge-op2{position:absolute;bottom:.15rem;right:.15rem;background:rgba(59,130,246,.85);color:#fff;padding:.02rem .15rem;border-radius:3px;font-size:.25rem;font-weight:600}
         
-        /* ⭐ CATEGORÍAS VERTICALES */
-        .categorias-container{display:flex;flex-direction:column;gap:.2rem;padding:.2rem 0}
-        .categoria-btn{background:rgba(255,255,255,.04);border:1px solid rgba(124,58,237,.08);border-radius:6px;padding:.25rem .6rem;color:#94A3B8;font-size:.6rem;font-weight:600;cursor:pointer;transition:.3s;text-align:left}
-        .categoria-btn:hover{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.2);color:#fff}
-        .categoria-btn.active{background:rgba(124,58,237,.15);border-color:#7C3AED;color:#fff}
-        body:not(.dark) .categoria-btn{color:#555;background:rgba(0,0,0,.03)}
-        body:not(.dark) .categoria-btn:hover{background:rgba(124,58,237,.08);color:#111}
-        body:not(.dark) .categoria-btn.active{background:rgba(124,58,237,.1);color:#7C3AED}
-        
-        .section-title{font-size:.8rem;font-weight:700;margin:.4rem 0 .2rem;display:flex;align-items:center;gap:.3rem}
+        .section-title{font-size:.75rem;font-weight:700;margin:.3rem 0 .15rem;display:flex;align-items:center;gap:.2rem}
         .section-title i{color:#7C3AED}
         body:not(.dark) .section-title{color:#111}
         
-        .horizontal-scroll{display:flex;gap:.4rem;overflow-x:auto;padding:.2rem 0;scrollbar-width:none}
+        .horizontal-scroll{display:flex;gap:.3rem;overflow-x:auto;padding:.15rem 0;scrollbar-width:none}
         .horizontal-scroll::-webkit-scrollbar{display:none}
-        .horizontal-scroll .movie-card{flex:0 0 auto;width:80px}
+        .horizontal-scroll .movie-card{flex:0 0 auto;width:75px}
         
         .skeleton{aspect-ratio:2/3;border-radius:6px;background:linear-gradient(90deg,#1A1A2E 25%,#2D2D44 50%,#1A1A2E 75%);background-size:200% 100%;animation:skeleton 1.5s infinite}
         body:not(.dark) .skeleton{background:linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 50%,#e0e0e0 75%);background-size:200% 100%}
         @keyframes skeleton{0%{background-position:-200% 0}100%{background-position:200% 0}}
         
-        .load-more{display:flex;justify-content:center;padding:.5rem 0}
-        .load-more button{background:rgba(124,58,237,.15);color:#fff;padding:.2rem 1rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);font-weight:600;cursor:pointer;font-size:.7rem;transition:.3s}
+        .load-more{display:flex;justify-content:center;padding:.3rem 0}
+        .load-more button{background:rgba(124,58,237,.15);color:#fff;padding:.15rem .8rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);font-weight:600;cursor:pointer;font-size:.65rem;transition:.3s}
         .load-more button:hover{background:rgba(124,58,237,.25);border-color:#7C3AED}
         body:not(.dark) .load-more button{color:#111;background:rgba(124,58,237,.1)}
         
-        .user-dropdown{position:absolute;right:0;top:calc(100% + 6px);background:rgba(26,26,46,.95);border-radius:10px;width:170px;border:1px solid rgba(124,58,237,.15);padding:.3rem 0;display:none;z-index:60;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+        .user-dropdown{position:absolute;right:0;top:calc(100% + 6px);background:rgba(26,26,46,.95);border-radius:8px;width:150px;border:1px solid rgba(124,58,237,.15);padding:.2rem 0;display:none;z-index:60;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
         body:not(.dark) .user-dropdown{background:rgba(255,255,255,.95);border-color:rgba(0,0,0,.1)}
-        .user-dropdown a{display:flex;align-items:center;gap:.4rem;padding:.3rem .7rem;color:#CBD5E1;text-decoration:none;font-size:.75rem;transition:.2s}
+        .user-dropdown a{display:flex;align-items:center;gap:.3rem;padding:.2rem .5rem;color:#CBD5E1;text-decoration:none;font-size:.7rem;transition:.2s}
         .user-dropdown a:hover{background:rgba(124,58,237,.08);color:#fff}
         body:not(.dark) .user-dropdown a{color:#333}
         body:not(.dark) .user-dropdown a:hover{background:rgba(124,58,237,.08);color:#111}
-        .user-dropdown hr{margin:.1rem 0;border:none;border-top:1px solid rgba(124,58,237,.08)}
+        .user-dropdown hr{margin:.05rem 0;border:none;border-top:1px solid rgba(124,58,237,.08)}
         .user-menu{position:relative}
-        .empty-msg{color:#64748B;font-size:.7rem;padding:.2rem 0}
-        .card-actions{display:flex;gap:2px;margin-top:2px;justify-content:center}
-        .card-actions button{background:none;border:none;cursor:pointer;font-size:.5rem;padding:1px 4px;border-radius:3px;transition:.2s}
+        .empty-msg{color:#64748B;font-size:.65rem;padding:.15rem 0}
+        .card-actions{display:flex;gap:2px;margin-top:1px;justify-content:center}
+        .card-actions button{background:none;border:none;cursor:pointer;font-size:.45rem;padding:1px 3px;border-radius:2px;transition:.2s}
         .card-actions .fav-btn{color:#EF4444}
         .card-actions .fav-btn:hover{background:rgba(239,68,68,.15)}
         .card-actions .list-btn{color:#3B82F6}
         .card-actions .list-btn:hover{background:rgba(59,130,246,.15)}
-        
-        /* ⭐ LAYOUT DE DOS COLUMNAS: categorías + contenido */
-        .main-layout{display:flex;gap:.5rem;padding:.2rem 0}
-        .categorias-side{flex:0 0 120px;position:sticky;top:0;align-self:flex-start;max-height:calc(100vh - 180px);overflow-y:auto}
-        @media(max-width:768px){.categorias-side{display:none}}
-        .contenido-side{flex:1;min-width:0}
         
         /* ⭐ BANNER APK */
         #bannerApp {
@@ -177,7 +161,7 @@
             right:0;
             background:linear-gradient(135deg,#1A1A2E,#2D2D44);
             border-top:2px solid #7C3AED;
-            padding:.5rem .8rem;
+            padding:.4rem .6rem;
             z-index:9999;
             box-shadow:0 -4px 30px rgba(124,58,237,.3);
             animation:slideUp 0.5s ease-out;
@@ -195,13 +179,13 @@
         }
         
         body.banner-activo {
-            padding-bottom: 70px;
+            padding-bottom: 60px;
         }
         
         .banner-logo-img {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
             object-fit: cover;
             background: #1A1A2E;
         }
@@ -288,47 +272,19 @@
 
         <!-- SECCIÓN PELÍCULAS (oculta por defecto) -->
         <div id="tabPeliculas" style="display:none;">
-            <div class="main-layout">
-                <div class="categorias-side" id="categoriasPeliculas">
-                    <div class="categoria-btn active" data-categoria="popular" onclick="filtrarPeliculas('popular')">🔥 Populares</div>
-                    <div class="categoria-btn" data-categoria="action" onclick="filtrarPeliculas('action')">⚔️ Acción</div>
-                    <div class="categoria-btn" data-categoria="comedy" onclick="filtrarPeliculas('comedy')">😂 Comedia</div>
-                    <div class="categoria-btn" data-categoria="drama" onclick="filtrarPeliculas('drama')">🎭 Drama</div>
-                    <div class="categoria-btn" data-categoria="horror" onclick="filtrarPeliculas('horror')">👻 Terror</div>
-                    <div class="categoria-btn" data-categoria="sci-fi" onclick="filtrarPeliculas('sci-fi')">🚀 Ciencia Ficción</div>
-                    <div class="categoria-btn" data-categoria="romance" onclick="filtrarPeliculas('romance')">💕 Romance</div>
-                    <div class="categoria-btn" data-categoria="animation" onclick="filtrarPeliculas('animation')">🎨 Animación</div>
-                </div>
-                <div class="contenido-side">
-                    <div class="section-title"><i class="fas fa-film"></i> Películas</div>
-                    <div class="grid-movies" id="gridPeliculas">
-                        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
-                        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
-                    </div>
-                </div>
+            <div class="section-title"><i class="fas fa-film"></i> Películas</div>
+            <div class="grid-movies" id="gridPeliculas">
+                <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+                <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
             </div>
         </div>
 
         <!-- SECCIÓN SERIES (oculta por defecto) -->
         <div id="tabSeries" style="display:none;">
-            <div class="main-layout">
-                <div class="categorias-side" id="categoriasSeries">
-                    <div class="categoria-btn active" data-categoria="popular" onclick="filtrarSeries('popular')">🔥 Populares</div>
-                    <div class="categoria-btn" data-categoria="action" onclick="filtrarSeries('action')">⚔️ Acción</div>
-                    <div class="categoria-btn" data-categoria="comedy" onclick="filtrarSeries('comedy')">😂 Comedia</div>
-                    <div class="categoria-btn" data-categoria="drama" onclick="filtrarSeries('drama')">🎭 Drama</div>
-                    <div class="categoria-btn" data-categoria="horror" onclick="filtrarSeries('horror')">👻 Terror</div>
-                    <div class="categoria-btn" data-categoria="sci-fi" onclick="filtrarSeries('sci-fi')">🚀 Ciencia Ficción</div>
-                    <div class="categoria-btn" data-categoria="romance" onclick="filtrarSeries('romance')">💕 Romance</div>
-                    <div class="categoria-btn" data-categoria="animation" onclick="filtrarSeries('animation')">🎨 Animación</div>
-                </div>
-                <div class="contenido-side">
-                    <div class="section-title"><i class="fas fa-tv"></i> Series</div>
-                    <div class="grid-movies" id="gridSeries">
-                        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
-                        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
-                    </div>
-                </div>
+            <div class="section-title"><i class="fas fa-tv"></i> Series</div>
+            <div class="grid-movies" id="gridSeries">
+                <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+                <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
             </div>
         </div>
 
@@ -338,19 +294,19 @@
 
 <!-- ⭐ BANNER APK -->
 <div id="bannerApp">
-    <div style="display:flex;align-items:center;justify-content:space-between;max-width:600px;margin:0 auto;gap:0.5rem;">
-        <div style="display:flex;align-items:center;gap:0.4rem;flex:1;">
+    <div style="display:flex;align-items:center;justify-content:space-between;max-width:600px;margin:0 auto;gap:0.4rem;">
+        <div style="display:flex;align-items:center;gap:0.3rem;flex:1;">
             <img src="logo.png" alt="TELY" class="banner-logo-img" onerror="this.style.display='none'">
             <div>
-                <div class="banner-titulo" style="font-weight:700;font-size:.75rem;color:#fff;">📱 TELY App</div>
-                <div class="banner-sub" style="font-size:.6rem;color:#94A3B8;">Descarga la app</div>
+                <div class="banner-titulo" style="font-weight:700;font-size:.7rem;color:#fff;">📱 TELY App</div>
+                <div class="banner-sub" style="font-size:.55rem;color:#94A3B8;">Descarga la app</div>
             </div>
         </div>
         <div style="display:flex;gap:0.3rem;flex-shrink:0;">
-            <button onclick="descargarAPK()" style="background:#7C3AED;border:none;color:#fff;padding:.25rem .7rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer;transition:.3s;white-space:nowrap;">
+            <button onclick="descargarAPK()" style="background:#7C3AED;border:none;color:#fff;padding:.2rem .6rem;border-radius:6px;font-weight:600;font-size:.6rem;cursor:pointer;transition:.3s;white-space:nowrap;">
                 <i class="fas fa-download"></i> APK
             </button>
-            <button onclick="cerrarBannerApp()" style="background:rgba(255,255,255,.1);border:none;color:#94A3B8;padding:.2rem .4rem;border-radius:6px;font-size:.7rem;cursor:pointer;transition:.3s;">
+            <button onclick="cerrarBannerApp()" style="background:rgba(255,255,255,.1);border:none;color:#94A3B8;padding:.15rem .3rem;border-radius:6px;font-size:.6rem;cursor:pointer;transition:.3s;">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -458,7 +414,7 @@ function getImagenUrl(path, size = 'w342') {
 function mostrarToast(msg, tipo = 'success') {
     const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
     const t = document.createElement('div');
-    t.style.cssText = `position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:8px 16px;border-radius:8px;z-index:9999;font-weight:600;font-size:.75rem;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
+    t.style.cssText = `position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:6px 14px;border-radius:8px;z-index:9999;font-weight:600;font-size:.7rem;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
     t.textContent = msg;
     document.body.appendChild(t);
     setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2000);
@@ -476,58 +432,36 @@ async function fetchTMDB(path, params = {}) {
 
 // ⭐ PESTAÑAS
 function cambiarTab(tab) {
-    // Ocultar todas
     document.getElementById('tabInicio').style.display = 'none';
     document.getElementById('tabPeliculas').style.display = 'none';
     document.getElementById('tabSeries').style.display = 'none';
     
-    // Mostrar la seleccionada
     if (tab === 'inicio') {
         document.getElementById('tabInicio').style.display = 'block';
     } else if (tab === 'peliculas') {
         document.getElementById('tabPeliculas').style.display = 'block';
-        cargarPeliculasPorCategoria('popular');
+        if (!document.getElementById('gridPeliculas').querySelector('.movie-card')) {
+            cargarPeliculas();
+        }
     } else if (tab === 'series') {
         document.getElementById('tabSeries').style.display = 'block';
-        cargarSeriesPorCategoria('popular');
+        if (!document.getElementById('gridSeries').querySelector('.movie-card')) {
+            cargarSeries();
+        }
     }
     
-    // Actualizar botones
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.tab === tab);
     });
 }
 
-// ⭐ CATEGORÍAS DE PELÍCULAS
-function filtrarPeliculas(categoria) {
-    document.querySelectorAll('#categoriasPeliculas .categoria-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.categoria === categoria);
-    });
-    cargarPeliculasPorCategoria(categoria);
-}
-
-async function cargarPeliculasPorCategoria(categoria) {
+// ⭐ CARGAR PELÍCULAS
+async function cargarPeliculas() {
     const grid = document.getElementById('gridPeliculas');
     grid.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
     
     try {
-        let data;
-        if (categoria === 'popular') {
-            data = await fetchTMDB('movie/popular', { page: 1 });
-        } else {
-            // Buscar por género
-            const generos = {
-                'action': 28, 'comedy': 35, 'drama': 18, 'horror': 27,
-                'sci-fi': 878, 'romance': 10749, 'animation': 16
-            };
-            const genreId = generos[categoria];
-            if (genreId) {
-                data = await fetchTMDB('discover/movie', { with_genres: genreId, page: 1 });
-            } else {
-                data = await fetchTMDB('movie/popular', { page: 1 });
-            }
-        }
-        
+        const data = await fetchTMDB('movie/popular', { page: 1 });
         grid.innerHTML = '';
         (data.results || []).slice(0, 12).forEach(p => {
             const item = {
@@ -547,35 +481,13 @@ async function cargarPeliculasPorCategoria(categoria) {
     }
 }
 
-// ⭐ CATEGORÍAS DE SERIES
-function filtrarSeries(categoria) {
-    document.querySelectorAll('#categoriasSeries .categoria-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.categoria === categoria);
-    });
-    cargarSeriesPorCategoria(categoria);
-}
-
-async function cargarSeriesPorCategoria(categoria) {
+// ⭐ CARGAR SERIES
+async function cargarSeries() {
     const grid = document.getElementById('gridSeries');
     grid.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
     
     try {
-        let data;
-        if (categoria === 'popular') {
-            data = await fetchTMDB('tv/popular', { page: 1 });
-        } else {
-            const generos = {
-                'action': 10759, 'comedy': 35, 'drama': 18, 'horror': 27,
-                'sci-fi': 878, 'romance': 10749, 'animation': 16
-            };
-            const genreId = generos[categoria];
-            if (genreId) {
-                data = await fetchTMDB('discover/tv', { with_genres: genreId, page: 1 });
-            } else {
-                data = await fetchTMDB('tv/popular', { page: 1 });
-            }
-        }
-        
+        const data = await fetchTMDB('tv/popular', { page: 1 });
         grid.innerHTML = '';
         (data.results || []).slice(0, 12).forEach(s => {
             const item = {
@@ -651,7 +563,7 @@ function cargarFavoritos() {
         Object.values(data).forEach(item => {
             const div = document.createElement('div');
             div.className = 'movie-card';
-            div.style.width = '80px';
+            div.style.width = '75px';
             div.style.flexShrink = '0';
             div.innerHTML = `
                 <img src="${item.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg'}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
@@ -683,7 +595,7 @@ function cargarMiLista() {
         Object.values(data).forEach(item => {
             const div = document.createElement('div');
             div.className = 'movie-card';
-            div.style.width = '80px';
+            div.style.width = '75px';
             div.style.flexShrink = '0';
             div.innerHTML = `
                 <img src="${item.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg'}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
@@ -704,7 +616,7 @@ function cargarMiLista() {
     });
 }
 
-// ⭐ CREAR TARJETA MÁS PEQUEÑA
+// ⭐ CREAR TARJETA
 function crearTarjeta(item, esSerie = false) {
     const div = document.createElement('div');
     div.className = 'movie-card';
@@ -791,10 +703,6 @@ async function cargarContenido() {
         });
 
         cargarContinuarViendo();
-        
-        // Cargar películas y series por categoría para las pestañas
-        cargarPeliculasPorCategoria('popular');
-        cargarSeriesPorCategoria('popular');
     } catch(e) { console.error(e); }
 }
 
@@ -807,7 +715,7 @@ function cargarContinuarViendo() {
     historial.slice(0, 10).forEach(entry => {
         const div = document.createElement('div');
         div.className = 'movie-card';
-        div.style.width = '80px';
+        div.style.width = '75px';
         div.style.flexShrink = '0';
         const pos = entry.temporada !== null && entry.capitulo !== null ? ` T${entry.temporada+1} Cap${entry.capitulo+1}` : '';
         div.innerHTML = `
@@ -844,7 +752,7 @@ window.mostrarSugerencias = async function(texto) {
         const resultados = [...(pelis.results || []), ...(series.results || [])];
         if (!resultados.length) { container.classList.remove('show'); return; }
         container.innerHTML = '';
-        resultados.slice(0, 8).forEach(item => {
+        resultados.slice(0, 6).forEach(item => {
             const div = document.createElement('div');
             div.className = 'search-result';
             div.innerHTML = `
@@ -923,7 +831,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 1500);
 });
 
-console.log('✅ TELY cargado - Header flotante, tarjetas pequeñas, categorías verticales');
+console.log('✅ TELY cargado - Header flotante, sin categorías verticales');
 </script>
 </body>
 </html>
