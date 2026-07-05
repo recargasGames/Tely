@@ -4,63 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>TELY 🎬 - Mi Perfil</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="preconnect" href="https://image.tmdb.org">
+    <link rel="dns-prefetch" href="https://image.tmdb.org">
+    <link rel="icon" href="logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="logo.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;transition:background 0.3s, color 0.3s;display:flex}
+        html,body{width:100%;height:100%;overflow:hidden;background:#0A0A0F}
+        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;transition:background 0.3s, color 0.3s;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+        ::-webkit-scrollbar{display:none}
         body.dark{background:#0A0A0F;color:#fff}
         body:not(.dark){background:#f0f0f0;color:#111}
         
-        .sidebar{position:fixed;top:0;left:0;bottom:0;width:72px;background:rgba(10,10,15,.97);backdrop-filter:blur(12px);border-right:1px solid rgba(124,58,237,.12);z-index:100;display:flex;flex-direction:column;align-items:center;padding:.8rem 0;overflow-y:auto;transition:width 0.3s}
-        body:not(.dark) .sidebar{background:rgba(255,255,255,.97);border-color:rgba(0,0,0,.08)}
-        .sidebar:hover{width:200px}
-        .sidebar:hover .sidebar-link span{display:inline}
-        .sidebar-logo{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:1.5rem;text-align:center;width:100%;padding:0 .5rem}
-        .sidebar-logo small{display:block;font-size:.55rem;color:#64748B;-webkit-text-fill-color:#64748B}
-        .sidebar-nav{display:flex;flex-direction:column;gap:.2rem;width:100%;padding:0 .3rem}
-        .sidebar-link{display:flex;align-items:center;gap:.8rem;padding:.6rem .8rem;border-radius:10px;color:#94A3B8;text-decoration:none;font-weight:600;font-size:.85rem;transition:.3s;white-space:nowrap}
-        .sidebar-link:hover{background:rgba(124,58,237,.12);color:#fff}
-        .sidebar-link.active{background:rgba(124,58,237,.2);color:#fff}
-        .sidebar-link i{font-size:1.2rem;min-width:24px;text-align:center}
-        .sidebar-link span{display:none}
-        .sidebar:hover .sidebar-link span{display:inline}
-        body:not(.dark) .sidebar-link{color:#555}
-        body:not(.dark) .sidebar-link:hover{background:rgba(124,58,237,.08);color:#111}
-        body:not(.dark) .sidebar-link.active{background:rgba(124,58,237,.12);color:#7C3AED}
-        .sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:.2rem;width:100%;padding:0 .3rem}
+        .main-content{width:100%;height:100vh;padding:.3rem .5rem;overflow-y:auto;margin:0 auto;max-width:600px}
         
-        .main-content{flex:1;margin-left:72px;padding:1rem;max-width:calc(100% - 72px)}
-        @media(max-width:768px){.sidebar{width:56px}.main-content{margin-left:56px;max-width:calc(100% - 56px)}}
+        .header-flotante{
+            position:sticky;
+            top:0;
+            z-index:50;
+            background:rgba(10,10,15,.92);
+            backdrop-filter:blur(12px);
+            padding:.3rem .3rem .4rem;
+            border-bottom:1px solid rgba(124,58,237,.1);
+        }
+        body:not(.dark) .header-flotante{
+            background:rgba(240,240,240,.92);
+            border-bottom-color:rgba(0,0,0,.08);
+        }
         
-        .top-header{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0 1rem;flex-wrap:wrap;gap:.5rem}
-        .top-header h1{font-size:1.3rem;font-weight:700;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .top-header{display:flex;justify-content:space-between;align-items:center;padding:.1rem 0 .2rem;flex-wrap:wrap;gap:.3rem}
+        .top-header h1{font-size:1.2rem;font-weight:800;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
         .top-actions{display:flex;align-items:center;gap:.5rem}
-        .theme-btn{background:rgba(255,255,255,.05);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:.9rem;transition:.3s}
+        
+        .theme-btn{background:rgba(255,255,255,.05);border:none;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.1rem;transition:.3s;display:flex;align-items:center;justify-content:center}
         .theme-btn:hover{background:rgba(255,255,255,.1)}
         body:not(.dark) .theme-btn{background:rgba(0,0,0,.05);color:#111}
         body:not(.dark) .theme-btn:hover{background:rgba(0,0,0,.1)}
-        .user-btn{background:rgba(124,58,237,.15);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;transition:.3s}
+        
+        .user-btn{background:rgba(124,58,237,.15);border:none;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.1rem;transition:.3s;display:flex;align-items:center;justify-content:center}
         .user-btn:hover{background:rgba(124,58,237,.3)}
         body:not(.dark) .user-btn{color:#111}
         
-        .profile-card{background:rgba(255,255,255,.04);border-radius:16px;padding:2rem;border:1px solid rgba(124,58,237,.15);max-width:500px;margin:0 auto;text-align:center}
-        body:not(.dark) .profile-card{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1)}
+        .back-btn{background:rgba(255,255,255,.05);border:none;color:#94A3B8;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.1rem;transition:.3s;display:flex;align-items:center;justify-content:center}
+        .back-btn:hover{background:rgba(255,255,255,.1)}
+        body:not(.dark) .back-btn{background:rgba(0,0,0,.05);color:#555}
         
-        .profile-avatar{width:100px;height:100px;margin:0 auto 1rem;border-radius:50%;overflow:hidden;border:3px solid #7C3AED}
+        .profile-card{background:rgba(255,255,255,.04);border-radius:12px;padding:1.5rem;border:1px solid rgba(124,58,237,.1);max-width:500px;margin:1rem auto;text-align:center}
+        body:not(.dark) .profile-card{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.08)}
+        
+        .profile-avatar{width:80px;height:80px;margin:0 auto .6rem;border-radius:50%;overflow:hidden;border:3px solid #7C3AED}
         .profile-avatar img{width:100%;height:100%;object-fit:cover;background:#1A1A2E}
-        .profile-name{font-size:1.5rem;font-weight:700}
-        .profile-email{color:#94A3B8;font-size:.95rem}
+        .profile-name{font-size:1.2rem;font-weight:700}
+        .profile-email{color:#94A3B8;font-size:.8rem}
         body:not(.dark) .profile-email{color:#888}
-        .profile-plan{display:inline-block;padding:.2rem .8rem;border-radius:9999px;background:rgba(16,185,129,.15);color:#34D399;font-size:.75rem;font-weight:600;margin-top:.3rem}
+        .profile-plan{display:inline-block;padding:.1rem .6rem;border-radius:9999px;background:rgba(16,185,129,.15);color:#34D399;font-size:.65rem;font-weight:600;margin-top:.2rem}
         
-        .profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:1.5rem 0;padding:1rem 0;border-top:1px solid rgba(124,58,237,.08);border-bottom:1px solid rgba(124,58,237,.08)}
+        .profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.3rem;margin:.8rem 0;padding:.6rem 0;border-top:1px solid rgba(124,58,237,.06);border-bottom:1px solid rgba(124,58,237,.06)}
         .profile-stats .stat{text-align:center}
-        .profile-stats .stat .num{font-size:1.3rem;font-weight:700;color:#7C3AED}
-        .profile-stats .stat .label{font-size:.7rem;color:#94A3B8}
+        .profile-stats .stat .num{font-size:1.1rem;font-weight:700;color:#7C3AED}
+        .profile-stats .stat .label{font-size:.6rem;color:#94A3B8}
         
-        /* ⭐ BOTONES DEL PERFIL */
-        .profile-btn{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.6rem 1.5rem;border-radius:10px;font-weight:600;cursor:pointer;transition:.3s;margin:.3rem;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem}
+        .profile-btn{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.5rem 1.2rem;border-radius:8px;font-weight:600;cursor:pointer;transition:.3s;margin:.2rem;font-size:.75rem;display:inline-flex;align-items:center;gap:.3rem}
         .profile-btn:hover{background:rgba(124,58,237,.25)}
         .profile-btn.danger{border-color:rgba(239,68,68,.3);color:#EF4444}
         .profile-btn.danger:hover{background:rgba(239,68,68,.15)}
@@ -73,24 +82,23 @@
         body:not(.dark) .profile-btn.success{color:#059669}
         body:not(.dark) .profile-btn.warning{color:#D97706}
         
-        .btn-group{display:flex;flex-direction:column;gap:.4rem;margin:.5rem 0}
+        .btn-group{display:flex;flex-direction:column;gap:.3rem;margin:.3rem 0}
         .btn-group .profile-btn{justify-content:center}
         
-        /* ⭐ MODALES */
         .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:none;align-items:center;justify-content:center;padding:1rem}
         .modal-overlay.show{display:flex}
-        .modal-box{background:#1A1A2E;border-radius:16px;padding:1.5rem;max-width:420px;width:100%;border:1px solid rgba(124,58,237,.15);max-height:90vh;overflow-y:auto}
-        body:not(.dark) .modal-box{background:#fff;border-color:rgba(0,0,0,.1)}
-        .modal-box h2{font-size:1.2rem;font-weight:700;margin-bottom:.3rem;text-align:center}
-        .modal-box .sub{color:#94A3B8;font-size:.85rem;text-align:center;margin-bottom:1rem}
+        .modal-box{background:#1A1A2E;border-radius:12px;padding:1.2rem;max-width:400px;width:100%;border:1px solid rgba(124,58,237,.12);max-height:90vh;overflow-y:auto}
+        body:not(.dark) .modal-box{background:#fff;border-color:rgba(0,0,0,.08)}
+        .modal-box h2{font-size:1.1rem;font-weight:700;margin-bottom:.2rem;text-align:center}
+        .modal-box .sub{color:#94A3B8;font-size:.75rem;text-align:center;margin-bottom:.6rem}
         body:not(.dark) .modal-box .sub{color:#555}
-        .modal-input{width:100%;padding:.6rem 1rem;border-radius:10px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.9rem;margin-bottom:.8rem;transition:.3s}
+        .modal-input{width:100%;padding:.4rem .8rem;border-radius:8px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.8rem;margin-bottom:.6rem;transition:.3s}
         .modal-input:focus{outline:none;border-color:#7C3AED}
         .modal-input::placeholder{color:#64748B}
         body:not(.dark) .modal-input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
         body:not(.dark) .modal-input::placeholder{color:#888}
-        .modal-actions{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:.5rem}
-        .modal-actions button{padding:.5rem 1.5rem;border-radius:10px;font-weight:600;border:none;cursor:pointer;transition:.3s}
+        .modal-actions{display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;margin-top:.3rem}
+        .modal-actions button{padding:.4rem 1.2rem;border-radius:8px;font-weight:600;border:none;cursor:pointer;transition:.3s;font-size:.75rem}
         .modal-actions .btn-guardar{background:#7C3AED;color:#fff}
         .modal-actions .btn-guardar:hover{background:#6D28D9}
         .modal-actions .btn-guardar:disabled{opacity:.5;cursor:not-allowed}
@@ -98,89 +106,111 @@
         .modal-actions .btn-cancelar:hover{background:rgba(255,255,255,.1)}
         body:not(.dark) .modal-actions .btn-cancelar{background:rgba(0,0,0,.05);color:#555}
         
-        /* ⭐ ESTILOS PEDIDOS */
-        .pedido-form{text-align:left;margin:.5rem 0}
-        .pedido-form .campo{margin-bottom:.6rem}
-        .pedido-form .campo label{display:block;font-size:.75rem;font-weight:600;color:#94A3B8;margin-bottom:.2rem}
-        .pedido-form .campo input,.pedido-form .campo select,.pedido-form .campo textarea{width:100%;padding:.4rem .8rem;border-radius:10px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.85rem;transition:.3s}
+        .pedido-form{text-align:left;margin:.3rem 0}
+        .pedido-form .campo{margin-bottom:.4rem}
+        .pedido-form .campo label{display:block;font-size:.65rem;font-weight:600;color:#94A3B8;margin-bottom:.1rem}
+        .pedido-form .campo input,.pedido-form .campo select,.pedido-form .campo textarea{width:100%;padding:.3rem .6rem;border-radius:8px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.75rem;transition:.3s}
         .pedido-form .campo input:focus,.pedido-form .campo select:focus,.pedido-form .campo textarea:focus{outline:none;border-color:#7C3AED}
-        .pedido-form .campo textarea{min-height:50px;resize:vertical}
+        .pedido-form .campo textarea{min-height:40px;resize:vertical}
         body:not(.dark) .pedido-form .campo input,body:not(.dark) .pedido-form .campo select,body:not(.dark) .pedido-form .campo textarea{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
         body:not(.dark) .pedido-form .campo label{color:#555}
         
-        .pedido-item{background:rgba(255,255,255,.03);border-radius:10px;padding:.5rem .8rem;margin:.3rem 0;border-left:3px solid #F59E0B;text-align:left}
+        .pedido-item{background:rgba(255,255,255,.03);border-radius:8px;padding:.4rem .6rem;margin:.2rem 0;border-left:3px solid #F59E0B;text-align:left}
         body:not(.dark) .pedido-item{background:rgba(0,0,0,.02)}
-        .pedido-item .titulo{font-weight:600;font-size:.85rem}
-        .pedido-item .detalles{font-size:.7rem;color:#94A3B8;display:flex;gap:.8rem;flex-wrap:wrap}
-        .pedido-item .estado{display:inline-block;padding:.05rem .5rem;border-radius:9999px;font-size:.55rem;font-weight:600}
+        .pedido-item .titulo{font-weight:600;font-size:.75rem}
+        .pedido-item .detalles{font-size:.6rem;color:#94A3B8;display:flex;gap:.6rem;flex-wrap:wrap}
+        .pedido-item .estado{display:inline-block;padding:.03rem .4rem;border-radius:9999px;font-size:.5rem;font-weight:600}
         .pedido-item .estado.pendiente{background:rgba(245,158,11,.15);color:#F59E0B}
         .pedido-item .estado.procesando{background:rgba(59,130,246,.15);color:#3B82F6}
         .pedido-item .estado.completado{background:rgba(16,185,129,.15);color:#34D399}
-        .pedido-item .fecha{font-size:.6rem;color:#64748B}
-        .no-pedidos{color:#64748B;font-size:.8rem;text-align:center;padding:.5rem 0}
-        .badge-pedido{display:inline-block;background:#EF4444;color:#fff;border-radius:9999px;padding:.05rem .5rem;font-size:.55rem;font-weight:700;margin-left:.3rem}
+        .pedido-item .fecha{font-size:.5rem;color:#64748B}
+        .no-pedidos{color:#64748B;font-size:.7rem;text-align:center;padding:.3rem 0}
+        .badge-pedido{display:inline-block;background:#EF4444;color:#fff;border-radius:9999px;padding:.03rem .4rem;font-size:.5rem;font-weight:700;margin-left:.2rem}
         
-        .user-dropdown{position:absolute;right:0;top:calc(100% + 8px);background:rgba(26,26,46,.95);border-radius:12px;width:200px;border:1px solid rgba(124,58,237,.15);padding:.4rem 0;display:none;z-index:50;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+        .user-dropdown{position:absolute;right:0;top:calc(100% + 6px);background:rgba(26,26,46,.95);border-radius:8px;width:160px;border:1px solid rgba(124,58,237,.15);padding:.2rem 0;display:none;z-index:60;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
         body:not(.dark) .user-dropdown{background:rgba(255,255,255,.95);border-color:rgba(0,0,0,.1)}
-        .user-dropdown a{display:flex;align-items:center;gap:.6rem;padding:.4rem 1rem;color:#CBD5E1;text-decoration:none;font-size:.85rem;transition:.2s}
+        .user-dropdown a{display:flex;align-items:center;gap:.3rem;padding:.3rem .6rem;color:#CBD5E1;text-decoration:none;font-size:.75rem;transition:.2s}
         .user-dropdown a:hover{background:rgba(124,58,237,.08);color:#fff}
         body:not(.dark) .user-dropdown a{color:#333}
         body:not(.dark) .user-dropdown a:hover{background:rgba(124,58,237,.08);color:#111}
-        .user-dropdown hr{margin:.2rem 0;border:none;border-top:1px solid rgba(124,58,237,.08)}
+        .user-dropdown hr{margin:.05rem 0;border:none;border-top:1px solid rgba(124,58,237,.08)}
         .user-menu{position:relative}
+        
+        #bannerApp {
+            display:none;
+            position:fixed;
+            bottom:0;
+            left:0;
+            right:0;
+            background:linear-gradient(135deg,#1A1A2E,#2D2D44);
+            border-top:2px solid #7C3AED;
+            padding:.4rem .6rem;
+            z-index:9999;
+            box-shadow:0 -4px 30px rgba(124,58,237,.3);
+            animation:slideUp 0.5s ease-out;
+        }
+        body:not(.dark) #bannerApp {
+            background:linear-gradient(135deg,#f0f0f0,#e8e8e8);
+            border-top-color:#7C3AED;
+        }
+        body:not(.dark) #bannerApp .banner-titulo{color:#111;}
+        body:not(.dark) #bannerApp .banner-sub{color:#555;}
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        body.banner-activo {
+            padding-bottom: 60px;
+        }
+        
+        .banner-logo-img {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: #1A1A2E;
+        }
     </style>
 </head>
 <body>
 
-<nav class="sidebar">
-    <div class="sidebar-logo">TELY<small>🍿</small></div>
-    <div class="sidebar-nav">
-        <a href="index.html" class="sidebar-link"><i class="fas fa-home"></i><span>Inicio</span></a>
-        <a href="peliculas.html" class="sidebar-link"><i class="fas fa-film"></i><span>Películas</span></a>
-        <a href="series.html" class="sidebar-link"><i class="fas fa-tv"></i><span>Series</span></a>
-        <a href="populares.html" class="sidebar-link"><i class="fas fa-fire"></i><span>Populares</span></a>
-    </div>
-    <div class="sidebar-bottom">
-        <a href="perfil.html" class="sidebar-link active"><i class="fas fa-user"></i><span>Perfil</span></a>
-    </div>
-</nav>
-
 <main class="main-content">
-    <div class="top-header">
-        <h1><i class="fas fa-user"></i> Mi Perfil</h1>
-        <div class="top-actions">
-            <button class="theme-btn" onclick="toggleTheme()" id="themeBtn"><i class="fas fa-moon"></i></button>
-            <div class="user-menu">
-                <button class="user-btn" onclick="toggleUserMenu()"><i class="fas fa-user-circle"></i></button>
-                <div class="user-dropdown" id="userDropdown">
-                    <a href="perfil.html"><i class="fas fa-user"></i> Mi perfil</a>
-                    <hr>
-                    <a href="#" id="loginBtn" onclick="irALogin()"><i class="fas fa-sign-in-alt"></i> Iniciar sesión</a>
-                    <a href="#" id="logoutBtn" style="display:none;" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+    <div class="header-flotante">
+        <div class="top-header">
+            <h1><i class="fas fa-user"></i> Mi Perfil</h1>
+            <div class="top-actions">
+                <button class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i></button>
+                <button class="theme-btn" onclick="toggleTheme()" id="themeBtn"><i class="fas fa-moon"></i></button>
+                <div class="user-menu">
+                    <button class="user-btn" onclick="toggleUserMenu()"><i class="fas fa-user-circle"></i></button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="perfil.html"><i class="fas fa-user"></i> Mi perfil</a>
+                        <hr>
+                        <a href="#" id="loginBtn" onclick="irALogin()"><i class="fas fa-sign-in-alt"></i> Iniciar sesión</a>
+                        <a href="#" id="logoutBtn" style="display:none;" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="profile-card">
-        <!-- ⭐ AVATAR -->
         <div class="profile-avatar">
             <img id="profileAvatar" src="https://ui-avatars.com/api/?name=Usuario&background=7C3AED&color=fff&size=100" alt="Avatar">
         </div>
-        
         <div class="profile-name" id="profileName">Invitado</div>
         <div class="profile-email" id="profileEmail">No has iniciado sesión</div>
         <div class="profile-plan" id="profilePlan">🎬 Plan Gratis</div>
 
-        <!-- ⭐ ESTADÍSTICAS -->
         <div class="profile-stats">
             <div class="stat"><div class="num" id="statHistorial">0</div><div class="label">Vistos</div></div>
             <div class="stat"><div class="num" id="statFavoritos">0</div><div class="label">Favoritos</div></div>
             <div class="stat"><div class="num" id="statPedidos">0</div><div class="label">Pedidos</div></div>
         </div>
 
-        <!-- ⭐ BOTONES -->
         <div class="btn-group">
             <button class="profile-btn warning" onclick="abrirModalPedido()"><i class="fas fa-plus-circle"></i> 📝 Hacer pedido</button>
             <button class="profile-btn" onclick="verMisPedidos()"><i class="fas fa-clipboard-list"></i> 📋 Mis pedidos <span class="badge-pedido" id="badgePedidos">0</span></button>
@@ -190,12 +220,11 @@
     </div>
 </main>
 
-<!-- ⭐ MODAL PARA HACER PEDIDO -->
+<!-- MODALES -->
 <div class="modal-overlay" id="modalPedido">
     <div class="modal-box">
         <h2><i class="fas fa-plus-circle" style="color:#F59E0B;"></i> Hacer pedido</h2>
         <p class="sub">Solicita una película o serie que no esté en la plataforma</p>
-        
         <form id="formPedido" onsubmit="event.preventDefault(); enviarPedido()">
             <div class="pedido-form">
                 <div class="campo">
@@ -218,7 +247,6 @@
                     <textarea id="pedidoSinopsis" placeholder="Describe de qué trata..."></textarea>
                 </div>
             </div>
-            
             <div class="modal-actions">
                 <button type="submit" class="btn-guardar" id="btnEnviarPedido"><i class="fas fa-paper-plane"></i> Enviar</button>
                 <button type="button" class="btn-cancelar" onclick="cerrarModalPedido()"><i class="fas fa-times"></i> Cancelar</button>
@@ -227,12 +255,11 @@
     </div>
 </div>
 
-<!-- ⭐ MODAL PARA VER PEDIDOS -->
 <div class="modal-overlay" id="modalPedidos">
     <div class="modal-box">
         <h2><i class="fas fa-clipboard-list" style="color:#F59E0B;"></i> Mis pedidos</h2>
         <p class="sub" id="subPedidos">Tus pedidos aparecerán aquí</p>
-        <div id="listaPedidos" style="max-height:300px;overflow-y:auto;">
+        <div id="listaPedidos" style="max-height:280px;overflow-y:auto;">
             <div class="no-pedidos">No tienes pedidos aún</div>
         </div>
         <div class="modal-actions">
@@ -241,22 +268,39 @@
     </div>
 </div>
 
-<!-- ⭐ MODAL PARA CAMBIAR CONTRASEÑA -->
 <div class="modal-overlay" id="modalPassword">
     <div class="modal-box">
         <h2><i class="fas fa-key" style="color:#34D399;"></i> Cambiar contraseña</h2>
         <p class="sub">Ingresa tu nueva contraseña</p>
-        
         <form id="formPassword" onsubmit="event.preventDefault(); cambiarPassword()">
             <input type="password" class="modal-input" id="passActual" placeholder="🔒 Contraseña actual" required>
             <input type="password" class="modal-input" id="passNueva" placeholder="🔑 Nueva contraseña" required minlength="6">
             <input type="password" class="modal-input" id="passConfirmar" placeholder="✅ Confirmar nueva contraseña" required>
-            
             <div class="modal-actions">
                 <button type="submit" class="btn-guardar" id="btnCambiarPass"><i class="fas fa-save"></i> Guardar</button>
                 <button type="button" class="btn-cancelar" onclick="cerrarModalPassword()"><i class="fas fa-times"></i> Cancelar</button>
             </div>
         </form>
+    </div>
+</div>
+
+<div id="bannerApp">
+    <div style="display:flex;align-items:center;justify-content:space-between;max-width:600px;margin:0 auto;gap:0.4rem;">
+        <div style="display:flex;align-items:center;gap:0.3rem;flex:1;">
+            <img src="logo.png" alt="TELY" class="banner-logo-img" onerror="this.style.display='none'">
+            <div>
+                <div class="banner-titulo" style="font-weight:700;font-size:.75rem;color:#fff;">📱 TELY App</div>
+                <div class="banner-sub" style="font-size:.6rem;color:#94A3B8;">Descarga la app</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:0.3rem;flex-shrink:0;">
+            <button onclick="descargarAPK()" style="background:#7C3AED;border:none;color:#fff;padding:.25rem .7rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer;transition:.3s;white-space:nowrap;">
+                <i class="fas fa-download"></i> APK
+            </button>
+            <button onclick="cerrarBannerApp()" style="background:rgba(255,255,255,.1);border:none;color:#94A3B8;padding:.2rem .4rem;border-radius:6px;font-size:.65rem;cursor:pointer;transition:.3s;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -278,36 +322,38 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ⭐ MANEJO DEL BOTÓN ATRÁS
-(function() {
-    window.history.pushState({ page: 1 }, "", "");
-    window.addEventListener('popstate', function(e) {
-        window.location.href = 'index.html';
-        e.preventDefault();
-        return false;
-    });
-    if (typeof document !== 'undefined') {
-        document.addEventListener('backbutton', function(e) {
-            window.location.href = 'index.html';
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        }, false);
+document.addEventListener('DOMContentLoaded', function() {
+    const esApp = window.navigator.standalone || 
+                   window.matchMedia('(display-mode: standalone)').matches ||
+                   /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (esApp) {
+        setTimeout(function() {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen();
+            }
+        }, 500);
     }
-})();
+});
+
+document.addEventListener('click', function() {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else if (document.documentElement.webkitRequestFullscreen) {
+            document.documentElement.webkitRequestFullscreen();
+        }
+    }
+});
+
+history.pushState(null, '', window.location.href);
+window.addEventListener('popstate', function(e) { return true; });
+document.addEventListener('backbutton', function(e) { return true; }, false);
 
 function irALogin() { window.location.href = 'login.html'; }
-
-function cerrarSesion() { 
-    auth.signOut().then(() => { 
-        window.location.href = 'index.html'; 
-    }); 
-}
-
-function toggleUserMenu() { 
-    document.getElementById('userDropdown').classList.toggle('show'); 
-}
-
+function cerrarSesion() { auth.signOut().then(() => { window.location.href = 'index.html'; }); }
+function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('userDropdown');
     if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
@@ -326,7 +372,6 @@ function toggleTheme() {
         localStorage.setItem('theme', 'dark'); 
     }
 }
-
 if (localStorage.getItem('theme') === 'light') { 
     document.body.classList.remove('dark'); 
     document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; 
@@ -335,17 +380,15 @@ if (localStorage.getItem('theme') === 'light') {
     document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; 
 }
 
-// ⭐ MOSTRAR TOAST
 function mostrarToast(msg, tipo = 'success') {
     const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
     const t = document.createElement('div');
-    t.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:10px 20px;border-radius:10px;z-index:9999;font-weight:600;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
+    t.style.cssText = `position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:6px 14px;border-radius:8px;z-index:9999;font-weight:600;font-size:.7rem;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
     t.textContent = msg;
     document.body.appendChild(t);
-    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2000);
 }
 
-// ⭐ PEDIDOS
 function abrirModalPedido() {
     const user = auth.currentUser;
     if (!user) {
@@ -357,18 +400,16 @@ function abrirModalPedido() {
     document.getElementById('formPedido').reset();
 }
 
-function cerrarModalPedido() {
-    document.getElementById('modalPedido').classList.remove('show');
-}
+function cerrarModalPedido() { document.getElementById('modalPedido').classList.remove('show'); }
+function cerrarModalPedidos() { document.getElementById('modalPedidos').classList.remove('show'); }
+function cerrarModalPassword() { document.getElementById('modalPassword').classList.remove('show'); }
 
 function enviarPedido() {
     const user = auth.currentUser;
     if (!user) return;
-    
     const btn = document.getElementById('btnEnviarPedido');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
-    
     const pedido = {
         tipo: document.getElementById('pedidoTipo').value,
         titulo: document.getElementById('pedidoTitulo').value.trim(),
@@ -380,14 +421,12 @@ function enviarPedido() {
         fecha: new Date().toISOString(),
         estado: 'pendiente'
     };
-    
     if (!pedido.titulo) {
         mostrarToast('❌ El título es obligatorio', 'error');
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar';
         return;
     }
-    
     db.ref('pedidos').push(pedido).then(() => {
         mostrarToast('✅ ¡Pedido enviado!', 'success');
         cerrarModalPedido();
@@ -412,32 +451,23 @@ function verMisPedidos() {
     cargarMisPedidos();
 }
 
-function cerrarModalPedidos() {
-    document.getElementById('modalPedidos').classList.remove('show');
-}
-
 function cargarMisPedidos() {
     const user = auth.currentUser;
     if (!user) return;
-    
     const container = document.getElementById('listaPedidos');
     const sub = document.getElementById('subPedidos');
-    container.innerHTML = '<div style="text-align:center;padding:.5rem;color:#64748B;"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>';
-    
+    container.innerHTML = '<div style="text-align:center;padding:.3rem;color:#64748B;"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>';
     db.ref('pedidos').orderByChild('usuario').equalTo(user.uid).once('value').then((snap) => {
         const data = snap.val();
         container.innerHTML = '';
-        
         if (!data) {
             container.innerHTML = '<div class="no-pedidos">No tienes pedidos aún</div>';
             sub.textContent = 'Haz un pedido desde el menú principal';
             return;
         }
-        
         const pedidos = Object.values(data);
         sub.textContent = `Tienes ${pedidos.length} pedido(s)`;
         pedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-        
         pedidos.forEach((p) => {
             const div = document.createElement('div');
             div.className = 'pedido-item';
@@ -446,27 +476,25 @@ function cargarMisPedidos() {
                 'procesando': '🔄 En proceso',
                 'completado': '✅ Completado'
             }[p.estado] || '⏳ Pendiente';
-            
             div.innerHTML = `
                 <div class="titulo">${p.tipo === 'pelicula' ? '🎬' : '📺'} ${p.titulo}</div>
                 <div class="detalles">
                     <span>📅 ${p.anio || 'N/D'}</span>
                     <span class="estado ${p.estado || 'pendiente'}">${estadoText}</span>
                 </div>
-                ${p.sinopsis && p.sinopsis !== 'Sin descripción' ? `<div style="font-size:.7rem;color:#64748B;margin-top:.2rem;">${p.sinopsis.substring(0, 80)}${p.sinopsis.length > 80 ? '...' : ''}</div>` : ''}
+                ${p.sinopsis && p.sinopsis !== 'Sin descripción' ? `<div style="font-size:.6rem;color:#64748B;margin-top:.1rem;">${p.sinopsis.substring(0, 80)}${p.sinopsis.length > 80 ? '...' : ''}</div>` : ''}
                 <div class="fecha">📆 ${new Date(p.fecha).toLocaleDateString()}</div>
             `;
             container.appendChild(div);
         });
     }).catch(() => {
-        container.innerHTML = '<div style="color:#EF4444;text-align:center;padding:.5rem;">Error al cargar los pedidos</div>';
+        container.innerHTML = '<div style="color:#EF4444;text-align:center;padding:.3rem;">Error al cargar los pedidos</div>';
     });
 }
 
 function actualizarContadorPedidos() {
     const user = auth.currentUser;
     if (!user) return;
-    
     db.ref('pedidos').orderByChild('usuario').equalTo(user.uid).once('value').then((snap) => {
         const data = snap.val();
         const count = data ? Object.keys(data).length : 0;
@@ -477,7 +505,6 @@ function actualizarContadorPedidos() {
     });
 }
 
-// ⭐ CAMBIAR CONTRASEÑA
 function abrirModalCambiarPassword() {
     const user = auth.currentUser;
     if (!user) {
@@ -489,33 +516,23 @@ function abrirModalCambiarPassword() {
     document.getElementById('formPassword').reset();
 }
 
-function cerrarModalPassword() {
-    document.getElementById('modalPassword').classList.remove('show');
-}
-
 function cambiarPassword() {
     const user = auth.currentUser;
     if (!user) return;
-    
     const passActual = document.getElementById('passActual').value;
     const passNueva = document.getElementById('passNueva').value;
     const passConfirmar = document.getElementById('passConfirmar').value;
-    
     if (passNueva !== passConfirmar) {
         mostrarToast('❌ Las contraseñas no coinciden', 'error');
         return;
     }
-    
     if (passNueva.length < 6) {
         mostrarToast('❌ La contraseña debe tener al menos 6 caracteres', 'error');
         return;
     }
-    
     const btn = document.getElementById('btnCambiarPass');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-    
-    // Reautenticar primero
     const credential = firebase.auth.EmailAuthProvider.credential(user.email, passActual);
     user.reauthenticateWithCredential(credential).then(() => {
         user.updatePassword(passNueva).then(() => {
@@ -535,7 +552,6 @@ function cambiarPassword() {
     });
 }
 
-// ⭐ ACTUALIZAR PERFIL
 function actualizarPerfil(user) {
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
@@ -550,10 +566,8 @@ function actualizarPerfil(user) {
         name.textContent = displayName;
         email.textContent = user.email || '';
         avatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=7C3AED&color=fff&size=100`;
-        
         const historial = JSON.parse(localStorage.getItem('historialTely')) || [];
         document.getElementById('statHistorial').textContent = historial.length;
-        
         db.ref('usuarios/' + user.uid).once('value').then((snap) => {
             const data = snap.val();
             if (data) {
@@ -584,7 +598,6 @@ auth.onAuthStateChanged(user => {
     actualizarPerfil(user);
 });
 
-// ⭐ CERRAR MODALES CON ESC
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         cerrarModalPedido();
@@ -593,7 +606,52 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-console.log('✅ Perfil TELY - Simplificado con pedidos y cambio de contraseña');
+// ⭐ BANNER APK
+function detectarPlataforma() {
+    const ua = navigator.userAgent || '';
+    const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
+    const esNavegador = !esWebView && /Android|iPhone|iPad|iPod/i.test(ua);
+    return { esWebView, esNavegador };
+}
+
+function mostrarBannerApp() {
+    const banner = document.getElementById('bannerApp');
+    if (!banner) return;
+    if (localStorage.getItem('bannerAppCerrado') === 'true') return;
+    const { esWebView, esNavegador } = detectarPlataforma();
+    if (esNavegador) {
+        banner.style.display = 'block';
+        document.body.classList.add('banner-activo');
+    }
+}
+
+function cerrarBannerApp() {
+    const banner = document.getElementById('bannerApp');
+    if (banner) {
+        banner.style.display = 'none';
+        document.body.classList.remove('banner-activo');
+        localStorage.setItem('bannerAppCerrado', 'true');
+    }
+}
+
+function descargarAPK() {
+    const urlAPK = 'https://appsgeyser.io/19960416/Tely';
+    mostrarToast('📱 Descargando...', 'info');
+    const link = document.createElement('a');
+    link.href = urlAPK;
+    link.target = '_blank';
+    link.download = 'Tely.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(cerrarBannerApp, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(mostrarBannerApp, 1500);
+});
+
+console.log('✅ Perfil TELY - Sin sidebar');
 </script>
 </body>
 </html>
