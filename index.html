@@ -128,7 +128,7 @@
         .card-actions .list-btn{color:#3B82F6}
         .card-actions .list-btn:hover{background:rgba(59,130,246,.15)}
         
-        /* ⭐ BANNER APK - NUEVO DISEÑO */
+        /* ⭐ BANNER APK */
         #bannerApp {
             display:none;
             position:fixed;
@@ -256,7 +256,7 @@
     </div>
 </main>
 
-<!-- ⭐ BANNER APK - NUEVO MENSAJE -->
+<!-- ⭐ BANNER APK -->
 <div id="bannerApp">
     <div style="display:flex;align-items:center;justify-content:space-between;max-width:600px;margin:0 auto;gap:0.5rem;">
         <div style="display:flex;align-items:center;gap:0.4rem;flex:1;">
@@ -851,7 +851,7 @@ window.buscarGlobal = function() {
     if (input.value.trim()) window.mostrarSugerencias(input.value);
 };
 
-// ⭐ BANNER APK
+// ⭐ BANNER APK - DETECCIÓN Y DESCARGA
 function detectarPlataforma() {
     const ua = navigator.userAgent || '';
     const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
@@ -885,7 +885,6 @@ function descargarAPK() {
     const urlAPK = 'https://appsgeyser.io/19960416/Tely';
     mostrarToast('📱 Descargando TELY...', 'info');
     
-    // Crear enlace de descarga directa
     const link = document.createElement('a');
     link.href = urlAPK;
     link.target = '_blank';
@@ -894,7 +893,6 @@ function descargarAPK() {
     link.click();
     document.body.removeChild(link);
     
-    // Cerrar banner después de 2 segundos
     setTimeout(cerrarBannerApp, 2000);
 }
 
@@ -904,10 +902,10 @@ cargarPeliculas(1);
 cargarSeries(1);
 
 document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(mostrarBannerApp, 1500);
+    setTimeout(mostrarBannerApp, 2000);
 });
 
-console.log('✅ TELY cargado - Banner con mensaje "¿Quieres instalar TELY?"');
+console.log('✅ TELY cargado - Banner APK, scroll infinito');
 </script>
 </body>
 </html>
