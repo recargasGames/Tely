@@ -330,31 +330,21 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ⭐ PANTALLA COMPLETA
-document.addEventListener('DOMContentLoaded', function() {
+// ⭐ PANTALLA COMPLETA - SOLO PARA APK
+function activarPantallaCompleta() {
     const esApp = window.navigator.standalone || 
                    window.matchMedia('(display-mode: standalone)').matches ||
-                   /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                   /Android.*(wv|WebView)/i.test(navigator.userAgent);
     if (esApp) {
-        setTimeout(function() {
+        try {
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen().catch(() => {});
             } else if (document.documentElement.webkitRequestFullscreen) {
                 document.documentElement.webkitRequestFullscreen();
             }
-        }, 500);
+        } catch(e) {}
     }
-});
-
-document.addEventListener('click', function() {
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen().catch(() => {});
-        } else if (document.documentElement.webkitRequestFullscreen) {
-            document.documentElement.webkitRequestFullscreen();
-        }
-    }
-});
+}
 
 // ⭐ BOTÓN ATRÁS - VA AL INDEX
 history.pushState(null, '', window.location.href);
@@ -812,16 +802,17 @@ function descargarAPK() {
     setTimeout(cerrarBannerApp, 2000);
 }
 
-// ⭐ INICIAR
+// ⭐ INICIAR - SOLO ACTIVAR PANTALLA COMPLETA EN APK
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(mostrarBannerApp, 2000);
+    activarPantallaCompleta();
+});
+
 if (tmdbId) {
     cargarContenidoReproductor();
 } else {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(mostrarBannerApp, 2000);
-});
 
 console.log('✅ Reproductor TELY - Opción 2 resaltada con ⭐ Recomendada');
 </script>
