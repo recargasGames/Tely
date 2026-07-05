@@ -4,165 +4,223 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>TELY 🎬 - Películas</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="preconnect" href="https://image.tmdb.org">
+    <link rel="dns-prefetch" href="https://image.tmdb.org">
+    <link rel="icon" href="logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="logo.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;transition:background 0.3s, color 0.3s;display:flex}
+        html,body{width:100%;height:100%;overflow:hidden;background:#0A0A0F}
+        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;transition:background 0.3s, color 0.3s;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+        ::-webkit-scrollbar{display:none}
         body.dark{background:#0A0A0F;color:#fff}
         body:not(.dark){background:#f0f0f0;color:#111}
         
-        .sidebar{position:fixed;top:0;left:0;bottom:0;width:72px;background:rgba(10,10,15,.97);backdrop-filter:blur(12px);border-right:1px solid rgba(124,58,237,.12);z-index:100;display:flex;flex-direction:column;align-items:center;padding:.8rem 0;overflow-y:auto;transition:width 0.3s}
-        body:not(.dark) .sidebar{background:rgba(255,255,255,.97);border-color:rgba(0,0,0,.08)}
-        .sidebar:hover{width:200px}
-        .sidebar:hover .sidebar-link span{display:inline}
-        .sidebar-logo{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:1.5rem;text-align:center;width:100%;padding:0 .5rem}
-        .sidebar-logo small{display:block;font-size:.55rem;color:#64748B;-webkit-text-fill-color:#64748B}
-        .sidebar-nav{display:flex;flex-direction:column;gap:.2rem;width:100%;padding:0 .3rem}
-        .sidebar-link{display:flex;align-items:center;gap:.8rem;padding:.6rem .8rem;border-radius:10px;color:#94A3B8;text-decoration:none;font-weight:600;font-size:.85rem;transition:.3s;white-space:nowrap}
-        .sidebar-link:hover{background:rgba(124,58,237,.12);color:#fff}
-        .sidebar-link.active{background:rgba(124,58,237,.2);color:#fff}
-        .sidebar-link i{font-size:1.2rem;min-width:24px;text-align:center}
-        .sidebar-link span{display:none}
-        .sidebar:hover .sidebar-link span{display:inline}
-        body:not(.dark) .sidebar-link{color:#555}
-        body:not(.dark) .sidebar-link:hover{background:rgba(124,58,237,.08);color:#111}
-        body:not(.dark) .sidebar-link.active{background:rgba(124,58,237,.12);color:#7C3AED}
-        .sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:.2rem;width:100%;padding:0 .3rem}
+        .main-content{width:100%;height:100vh;padding:.3rem .5rem;overflow-y:auto;margin:0 auto;max-width:600px}
         
-        .main-content{flex:1;margin-left:72px;padding:1rem;max-width:calc(100% - 72px)}
-        @media(max-width:768px){.sidebar{width:56px}.main-content{margin-left:56px;max-width:calc(100% - 56px)}}
+        .header-flotante{
+            position:sticky;
+            top:0;
+            z-index:50;
+            background:rgba(10,10,15,.92);
+            backdrop-filter:blur(12px);
+            padding:.3rem .3rem .4rem;
+            border-bottom:1px solid rgba(124,58,237,.1);
+        }
+        body:not(.dark) .header-flotante{
+            background:rgba(240,240,240,.92);
+            border-bottom-color:rgba(0,0,0,.08);
+        }
         
-        .top-header{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0 1rem;flex-wrap:wrap;gap:.5rem}
-        .top-header h1{font-size:1.3rem;font-weight:700;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .top-header{display:flex;justify-content:space-between;align-items:center;padding:.1rem 0 .2rem;flex-wrap:wrap;gap:.3rem}
+        .top-header h1{font-size:1.2rem;font-weight:800;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
         .top-actions{display:flex;align-items:center;gap:.5rem}
-        .theme-btn{background:rgba(255,255,255,.05);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:.9rem;transition:.3s}
+        
+        .theme-btn{background:rgba(255,255,255,.05);border:none;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.1rem;transition:.3s;display:flex;align-items:center;justify-content:center}
         .theme-btn:hover{background:rgba(255,255,255,.1)}
         body:not(.dark) .theme-btn{background:rgba(0,0,0,.05);color:#111}
         body:not(.dark) .theme-btn:hover{background:rgba(0,0,0,.1)}
-        .user-btn{background:rgba(124,58,237,.15);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;transition:.3s}
+        
+        .user-btn{background:rgba(124,58,237,.15);border:none;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.1rem;transition:.3s;display:flex;align-items:center;justify-content:center}
         .user-btn:hover{background:rgba(124,58,237,.3)}
         body:not(.dark) .user-btn{color:#111}
         
-        .search-bar{display:flex;align-items:center;gap:.5rem;max-width:500px;margin-bottom:1rem;position:relative}
-        .search-bar input{flex:1;padding:.5rem 1rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.9rem;transition:.3s}
+        .back-btn{background:rgba(255,255,255,.05);border:none;color:#94A3B8;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.1rem;transition:.3s;display:flex;align-items:center;justify-content:center}
+        .back-btn:hover{background:rgba(255,255,255,.1)}
+        body:not(.dark) .back-btn{background:rgba(0,0,0,.05);color:#555}
+        
+        .search-bar{display:flex;align-items:center;gap:.3rem;position:relative;margin:.1rem 0}
+        .search-bar input{flex:1;padding:.3rem .6rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.8rem;transition:.3s}
         .search-bar input:focus{outline:none;border-color:#7C3AED;background:rgba(255,255,255,.08)}
-        .search-bar input::placeholder{color:#64748B}
+        .search-bar input::placeholder{color:#64748B;font-size:.75rem}
         body:not(.dark) .search-bar input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
         body:not(.dark) .search-bar input::placeholder{color:#888}
-        .search-bar button{padding:.4rem 1.2rem;border-radius:9999px;border:none;background:#7C3AED;color:#fff;font-size:.9rem;cursor:pointer;transition:.3s}
+        .search-bar button{padding:.2rem .8rem;border-radius:9999px;border:none;background:#7C3AED;color:#fff;font-size:.75rem;cursor:pointer;transition:.3s}
         .search-bar button:hover{background:#6D28D9}
-        .search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:rgba(26,26,46,.98);border-radius:12px;max-height:300px;overflow-y:auto;display:none;z-index:50;border:1px solid rgba(124,58,237,.15);padding:.3rem 0}
+        .search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:rgba(26,26,46,.98);border-radius:8px;max-height:180px;overflow-y:auto;display:none;z-index:60;border:1px solid rgba(124,58,237,.15);padding:.15rem 0}
         .search-results.show{display:block}
         body:not(.dark) .search-results{background:rgba(255,255,255,.98);border-color:rgba(0,0,0,.1)}
-        .search-result{display:flex;align-items:center;gap:.6rem;padding:.4rem .8rem;cursor:pointer;transition:.2s}
+        .search-result{display:flex;align-items:center;gap:.3rem;padding:.2rem .4rem;cursor:pointer;transition:.2s}
         .search-result:hover{background:rgba(124,58,237,.1)}
-        .search-result img{width:30px;height:45px;object-fit:cover;border-radius:4px}
+        .search-result img{width:20px;height:30px;object-fit:cover;border-radius:3px}
         .search-result .info{flex:1}
-        .search-result .info .title{font-weight:600;font-size:.8rem}
-        .search-result .info .detail{font-size:.65rem;color:#94A3B8}
+        .search-result .info .title{font-weight:600;font-size:.7rem}
+        .search-result .info .detail{font-size:.55rem;color:#94A3B8}
         
-        .grid-movies{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem}
-        @media(min-width:768px){.grid-movies{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}}
-        @media(min-width:1024px){.grid-movies{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}}
+        .grid-movies{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.4rem;padding:.2rem 0}
+        @media(min-width:768px){.grid-movies{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}}
+        @media(min-width:1024px){.grid-movies{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}}
         
-        .movie-card{background:rgba(255,255,255,.04);border-radius:8px;overflow:hidden;cursor:pointer;border:1px solid rgba(124,58,237,.06);transition:.3s;position:relative}
-        .movie-card:hover{transform:translateY(-3px);border-color:rgba(124,58,237,.2)}
-        body:not(.dark) .movie-card{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.08)}
+        .movie-card{background:rgba(255,255,255,.04);border-radius:6px;overflow:hidden;cursor:pointer;border:1px solid rgba(124,58,237,.06);transition:.3s;position:relative}
+        .movie-card:hover{transform:translateY(-2px);border-color:rgba(124,58,237,.2)}
+        body:not(.dark) .movie-card{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.06)}
         .movie-card .poster{width:100%;aspect-ratio:2/3;object-fit:cover;background:#1A1A2E}
-        .movie-card .info{padding:.3rem .4rem}
-        .movie-card .info h4{font-size:.7rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .movie-card .info{padding:.15rem .2rem}
+        .movie-card .info h4{font-size:.6rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         body:not(.dark) .movie-card .info h4{color:#111}
-        .movie-card .info .meta{display:flex;justify-content:space-between;font-size:.55rem;color:#94A3B8}
-        .movie-card .badge-year{position:absolute;top:.3rem;left:.3rem;background:rgba(124,58,237,.85);color:#fff;padding:.1rem .4rem;border-radius:3px;font-size:.5rem;font-weight:700}
-        .movie-card .badge-type{position:absolute;top:.3rem;right:.3rem;background:rgba(0,0,0,.7);color:#fff;padding:.1rem .4rem;border-radius:3px;font-size:.45rem;font-weight:600}
-        .movie-card .badge-op2{position:absolute;bottom:.3rem;right:.3rem;background:rgba(59,130,246,.85);color:#fff;padding:.05rem .3rem;border-radius:3px;font-size:.4rem;font-weight:600}
+        .movie-card .info .meta{display:flex;justify-content:space-between;font-size:.45rem;color:#94A3B8}
+        .movie-card .badge-year{position:absolute;top:.15rem;left:.15rem;background:rgba(124,58,237,.85);color:#fff;padding:.03rem .25rem;border-radius:3px;font-size:.35rem;font-weight:700}
+        .movie-card .badge-type{position:absolute;top:.15rem;right:.15rem;background:rgba(0,0,0,.7);color:#fff;padding:.03rem .25rem;border-radius:3px;font-size:.35rem;font-weight:600}
+        .movie-card .badge-op2{position:absolute;bottom:.15rem;right:.15rem;background:rgba(59,130,246,.85);color:#fff;padding:.02rem .15rem;border-radius:3px;font-size:.3rem;font-weight:600}
         
-        .section-title{font-size:1rem;font-weight:700;margin:.8rem 0 .5rem;display:flex;align-items:center;gap:.4rem}
+        .section-title{font-size:.85rem;font-weight:700;margin:.3rem 0 .15rem;display:flex;align-items:center;gap:.2rem}
         .section-title i{color:#7C3AED}
         body:not(.dark) .section-title{color:#111}
-        .skeleton{aspect-ratio:2/3;border-radius:8px;background:linear-gradient(90deg,#1A1A2E 25%,#2D2D44 50%,#1A1A2E 75%);background-size:200% 100%;animation:skeleton 1.5s infinite}
+        
+        .skeleton{aspect-ratio:2/3;border-radius:6px;background:linear-gradient(90deg,#1A1A2E 25%,#2D2D44 50%,#1A1A2E 75%);background-size:200% 100%;animation:skeleton 1.5s infinite}
         body:not(.dark) .skeleton{background:linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 50%,#e0e0e0 75%);background-size:200% 100%}
         @keyframes skeleton{0%{background-position:-200% 0}100%{background-position:200% 0}}
-        .load-more{display:flex;justify-content:center;padding:1rem 0}
-        .load-more button{background:rgba(124,58,237,.15);color:#fff;padding:.4rem 1.5rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);font-weight:600;cursor:pointer;font-size:.85rem;transition:.3s}
+        
+        .load-more{display:flex;justify-content:center;padding:.3rem 0;margin:.5rem 0}
+        .load-more button{background:rgba(124,58,237,.15);color:#fff;padding:.3rem 1.2rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);font-weight:600;cursor:pointer;font-size:.7rem;transition:.3s}
         .load-more button:hover{background:rgba(124,58,237,.25);border-color:#7C3AED}
         body:not(.dark) .load-more button{color:#111;background:rgba(124,58,237,.1)}
+        .load-more button:disabled{opacity:.4;cursor:not-allowed}
         
-        .user-dropdown{position:absolute;right:0;top:calc(100% + 8px);background:rgba(26,26,46,.95);border-radius:12px;width:200px;border:1px solid rgba(124,58,237,.15);padding:.4rem 0;display:none;z-index:50;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+        .user-dropdown{position:absolute;right:0;top:calc(100% + 6px);background:rgba(26,26,46,.95);border-radius:8px;width:160px;border:1px solid rgba(124,58,237,.15);padding:.2rem 0;display:none;z-index:60;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
         body:not(.dark) .user-dropdown{background:rgba(255,255,255,.95);border-color:rgba(0,0,0,.1)}
-        .user-dropdown a{display:flex;align-items:center;gap:.6rem;padding:.4rem 1rem;color:#CBD5E1;text-decoration:none;font-size:.85rem;transition:.2s}
+        .user-dropdown a{display:flex;align-items:center;gap:.3rem;padding:.3rem .6rem;color:#CBD5E1;text-decoration:none;font-size:.75rem;transition:.2s}
         .user-dropdown a:hover{background:rgba(124,58,237,.08);color:#fff}
         body:not(.dark) .user-dropdown a{color:#333}
         body:not(.dark) .user-dropdown a:hover{background:rgba(124,58,237,.08);color:#111}
-        .user-dropdown hr{margin:.2rem 0;border:none;border-top:1px solid rgba(124,58,237,.08)}
+        .user-dropdown hr{margin:.05rem 0;border:none;border-top:1px solid rgba(124,58,237,.08)}
         .user-menu{position:relative}
-        .filter-section{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
-        .filter-section select{padding:.3rem .8rem;border-radius:8px;border:1px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.8rem;cursor:pointer}
-        .filter-section select:focus{outline:none;border-color:#7C3AED}
-        body:not(.dark) .filter-section select{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
-        .card-actions{display:flex;gap:4px;margin-top:4px;justify-content:center}
-        .card-actions button{background:none;border:none;cursor:pointer;font-size:.65rem;padding:2px 6px;border-radius:4px;transition:.2s}
+        .empty-msg{color:#64748B;font-size:.7rem;padding:.15rem 0}
+        .card-actions{display:flex;gap:2px;margin-top:1px;justify-content:center}
+        .card-actions button{background:none;border:none;cursor:pointer;font-size:.5rem;padding:1px 3px;border-radius:2px;transition:.2s}
         .card-actions .fav-btn{color:#EF4444}
         .card-actions .fav-btn:hover{background:rgba(239,68,68,.15)}
         .card-actions .list-btn{color:#3B82F6}
         .card-actions .list-btn:hover{background:rgba(59,130,246,.15)}
+        
+        .filter-section{display:flex;gap:.3rem;flex-wrap:wrap;margin:.1rem 0}
+        .filter-section select{padding:.2rem .5rem;border-radius:6px;border:1px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.7rem;cursor:pointer}
+        .filter-section select:focus{outline:none;border-color:#7C3AED}
+        body:not(.dark) .filter-section select{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
+        .filter-section button{padding:.2rem .8rem;border-radius:6px;border:none;background:#7C3AED;color:#fff;font-weight:600;font-size:.7rem;cursor:pointer}
+        .filter-section button:hover{background:#6D28D9}
+        
+        #bannerApp {
+            display:none;
+            position:fixed;
+            bottom:0;
+            left:0;
+            right:0;
+            background:linear-gradient(135deg,#1A1A2E,#2D2D44);
+            border-top:2px solid #7C3AED;
+            padding:.4rem .6rem;
+            z-index:9999;
+            box-shadow:0 -4px 30px rgba(124,58,237,.3);
+            animation:slideUp 0.5s ease-out;
+        }
+        body:not(.dark) #bannerApp {
+            background:linear-gradient(135deg,#f0f0f0,#e8e8e8);
+            border-top-color:#7C3AED;
+        }
+        body:not(.dark) #bannerApp .banner-titulo{color:#111;}
+        body:not(.dark) #bannerApp .banner-sub{color:#555;}
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        body.banner-activo {
+            padding-bottom: 60px;
+        }
+        
+        .banner-logo-img {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: #1A1A2E;
+        }
     </style>
 </head>
 <body>
 
-<nav class="sidebar">
-    <div class="sidebar-logo">TELY<small>🍿</small></div>
-    <div class="sidebar-nav">
-        <a href="index.html" class="sidebar-link"><i class="fas fa-home"></i><span>Inicio</span></a>
-        <a href="peliculas.html" class="sidebar-link active"><i class="fas fa-film"></i><span>Películas</span></a>
-        <a href="series.html" class="sidebar-link"><i class="fas fa-tv"></i><span>Series</span></a>
-        <a href="populares.html" class="sidebar-link"><i class="fas fa-fire"></i><span>Populares</span></a>
-    </div>
-    <div class="sidebar-bottom">
-        <a href="perfil.html" class="sidebar-link"><i class="fas fa-user"></i><span>Perfil</span></a>
-    </div>
-</nav>
-
-<main class="main-content">
-    <div class="top-header">
-        <h1><i class="fas fa-film"></i> Películas</h1>
-        <div class="top-actions">
-            <button class="theme-btn" onclick="toggleTheme()" id="themeBtn"><i class="fas fa-moon"></i></button>
-            <div class="user-menu">
-                <button class="user-btn" onclick="toggleUserMenu()"><i class="fas fa-user-circle"></i></button>
-                <div class="user-dropdown" id="userDropdown">
-                    <a href="perfil.html"><i class="fas fa-user"></i> Mi perfil</a>
-                    <hr>
-                    <a href="#" id="loginBtn" onclick="irALogin()"><i class="fas fa-sign-in-alt"></i> Iniciar sesión</a>
-                    <a href="#" id="logoutBtn" style="display:none;" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+<main class="main-content" id="mainContent">
+    <div class="header-flotante">
+        <div class="top-header">
+            <h1><i class="fas fa-film"></i> Películas</h1>
+            <div class="top-actions">
+                <button class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i></button>
+                <button class="theme-btn" onclick="toggleTheme()" id="themeBtn"><i class="fas fa-moon"></i></button>
+                <div class="user-menu">
+                    <button class="user-btn" onclick="toggleUserMenu()"><i class="fas fa-user-circle"></i></button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="perfil.html"><i class="fas fa-user"></i> Mi perfil</a>
+                        <hr>
+                        <a href="#" id="loginBtn" onclick="irALogin()"><i class="fas fa-sign-in-alt"></i> Iniciar sesión</a>
+                        <a href="#" id="logoutBtn" style="display:none;" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+                    </div>
                 </div>
             </div>
         </div>
+        
+        <div class="search-bar">
+            <input type="text" placeholder="🔍 Buscar películas..." id="searchInput" onkeydown="if(event.key==='Enter') buscarGlobal()" oninput="mostrarSugerencias(this.value)">
+            <button onclick="buscarGlobal()"><i class="fas fa-search"></i></button>
+            <div class="search-results" id="searchResults"></div>
+        </div>
+        
+        <div class="filter-section">
+            <select id="filterYear"><option value="">Todos los años</option><option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option></select>
+            <select id="filterGenre"><option value="">Todos los géneros</option><option value="28">Acción</option><option value="35">Comedia</option><option value="18">Drama</option><option value="27">Terror</option><option value="878">Ciencia Ficción</option></select>
+            <button onclick="aplicarFiltros()"><i class="fas fa-filter"></i></button>
+        </div>
     </div>
 
-    <div class="search-bar">
-        <input type="text" placeholder="🔍 Buscar películas..." id="searchInput" onkeydown="if(event.key==='Enter') buscarGlobal()" oninput="mostrarSugerencias(this.value)">
-        <button onclick="buscarGlobal()"><i class="fas fa-search"></i></button>
-        <div class="search-results" id="searchResults"></div>
-    </div>
-
-    <div class="filter-section">
-        <select id="filterYear"><option value="">Todos los años</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option></select>
-        <select id="filterGenre"><option value="">Todos los géneros</option><option value="28">Acción</option><option value="35">Comedia</option><option value="18">Drama</option><option value="27">Terror</option><option value="878">Ciencia Ficción</option></select>
-        <button style="padding:.3rem 1rem;border-radius:8px;border:none;background:#7C3AED;color:#fff;font-weight:600;cursor:pointer" onclick="aplicarFiltros()"><i class="fas fa-filter"></i> Filtrar</button>
-    </div>
-
-    <div class="grid-movies" id="listaPeliculas">
-        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
-        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
-        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
-        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
-    </div>
-
-    <div class="load-more"><button onclick="cargarMasPeliculas()"><i class="fas fa-plus"></i> Cargar más</button></div>
+    <div class="grid-movies" id="listaPeliculas"></div>
+    <div class="load-more"><button onclick="cargarMasPeliculas()" id="btnMasPeliculas"><i class="fas fa-plus"></i> Cargar más</button></div>
 </main>
+
+<div id="bannerApp">
+    <div style="display:flex;align-items:center;justify-content:space-between;max-width:600px;margin:0 auto;gap:0.4rem;">
+        <div style="display:flex;align-items:center;gap:0.3rem;flex:1;">
+            <img src="logo.png" alt="TELY" class="banner-logo-img" onerror="this.style.display='none'">
+            <div>
+                <div class="banner-titulo" style="font-weight:700;font-size:.75rem;color:#fff;">📱 TELY App</div>
+                <div class="banner-sub" style="font-size:.6rem;color:#94A3B8;">Descarga la app</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:0.3rem;flex-shrink:0;">
+            <button onclick="descargarAPK()" style="background:#7C3AED;border:none;color:#fff;padding:.25rem .7rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer;transition:.3s;white-space:nowrap;">
+                <i class="fas fa-download"></i> APK
+            </button>
+            <button onclick="cerrarBannerApp()" style="background:rgba(255,255,255,.1);border:none;color:#94A3B8;padding:.2rem .4rem;border-radius:6px;font-size:.65rem;cursor:pointer;transition:.3s;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -182,8 +240,30 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-let paginaPeliculas = 1;
-let cargandoPeliculas = false;
+document.addEventListener('DOMContentLoaded', function() {
+    const esApp = window.navigator.standalone || 
+                   window.matchMedia('(display-mode: standalone)').matches ||
+                   /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (esApp) {
+        setTimeout(function() {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen();
+            }
+        }, 500);
+    }
+});
+
+document.addEventListener('click', function() {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else if (document.documentElement.webkitRequestFullscreen) {
+            document.documentElement.webkitRequestFullscreen();
+        }
+    }
+});
 
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) { return true; });
@@ -204,20 +284,38 @@ auth.onAuthStateChanged(user => {
 function toggleTheme() {
     const body = document.body;
     const btn = document.getElementById('themeBtn');
-    if (body.classList.contains('dark')) { body.classList.remove('dark'); btn.innerHTML = '<i class="fas fa-moon"></i>'; localStorage.setItem('theme', 'light'); }
-    else { body.classList.add('dark'); btn.innerHTML = '<i class="fas fa-sun"></i>'; localStorage.setItem('theme', 'dark'); }
+    if (body.classList.contains('dark')) { 
+        body.classList.remove('dark'); 
+        btn.innerHTML = '<i class="fas fa-moon"></i>'; 
+        localStorage.setItem('theme', 'light'); 
+    } else { 
+        body.classList.add('dark'); 
+        btn.innerHTML = '<i class="fas fa-sun"></i>'; 
+        localStorage.setItem('theme', 'dark'); 
+    }
 }
-if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
-else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
+if (localStorage.getItem('theme') === 'light') { 
+    document.body.classList.remove('dark'); 
+    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; 
+} else { 
+    document.body.classList.add('dark'); 
+    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; 
+}
 
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    if (tipo === 'pelicula') return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
-    else return `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+    if (tipo === 'pelicula') {
+        return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+    } else {
+        return `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+    }
 }
 
 function generarEnlaceVidsrc(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    if (tipo === 'pelicula') return `https://vidsrc.in/embed/movie/${tmdb_id}?lang=es`;
-    else return `https://vidsrc.in/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es`;
+    if (tipo === 'pelicula') {
+        return `https://vidsrc.in/embed/movie/${tmdb_id}?lang=es`;
+    } else {
+        return `https://vidsrc.in/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es`;
+    }
 }
 
 function getImagenUrl(path, size = 'w342') {
@@ -228,10 +326,10 @@ function getImagenUrl(path, size = 'w342') {
 function mostrarToast(msg, tipo = 'success') {
     const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
     const t = document.createElement('div');
-    t.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:10px 20px;border-radius:10px;z-index:9999;font-weight:600;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
+    t.style.cssText = `position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:6px 14px;border-radius:8px;z-index:9999;font-weight:600;font-size:.7rem;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
     t.textContent = msg;
     document.body.appendChild(t);
-    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2000);
 }
 
 async function fetchTMDB(path, params = {}) {
@@ -244,13 +342,25 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
+let paginaPeliculas = 1;
+let cargandoPeliculas = false;
+let totalPaginasPeliculas = 1;
+let scrollTimeout = null;
+let filtroGenero = '';
+let filtroAnio = '';
+
 function toggleFavorito(item) {
     if (!auth.currentUser) { window.location.href = 'login.html'; return; }
     const userId = auth.currentUser.uid;
     const favRef = db.ref(`usuarios/${userId}/favoritos/${item.id}`);
     favRef.once('value').then((snap) => {
-        if (snap.exists()) { favRef.remove(); mostrarToast('🗑️ Eliminado de favoritos', 'warning'); }
-        else { favRef.set({ id: item.id, titulo: item.titulo, tipo: item.tipo || 'pelicula', portada: item.portada, tmdb_id: item.tmdb_id }); mostrarToast('❤️ Agregado a favoritos', 'success'); }
+        if (snap.exists()) { 
+            favRef.remove(); 
+            mostrarToast('🗑️ Eliminado de favoritos', 'warning'); 
+        } else { 
+            favRef.set({ id: item.id, titulo: item.titulo, tipo: item.tipo || 'pelicula', portada: item.portada, tmdb_id: item.tmdb_id }); 
+            mostrarToast('❤️ Agregado a favoritos', 'success'); 
+        }
     });
 }
 
@@ -259,8 +369,13 @@ function toggleMiLista(item) {
     const userId = auth.currentUser.uid;
     const listaRef = db.ref(`usuarios/${userId}/milista/${item.id}`);
     listaRef.once('value').then((snap) => {
-        if (snap.exists()) { listaRef.remove(); mostrarToast('🗑️ Eliminado de Mi Lista', 'warning'); }
-        else { listaRef.set({ id: item.id, titulo: item.titulo, tipo: item.tipo || 'pelicula', portada: item.portada, tmdb_id: item.tmdb_id }); mostrarToast('📝 Agregado a Mi Lista', 'success'); }
+        if (snap.exists()) { 
+            listaRef.remove(); 
+            mostrarToast('🗑️ Eliminado de Mi Lista', 'warning'); 
+        } else { 
+            listaRef.set({ id: item.id, titulo: item.titulo, tipo: item.tipo || 'pelicula', portada: item.portada, tmdb_id: item.tmdb_id }); 
+            mostrarToast('📝 Agregado a Mi Lista', 'success'); 
+        }
     });
 }
 
@@ -294,18 +409,37 @@ function crearTarjeta(item) {
 
 async function cargarPeliculas(page = 1) {
     if (cargandoPeliculas) return;
+    if (page > totalPaginasPeliculas && page > 1) return;
+    
     cargandoPeliculas = true;
-    const container = document.getElementById('listaPeliculas');
-    if (page === 1) container.innerHTML = '<div class="skeleton"></div>'.repeat(12);
+    const grid = document.getElementById('listaPeliculas');
+    const btn = document.getElementById('btnMasPeliculas');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+    
+    if (page === 1) grid.innerHTML = '';
+    
     try {
-        const data = await fetchTMDB('movie/popular', { page });
-        if (!data.results || !data.results.length) { cargandoPeliculas = false; return; }
-        if (page === 1) container.innerHTML = '';
+        let params = { page };
+        if (filtroAnio) params.primary_release_year = filtroAnio;
+        if (filtroGenero) params.with_genres = filtroGenero;
+        
+        const data = await fetchTMDB('discover/movie', params);
+        totalPaginasPeliculas = data.total_pages || 1;
+        
+        if (!data.results || !data.results.length) {
+            if (page === 1) grid.innerHTML = '<p class="empty-msg">No hay películas</p>';
+            btn.style.display = 'none';
+            cargandoPeliculas = false;
+            return;
+        }
+        
         const dbRef = db.ref();
         const snap = await dbRef.child('contenido_personalizado').once('value');
         const adminData = snap.val() || {};
         const adminMap = {};
         Object.values(adminData).forEach(i => { adminMap[i.tmdb_id] = i; });
+        
         data.results.forEach(p => {
             const a = adminMap[p.id];
             const item = {
@@ -317,14 +451,37 @@ async function cargarPeliculas(page = 1) {
                 url: a?.url || generarEnlaceUnlimplay(p.id, 'pelicula'),
                 opcion2: a?.opcion2 || generarEnlaceVidsrc(p.id, 'pelicula')
             };
-            container.appendChild(crearTarjeta(item));
+            grid.appendChild(crearTarjeta(item));
         });
-    } catch(e) { console.error(e); }
+        
+        if (page >= totalPaginasPeliculas) {
+            btn.style.display = 'none';
+        } else {
+            btn.style.display = 'flex';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más';
+        }
+    } catch(e) {
+        console.error(e);
+        btn.innerHTML = '⚠️ Error';
+        btn.disabled = false;
+    }
     cargandoPeliculas = false;
 }
 
-window.cargarMasPeliculas = function() { paginaPeliculas++; cargarPeliculas(paginaPeliculas); };
-window.aplicarFiltros = function() { paginaPeliculas = 1; cargarPeliculas(1); };
+window.cargarMasPeliculas = function() { 
+    if (!cargandoPeliculas) {
+        paginaPeliculas++; 
+        cargarPeliculas(paginaPeliculas); 
+    }
+};
+
+window.aplicarFiltros = function() {
+    filtroGenero = document.getElementById('filterGenre').value;
+    filtroAnio = document.getElementById('filterYear').value;
+    paginaPeliculas = 1;
+    cargarPeliculas(1);
+};
 
 window.mostrarSugerencias = async function(texto) {
     const container = document.getElementById('searchResults');
@@ -333,7 +490,7 @@ window.mostrarSugerencias = async function(texto) {
         const data = await fetchTMDB('search/movie', { query: texto, page: 1 });
         if (!data.results || !data.results.length) { container.classList.remove('show'); return; }
         container.innerHTML = '';
-        data.results.slice(0, 8).forEach(item => {
+        data.results.slice(0, 6).forEach(item => {
             const div = document.createElement('div');
             div.className = 'search-result';
             div.innerHTML = `
@@ -358,8 +515,72 @@ window.buscarGlobal = function() {
     if (input.value.trim()) window.mostrarSugerencias(input.value);
 };
 
+// ⭐ SCROLL INFINITO
+const mainContent = document.getElementById('mainContent');
+mainContent.addEventListener('scroll', function() {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+        const scrollTop = mainContent.scrollTop;
+        const scrollHeight = mainContent.scrollHeight;
+        const clientHeight = mainContent.clientHeight;
+        
+        if (scrollTop + clientHeight >= scrollHeight - 100) {
+            if (!cargandoPeliculas && paginaPeliculas < totalPaginasPeliculas) {
+                cargarMasPeliculas();
+            }
+        }
+    }, 300);
+});
+
+// ⭐ BANNER APK
+function detectarPlataforma() {
+    const ua = navigator.userAgent || '';
+    const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
+    const esNavegador = !esWebView && /Android|iPhone|iPad|iPod/i.test(ua);
+    return { esWebView, esNavegador };
+}
+
+function mostrarBannerApp() {
+    const banner = document.getElementById('bannerApp');
+    if (!banner) return;
+    if (localStorage.getItem('bannerAppCerrado') === 'true') return;
+    
+    const { esWebView, esNavegador } = detectarPlataforma();
+    if (esNavegador) {
+        banner.style.display = 'block';
+        document.body.classList.add('banner-activo');
+    }
+}
+
+function cerrarBannerApp() {
+    const banner = document.getElementById('bannerApp');
+    if (banner) {
+        banner.style.display = 'none';
+        document.body.classList.remove('banner-activo');
+        localStorage.setItem('bannerAppCerrado', 'true');
+    }
+}
+
+function descargarAPK() {
+    const urlAPK = 'https://appsgeyser.io/19960416/Tely';
+    mostrarToast('📱 Descargando...', 'info');
+    const link = document.createElement('a');
+    link.href = urlAPK;
+    link.target = '_blank';
+    link.download = 'Tely.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(cerrarBannerApp, 1000);
+}
+
 cargarPeliculas(1);
-console.log('✅ Películas cargadas');
+
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(mostrarBannerApp, 1500);
+});
+
+console.log('✅ Películas cargadas - Sin sidebar, scroll infinito');
 </script>
 </body>
 </html>
