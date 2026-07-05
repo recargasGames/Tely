@@ -57,28 +57,30 @@
         .admin-btn-danger:hover{background:#DC2626}
         .admin-btn-blue{background:#3B82F6}
         .admin-btn-blue:hover{background:#2563EB}
-        .admin-btn-purple{background:#8B5CF6}
-        .admin-btn-purple:hover{background:#7C3AED}
         .admin-btn-orange{background:#F59E0B}
         .admin-btn-orange:hover{background:#D97706}
-        .admin-btn-red{background:#EF4444}
-        .admin-btn-red:hover{background:#DC2626}
+        .admin-btn-purple{background:#8B5CF6}
+        .admin-btn-purple:hover{background:#7C3AED}
         
-        /* ⭐ ITEM CON MINIATURA */
+        /* ⭐ ITEM CON MINIATURA Y BOTONES DE EDICIÓN */
         .admin-item{display:flex;align-items:center;gap:.8rem;background:rgba(255,255,255,.02);border-radius:8px;padding:.5rem .6rem;border-left:3px solid #7C3AED;margin-bottom:.4rem}
         body:not(.dark) .admin-item{background:rgba(0,0,0,.02)}
         .admin-item .thumbnail{width:50px;height:75px;border-radius:6px;object-fit:cover;background:#1A1A2E;flex-shrink:0}
         .admin-item .info-item{flex:1;min-width:0}
-        .admin-item .title{font-weight:600;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .admin-item .title{font-weight:600;font-size:.85rem;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
         .admin-item .meta{font-size:.7rem;color:#94A3B8;display:flex;gap:.8rem;flex-wrap:wrap}
-        .admin-item .enlace{font-size:.65rem;color:#60A5FA;word-break:break-all;margin-top:.1rem;padding:.1rem .3rem;background:rgba(59,130,246,.08);border-radius:4px;border:1px solid rgba(59,130,246,.1)}
+        .admin-item .enlace{font-size:.65rem;word-break:break-all;margin-top:.1rem;padding:.1rem .3rem;border-radius:4px}
+        .admin-item .enlace.op1{color:#34D399;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.1)}
+        .admin-item .enlace.op2{color:#60A5FA;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.1)}
         .admin-item .actions{display:flex;gap:.3rem;flex-wrap:wrap;flex-shrink:0}
-        .admin-item .actions .admin-btn{padding:.1rem .6rem;font-size:.6rem;border-radius:4px}
-        body:not(.dark) .admin-item .meta{color:#888}
-        
+        .admin-item .actions .admin-btn{padding:.15rem .5rem;font-size:.55rem;border-radius:4px}
         .admin-item .badge-tipo{font-size:.55rem;font-weight:600;padding:.05rem .4rem;border-radius:4px}
         .admin-item .badge-tipo.pelicula{background:rgba(124,58,237,.15);color:#A78BFA}
         .admin-item .badge-tipo.serie{background:rgba(16,185,129,.15);color:#34D399}
+        
+        .admin-item .edit-input{width:100%;padding:.2rem .4rem;border-radius:4px;border:1px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.65rem;margin-top:.1rem}
+        body:not(.dark) .admin-item .edit-input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
+        .admin-item .edit-input:focus{outline:none;border-color:#7C3AED}
         
         .user-dropdown{position:absolute;right:0;top:calc(100% + 8px);background:rgba(26,26,46,.95);border-radius:12px;width:200px;border:1px solid rgba(124,58,237,.15);padding:.4rem 0;display:none;z-index:50;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
@@ -303,7 +305,7 @@
         </div>
     </div>
 
-    <!-- ⭐ CONTENIDO EN FIREBASE CON MINIATURAS -->
+    <!-- ⭐ CONTENIDO EN FIREBASE CON MINIATURAS Y EDICIÓN -->
     <div class="admin-card">
         <h3><i class="fas fa-list text-emerald-500"></i> Contenido en Firebase</h3>
         
@@ -368,6 +370,7 @@ let seriesLista = [];
 let peliculasKeys = [];
 let seriesKeys = [];
 let pedidosData = [];
+let itemsEditando = {};
 
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) { return true; });
@@ -1024,7 +1027,65 @@ function marcarTodosCompletados() {
     });
 }
 
-// ⭐ CARGAR CONTENIDO EN FIREBASE CON MINIATURAS
+// ⭐ FUNCIONES DE EDICIÓN DE ENLACES
+function editarEnlace(key, tipo, campo) {
+    const container = document.getElementById(`item-${key}`);
+    const enlaceDiv = container.querySelector(`.enlace.${campo}`);
+    const actionsDiv = container.querySelector('.actions');
+    
+    // Si ya está en modo edición, cancelar
+    if (itemsEditando[key]) {
+        cancelarEdicion(key);
+        return;
+    }
+    
+    const currentUrl = enlaceDiv.textContent.replace('🔗', '').trim();
+    itemsEditando[key] = true;
+    
+    enlaceDiv.innerHTML = `
+        <input class="edit-input" id="edit-input-${key}-${campo}" value="${currentUrl}" placeholder="Pega el nuevo enlace...">
+        <div style="margin-top:.2rem;display:flex;gap:.3rem;">
+            <button class="admin-btn admin-btn-green" style="padding:.1rem .5rem;font-size:.55rem;" onclick="guardarEnlace('${key}', '${tipo}', '${campo}')"><i class="fas fa-check"></i> Guardar</button>
+            <button class="admin-btn admin-btn-danger" style="padding:.1rem .5rem;font-size:.55rem;" onclick="cancelarEdicion('${key}')"><i class="fas fa-times"></i> Cancelar</button>
+        </div>
+    `;
+    
+    setTimeout(() => {
+        const input = document.getElementById(`edit-input-${key}-${campo}`);
+        if (input) {
+            input.focus();
+            input.select();
+        }
+    }, 100);
+}
+
+function cancelarEdicion(key) {
+    delete itemsEditando[key];
+    cargarContenido();
+}
+
+async function guardarEnlace(key, tipo, campo) {
+    const input = document.getElementById(`edit-input-${key}-${campo}`);
+    if (!input) return;
+    
+    const nuevoEnlace = input.value.trim();
+    if (!nuevoEnlace) {
+        mostrarToast('❌ El enlace no puede estar vacío', 'error');
+        return;
+    }
+    
+    try {
+        const path = tipo === 'pelicula' ? 'contenido_personalizado' : 'series_personalizadas';
+        await db.ref(`${path}/${key}`).update({ [campo]: nuevoEnlace });
+        mostrarToast(`✅ ${campo} actualizada correctamente`, 'success');
+        delete itemsEditando[key];
+        cargarContenido();
+    } catch(e) {
+        mostrarToast('❌ Error: ' + e.message, 'error');
+    }
+}
+
+// ⭐ CARGAR CONTENIDO EN FIREBASE CON MINIATURAS Y BOTONES DE EDICIÓN
 window.cargarContenido = async function() {
     if (!esAdmin) return;
     const container = document.getElementById('listaContenido');
@@ -1052,50 +1113,58 @@ window.cargarContenido = async function() {
         container.innerHTML = '';
         let itemsHTML = '';
         
-        // ⭐ PELÍCULAS CON MINIATURA
+        // ⭐ PELÍCULAS
         peliculasLista.forEach((p, index) => {
             const key = peliculasKeys[index];
-            const urlDisplay = p.url || 'Sin enlace';
+            const urlOp1 = p.url || 'Sin enlace';
+            const urlOp2 = p.opcion2 || 'Sin Opción 2';
             const portada = p.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
+            
             itemsHTML += `
                 <div class="admin-item" id="item-${key}" data-titulo="${p.titulo.toLowerCase()}" data-tipo="pelicula">
                     <img src="${portada}" class="thumbnail" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
                     <div class="info-item">
                         <div class="title">${p.titulo} <span class="badge-tipo pelicula">🎬 Película</span></div>
                         <div class="meta">${p.anio || 'N/D'} • ⭐ ${p.puntuacion || 'N/A'} • TMDB: ${p.tmdb_id}</div>
-                        <div class="enlace">🔗 ${urlDisplay}</div>
+                        <div class="enlace op1">🔗 Op1: ${urlOp1}</div>
+                        <div class="enlace op2">🔗 Op2: ${urlOp2}</div>
                     </div>
                     <div class="actions">
-                        <button class="admin-btn admin-btn-danger" onclick="eliminarItem('${key}', 'pelicula')" style="padding:.2rem .6rem;font-size:.6rem;"><i class="fas fa-trash"></i></button>
+                        <button class="admin-btn admin-btn-blue" onclick="editarEnlace('${key}', 'pelicula', 'url')" style="padding:.15rem .5rem;font-size:.55rem;"><i class="fas fa-pen"></i> Op1</button>
+                        <button class="admin-btn admin-btn-purple" onclick="editarEnlace('${key}', 'pelicula', 'opcion2')" style="padding:.15rem .5rem;font-size:.55rem;"><i class="fas fa-pen"></i> Op2</button>
+                        <button class="admin-btn admin-btn-danger" onclick="eliminarItem('${key}', 'pelicula')" style="padding:.15rem .5rem;font-size:.55rem;"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
             `;
         });
         
-        // ⭐ SERIES CON MINIATURA
+        // ⭐ SERIES
         seriesLista.forEach((s, index) => {
             const key = seriesKeys[index];
             const capsCount = s.temporadas ? s.temporadas.reduce((sum, t) => sum + (t.capitulos ? t.capitulos.length : 0), 0) : 0;
-            const urlDisplay = s.url || 'Sin enlace (ver capítulos)';
+            const urlOp1 = s.url || 'Sin enlace';
+            const urlOp2 = s.opcion2 || 'Sin Opción 2';
             const portada = s.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
+            
             itemsHTML += `
                 <div class="admin-item" id="item-${key}" data-titulo="${s.titulo.toLowerCase()}" data-tipo="serie">
                     <img src="${portada}" class="thumbnail" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
                     <div class="info-item">
                         <div class="title">${s.titulo} <span class="badge-tipo serie">📺 Serie</span></div>
                         <div class="meta">${s.anio || 'N/D'} • ${s.temporadas?.length || 0} temps • ${capsCount} caps • ⭐ ${s.puntuacion || 'N/A'} • TMDB: ${s.tmdb_id}</div>
-                        <div class="enlace">🔗 ${urlDisplay}</div>
+                        <div class="enlace op1">🔗 Op1: ${urlOp1}</div>
+                        <div class="enlace op2">🔗 Op2: ${urlOp2}</div>
                     </div>
                     <div class="actions">
-                        <button class="admin-btn admin-btn-danger" onclick="eliminarItem('${key}', 'serie')" style="padding:.2rem .6rem;font-size:.6rem;"><i class="fas fa-trash"></i></button>
+                        <button class="admin-btn admin-btn-blue" onclick="editarEnlace('${key}', 'serie', 'url')" style="padding:.15rem .5rem;font-size:.55rem;"><i class="fas fa-pen"></i> Op1</button>
+                        <button class="admin-btn admin-btn-purple" onclick="editarEnlace('${key}', 'serie', 'opcion2')" style="padding:.15rem .5rem;font-size:.55rem;"><i class="fas fa-pen"></i> Op2</button>
+                        <button class="admin-btn admin-btn-danger" onclick="eliminarItem('${key}', 'serie')" style="padding:.15rem .5rem;font-size:.55rem;"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
             `;
         });
         
         container.innerHTML = itemsHTML;
-        
-        // Aplicar filtro si hay
         filtrarContenido();
         mostrarPagina();
         
@@ -1173,7 +1242,7 @@ window.filtrarContenido = function() {
 
 cargarContenido();
 cargarPedidos();
-console.log('✅ Admin TELY - Con miniaturas en la lista de contenido');
+console.log('✅ Admin TELY - Con edición de Op1 y Op2');
 </script>
 </body>
 </html>
