@@ -128,7 +128,6 @@
         .card-actions .list-btn{color:#3B82F6}
         .card-actions .list-btn:hover{background:rgba(59,130,246,.15)}
         
-        /* ⭐ BANNER APK */
         #bannerApp {
             display:none;
             position:fixed;
@@ -193,7 +192,6 @@
 <body>
 
 <main class="main-content" id="mainContent">
-    <!-- HEADER FLOTANTE -->
     <div class="header-flotante">
         <div class="top-header">
             <h1><i class="fas fa-home"></i> TELY</h1>
@@ -256,7 +254,6 @@
     </div>
 </main>
 
-<!-- ⭐ BANNER APK -->
 <div id="bannerApp">
     <div style="display:flex;align-items:center;justify-content:space-between;max-width:600px;margin:0 auto;gap:0.5rem;">
         <div style="display:flex;align-items:center;gap:0.4rem;flex:1;">
@@ -322,10 +319,57 @@ function esNavegadorWeb() {
     return !esApp;
 }
 
+// ⭐ GUARDAR ESTADO DE LA PESTAÑA
+function guardarEstado(tab) {
+    try {
+        sessionStorage.setItem('tabActiva', tab);
+    } catch(e) {}
+}
+
+function restaurarEstado() {
+    try {
+        const tab = sessionStorage.getItem('tabActiva') || 'inicio';
+        return tab;
+    } catch(e) { return 'inicio'; }
+}
+
+// ⭐ GUARDAR SCROLL
+function guardarScroll() {
+    try {
+        const scrollTop = document.getElementById('mainContent').scrollTop;
+        sessionStorage.setItem('scrollPos', scrollTop);
+    } catch(e) {}
+}
+
+function restaurarScroll() {
+    try {
+        const scrollTop = parseInt(sessionStorage.getItem('scrollPos')) || 0;
+        document.getElementById('mainContent').scrollTop = scrollTop;
+    } catch(e) {}
+}
+
+// ⭐ ESCUCHAR EVENTO DE SCROLL PARA GUARDAR
+document.addEventListener('DOMContentLoaded', function() {
+    const mainContent = document.getElementById('mainContent');
+    mainContent.addEventListener('scroll', function() {
+        guardarScroll();
+    });
+});
+
+// ⭐ BOTÓN ATRÁS - GUARDA ESTADO ANTES DE IR
 history.pushState(null, '', window.location.href);
-window.addEventListener('popstate', function(e) { return true; });
+window.addEventListener('popstate', function(e) {
+    // Guardar estado actual antes de salir
+    const tabActiva = document.querySelector('.tab-btn.active');
+    if (tabActiva) {
+        guardarEstado(tabActiva.dataset.tab);
+    }
+    guardarScroll();
+    return true;
+});
 document.addEventListener('backbutton', function(e) { return true; }, false);
 
+// ⭐ AUTENTICACIÓN
 function irALogin() { window.location.href = 'login.html'; }
 function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
 function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
@@ -415,6 +459,11 @@ function cambiarTab(tab) {
     
     if (tab === 'inicio') {
         document.getElementById('tabInicio').style.display = 'block';
+        // Cargar contenido de inicio si está vacío
+        const pelisPop = document.getElementById('peliculasPopulares');
+        if (!pelisPop.querySelector('.movie-card') && !pelisPop.querySelector('.skeleton')) {
+            cargarContenido();
+        }
     } else if (tab === 'peliculas') {
         document.getElementById('tabPeliculas').style.display = 'block';
         if (!document.getElementById('gridPeliculas').querySelector('.movie-card')) {
@@ -430,6 +479,12 @@ function cambiarTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.tab === tab);
     });
+    
+    // Guardar estado
+    guardarEstado(tab);
+    
+    // Restaurar scroll después de cambiar pestaña
+    setTimeout(restaurarScroll, 100);
 }
 
 async function cargarPeliculas(page = 1) {
@@ -441,26 +496,22 @@ async function cargarPeliculas(page = 1) {
     const btn = document.getElementById('btnMasPeliculas');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
-    
     if (page === 1) grid.innerHTML = '';
     
     try {
         const data = await fetchTMDB('movie/popular', { page });
         totalPaginasPeliculas = data.total_pages || 1;
-        
         if (!data.results || !data.results.length) {
             if (page === 1) grid.innerHTML = '<p class="empty-msg">No hay películas</p>';
             btn.style.display = 'none';
             cargandoPeliculas = false;
             return;
         }
-        
         const dbRef = db.ref();
         const snap = await dbRef.child('contenido_personalizado').once('value');
         const adminData = snap.val() || {};
         const adminMap = {};
         Object.values(adminData).forEach(i => { adminMap[i.tmdb_id] = i; });
-        
         data.results.forEach(p => {
             const a = adminMap[p.id];
             const item = {
@@ -474,7 +525,6 @@ async function cargarPeliculas(page = 1) {
             };
             grid.appendChild(crearTarjeta(item));
         });
-        
         if (page >= totalPaginasPeliculas) {
             btn.style.display = 'none';
         } else {
@@ -499,26 +549,22 @@ async function cargarSeries(page = 1) {
     const btn = document.getElementById('btnMasSeries');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
-    
     if (page === 1) grid.innerHTML = '';
     
     try {
         const data = await fetchTMDB('tv/popular', { page });
         totalPaginasSeries = data.total_pages || 1;
-        
         if (!data.results || !data.results.length) {
             if (page === 1) grid.innerHTML = '<p class="empty-msg">No hay series</p>';
             btn.style.display = 'none';
             cargandoSeries = false;
             return;
         }
-        
         const dbRef = db.ref();
         const snap = await dbRef.child('series_personalizadas').once('value');
         const adminData = snap.val() || {};
         const adminMap = {};
         Object.values(adminData).forEach(i => { adminMap[i.tmdb_id] = i; });
-        
         data.results.forEach(s => {
             const a = adminMap[s.id];
             const item = {
@@ -532,7 +578,6 @@ async function cargarSeries(page = 1) {
             };
             grid.appendChild(crearTarjeta(item, true));
         });
-        
         if (page >= totalPaginasSeries) {
             btn.style.display = 'none';
         } else {
@@ -798,6 +843,7 @@ mainContent.addEventListener('scroll', function() {
                 }
             }
         }
+        guardarScroll();
     }, 300);
 });
 
@@ -839,7 +885,6 @@ window.buscarGlobal = function() {
     if (input.value.trim()) window.mostrarSugerencias(input.value);
 };
 
-// ⭐ BANNER APK
 function detectarPlataforma() {
     const ua = navigator.userAgent || '';
     const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
@@ -851,7 +896,6 @@ function mostrarBannerApp() {
     const banner = document.getElementById('bannerApp');
     if (!banner) return;
     if (localStorage.getItem('bannerAppCerrado') === 'true') return;
-    
     const { esWebView, esNavegador } = detectarPlataforma();
     if (esNavegador) {
         banner.style.display = 'block';
@@ -881,9 +925,13 @@ function descargarAPK() {
     setTimeout(cerrarBannerApp, 2000);
 }
 
+// ⭐ INICIAR - RESTAURAR ESTADO
 document.addEventListener('DOMContentLoaded', function() {
+    const tab = restaurarEstado();
+    cambiarTab(tab);
     setTimeout(mostrarBannerApp, 2000);
     setTimeout(activarPantallaCompleta, 1000);
+    setTimeout(restaurarScroll, 200);
 });
 
 document.addEventListener('click', function() {
@@ -899,11 +947,12 @@ document.addEventListener('click', function() {
     }
 });
 
+// Cargar contenido inicial
 cargarContenido();
 cargarPeliculas(1);
 cargarSeries(1);
 
-console.log('✅ TELY cargado');
+console.log('✅ TELY cargado - Guarda estado de pestaña y scroll');
 </script>
 </body>
 </html>
