@@ -295,31 +295,35 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ⭐ PANTALLA COMPLETA
-document.addEventListener('DOMContentLoaded', function() {
+// ⭐ PANTALLA COMPLETA - SOLO PARA APK, NO FORZAR EN NAVEGADOR
+function activarPantallaCompleta() {
     const esApp = window.navigator.standalone || 
                    window.matchMedia('(display-mode: standalone)').matches ||
-                   /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                   /Android.*(wv|WebView)/i.test(navigator.userAgent);
     if (esApp) {
-        setTimeout(function() {
+        try {
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen().catch(() => {});
             } else if (document.documentElement.webkitRequestFullscreen) {
                 document.documentElement.webkitRequestFullscreen();
             }
-        }, 500);
+        } catch(e) {}
     }
-});
+}
 
-document.addEventListener('click', function() {
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen().catch(() => {});
-        } else if (document.documentElement.webkitRequestFullscreen) {
-            document.documentElement.webkitRequestFullscreen();
-        }
-    }
-});
+// ⭐ NO FORZAR PANTALLA COMPLETA AL DESCARGAR
+function descargarAPK() {
+    const urlAPK = 'https://appsgeyser.io/19960416/Tely';
+    mostrarToast('📱 Descargando TELY...', 'info');
+    const link = document.createElement('a');
+    link.href = urlAPK;
+    link.target = '_blank';
+    link.download = 'Tely.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(cerrarBannerApp, 2000);
+}
 
 // ⭐ BOTÓN ATRÁS
 history.pushState(null, '', window.location.href);
@@ -851,7 +855,7 @@ window.buscarGlobal = function() {
     if (input.value.trim()) window.mostrarSugerencias(input.value);
 };
 
-// ⭐ BANNER APK - DETECCIÓN Y DESCARGA
+// ⭐ BANNER APK
 function detectarPlataforma() {
     const ua = navigator.userAgent || '';
     const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
@@ -880,32 +884,17 @@ function cerrarBannerApp() {
     }
 }
 
-function descargarAPK() {
-    // ⭐ DESCARGA DIRECTA - SIN REDIRIGIR
-    const urlAPK = 'https://appsgeyser.io/19960416/Tely';
-    mostrarToast('📱 Descargando TELY...', 'info');
-    
-    const link = document.createElement('a');
-    link.href = urlAPK;
-    link.target = '_blank';
-    link.download = 'Tely.apk';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    setTimeout(cerrarBannerApp, 2000);
-}
+// ⭐ INICIAR - SOLO ACTIVAR PANTALLA COMPLETA EN APK
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(mostrarBannerApp, 2000);
+    activarPantallaCompleta();
+});
 
-// ⭐ INICIAR
 cargarContenido();
 cargarPeliculas(1);
 cargarSeries(1);
 
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(mostrarBannerApp, 2000);
-});
-
-console.log('✅ TELY cargado - Banner APK, scroll infinito');
+console.log('✅ TELY cargado - Banner APK, scroll infinito, sin pantalla completa forzada');
 </script>
 </body>
 </html>
