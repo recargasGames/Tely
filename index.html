@@ -295,12 +295,17 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ⭐ PANTALLA COMPLETA - SOLO PARA APK, NO FORZAR EN NAVEGADOR
+// ⭐ PANTALLA COMPLETA - SOLO EN APK, NUNCA EN NAVEGADOR
 function activarPantallaCompleta() {
+    // Detectar si estamos en una APK (WebView) o en navegador
+    const ua = navigator.userAgent || '';
+    const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
     const esApp = window.navigator.standalone || 
                    window.matchMedia('(display-mode: standalone)').matches ||
-                   /Android.*(wv|WebView)/i.test(navigator.userAgent);
-    if (esApp) {
+                   esWebView;
+    
+    // SOLO activar pantalla completa si estamos en la APK
+    if (esApp && !document.fullscreenElement && !document.webkitFullscreenElement) {
         try {
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen().catch(() => {});
@@ -311,18 +316,14 @@ function activarPantallaCompleta() {
     }
 }
 
-// ⭐ NO FORZAR PANTALLA COMPLETA AL DESCARGAR
-function descargarAPK() {
-    const urlAPK = 'https://appsgeyser.io/19960416/Tely';
-    mostrarToast('📱 Descargando TELY...', 'info');
-    const link = document.createElement('a');
-    link.href = urlAPK;
-    link.target = '_blank';
-    link.download = 'Tely.apk';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setTimeout(cerrarBannerApp, 2000);
+// ⭐ DETECTAR SI ESTAMOS EN NAVEGADOR WEB
+function esNavegadorWeb() {
+    const ua = navigator.userAgent || '';
+    const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
+    const esApp = window.navigator.standalone || 
+                   window.matchMedia('(display-mode: standalone)').matches ||
+                   esWebView;
+    return !esApp;
 }
 
 // ⭐ BOTÓN ATRÁS
@@ -855,7 +856,7 @@ window.buscarGlobal = function() {
     if (input.value.trim()) window.mostrarSugerencias(input.value);
 };
 
-// ⭐ BANNER APK
+// ⭐ BANNER APK - SOLO EN NAVEGADOR
 function detectarPlataforma() {
     const ua = navigator.userAgent || '';
     const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
@@ -884,17 +885,47 @@ function cerrarBannerApp() {
     }
 }
 
+function descargarAPK() {
+    const urlAPK = 'https://appsgeyser.io/19960416/Tely';
+    mostrarToast('📱 Descargando TELY...', 'info');
+    const link = document.createElement('a');
+    link.href = urlAPK;
+    link.target = '_blank';
+    link.download = 'Tely.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(cerrarBannerApp, 2000);
+}
+
 // ⭐ INICIAR - SOLO ACTIVAR PANTALLA COMPLETA EN APK
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 2000);
-    activarPantallaCompleta();
+    // Solo activar pantalla completa si estamos en APK
+    setTimeout(activarPantallaCompleta, 1000);
+});
+
+// ⭐ NO FORZAR PANTALLA COMPLETA EN CLIC (SOLO EN APK)
+document.addEventListener('click', function() {
+    // Si estamos en navegador, NO hacer nada
+    if (esNavegadorWeb()) return;
+    // Si estamos en APK, verificar si ya está en pantalla completa
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        try {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen();
+            }
+        } catch(e) {}
+    }
 });
 
 cargarContenido();
 cargarPeliculas(1);
 cargarSeries(1);
 
-console.log('✅ TELY cargado - Banner APK, scroll infinito, sin pantalla completa forzada');
+console.log('✅ TELY cargado - Scroll infinito, banner APK, pantalla completa solo en APK');
 </script>
 </body>
 </html>
