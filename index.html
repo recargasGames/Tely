@@ -4,13 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>TELY 🎬 - Inicio</title>
+    <!-- ⭐ PANTALLA COMPLETA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="preconnect" href="https://image.tmdb.org">
     <link rel="dns-prefetch" href="https://image.tmdb.org">
+    <!-- ⭐ ICONO DE LA APP (logo.png) -->
+    <link rel="icon" href="logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="logo.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;transition:background 0.3s, color 0.3s;display:flex}
+        html,body{width:100%;height:100%;overflow:hidden;background:#0A0A0F}
+        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;transition:background 0.3s, color 0.3s;display:flex;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+        ::-webkit-scrollbar{display:none}
         body.dark{background:#0A0A0F;color:#fff}
         body:not(.dark){background:#f0f0f0;color:#111}
         
@@ -18,8 +27,13 @@
         body:not(.dark) .sidebar{background:rgba(255,255,255,.97);border-color:rgba(0,0,0,.08)}
         .sidebar:hover{width:200px}
         .sidebar:hover .sidebar-link span{display:inline}
-        .sidebar-logo{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:1.5rem;text-align:center;width:100%;padding:0 .5rem}
-        .sidebar-logo small{display:block;font-size:.55rem;color:#64748B;-webkit-text-fill-color:#64748B}
+        
+        /* ⭐ LOGO EN EL SIDEBAR */
+        .sidebar-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:1.5rem;text-align:center;width:100%;padding:0 .5rem}
+        .sidebar-logo img{width:40px;height:40px;border-radius:12px;object-fit:cover;margin-bottom:.2rem}
+        .sidebar-logo .logo-text{font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .sidebar-logo small{display:block;font-size:.5rem;color:#64748B;-webkit-text-fill-color:#64748B}
+        
         .sidebar-nav{display:flex;flex-direction:column;gap:.2rem;width:100%;padding:0 .3rem}
         .sidebar-link{display:flex;align-items:center;gap:.8rem;padding:.6rem .8rem;border-radius:10px;color:#94A3B8;text-decoration:none;font-weight:600;font-size:.85rem;transition:.3s;white-space:nowrap}
         .sidebar-link:hover{background:rgba(124,58,237,.12);color:#fff}
@@ -32,7 +46,12 @@
         body:not(.dark) .sidebar-link.active{background:rgba(124,58,237,.12);color:#7C3AED}
         .sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:.2rem;width:100%;padding:0 .3rem}
         
-        .main-content{flex:1;margin-left:72px;padding:1rem;max-width:calc(100% - 72px)}
+        /* ⭐ BOTÓN DESCARGAR APP EN SIDEBAR */
+        .sidebar-link.download-app{border-top:1px solid rgba(124,58,237,.2);margin-top:.5rem;padding-top:.5rem;color:#F59E0B}
+        .sidebar-link.download-app:hover{background:rgba(245,158,11,.15);color:#F59E0B}
+        .sidebar-link.download-app i{color:#F59E0B}
+        
+        .main-content{flex:1;margin-left:72px;padding:1rem;max-width:calc(100% - 72px);height:100vh;overflow-y:auto}
         @media(max-width:768px){.sidebar{width:56px}.main-content{margin-left:56px;max-width:calc(100% - 56px)}}
         
         .top-header{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0 1rem;flex-wrap:wrap;gap:.5rem}
@@ -113,17 +132,62 @@
         .card-actions .fav-btn:hover{background:rgba(239,68,68,.15)}
         .card-actions .list-btn{color:#3B82F6}
         .card-actions .list-btn:hover{background:rgba(59,130,246,.15)}
+        
+        /* ⭐ BANNER DE DESCARGAR APP - FLOTANTE */
+        #bannerApp {
+            display:none;
+            position:fixed;
+            bottom:0;
+            left:0;
+            right:0;
+            background:linear-gradient(135deg,#1A1A2E,#2D2D44);
+            border-top:2px solid #7C3AED;
+            padding:0.8rem 1rem;
+            z-index:9999;
+            box-shadow:0 -4px 30px rgba(124,58,237,.3);
+            animation:slideUp 0.5s ease-out;
+        }
+        body:not(.dark) #bannerApp {
+            background:linear-gradient(135deg,#f0f0f0,#e8e8e8);
+            border-top-color:#7C3AED;
+        }
+        body:not(.dark) #bannerApp .banner-titulo{color:#111;}
+        body:not(.dark) #bannerApp .banner-sub{color:#555;}
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        body.banner-activo {
+            padding-bottom: 80px;
+        }
+        
+        .banner-logo-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            object-fit: cover;
+            background: #1A1A2E;
+        }
     </style>
 </head>
 <body>
 
 <nav class="sidebar">
-    <div class="sidebar-logo">TELY<small>🍿</small></div>
+    <div class="sidebar-logo">
+        <!-- ⭐ LOGO - CAMBIA logo.png POR TU LOGO -->
+        <img src="logo.png" alt="TELY" onerror="this.style.display='none'">
+        <div class="logo-text">TELY</div>
+        <small>🍿</small>
+    </div>
     <div class="sidebar-nav">
         <a href="index.html" class="sidebar-link active"><i class="fas fa-home"></i><span>Inicio</span></a>
         <a href="peliculas.html" class="sidebar-link"><i class="fas fa-film"></i><span>Películas</span></a>
         <a href="series.html" class="sidebar-link"><i class="fas fa-tv"></i><span>Series</span></a>
         <a href="populares.html" class="sidebar-link"><i class="fas fa-fire"></i><span>Populares</span></a>
+        <!-- ⭐ BOTÓN DESCARGAR APP EN EL SIDEBAR -->
+        <a href="#" onclick="descargarAPK()" class="sidebar-link download-app"><i class="fas fa-download"></i><span>Descargar App</span></a>
     </div>
     <div class="sidebar-bottom">
         <a href="perfil.html" class="sidebar-link"><i class="fas fa-user"></i><span>Perfil</span></a>
@@ -177,6 +241,28 @@
     <div class="load-more"><button onclick="cargarMas()"><i class="fas fa-plus"></i> Cargar más</button></div>
 </main>
 
+<!-- ⭐ BANNER PARA DESCARGAR APP - FLOTANTE -->
+<div id="bannerApp">
+    <div style="display:flex;align-items:center;justify-content:space-between;max-width:600px;margin:0 auto;gap:0.8rem;">
+        <div style="display:flex;align-items:center;gap:0.6rem;flex:1;">
+            <!-- ⭐ LOGO EN EL BANNER -->
+            <img src="logo.png" alt="TELY" class="banner-logo-img" onerror="this.style.display='none'">
+            <div>
+                <div class="banner-titulo" style="font-weight:700;font-size:0.9rem;color:#fff;">📱 TELY App</div>
+                <div class="banner-sub" style="font-size:0.7rem;color:#94A3B8;">Mejor experiencia • Sin anuncios • Más rápida</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:0.4rem;flex-shrink:0;">
+            <button onclick="descargarAPK()" style="background:#7C3AED;border:none;color:#fff;padding:0.4rem 1rem;border-radius:8px;font-weight:600;font-size:0.75rem;cursor:pointer;transition:.3s;white-space:nowrap;">
+                <i class="fas fa-download"></i> Descargar
+            </button>
+            <button onclick="cerrarBannerApp()" style="background:rgba(255,255,255,.1);border:none;color:#94A3B8;padding:0.3rem 0.6rem;border-radius:8px;font-size:0.8rem;cursor:pointer;transition:.3s;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -197,6 +283,32 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
+
+// ⭐ PANTALLA COMPLETA
+document.addEventListener('DOMContentLoaded', function() {
+    const esApp = window.navigator.standalone || 
+                   window.matchMedia('(display-mode: standalone)').matches ||
+                   /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (esApp) {
+        setTimeout(function() {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen();
+            }
+        }, 500);
+    }
+});
+
+document.addEventListener('click', function() {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else if (document.documentElement.webkitRequestFullscreen) {
+            document.documentElement.webkitRequestFullscreen();
+        }
+    }
+});
 
 // ⭐ BOTÓN ATRÁS
 history.pushState(null, '', window.location.href);
@@ -268,6 +380,43 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
+// ⭐ BANNER DE DESCARGAR APP
+function detectarPlataforma() {
+    const ua = navigator.userAgent || '';
+    const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
+    const esNavegador = !esWebView && /Android|iPhone|iPad|iPod/i.test(ua);
+    return { esWebView, esNavegador };
+}
+
+function mostrarBannerApp() {
+    const banner = document.getElementById('bannerApp');
+    if (!banner) return;
+    if (localStorage.getItem('bannerAppCerrado') === 'true') return;
+    
+    const { esWebView, esNavegador } = detectarPlataforma();
+    if (esNavegador) {
+        banner.style.display = 'block';
+        document.body.classList.add('banner-activo');
+    }
+}
+
+function cerrarBannerApp() {
+    const banner = document.getElementById('bannerApp');
+    if (banner) {
+        banner.style.display = 'none';
+        document.body.classList.remove('banner-activo');
+        localStorage.setItem('bannerAppCerrado', 'true');
+    }
+}
+
+function descargarAPK() {
+    // ⭐ TU ENLACE DE DESCARGA - CAMBIA ESTO SI ES OTRO
+    const urlAPK = 'https://appsgeyser.io/19960337/Tely';
+    mostrarToast('📱 Descargando TELY App...', 'info');
+    window.open(urlAPK, '_blank');
+    setTimeout(cerrarBannerApp, 1000);
+}
+
 // ⭐ FAVORITOS
 function toggleFavorito(item) {
     if (!auth.currentUser) { window.location.href = 'login.html'; return; }
@@ -332,7 +481,6 @@ function cargarFavoritos() {
             `;
             div.onclick = () => {
                 const params = new URLSearchParams();
-                // ✅ Usar tmdb_id si existe, si no limpiar el prefijo
                 let playId = item.tmdb_id || item.id;
                 if (playId && typeof playId === 'string' && playId.startsWith('tmdb_')) {
                     playId = playId.replace('tmdb_', '');
@@ -365,7 +513,6 @@ function cargarMiLista() {
             `;
             div.onclick = () => {
                 const params = new URLSearchParams();
-                // ✅ Usar tmdb_id si existe, si no limpiar el prefijo
                 let playId = item.tmdb_id || item.id;
                 if (playId && typeof playId === 'string' && playId.startsWith('tmdb_')) {
                     playId = playId.replace('tmdb_', '');
@@ -469,7 +616,7 @@ async function cargarContenido() {
     } catch(e) { console.error(e); }
 }
 
-// ⭐ CONTINUAR VIENDO - CORREGIDO ✅
+// ⭐ CONTINUAR VIENDO
 function cargarContinuarViendo() {
     const container = document.getElementById('continuarViendo');
     const historial = JSON.parse(localStorage.getItem('historialTely')) || [];
@@ -488,7 +635,6 @@ function cargarContinuarViendo() {
         div.onclick = () => {
             if (auth.currentUser) {
                 const params = new URLSearchParams();
-                // ✅ CORREGIDO: Usar tmdb_id si existe, si no limpiar el prefijo
                 let playId = entry.tmdb_id || entry.id;
                 if (playId && typeof playId === 'string' && playId.startsWith('tmdb_')) {
                     playId = playId.replace('tmdb_', '');
@@ -546,8 +692,15 @@ window.cargarMas = function() {
     mostrarToast('🔄 Cargando más contenido...', 'info');
 };
 
+// ⭐ INICIAR
 cargarContenido();
-console.log('✅ TELY cargado - Historial corregido');
+
+// ⭐ MOSTRAR BANNER DESPUÉS DE 1.5 SEGUNDOS
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(mostrarBannerApp, 1500);
+});
+
+console.log('✅ TELY cargado - Con banner de descarga APP y pantalla completa');
 </script>
 </body>
 </html>
