@@ -128,6 +128,7 @@
         .card-actions .list-btn{color:#3B82F6}
         .card-actions .list-btn:hover{background:rgba(59,130,246,.15)}
         
+        /* ⭐ BANNER APK - NUEVO DISEÑO */
         #bannerApp {
             display:none;
             position:fixed;
@@ -136,7 +137,7 @@
             right:0;
             background:linear-gradient(135deg,#1A1A2E,#2D2D44);
             border-top:2px solid #7C3AED;
-            padding:.4rem .6rem;
+            padding:.6rem .8rem;
             z-index:9999;
             box-shadow:0 -4px 30px rgba(124,58,237,.3);
             animation:slideUp 0.5s ease-out;
@@ -154,15 +155,38 @@
         }
         
         body.banner-activo {
-            padding-bottom: 60px;
+            padding-bottom: 70px;
         }
         
         .banner-logo-img {
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
             object-fit: cover;
             background: #1A1A2E;
+        }
+        
+        .banner-install-btn {
+            background:linear-gradient(135deg,#7C3AED,#A78BFA);
+            border:none;
+            color:#fff;
+            padding:.4rem 1.2rem;
+            border-radius:8px;
+            font-weight:700;
+            font-size:.75rem;
+            cursor:pointer;
+            transition:.3s;
+            white-space:nowrap;
+            display:flex;
+            align-items:center;
+            gap:.3rem;
+        }
+        .banner-install-btn:hover {
+            transform:scale(1.05);
+            box-shadow:0 0 20px rgba(124,58,237,.4);
+        }
+        .banner-install-btn:active {
+            transform:scale(0.95);
         }
     </style>
 </head>
@@ -232,20 +256,21 @@
     </div>
 </main>
 
+<!-- ⭐ BANNER APK - NUEVO MENSAJE -->
 <div id="bannerApp">
-    <div style="display:flex;align-items:center;justify-content:space-between;max-width:600px;margin:0 auto;gap:0.4rem;">
-        <div style="display:flex;align-items:center;gap:0.3rem;flex:1;">
+    <div style="display:flex;align-items:center;justify-content:space-between;max-width:600px;margin:0 auto;gap:0.5rem;">
+        <div style="display:flex;align-items:center;gap:0.4rem;flex:1;">
             <img src="logo.png" alt="TELY" class="banner-logo-img" onerror="this.style.display='none'">
             <div>
-                <div class="banner-titulo" style="font-weight:700;font-size:.75rem;color:#fff;">📱 TELY App</div>
-                <div class="banner-sub" style="font-size:.6rem;color:#94A3B8;">Descarga la app</div>
+                <div class="banner-titulo" style="font-weight:700;font-size:.8rem;color:#fff;">📱 ¿Quieres instalar TELY en tu teléfono?</div>
+                <div class="banner-sub" style="font-size:.6rem;color:#94A3B8;">Mejor experiencia • Sin anuncios • Más rápida</div>
             </div>
         </div>
-        <div style="display:flex;gap:0.3rem;flex-shrink:0;">
-            <button onclick="descargarAPK()" style="background:#7C3AED;border:none;color:#fff;padding:.25rem .7rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer;transition:.3s;white-space:nowrap;">
-                <i class="fas fa-download"></i> APK
+        <div style="display:flex;gap:0.3rem;flex-shrink:0;align-items:center;">
+            <button onclick="descargarAPK()" class="banner-install-btn">
+                <i class="fas fa-download"></i> Instalar
             </button>
-            <button onclick="cerrarBannerApp()" style="background:rgba(255,255,255,.1);border:none;color:#94A3B8;padding:.2rem .4rem;border-radius:6px;font-size:.65rem;cursor:pointer;transition:.3s;">
+            <button onclick="cerrarBannerApp()" style="background:rgba(255,255,255,.1);border:none;color:#94A3B8;padding:.3rem .5rem;border-radius:6px;font-size:.8rem;cursor:pointer;transition:.3s;">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -270,6 +295,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
+// ⭐ PANTALLA COMPLETA
 document.addEventListener('DOMContentLoaded', function() {
     const esApp = window.navigator.standalone || 
                    window.matchMedia('(display-mode: standalone)').matches ||
@@ -295,10 +321,12 @@ document.addEventListener('click', function() {
     }
 });
 
+// ⭐ BOTÓN ATRÁS
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) { return true; });
 document.addEventListener('backbutton', function(e) { return true; }, false);
 
+// ⭐ AUTENTICACIÓN
 function irALogin() { window.location.href = 'login.html'; }
 function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
 function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
@@ -312,6 +340,7 @@ auth.onAuthStateChanged(user => {
     if (user) { cargarFavoritos(); cargarMiLista(); }
 });
 
+// ⭐ MODO OSCURO
 function toggleTheme() {
     const body = document.body;
     const btn = document.getElementById('themeBtn');
@@ -333,6 +362,7 @@ if (localStorage.getItem('theme') === 'light') {
     document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; 
 }
 
+// ⭐ FUNCIONES DE ENLACES
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     if (tipo === 'pelicula') {
         return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
@@ -357,7 +387,7 @@ function getImagenUrl(path, size = 'w342') {
 function mostrarToast(msg, tipo = 'success') {
     const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
     const t = document.createElement('div');
-    t.style.cssText = `position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:6px 14px;border-radius:8px;z-index:9999;font-weight:600;font-size:.7rem;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
+    t.style.cssText = `position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:6px 14px;border-radius:8px;z-index:9999;font-weight:600;font-size:.7rem;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
     t.textContent = msg;
     document.body.appendChild(t);
     setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2000);
@@ -373,6 +403,7 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
+// ⭐ VARIABLES DE PAGINACIÓN
 let paginaPeliculas = 1;
 let paginaSeries = 1;
 let cargandoPeliculas = false;
@@ -381,6 +412,7 @@ let totalPaginasPeliculas = 1;
 let totalPaginasSeries = 1;
 let scrollTimeout = null;
 
+// ⭐ PESTAÑAS
 function cambiarTab(tab) {
     document.getElementById('tabInicio').style.display = 'none';
     document.getElementById('tabPeliculas').style.display = 'none';
@@ -405,6 +437,7 @@ function cambiarTab(tab) {
     });
 }
 
+// ⭐ CARGAR PELÍCULAS
 async function cargarPeliculas(page = 1) {
     if (cargandoPeliculas) return;
     if (page > totalPaginasPeliculas && page > 1) return;
@@ -463,6 +496,7 @@ async function cargarPeliculas(page = 1) {
     cargandoPeliculas = false;
 }
 
+// ⭐ CARGAR SERIES
 async function cargarSeries(page = 1) {
     if (cargandoSeries) return;
     if (page > totalPaginasSeries && page > 1) return;
@@ -535,6 +569,7 @@ window.cargarMasSeries = function() {
     }
 };
 
+// ⭐ FAVORITOS Y LISTA
 function toggleFavorito(item) {
     if (!auth.currentUser) { window.location.href = 'login.html'; return; }
     const userId = auth.currentUser.uid;
@@ -631,6 +666,7 @@ function cargarMiLista() {
     });
 }
 
+// ⭐ CREAR TARJETA
 function crearTarjeta(item, esSerie = false) {
     const div = document.createElement('div');
     div.className = 'movie-card';
@@ -662,6 +698,7 @@ function crearTarjeta(item, esSerie = false) {
     return div;
 }
 
+// ⭐ CARGAR CONTENIDO INICIAL
 async function cargarContenido() {
     try {
         const [pelis, series] = await Promise.all([
@@ -761,9 +798,7 @@ mainContent.addEventListener('scroll', function() {
         const scrollHeight = mainContent.scrollHeight;
         const clientHeight = mainContent.clientHeight;
         
-        // Si estamos cerca del final (menos de 100px)
         if (scrollTop + clientHeight >= scrollHeight - 100) {
-            // Verificar qué pestaña está activa
             if (document.getElementById('tabPeliculas').style.display !== 'none') {
                 if (!cargandoPeliculas && paginaPeliculas < totalPaginasPeliculas) {
                     cargarMasPeliculas();
@@ -777,6 +812,7 @@ mainContent.addEventListener('scroll', function() {
     }, 300);
 });
 
+// ⭐ BÚSQUEDA
 window.mostrarSugerencias = async function(texto) {
     const container = document.getElementById('searchResults');
     if (!texto || texto.length < 2) { container.classList.remove('show'); return; }
@@ -845,8 +881,11 @@ function cerrarBannerApp() {
 }
 
 function descargarAPK() {
+    // ⭐ DESCARGA DIRECTA - SIN REDIRIGIR
     const urlAPK = 'https://appsgeyser.io/19960416/Tely';
-    mostrarToast('📱 Descargando...', 'info');
+    mostrarToast('📱 Descargando TELY...', 'info');
+    
+    // Crear enlace de descarga directa
     const link = document.createElement('a');
     link.href = urlAPK;
     link.target = '_blank';
@@ -854,9 +893,12 @@ function descargarAPK() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    setTimeout(cerrarBannerApp, 1000);
+    
+    // Cerrar banner después de 2 segundos
+    setTimeout(cerrarBannerApp, 2000);
 }
 
+// ⭐ INICIAR
 cargarContenido();
 cargarPeliculas(1);
 cargarSeries(1);
@@ -865,7 +907,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 1500);
 });
 
-console.log('✅ TELY cargado - Sin sidebar, scroll infinito');
+console.log('✅ TELY cargado - Banner con mensaje "¿Quieres instalar TELY?"');
 </script>
 </body>
 </html>
