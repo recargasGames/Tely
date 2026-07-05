@@ -8,30 +8,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;transition:background 0.3s, color 0.3s;display:flex}
+        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;transition:background 0.3s, color 0.3s}
         body.dark{background:#0A0A0F;color:#fff}
         body:not(.dark){background:#f0f0f0;color:#111}
         
-        .sidebar{position:fixed;top:0;left:0;bottom:0;width:72px;background:rgba(10,10,15,.97);backdrop-filter:blur(12px);border-right:1px solid rgba(124,58,237,.12);z-index:100;display:flex;flex-direction:column;align-items:center;padding:.8rem 0;overflow-y:auto;transition:width 0.3s}
-        body:not(.dark) .sidebar{background:rgba(255,255,255,.97);border-color:rgba(0,0,0,.08)}
-        .sidebar:hover{width:200px}
-        .sidebar:hover .sidebar-link span{display:inline}
-        .sidebar-logo{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:1.5rem;text-align:center;width:100%;padding:0 .5rem}
-        .sidebar-logo small{display:block;font-size:.55rem;color:#64748B;-webkit-text-fill-color:#64748B}
-        .sidebar-nav{display:flex;flex-direction:column;gap:.2rem;width:100%;padding:0 .3rem}
-        .sidebar-link{display:flex;align-items:center;gap:.8rem;padding:.6rem .8rem;border-radius:10px;color:#94A3B8;text-decoration:none;font-weight:600;font-size:.85rem;transition:.3s;white-space:nowrap}
-        .sidebar-link:hover{background:rgba(124,58,237,.12);color:#fff}
-        .sidebar-link.active{background:rgba(124,58,237,.2);color:#fff}
-        .sidebar-link i{font-size:1.2rem;min-width:24px;text-align:center}
-        .sidebar-link span{display:none}
-        .sidebar:hover .sidebar-link span{display:inline}
-        body:not(.dark) .sidebar-link{color:#555}
-        body:not(.dark) .sidebar-link:hover{background:rgba(124,58,237,.08);color:#111}
-        body:not(.dark) .sidebar-link.active{background:rgba(124,58,237,.12);color:#7C3AED}
-        .sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:.2rem;width:100%;padding:0 .3rem}
-        
-        .main-content{flex:1;margin-left:72px;padding:1rem;max-width:calc(100% - 72px)}
-        @media(max-width:768px){.sidebar{width:56px}.main-content{margin-left:56px;max-width:calc(100% - 56px)}}
+        /* ⭐ SIN SIDEBAR - MAIN OCUPA TODO */
+        .main-content{width:100%;padding:1rem;max-width:800px;margin:0 auto}
         
         .top-header{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0 1rem;flex-wrap:wrap;gap:.5rem}
         .top-header h1{font-size:1.3rem;font-weight:700;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -152,19 +134,6 @@
     </style>
 </head>
 <body>
-
-<nav class="sidebar">
-    <div class="sidebar-logo">TELY<small>🍿</small></div>
-    <div class="sidebar-nav">
-        <a href="index.html" class="sidebar-link"><i class="fas fa-home"></i><span>Inicio</span></a>
-        <a href="peliculas.html" class="sidebar-link"><i class="fas fa-film"></i><span>Películas</span></a>
-        <a href="series.html" class="sidebar-link"><i class="fas fa-tv"></i><span>Series</span></a>
-        <a href="populares.html" class="sidebar-link"><i class="fas fa-fire"></i><span>Populares</span></a>
-    </div>
-    <div class="sidebar-bottom">
-        <a href="perfil.html" class="sidebar-link"><i class="fas fa-user"></i><span>Perfil</span></a>
-    </div>
-</nav>
 
 <div class="login-overlay" id="loginOverlay">
     <div class="login-box">
@@ -840,7 +809,6 @@ window.generarTodo = async function() {
                     tmdb_id: p.id,
                     puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A',
                     url: generarEnlaceUnlimplay(p.id, 'pelicula'),
-                    // ⭐ SIN OPCIÓN 2 - SE AGREGA MANUALMENTE
                     creado: Date.now()
                 });
                 totalPeliculas++;
@@ -883,7 +851,6 @@ window.generarTodo = async function() {
                             titulo: ep.name || `Capítulo ${ep.episode_number}`,
                             sinopsis: ep.overview || 'Sin sinopsis',
                             url: generarEnlaceUnlimplay(s.id, 'serie', t, ep.episode_number)
-                            // ⭐ SIN OPCIÓN 2 - SE AGREGA MANUALMENTE
                         }));
                         capsSerie += capitulos.length;
                         temporadas.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
@@ -902,7 +869,6 @@ window.generarTodo = async function() {
                         puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A',
                         temporadas: temporadas,
                         url: generarEnlaceUnlimplay(s.id, 'serie', 1, 1),
-                        // ⭐ SIN OPCIÓN 2 - SE AGREGA MANUALMENTE
                         creado: Date.now()
                     });
                     totalSeries++;
@@ -1140,7 +1106,7 @@ window.eliminarItem = async function(key, tipo) {
 };
 
 db.ref().on('value', () => { if (esAdmin) cargarContenido(); });
-console.log('✅ Admin TELY - Opción 2 solo MANUAL');
+console.log('✅ Admin TELY - Sin sidebar, Opción 2 solo MANUAL');
 </script>
 </body>
 </html>
