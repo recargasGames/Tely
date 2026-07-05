@@ -295,16 +295,13 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ⭐ PANTALLA COMPLETA - SOLO EN APK, NUNCA EN NAVEGADOR
+// ⭐ PANTALLA COMPLETA - SOLO EN APK
 function activarPantallaCompleta() {
-    // Detectar si estamos en una APK (WebView) o en navegador
     const ua = navigator.userAgent || '';
     const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
     const esApp = window.navigator.standalone || 
                    window.matchMedia('(display-mode: standalone)').matches ||
                    esWebView;
-    
-    // SOLO activar pantalla completa si estamos en la APK
     if (esApp && !document.fullscreenElement && !document.webkitFullscreenElement) {
         try {
             if (document.documentElement.requestFullscreen) {
@@ -316,7 +313,6 @@ function activarPantallaCompleta() {
     }
 }
 
-// ⭐ DETECTAR SI ESTAMOS EN NAVEGADOR WEB
 function esNavegadorWeb() {
     const ua = navigator.userAgent || '';
     const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
@@ -326,12 +322,10 @@ function esNavegadorWeb() {
     return !esApp;
 }
 
-// ⭐ BOTÓN ATRÁS
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) { return true; });
 document.addEventListener('backbutton', function(e) { return true; }, false);
 
-// ⭐ AUTENTICACIÓN
 function irALogin() { window.location.href = 'login.html'; }
 function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
 function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
@@ -345,7 +339,6 @@ auth.onAuthStateChanged(user => {
     if (user) { cargarFavoritos(); cargarMiLista(); }
 });
 
-// ⭐ MODO OSCURO
 function toggleTheme() {
     const body = document.body;
     const btn = document.getElementById('themeBtn');
@@ -367,7 +360,6 @@ if (localStorage.getItem('theme') === 'light') {
     document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; 
 }
 
-// ⭐ FUNCIONES DE ENLACES
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     if (tipo === 'pelicula') {
         return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
@@ -408,7 +400,6 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
-// ⭐ VARIABLES DE PAGINACIÓN
 let paginaPeliculas = 1;
 let paginaSeries = 1;
 let cargandoPeliculas = false;
@@ -417,7 +408,6 @@ let totalPaginasPeliculas = 1;
 let totalPaginasSeries = 1;
 let scrollTimeout = null;
 
-// ⭐ PESTAÑAS
 function cambiarTab(tab) {
     document.getElementById('tabInicio').style.display = 'none';
     document.getElementById('tabPeliculas').style.display = 'none';
@@ -442,7 +432,6 @@ function cambiarTab(tab) {
     });
 }
 
-// ⭐ CARGAR PELÍCULAS
 async function cargarPeliculas(page = 1) {
     if (cargandoPeliculas) return;
     if (page > totalPaginasPeliculas && page > 1) return;
@@ -501,7 +490,6 @@ async function cargarPeliculas(page = 1) {
     cargandoPeliculas = false;
 }
 
-// ⭐ CARGAR SERIES
 async function cargarSeries(page = 1) {
     if (cargandoSeries) return;
     if (page > totalPaginasSeries && page > 1) return;
@@ -574,7 +562,6 @@ window.cargarMasSeries = function() {
     }
 };
 
-// ⭐ FAVORITOS Y LISTA
 function toggleFavorito(item) {
     if (!auth.currentUser) { window.location.href = 'login.html'; return; }
     const userId = auth.currentUser.uid;
@@ -671,7 +658,6 @@ function cargarMiLista() {
     });
 }
 
-// ⭐ CREAR TARJETA
 function crearTarjeta(item, esSerie = false) {
     const div = document.createElement('div');
     div.className = 'movie-card';
@@ -703,7 +689,6 @@ function crearTarjeta(item, esSerie = false) {
     return div;
 }
 
-// ⭐ CARGAR CONTENIDO INICIAL
 async function cargarContenido() {
     try {
         const [pelis, series] = await Promise.all([
@@ -794,7 +779,6 @@ function cargarContinuarViendo() {
     });
 }
 
-// ⭐ SCROLL INFINITO
 const mainContent = document.getElementById('mainContent');
 mainContent.addEventListener('scroll', function() {
     clearTimeout(scrollTimeout);
@@ -817,7 +801,6 @@ mainContent.addEventListener('scroll', function() {
     }, 300);
 });
 
-// ⭐ BÚSQUEDA
 window.mostrarSugerencias = async function(texto) {
     const container = document.getElementById('searchResults');
     if (!texto || texto.length < 2) { container.classList.remove('show'); return; }
@@ -856,7 +839,7 @@ window.buscarGlobal = function() {
     if (input.value.trim()) window.mostrarSugerencias(input.value);
 };
 
-// ⭐ BANNER APK - SOLO EN NAVEGADOR
+// ⭐ BANNER APK
 function detectarPlataforma() {
     const ua = navigator.userAgent || '';
     const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
@@ -898,18 +881,13 @@ function descargarAPK() {
     setTimeout(cerrarBannerApp, 2000);
 }
 
-// ⭐ INICIAR - SOLO ACTIVAR PANTALLA COMPLETA EN APK
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 2000);
-    // Solo activar pantalla completa si estamos en APK
     setTimeout(activarPantallaCompleta, 1000);
 });
 
-// ⭐ NO FORZAR PANTALLA COMPLETA EN CLIC (SOLO EN APK)
 document.addEventListener('click', function() {
-    // Si estamos en navegador, NO hacer nada
     if (esNavegadorWeb()) return;
-    // Si estamos en APK, verificar si ya está en pantalla completa
     if (!document.fullscreenElement && !document.webkitFullscreenElement) {
         try {
             if (document.documentElement.requestFullscreen) {
@@ -925,7 +903,7 @@ cargarContenido();
 cargarPeliculas(1);
 cargarSeries(1);
 
-console.log('✅ TELY cargado - Scroll infinito, banner APK, pantalla completa solo en APK');
+console.log('✅ TELY cargado');
 </script>
 </body>
 </html>
