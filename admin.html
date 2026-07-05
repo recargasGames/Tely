@@ -46,7 +46,6 @@
         .btn-group{display:flex;gap:.3rem;flex-wrap:wrap;margin:.3rem 0}
         .btn-group .admin-btn{padding:.3rem 1rem;font-size:.75rem}
         
-        /* ⭐ ADMIN ITEM CON MINIATURA */
         .admin-item{display:flex;align-items:center;gap:.8rem;background:rgba(255,255,255,.02);border-radius:8px;padding:.5rem .6rem;border-left:3px solid #7C3AED;margin-bottom:.4rem}
         body:not(.dark) .admin-item{background:rgba(0,0,0,.02)}
         .admin-item .thumbnail{width:45px;height:67px;border-radius:4px;object-fit:cover;background:#1A1A2E;flex-shrink:0}
@@ -58,10 +57,6 @@
         .admin-item .enlace.op2{color:#60A5FA;border-color:rgba(59,130,246,.15)}
         .admin-item .actions{display:flex;gap:.2rem;flex-wrap:wrap;flex-shrink:0}
         .admin-item .actions .admin-btn{padding:.1rem .4rem;font-size:.55rem;border-radius:4px}
-        
-        .admin-item .edit-input{width:100%;padding:.1rem .3rem;border-radius:4px;border:1px solid rgba(124,58,237,.15);background:rgba(255,255,255,.05);color:#fff;font-size:.6rem;margin-top:.05rem}
-        body:not(.dark) .admin-item .edit-input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.08)}
-        .admin-item .edit-input:focus{outline:none;border-color:#7C3AED}
         .admin-item .badge-tipo{font-size:.5rem;font-weight:600;padding:.03rem .3rem;border-radius:4px}
         .admin-item .badge-tipo.pelicula{background:rgba(124,58,237,.12);color:#A78BFA}
         .admin-item .badge-tipo.serie{background:rgba(16,185,129,.12);color:#34D399}
@@ -119,7 +114,6 @@
         .search-admin select{padding:.4rem .8rem;border-radius:8px;border:1px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.85rem;cursor:pointer}
         body:not(.dark) .search-admin select{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
         .search-admin select:focus{outline:none;border-color:#7C3AED}
-        .edit-mode-indicator{display:inline-block;padding:.1rem .6rem;border-radius:4px;background:rgba(245,158,11,.15);color:#F59E0B;font-size:.6rem;font-weight:600}
         
         .capitulo-detalle{background:rgba(255,255,255,.02);border-radius:6px;padding:.2rem .4rem;margin:.15rem 0;border-left:2px solid rgba(59,130,246,.3)}
         .capitulo-detalle .cap-titulo{font-size:.65rem;font-weight:500;color:#E2E8F0}
@@ -142,7 +136,6 @@
         .paginacion select{padding:.2rem .4rem;border-radius:4px;background:rgba(255,255,255,.05);color:#fff;border:1px solid rgba(124,58,237,.2);font-size:.7rem}
         body:not(.dark) .paginacion select{background:rgba(0,0,0,.05);color:#111}
         
-        /* ⭐ PEDIDOS */
         .pedido-item{background:rgba(255,255,255,.03);border-radius:8px;padding:.5rem .8rem;margin:.3rem 0;border-left:3px solid #F59E0B}
         body:not(.dark) .pedido-item{background:rgba(0,0,0,.02)}
         .pedido-item .titulo{font-weight:600;font-size:.85rem}
@@ -204,7 +197,7 @@
         <span id="adminStatus">Verificando acceso...</span>
     </div>
 
-    <!-- ⭐ SECCIÓN DE GENERACIÓN CON BOTONES SEPARADOS -->
+    <!-- ⭐ GENERACIÓN -->
     <div class="admin-card" style="border-color:rgba(245,158,11,.4)">
         <h3><i class="fas fa-wand-magic-sparkles" style="color:#F59E0B;"></i> Generar contenido</h3>
         
@@ -241,7 +234,7 @@
         </div>
     </div>
 
-    <!-- ⭐ SECCIÓN DE PEDIDOS -->
+    <!-- ⭐ PEDIDOS -->
     <div class="admin-card" style="border-color:rgba(245,158,11,.3)">
         <h3><i class="fas fa-clipboard-list" style="color:#F59E0B;"></i> Pedidos de usuarios <span class="badge-pedidos" id="badgeTotalPedidos">0</span></h3>
         
@@ -259,7 +252,7 @@
         </div>
     </div>
 
-    <!-- ⭐ SECCIÓN DE CONTENIDO CON MINIATURAS -->
+    <!-- ⭐ CONTENIDO -->
     <div class="admin-card">
         <h3><i class="fas fa-list text-emerald-500"></i> Contenido en Firebase</h3>
         
@@ -672,7 +665,7 @@ function continuarGeneracion() {
 }
 
 // ⭐ EDITAR ENLACES
-window.editarEnlace = function(id, tipo, key, campo) {
+window.editarEnlace = function(key, tipo, campo) {
     const container = document.getElementById(`item-${key}`);
     const enlaceDiv = container.querySelector(`.enlace.${campo}`);
     const actionsDiv = container.querySelector('.actions');
@@ -730,14 +723,12 @@ window.agregarOpcion2 = async function(key, tipo, tmdbId) {
     const container = document.getElementById(`item-${key}`);
     const actionsDiv = container.querySelector('.actions');
     
-    // Verificar si ya existe op2
     const op2Existente = container.querySelector('.enlace.op2');
     if (op2Existente) {
         editarEnlace(key, tipo, 'op2');
         return;
     }
     
-    // Crear nuevo enlace op2
     const nuevoOp2 = document.createElement('div');
     nuevoOp2.className = 'enlace op2';
     nuevoOp2.style.marginTop = '.1rem';
@@ -750,7 +741,6 @@ window.agregarOpcion2 = async function(key, tipo, tmdbId) {
         </div>
     `;
     
-    // Insertar antes de actions
     container.insertBefore(nuevoOp2, actionsDiv);
     
     setTimeout(() => {
@@ -1023,7 +1013,14 @@ window.cargarContenido = async function() {
     if (!esAdmin) return;
     const container = document.getElementById('listaContenido');
     container.innerHTML = '<p class="loading-text">Cargando contenido...</p>';
+    
     try {
+        // Verificar conexión a Firebase
+        if (!db) {
+            container.innerHTML = '<p style="color:#EF4444;">❌ Error: Firebase no está disponible</p>';
+            return;
+        }
+        
         const [pSnap, sSnap] = await Promise.all([
             db.ref('contenido_personalizado').once('value'),
             db.ref('series_personalizadas').once('value')
@@ -1045,7 +1042,7 @@ window.cargarContenido = async function() {
         document.getElementById('totalCaps').textContent = caps;
         
         if (!peliculasLista.length && !seriesLista.length) {
-            container.innerHTML = '<p class="loading-text">No hay contenido guardado</p>';
+            container.innerHTML = '<div style="color:#64748B;text-align:center;padding:1rem;font-size:.9rem;">📭 No hay contenido guardado. Presiona "Generar Películas" o "Generar Series" para comenzar.</div>';
             document.getElementById('paginacionContainer').style.display = 'none';
             return;
         }
@@ -1061,7 +1058,7 @@ window.cargarContenido = async function() {
                 const key = peliculasKeys[index];
                 const portada = p.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
                 const urlOp1 = p.url || 'Sin enlace';
-                const urlOp2 = p.opcion2 || 'Sin Op2';
+                const urlOp2 = p.opcion2 || '';
                 
                 const item = document.createElement('div');
                 item.className = 'admin-item';
@@ -1076,11 +1073,11 @@ window.cargarContenido = async function() {
                         <div class="title">${p.titulo} <span class="badge-tipo pelicula">🎬</span></div>
                         <div class="meta">${p.anio || 'N/D'} • ⭐ ${p.puntuacion || 'N/A'} • TMDB: ${p.tmdb_id}</div>
                         <div class="enlace op1">🔗 Op1: ${urlOp1}</div>
-                        ${urlOp2 && urlOp2 !== 'Sin Op2' ? `<div class="enlace op2">🔗 Op2: ${urlOp2}</div>` : ''}
+                        ${urlOp2 ? `<div class="enlace op2">🔗 Op2: ${urlOp2}</div>` : ''}
                     </div>
                     <div class="actions">
                         <button class="admin-btn admin-btn-blue" onclick="editarEnlace('${key}', 'pelicula', 'url')"><i class="fas fa-pen"></i> Op1</button>
-                        <button class="admin-btn admin-btn-purple" onclick="agregarOpcion2('${key}', 'pelicula', '${p.tmdb_id}')"><i class="fas fa-plus"></i> Op2</button>
+                        ${urlOp2 ? `<button class="admin-btn admin-btn-purple" onclick="editarEnlace('${key}', 'pelicula', 'op2')"><i class="fas fa-pen"></i> Op2</button>` : `<button class="admin-btn admin-btn-purple" onclick="agregarOpcion2('${key}', 'pelicula', '${p.tmdb_id}')"><i class="fas fa-plus"></i> Op2</button>`}
                         <button class="admin-btn admin-btn-danger" onclick="eliminarItem('${key}', 'pelicula')"><i class="fas fa-trash"></i></button>
                     </div>
                 `;
@@ -1100,7 +1097,7 @@ window.cargarContenido = async function() {
                 const isExpanded = seriesExpandidas[key] || false;
                 const portada = s.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
                 const urlOp1 = s.url || 'Sin enlace';
-                const urlOp2 = s.opcion2 || 'Sin Op2';
+                const urlOp2 = s.opcion2 || '';
                 
                 const item = document.createElement('div');
                 item.className = 'admin-item serie-expandida';
@@ -1116,7 +1113,7 @@ window.cargarContenido = async function() {
                         if (temp.capitulos && temp.capitulos.length) {
                             temp.capitulos.forEach((cap, capIdx) => {
                                 const capUrl = cap.url || 'Sin enlace';
-                                const capOp2 = cap.opcion2 || 'Sin Op2';
+                                const capOp2 = cap.opcion2 || '';
                                 capitulosHTML += `
                                     <div class="capitulo-detalle">
                                         <div class="cap-titulo">Cap ${cap.numero || capIdx + 1}: ${cap.titulo || 'Sin título'}</div>
@@ -1148,11 +1145,11 @@ window.cargarContenido = async function() {
                         <div class="title">${s.titulo} <span class="badge-tipo serie">📺</span></div>
                         <div class="meta">${s.anio || 'N/D'} • ${s.temporadas?.length || 0} temps • ${capsCount} caps • ⭐ ${s.puntuacion || 'N/A'} • TMDB: ${s.tmdb_id}</div>
                         <div class="enlace op1">🔗 Op1: ${urlOp1}</div>
-                        ${urlOp2 && urlOp2 !== 'Sin Op2' ? `<div class="enlace op2">🔗 Op2: ${urlOp2}</div>` : ''}
+                        ${urlOp2 ? `<div class="enlace op2">🔗 Op2: ${urlOp2}</div>` : ''}
                     </div>
                     <div class="actions">
                         <button class="admin-btn admin-btn-blue" onclick="editarEnlace('${key}', 'serie', 'url')"><i class="fas fa-pen"></i> Op1</button>
-                        <button class="admin-btn admin-btn-purple" onclick="agregarOpcion2('${key}', 'serie', '${s.tmdb_id}')"><i class="fas fa-plus"></i> Op2</button>
+                        ${urlOp2 ? `<button class="admin-btn admin-btn-purple" onclick="editarEnlace('${key}', 'serie', 'op2')"><i class="fas fa-pen"></i> Op2</button>` : `<button class="admin-btn admin-btn-purple" onclick="agregarOpcion2('${key}', 'serie', '${s.tmdb_id}')"><i class="fas fa-plus"></i> Op2</button>`}
                         <button class="toggle-series-btn" id="toggle-btn-${key}" onclick="toggleSerie('${key}')">
                             <i class="fas fa-chevron-${isExpanded ? 'up' : 'down'}"></i> ${isExpanded ? 'Ocultar' : 'Ver caps'}
                         </button>
@@ -1171,8 +1168,16 @@ window.cargarContenido = async function() {
         mostrarPagina();
         
     } catch(e) {
-        container.innerHTML = '<p style="color:#EF4444;">Error al cargar</p>';
-        console.error(e);
+        console.error('Error al cargar contenido:', e);
+        container.innerHTML = `
+            <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:1rem;text-align:center;">
+                <p style="color:#EF4444;font-size:.9rem;">❌ Error al cargar el contenido</p>
+                <p style="color:#64748B;font-size:.75rem;margin-top:.3rem;">${e.message || 'Verifica tu conexión a Firebase'}</p>
+                <button onclick="cargarContenido()" style="margin-top:.5rem;padding:.3rem 1rem;background:#7C3AED;border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:.75rem;">
+                    <i class="fas fa-refresh"></i> Reintentar
+                </button>
+            </div>
+        `;
     }
 };
 
@@ -1203,9 +1208,31 @@ window.filtrarContenido = function() {
     });
 };
 
+// ⭐ LIMPIAR TODO
+window.limpiarTodo = async function() {
+    if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
+    if (!confirm('⚠️ ¿Eliminar TODO el contenido de Firebase?\n¡No se puede deshacer!')) return;
+    try {
+        const snap = await db.ref().once('value');
+        const data = snap.val();
+        const updates = {};
+        if (data) {
+            Object.keys(data).forEach(key => {
+                if (key === 'contenido_personalizado' || key === 'series_personalizadas') updates[key] = null;
+            });
+            await db.ref().update(updates);
+        }
+        mostrarToast('🗑️ Todo eliminado', 'warning');
+        cargarContenido();
+    } catch(e) {
+        mostrarToast('❌ Error: ' + e.message, 'error');
+    }
+};
+
+// ⭐ INICIAR
 cargarContenido();
 cargarPedidos();
-console.log('✅ Admin TELY - Con miniaturas, Op1/Op2 editables, pedidos');
+console.log('✅ Admin TELY - Con miniaturas y manejo de errores');
 </script>
 </body>
 </html>
