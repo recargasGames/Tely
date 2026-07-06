@@ -202,7 +202,7 @@
         <span id="adminStatus">Verificando acceso...</span>
     </div>
 
-    <!-- ⭐ SECCIÓN DE GENERACIÓN CON BOTONES SEPARADOS -->
+    <!-- ⭐ GENERACIÓN -->
     <div class="admin-card" style="border-color:rgba(245,158,11,.4)">
         <h3><i class="fas fa-wand-magic-sparkles" style="color:#F59E0B;"></i> Generar contenido</h3>
         
@@ -239,7 +239,7 @@
         </div>
     </div>
 
-    <!-- ⭐ SECCIÓN DE PEDIDOS -->
+    <!-- ⭐ PEDIDOS -->
     <div class="admin-card" style="border-color:rgba(245,158,11,.3)">
         <h3><i class="fas fa-clipboard-list" style="color:#F59E0B;"></i> Pedidos de usuarios <span class="badge-pedidos" id="badgeTotalPedidos">0</span></h3>
         
@@ -257,7 +257,7 @@
         </div>
     </div>
 
-    <!-- ⭐ SECCIÓN DE CONTENIDO CON MINIATURAS -->
+    <!-- ⭐ CONTENIDO CON MINIATURAS -->
     <div class="admin-card">
         <h3><i class="fas fa-list text-emerald-500"></i> Contenido en Firebase</h3>
         
@@ -1056,12 +1056,6 @@ window.cargarContenido = async function() {
     container.innerHTML = '<p class="loading-text">Cargando contenido...</p>';
     
     try {
-        // Verificar conexión a Firebase
-        if (!db) {
-            container.innerHTML = '<p style="color:#EF4444;">❌ Error: Firebase no está disponible</p>';
-            return;
-        }
-        
         console.log('🔍 Buscando en Firebase...');
         
         const [pSnap, sSnap] = await Promise.all([
@@ -1088,7 +1082,7 @@ window.cargarContenido = async function() {
         document.getElementById('totalCaps').textContent = caps;
         
         if (!peliculasLista.length && !seriesLista.length) {
-            container.innerHTML = '<div style="color:#64748B;text-align:center;padding:1rem;font-size:.9rem;">📭 No hay contenido guardado. Presiona "Generar Películas" o "Generar Series" para comenzar.</div>';
+            container.innerHTML = '<div style="color:#64748B;text-align:center;padding:1rem;font-size:.9rem;">📭 No hay contenido guardado.</div>';
             document.getElementById('paginacionContainer').style.display = 'none';
             return;
         }
@@ -1239,10 +1233,10 @@ window.eliminarItem = async function(key, tipo) {
     }
 };
 
-// ⭐ INICIAR
+// ⭐ INICIAR - CARGA AUTOMÁTICA
 cargarContenido();
 cargarPedidos();
-console.log('✅ Admin TELY - Con miniaturas, Op1/Op2 editables y pedidos');
+console.log('✅ Admin TELY - Con miniaturas, carga automática de datos existentes');
 </script>
 </body>
 </html>
