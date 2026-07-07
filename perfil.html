@@ -64,10 +64,10 @@
         body:not(.dark) .profile-email{color:#888}
         .profile-plan{display:inline-block;padding:.1rem .6rem;border-radius:9999px;background:rgba(16,185,129,.15);color:#34D399;font-size:.65rem;font-weight:600;margin-top:.2rem}
         
-        .profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.3rem;margin:.8rem 0;padding:.6rem 0;border-top:1px solid rgba(124,58,237,.06);border-bottom:1px solid rgba(124,58,237,.06)}
+        .profile-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.3rem;margin:.8rem 0;padding:.6rem 0;border-top:1px solid rgba(124,58,237,.06);border-bottom:1px solid rgba(124,58,237,.06)}
         .profile-stats .stat{text-align:center}
         .profile-stats .stat .num{font-size:1.1rem;font-weight:700;color:#7C3AED}
-        .profile-stats .stat .label{font-size:.6rem;color:#94A3B8}
+        .profile-stats .stat .label{font-size:.55rem;color:#94A3B8}
         
         .profile-btn{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.5rem 1.2rem;border-radius:8px;font-weight:600;cursor:pointer;transition:.3s;margin:.2rem;font-size:.75rem;display:inline-flex;align-items:center;gap:.3rem}
         .profile-btn:hover{background:rgba(124,58,237,.25)}
@@ -77,10 +77,13 @@
         .profile-btn.success:hover{background:rgba(16,185,129,.15)}
         .profile-btn.warning{border-color:rgba(245,158,11,.3);color:#F59E0B}
         .profile-btn.warning:hover{background:rgba(245,158,11,.15)}
+        .profile-btn.download{border-color:rgba(59,130,246,.3);color:#60A5FA}
+        .profile-btn.download:hover{background:rgba(59,130,246,.15)}
         body:not(.dark) .profile-btn{color:#111}
         body:not(.dark) .profile-btn.danger{color:#EF4444}
         body:not(.dark) .profile-btn.success{color:#059669}
         body:not(.dark) .profile-btn.warning{color:#D97706}
+        body:not(.dark) .profile-btn.download{color:#2563EB}
         
         .btn-group{display:flex;flex-direction:column;gap:.3rem;margin:.3rem 0}
         .btn-group .profile-btn{justify-content:center}
@@ -126,6 +129,22 @@
         .pedido-item .fecha{font-size:.5rem;color:#64748B}
         .no-pedidos{color:#64748B;font-size:.7rem;text-align:center;padding:.3rem 0}
         .badge-pedido{display:inline-block;background:#EF4444;color:#fff;border-radius:9999px;padding:.03rem .4rem;font-size:.5rem;font-weight:700;margin-left:.2rem}
+        
+        /* ===== DESCARGAS OFFLINE ===== */
+        .descarga-item{background:rgba(255,255,255,.03);border-radius:8px;padding:.4rem .6rem;margin:.2rem 0;border-left:3px solid #3B82F6;text-align:left;display:flex;align-items:center;gap:.4rem}
+        body:not(.dark) .descarga-item{background:rgba(0,0,0,.02)}
+        .descarga-item .thumb{width:40px;height:60px;border-radius:4px;object-fit:cover;flex-shrink:0;background:#1A1A2E}
+        .descarga-item .info{flex:1;min-width:0}
+        .descarga-item .info .titulo{font-weight:600;font-size:.75rem}
+        .descarga-item .info .detalles{font-size:.55rem;color:#94A3B8;display:flex;gap:.4rem;flex-wrap:wrap}
+        .descarga-item .acciones{display:flex;gap:.2rem;flex-shrink:0}
+        .descarga-item .acciones button{background:rgba(255,255,255,.05);border:none;color:#94A3B8;padding:.15rem .3rem;border-radius:4px;font-size:.55rem;cursor:pointer;transition:.2s}
+        .descarga-item .acciones button:hover{background:rgba(124,58,237,.15);color:#fff}
+        .descarga-item .acciones .play-desc{color:#34D399}
+        .descarga-item .acciones .play-desc:hover{background:rgba(16,185,129,.15);color:#34D399}
+        .descarga-item .acciones .delete-desc{color:#EF4444}
+        .descarga-item .acciones .delete-desc:hover{background:rgba(239,68,68,.15);color:#EF4444}
+        .descarga-item .size{font-size:.45rem;color:#64748B}
         
         .user-dropdown{position:absolute;right:0;top:calc(100% + 6px);background:rgba(26,26,46,.95);border-radius:8px;width:160px;border:1px solid rgba(124,58,237,.15);padding:.2rem 0;display:none;z-index:60;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
@@ -209,9 +228,11 @@
             <div class="stat"><div class="num" id="statHistorial">0</div><div class="label">Vistos</div></div>
             <div class="stat"><div class="num" id="statFavoritos">0</div><div class="label">Favoritos</div></div>
             <div class="stat"><div class="num" id="statPedidos">0</div><div class="label">Pedidos</div></div>
+            <div class="stat"><div class="num" id="statDescargas">0</div><div class="label">Descargas</div></div>
         </div>
 
         <div class="btn-group">
+            <button class="profile-btn download" onclick="verDescargasOffline()"><i class="fas fa-download"></i> 📥 Mis Descargas <span class="badge-pedido" id="badgeDescargas" style="display:none;">0</span></button>
             <button class="profile-btn warning" onclick="abrirModalPedido()"><i class="fas fa-plus-circle"></i> 📝 Hacer pedido</button>
             <button class="profile-btn" onclick="verMisPedidos()"><i class="fas fa-clipboard-list"></i> 📋 Mis pedidos <span class="badge-pedido" id="badgePedidos">0</span></button>
             <button class="profile-btn success" onclick="abrirModalCambiarPassword()"><i class="fas fa-key"></i> 🔑 Cambiar contraseña</button>
@@ -220,7 +241,7 @@
     </div>
 </main>
 
-<!-- MODALES -->
+<!-- MODAL PEDIDO -->
 <div class="modal-overlay" id="modalPedido">
     <div class="modal-box">
         <h2><i class="fas fa-plus-circle" style="color:#F59E0B;"></i> Hacer pedido</h2>
@@ -255,6 +276,7 @@
     </div>
 </div>
 
+<!-- MODAL PEDIDOS -->
 <div class="modal-overlay" id="modalPedidos">
     <div class="modal-box">
         <h2><i class="fas fa-clipboard-list" style="color:#F59E0B;"></i> Mis pedidos</h2>
@@ -268,6 +290,21 @@
     </div>
 </div>
 
+<!-- MODAL DESCARGAS OFFLINE -->
+<div class="modal-overlay" id="modalDescargas">
+    <div class="modal-box">
+        <h2><i class="fas fa-download" style="color:#3B82F6;"></i> Mis Descargas</h2>
+        <p class="sub" id="subDescargas">Episodios y películas descargadas para ver sin internet</p>
+        <div id="listaDescargas" style="max-height:300px;overflow-y:auto;">
+            <div class="no-pedidos">No tienes descargas aún</div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn-cancelar" onclick="cerrarModalDescargas()"><i class="fas fa-times"></i> Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CAMBIAR CONTRASEÑA -->
 <div class="modal-overlay" id="modalPassword">
     <div class="modal-box">
         <h2><i class="fas fa-key" style="color:#34D399;"></i> Cambiar contraseña</h2>
@@ -322,6 +359,203 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
+// ============================================================
+//  DESCARGA OFFLINE - IndexedDB
+// ============================================================
+const DB_NAME = 'TELY_Offline';
+const DB_VERSION = 1;
+const STORE_NAME = 'descargas';
+
+function abrirDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                store.createIndex('titulo', 'titulo');
+                store.createIndex('fecha_descarga', 'fecha_descarga');
+            }
+        };
+        request.onsuccess = (event) => resolve(event.target.result);
+        request.onerror = (event) => reject(event.target.error);
+    });
+}
+
+function guardarDescarga(episodio) {
+    return new Promise((resolve, reject) => {
+        abrirDB().then(db => {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.add(episodio);
+            request.onsuccess = () => {
+                db.close();
+                resolve();
+                actualizarContadorDescargas();
+            };
+            request.onerror = () => {
+                db.close();
+                reject(request.error);
+            };
+        }).catch(reject);
+    });
+}
+
+function obtenerDescargas() {
+    return new Promise((resolve, reject) => {
+        abrirDB().then(db => {
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
+            request.onsuccess = () => {
+                db.close();
+                resolve(request.result);
+            };
+            request.onerror = () => {
+                db.close();
+                reject(request.error);
+            };
+        }).catch(reject);
+    });
+}
+
+function eliminarDescarga(id) {
+    return new Promise((resolve, reject) => {
+        abrirDB().then(db => {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.delete(id);
+            request.onsuccess = () => {
+                db.close();
+                resolve();
+                actualizarContadorDescargas();
+            };
+            request.onerror = () => {
+                db.close();
+                reject(request.error);
+            };
+        }).catch(reject);
+    });
+}
+
+// ============================================================
+//  FUNCIONES DE DESCARGA
+// ============================================================
+function verDescargasOffline() {
+    document.getElementById('modalDescargas').classList.add('show');
+    cargarDescargasOffline();
+}
+
+function cerrarModalDescargas() {
+    document.getElementById('modalDescargas').classList.remove('show');
+}
+
+function cargarDescargasOffline() {
+    const container = document.getElementById('listaDescargas');
+    const sub = document.getElementById('subDescargas');
+    container.innerHTML = '<div style="text-align:center;padding:.3rem;color:#64748B;"><i class="fas fa-spinner fa-spin"></i> Cargando descargas...</div>';
+    
+    obtenerDescargas().then(descargas => {
+        container.innerHTML = '';
+        if (!descargas || descargas.length === 0) {
+            container.innerHTML = '<div class="no-pedidos">No tienes descargas aún</div>';
+            sub.textContent = 'Descarga episodios desde el reproductor para verlos sin internet';
+            return;
+        }
+        sub.textContent = `Tienes ${descargas.length} descarga(s)`;
+        descargas.sort((a, b) => new Date(b.fecha_descarga) - new Date(a.fecha_descarga));
+        descargas.forEach(d => {
+            const div = document.createElement('div');
+            div.className = 'descarga-item';
+            const tamaño = d.tamaño ? `${Math.round(d.tamaño / 1024 / 1024)} MB` : '';
+            div.innerHTML = `
+                <img src="${d.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg'}" class="thumb" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+                <div class="info">
+                    <div class="titulo">${d.titulo}</div>
+                    <div class="detalles">
+                        <span>${d.tipo === 'serie' ? '📺 Serie' : '🎬 Película'}</span>
+                        ${d.temporada ? `<span>T${d.temporada}</span>` : ''}
+                        ${d.capitulo ? `<span>Cap${d.capitulo}</span>` : ''}
+                        ${tamaño ? `<span class="size">${tamaño}</span>` : ''}
+                        <span>📆 ${new Date(d.fecha_descarga).toLocaleDateString()}</span>
+                    </div>
+                </div>
+                <div class="acciones">
+                    <button class="play-desc" onclick="reproducirDescarga('${d.id}')"><i class="fas fa-play"></i></button>
+                    <button class="delete-desc" onclick="eliminarDescargaHandler('${d.id}')"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }).catch(() => {
+        container.innerHTML = '<div style="color:#EF4444;text-align:center;padding:.3rem;">Error al cargar las descargas</div>';
+    });
+}
+
+function reproducirDescarga(id) {
+    obtenerDescargas().then(descargas => {
+        const d = descargas.find(item => item.id === id);
+        if (d && d.url) {
+            // Guardar en historial local
+            const historial = JSON.parse(localStorage.getItem('historialTely')) || [];
+            historial.unshift({
+                id: d.id,
+                tmdb_id: d.tmdb_id || d.id,
+                titulo: d.titulo,
+                tipo: d.tipo || 'pelicula',
+                portada: d.portada,
+                temporada: d.temporada || 0,
+                capitulo: d.capitulo || 0,
+                fecha: new Date().toISOString()
+            });
+            if (historial.length > 50) historial.pop();
+            localStorage.setItem('historialTely', JSON.stringify(historial));
+            
+            // Reproducir offline
+            const params = new URLSearchParams();
+            params.set('play', d.tmdb_id || d.id);
+            params.set('tipo', d.tipo || 'pelicula');
+            if (d.temporada) params.set('temp', d.temporada - 1);
+            if (d.capitulo) params.set('cap', d.capitulo - 1);
+            window.location.href = `reproductor.html?${params.toString()}`;
+        } else {
+            mostrarToast('❌ No se puede reproducir este contenido', 'error');
+        }
+    });
+}
+
+function eliminarDescargaHandler(id) {
+    if (confirm('¿Eliminar esta descarga?')) {
+        eliminarDescarga(id).then(() => {
+            mostrarToast('🗑️ Descarga eliminada', 'warning');
+            cargarDescargasOffline();
+        }).catch(() => {
+            mostrarToast('❌ Error al eliminar', 'error');
+        });
+    }
+}
+
+function actualizarContadorDescargas() {
+    obtenerDescargas().then(descargas => {
+        const count = descargas ? descargas.length : 0;
+        document.getElementById('statDescargas').textContent = count;
+        const badge = document.getElementById('badgeDescargas');
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+    }).catch(() => {});
+}
+
+// ============================================================
+//  EXPONER FUNCIONES PARA EL REPRODUCTOR (window)
+// ============================================================
+window.guardarDescarga = guardarDescarga;
+window.obtenerDescargas = obtenerDescargas;
+window.eliminarDescarga = eliminarDescarga;
+window.actualizarContadorDescargas = actualizarContadorDescargas;
+
+// ============================================================
+//  FUNCIONES EXISTENTES
+// ============================================================
 document.addEventListener('DOMContentLoaded', function() {
     const esApp = window.navigator.standalone || 
                    window.matchMedia('(display-mode: standalone)').matches ||
@@ -352,8 +586,15 @@ window.addEventListener('popstate', function(e) { return true; });
 document.addEventListener('backbutton', function(e) { return true; }, false);
 
 function irALogin() { window.location.href = 'login.html'; }
-function cerrarSesion() { auth.signOut().then(() => { window.location.href = 'index.html'; }); }
-function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
+function cerrarSesion() { 
+    auth.signOut().then(() => { 
+        window.location.href = 'index.html'; 
+    }); 
+}
+
+function toggleUserMenu() { 
+    document.getElementById('userDropdown').classList.toggle('show'); 
+}
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('userDropdown');
     if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
@@ -579,6 +820,7 @@ function actualizarPerfil(user) {
             }
         });
         actualizarContadorPedidos();
+        actualizarContadorDescargas();
     } else {
         loginBtn.style.display = 'flex';
         logoutBtn.style.display = 'none';
@@ -588,8 +830,11 @@ function actualizarPerfil(user) {
         document.getElementById('statHistorial').textContent = '0';
         document.getElementById('statFavoritos').textContent = '0';
         document.getElementById('statPedidos').textContent = '0';
+        document.getElementById('statDescargas').textContent = '0';
         document.getElementById('badgePedidos').textContent = '0';
         document.getElementById('badgePedidos').style.display = 'none';
+        document.getElementById('badgeDescargas').textContent = '0';
+        document.getElementById('badgeDescargas').style.display = 'none';
         avatar.src = 'https://ui-avatars.com/api/?name=Invitado&background=7C3AED&color=fff&size=100';
     }
 }
@@ -603,6 +848,7 @@ document.addEventListener('keydown', function(e) {
         cerrarModalPedido();
         cerrarModalPedidos();
         cerrarModalPassword();
+        cerrarModalDescargas();
     }
 });
 
@@ -651,7 +897,10 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 1500);
 });
 
-console.log('✅ Perfil TELY - Sin sidebar');
+// ⭐ ACTUALIZAR CONTADOR DE DESCARGAS AL INICIAR
+setTimeout(actualizarContadorDescargas, 1000);
+
+console.log('✅ Perfil TELY - Con descargas offline integradas');
 </script>
 </body>
 </html>
