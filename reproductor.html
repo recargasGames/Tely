@@ -21,44 +21,6 @@
         body.dark{background:#0A0A0F;color:#fff}
         body:not(.dark){background:#f0f0f0;color:#111}
         
-        /* ===== OCULTAR BARRA DE ESTADO EN HORIZONTAL ===== */
-        body:fullscreen .header-flotante,
-        body:-webkit-full-screen .header-flotante,
-        body:-moz-full-screen .header-flotante,
-        body:-ms-fullscreen .header-flotante {
-            display: none !important;
-        }
-        
-        /* Cuando el video está en pantalla completa, ocultar todo excepto el video */
-        body:fullscreen .main-content,
-        body:-webkit-full-screen .main-content,
-        body:-moz-full-screen .main-content,
-        body:-ms-fullscreen .main-content {
-            padding: 0 !important;
-            max-width: 100% !important;
-        }
-        
-        body:fullscreen .player-wrapper,
-        body:-webkit-full-screen .player-wrapper,
-        body:-moz-full-screen .player-wrapper,
-        body:-ms-fullscreen .player-wrapper {
-            border-radius: 0 !important;
-            aspect-ratio: auto !important;
-            height: 100vh !important;
-            width: 100vw !important;
-            margin: 0 !important;
-        }
-        
-        body:fullscreen .info-top,
-        body:fullscreen .player-controls,
-        body:fullscreen .episodios-section,
-        body:fullscreen .recomendaciones-wrap,
-        body:fullscreen .btn-actions-modern,
-        body:fullscreen .season-selector-wrap,
-        body:fullscreen #bannerApp {
-            display: none !important;
-        }
-        
         .main-content{width:100%;height:100vh;padding:.3rem .5rem;overflow-y:auto;margin:0 auto;max-width:600px}
         
         .header-flotante{
@@ -96,7 +58,6 @@
         .player-wrapper{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;width:100%;margin:.2rem 0}
         .player-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;background:#000}
         
-        /* Botón para pantalla completa */
         .btn-fullscreen{
             background:rgba(255,255,255,.06);
             border:1px solid rgba(124,58,237,.15);
@@ -289,8 +250,11 @@
             color:#fff;
         }
         body:not(.dark) .episodio-item .acciones-ep button:hover{color:#111}
+        .episodio-item .acciones-ep .download-ep{color:#60A5FA}
+        .episodio-item .acciones-ep .download-ep:hover{background:rgba(59,130,246,.15);color:#60A5FA}
+        .episodio-item .acciones-ep .download-ep.descargado{color:#34D399}
         
-        /* ===== RECOMENDACIONES - IMÁGENES COMPLETAS ===== */
+        /* ===== RECOMENDACIONES ===== */
         .recomendaciones-wrap{margin-top:.2rem}
         .titulo-recomendadas{font-weight:600;font-size:.75rem;color:#fff;margin:.2rem 0 .1rem}
         body:not(.dark) .titulo-recomendadas{color:#111}
@@ -376,6 +340,26 @@
             .recomendacion{width:65px}
             .recomendacion p{font-size:.4rem}
         }
+        
+        /* Pantalla completa: ocultar todo */
+        body:fullscreen .header-flotante,
+        body:-webkit-full-screen .header-flotante,
+        body:-moz-full-screen .header-flotante,
+        body:-ms-fullscreen .header-flotante { display: none !important; }
+        body:fullscreen .main-content,
+        body:-webkit-full-screen .main-content,
+        body:-moz-full-screen .main-content,
+        body:-ms-fullscreen .main-content { padding: 0 !important; max-width: 100% !important; }
+        body:fullscreen .player-wrapper,
+        body:-webkit-full-screen .player-wrapper,
+        body:-moz-full-screen .player-wrapper,
+        body:-ms-fullscreen .player-wrapper { border-radius: 0 !important; aspect-ratio: auto !important; height: 100vh !important; width: 100vw !important; margin: 0 !important; }
+        body:fullscreen .info-top,
+        body:fullscreen .player-controls,
+        body:fullscreen .episodios-section,
+        body:fullscreen .recomendaciones-wrap,
+        body:fullscreen .season-selector-wrap,
+        body:fullscreen #bannerApp { display: none !important; }
     </style>
 </head>
 <body>
@@ -488,7 +472,85 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ===== CACHÉ =====
+// ============================================================
+//  DESCARGA OFFLINE - FUNCIONES GLOBALES
+// ============================================================
+const DB_NAME = 'TELY_Offline';
+const DB_VERSION = 1;
+const STORE_NAME = 'descargas';
+
+function abrirDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+            }
+        };
+        request.onsuccess = (event) => resolve(event.target.result);
+        request.onerror = (event) => reject(event.target.error);
+    });
+}
+
+function guardarDescarga(episodio) {
+    return new Promise((resolve, reject) => {
+        abrirDB().then(db => {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.add(episodio);
+            request.onsuccess = () => { db.close(); resolve(); };
+            request.onerror = () => { db.close(); reject(request.error); };
+        }).catch(reject);
+    });
+}
+
+function obtenerDescargas() {
+    return new Promise((resolve, reject) => {
+        abrirDB().then(db => {
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
+            request.onsuccess = () => { db.close(); resolve(request.result); };
+            request.onerror = () => { db.close(); reject(request.error); };
+        }).catch(reject);
+    });
+}
+
+function eliminarDescarga(id) {
+    return new Promise((resolve, reject) => {
+        abrirDB().then(db => {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.delete(id);
+            request.onsuccess = () => { db.close(); resolve(); };
+            request.onerror = () => { db.close(); reject(request.error); };
+        }).catch(reject);
+    });
+}
+
+function verificarDescargado(id) {
+    return new Promise((resolve) => {
+        abrirDB().then(db => {
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.get(id);
+            request.onsuccess = () => { db.close(); resolve(!!request.result); };
+            request.onerror = () => { db.close(); resolve(false); };
+        }).catch(() => resolve(false));
+    });
+}
+
+// ============================================================
+//  EXPONER FUNCIONES PARA EL PERFIL (window)
+// ============================================================
+window.guardarDescarga = guardarDescarga;
+window.obtenerDescargas = obtenerDescargas;
+window.eliminarDescarga = eliminarDescarga;
+
+// ============================================================
+//  CACHÉ
+// ============================================================
 function guardarContenidoEnCache(tmdbId, data) {
     try { localStorage.setItem(`tely_contenido_${tmdbId}`, JSON.stringify({ data, timestamp: Date.now() })); } catch(e) {}
 }
@@ -509,35 +571,25 @@ function guardarPestanaActiva() {
     } catch(e) {}
 }
 
-// ===== VOLVER AL ÍNDICE CON UN SOLO CLIC =====
 function volverAlIndex() {
     guardarPestanaActiva();
-    // Salir de pantalla completa si está activa
     if (document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
     }
     window.location.href = 'index.html';
 }
 
-// ===== PANTALLA COMPLETA =====
 function toggleFullscreen() {
     const wrapper = document.getElementById('playerWrapper');
     if (!document.fullscreenElement) {
-        if (wrapper.requestFullscreen) {
-            wrapper.requestFullscreen();
-        } else if (wrapper.webkitRequestFullscreen) {
-            wrapper.webkitRequestFullscreen();
-        }
+        if (wrapper.requestFullscreen) { wrapper.requestFullscreen(); }
+        else if (wrapper.webkitRequestFullscreen) { wrapper.webkitRequestFullscreen(); }
     } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        }
+        if (document.exitFullscreen) { document.exitFullscreen(); }
+        else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
     }
 }
 
-// ===== AUTENTICACIÓN =====
 function irALogin() { window.location.href = 'login.html'; }
 function cerrarSesion() { auth.signOut().then(() => { window.location.href = 'index.html'; }); }
 function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
@@ -550,7 +602,6 @@ auth.onAuthStateChanged(user => {
     document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
 });
 
-// ===== TEMA =====
 function toggleTheme() {
     const body = document.body;
     const btn = document.getElementById('themeBtn');
@@ -572,7 +623,6 @@ if (localStorage.getItem('theme') === 'light') {
     document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; 
 }
 
-// ===== UTILIDADES =====
 function getImagenUrl(path, size = 'w342') {
     if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
     return `https://image.tmdb.org/t/p/${size}${path}`;
@@ -605,7 +655,9 @@ function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     }
 }
 
-// ===== VARIABLES GLOBALES =====
+// ============================================================
+//  VARIABLES GLOBALES
+// ============================================================
 const params = new URLSearchParams(window.location.search);
 let tmdbId = params.get('play');
 if (tmdbId && typeof tmdbId === 'string' && tmdbId.startsWith('tmdb_')) {
@@ -625,7 +677,9 @@ let urlOp2 = null;
 let reproduciendo = false;
 let esSerie = false;
 
-// ===== REPRODUCTOR =====
+// ============================================================
+//  REPRODUCTOR
+// ============================================================
 function reproducir(url) {
     if (reproduciendo && urlActual === url) return;
     reproduciendo = true;
@@ -716,7 +770,81 @@ function ayuda() {
     mostrarToast('💬 ¿Necesitas ayuda? Contáctanos', 'info');
 }
 
-// ===== CARGAR CONTENIDO =====
+// ============================================================
+//  DESCARGA DE EPISODIOS
+// ============================================================
+function descargarEpisodioHandler(capIdx) {
+    if (!auth.currentUser) {
+        mostrarToast('⚠️ Inicia sesión para descargar', 'warning');
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    const temp = temporadasActuales[tempActualIndex];
+    if (!temp || !temp.capitulos || !temp.capitulos[capIdx]) {
+        mostrarToast('❌ Episodio no encontrado', 'error');
+        return;
+    }
+    
+    const cap = temp.capitulos[capIdx];
+    if (!cap.url) {
+        mostrarToast('❌ Este episodio no tiene enlace para descargar', 'error');
+        return;
+    }
+    
+    const id = `${tmdbId}_${tempActualIndex}_${capIdx}`;
+    
+    verificarDescargado(id).then(yaDescargado => {
+        if (yaDescargado) {
+            mostrarToast('📥 Ya tienes este episodio descargado', 'info');
+            return;
+        }
+        
+        const episodio = {
+            id: id,
+            tmdb_id: tmdbId,
+            titulo: peliculaActual.titulo + ' - ' + (cap.titulo || `Episodio ${cap.numero || capIdx + 1}`),
+            tipo: 'serie',
+            temporada: tempActualIndex + 1,
+            capitulo: cap.numero || capIdx + 1,
+            url: cap.url,
+            portada: peliculaActual.portada,
+            fecha_descarga: new Date().toISOString(),
+            tamaño: 0
+        };
+        
+        guardarDescarga(episodio).then(() => {
+            mostrarToast('✅ Episodio descargado para ver sin internet', 'success');
+            // Actualizar el botón de descarga en la UI
+            actualizarBotonesDescarga();
+        }).catch(() => {
+            mostrarToast('❌ Error al descargar', 'error');
+        });
+    });
+}
+
+function actualizarBotonesDescarga() {
+    const items = document.querySelectorAll('.episodio-item');
+    items.forEach((item, idx) => {
+        const id = `${tmdbId}_${tempActualIndex}_${idx}`;
+        const btn = item.querySelector('.download-ep');
+        if (btn) {
+            verificarDescargado(id).then(descargado => {
+                if (descargado) {
+                    btn.classList.add('descargado');
+                    btn.innerHTML = '<i class="fas fa-check"></i> Descargado';
+                } else {
+                    btn.classList.remove('descargado');
+                    btn.innerHTML = '<i class="fas fa-download"></i> Descargar';
+                }
+            });
+        }
+    });
+}
+
+// ============================================================
+//  CARGAR CONTENIDO
+// ============================================================
 async function cargarContenidoReproductor() {
     const wrapper = document.getElementById('playerWrapper');
     wrapper.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner"></i><span>Cargando...</span></div>`;
@@ -911,7 +1039,7 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
             <div class="sinopsis">${cap.sinopsis || ''}</div>
             <div class="acciones-ep">
                 <button onclick="event.stopPropagation(); marcarVisto(${idx})"><i class="fas fa-check"></i> Visto</button>
-                <button onclick="event.stopPropagation(); descargarEpisodio(${idx})"><i class="fas fa-download"></i> Descargar</button>
+                <button class="download-ep" onclick="event.stopPropagation(); descargarEpisodioHandler(${idx})"><i class="fas fa-download"></i> Descargar</button>
                 <button onclick="event.stopPropagation(); reportarEpisodio(${idx})"><i class="fas fa-flag"></i> Reportar</button>
             </div>
         `;
@@ -928,6 +1056,9 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
         };
         container.appendChild(d);
     });
+    
+    // Actualizar botones de descarga
+    setTimeout(actualizarBotonesDescarga, 300);
 }
 
 function cambiarTempSelect() {
@@ -950,15 +1081,13 @@ function marcarVisto(idx) {
     }
 }
 
-function descargarEpisodio(idx) {
-    mostrarToast('⬇️ Descargando episodio... (próximamente)', 'info');
-}
-
 function reportarEpisodio(idx) {
     mostrarToast('📋 Reporte enviado para este episodio', 'success');
 }
 
-// ===== RECOMENDACIONES - CON IMÁGENES COMPLETAS =====
+// ============================================================
+//  RECOMENDACIONES
+// ============================================================
 async function cargarRecomendaciones(tmdbId) {
     const container = document.getElementById('recomendaciones');
     container.innerHTML = '<p style="color:#64748B;font-size:.6rem;padding:.5rem;">Cargando...</p>';
@@ -989,7 +1118,9 @@ async function cargarRecomendaciones(tmdbId) {
     }
 }
 
-// ===== BANNER APK =====
+// ============================================================
+//  BANNER APK
+// ============================================================
 function detectarPlataforma() {
     const ua = navigator.userAgent || '';
     const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
@@ -1030,10 +1161,25 @@ function descargarAPK() {
     setTimeout(cerrarBannerApp, 2000);
 }
 
-// ===== BOTÓN ATRÁS - UN SOLO CLIC =====
-// Ya está implementado en volverAlIndex()
+// ============================================================
+//  BOTÓN ATRÁS - UN SOLO CLIC
+// ============================================================
+history.pushState(null, '', window.location.href);
+window.addEventListener('popstate', function(e) {
+    volverAlIndex();
+    e.preventDefault();
+    return false;
+});
+document.addEventListener('backbutton', function(e) {
+    volverAlIndex();
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+}, false);
 
-// ===== INICIAR =====
+// ============================================================
+//  INICIAR
+// ============================================================
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 2000);
 });
@@ -1046,7 +1192,7 @@ if (tmdbId) {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
 
-console.log('✅ TELY Reproductor - Un solo clic para salir, imágenes completas, pantalla completa oculta barra de estado');
+console.log('✅ TELY Reproductor - Con descarga offline integrada');
 </script>
 </body>
 </html>
