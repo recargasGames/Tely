@@ -292,34 +292,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ⭐ PANTALLA COMPLETA - SOLO EN APK
-function activarPantallaCompleta() {
-    const ua = navigator.userAgent || '';
-    const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
-    const esApp = window.navigator.standalone || 
-                   window.matchMedia('(display-mode: standalone)').matches ||
-                   esWebView;
-    if (esApp && !document.fullscreenElement && !document.webkitFullscreenElement) {
-        try {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            } else if (document.documentElement.webkitRequestFullscreen) {
-                document.documentElement.webkitRequestFullscreen();
-            }
-        } catch(e) {}
-    }
-}
-
-function esNavegadorWeb() {
-    const ua = navigator.userAgent || '';
-    const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
-    const esApp = window.navigator.standalone || 
-                   window.matchMedia('(display-mode: standalone)').matches ||
-                   esWebView;
-    return !esApp;
-}
-
-// ⭐ GUARDAR ESTADO DE LA PESTAÑA
+// ⭐ GUARDAR ESTADO DE PESTAÑA Y SCROLL
 function guardarEstado(tab) {
     try {
         sessionStorage.setItem('tabActiva', tab);
@@ -328,12 +301,10 @@ function guardarEstado(tab) {
 
 function restaurarEstado() {
     try {
-        const tab = sessionStorage.getItem('tabActiva') || 'inicio';
-        return tab;
+        return sessionStorage.getItem('tabActiva') || 'inicio';
     } catch(e) { return 'inicio'; }
 }
 
-// ⭐ GUARDAR SCROLL
 function guardarScroll() {
     try {
         const scrollTop = document.getElementById('mainContent').scrollTop;
@@ -348,27 +319,36 @@ function restaurarScroll() {
     } catch(e) {}
 }
 
-// ⭐ ESCUCHAR EVENTO DE SCROLL PARA GUARDAR
-document.addEventListener('DOMContentLoaded', function() {
-    const mainContent = document.getElementById('mainContent');
-    mainContent.addEventListener('scroll', function() {
-        guardarScroll();
-    });
-});
+// ⭐ CACHÉ PARA DATOS
+function guardarCache(key, data) {
+    try {
+        localStorage.setItem(`tely_cache_${key}`, JSON.stringify({
+            data: data,
+            timestamp: Date.now()
+        }));
+    } catch(e) {}
+}
 
-// ⭐ BOTÓN ATRÁS - GUARDA ESTADO ANTES DE IR
+function obtenerCache(key, maxAge = 600000) {
+    try {
+        const cached = localStorage.getItem(`tely_cache_${key}`);
+        if (!cached) return null;
+        const parsed = JSON.parse(cached);
+        if (Date.now() - parsed.timestamp > maxAge) return null;
+        return parsed.data;
+    } catch(e) { return null; }
+}
+
+// ⭐ BOTÓN ATRÁS
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) {
     const tabActiva = document.querySelector('.tab-btn.active');
-    if (tabActiva) {
-        guardarEstado(tabActiva.dataset.tab);
-    }
+    if (tabActiva) guardarEstado(tabActiva.dataset.tab);
     guardarScroll();
     return true;
 });
-document.addEventListener('backbutton', function(e) { return true; }, false);
 
-// ⭐ AUTENTICACIÓN
+// ⭐ FUNCIONES DE AUTENTICACIÓN
 function irALogin() { window.location.href = 'login.html'; }
 function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
 function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
@@ -443,30 +423,6 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
-// ⭐ CACHÉ: Guardar y recuperar datos
-function guardarCache(key, data) {
-    try {
-        const cacheData = {
-            data: data,
-            timestamp: Date.now()
-        };
-        localStorage.setItem(`tely_cache_${key}`, JSON.stringify(cacheData));
-    } catch(e) {}
-}
-
-function obtenerCache(key, maxAge = 600000) { // 10 minutos
-    try {
-        const cached = localStorage.getItem(`tely_cache_${key}`);
-        if (!cached) return null;
-        const parsed = JSON.parse(cached);
-        if (Date.now() - parsed.timestamp > maxAge) {
-            localStorage.removeItem(`tely_cache_${key}`);
-            return null;
-        }
-        return parsed.data;
-    } catch(e) { return null; }
-}
-
 let paginaPeliculas = 1;
 let paginaSeries = 1;
 let cargandoPeliculas = false;
@@ -510,7 +466,6 @@ async function cargarPeliculas(page = 1) {
     if (cargandoPeliculas) return;
     if (page > totalPaginasPeliculas && page > 1) return;
     
-    // Verificar caché
     const cacheKey = `peliculas_page_${page}`;
     const cachedData = obtenerCache(cacheKey);
     if (cachedData && page === 1) {
@@ -565,10 +520,7 @@ async function cargarPeliculas(page = 1) {
             };
         });
         
-        // Guardar en caché
-        if (page === 1) {
-            guardarCache(cacheKey, items);
-        }
+        if (page === 1) guardarCache(cacheKey, items);
         
         items.forEach(item => {
             grid.appendChild(crearTarjeta(item));
@@ -593,7 +545,6 @@ async function cargarSeries(page = 1) {
     if (cargandoSeries) return;
     if (page > totalPaginasSeries && page > 1) return;
     
-    // Verificar caché
     const cacheKey = `series_page_${page}`;
     const cachedData = obtenerCache(cacheKey);
     if (cachedData && page === 1) {
@@ -648,10 +599,7 @@ async function cargarSeries(page = 1) {
             };
         });
         
-        // Guardar en caché
-        if (page === 1) {
-            guardarCache(cacheKey, items);
-        }
+        if (page === 1) guardarCache(cacheKey, items);
         
         items.forEach(item => {
             grid.appendChild(crearTarjeta(item, true));
@@ -814,7 +762,6 @@ function crearTarjeta(item, esSerie = false) {
 }
 
 async function cargarContenido() {
-    // Verificar caché para contenido de inicio
     const cacheKey = 'contenido_inicio';
     const cachedData = obtenerCache(cacheKey);
     if (cachedData) {
@@ -888,9 +835,7 @@ async function cargarContenido() {
             seriesContainer.appendChild(crearTarjeta(item, true));
         });
 
-        // Guardar en caché
         guardarCache(cacheKey, { peliculas: peliculasItems, series: seriesItems });
-
         cargarContinuarViendo();
     } catch(e) { console.error(e); }
 }
@@ -1029,26 +974,12 @@ function descargarAPK() {
     setTimeout(cerrarBannerApp, 2000);
 }
 
-// ⭐ INICIAR - RESTAURAR ESTADO
+// ⭐ INICIAR
 document.addEventListener('DOMContentLoaded', function() {
     const tab = restaurarEstado();
     cambiarTab(tab);
     setTimeout(mostrarBannerApp, 2000);
-    setTimeout(activarPantallaCompleta, 1000);
     setTimeout(restaurarScroll, 200);
-});
-
-document.addEventListener('click', function() {
-    if (esNavegadorWeb()) return;
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        try {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            } else if (document.documentElement.webkitRequestFullscreen) {
-                document.documentElement.webkitRequestFullscreen();
-            }
-        } catch(e) {}
-    }
 });
 
 // Cargar contenido inicial
@@ -1056,7 +987,7 @@ cargarContenido();
 cargarPeliculas(1);
 cargarSeries(1);
 
-console.log('✅ TELY cargado - Con caché y mejoras funcionales');
+console.log('✅ TELY cargado - Con caché y persistencia de estado');
 </script>
 </body>
 </html>
