@@ -49,6 +49,16 @@
         .search-result .info{flex:1}
         .search-result .info .title{font-weight:600;font-size:.65rem}
         .search-result .info .detail{font-size:.5rem;color:#94A3B8}
+        
+        /* ⭐ NAVEGACIÓN PESTAÑAS */
+        .nav-tabs{display:flex;gap:.2rem;margin:.2rem 0;border-bottom:1px solid rgba(124,58,237,.1);padding-bottom:.1rem}
+        .nav-tab{flex:1;padding:.2rem .1rem;text-align:center;background:none;border:none;color:#64748B;font-size:.7rem;font-weight:600;cursor:pointer;transition:.3s;border-radius:4px}
+        .nav-tab:hover{color:#fff;background:rgba(124,58,237,.05)}
+        .nav-tab.active{color:#7C3AED;border-bottom:2px solid #7C3AED}
+        body:not(.dark) .nav-tab{color:#555}
+        body:not(.dark) .nav-tab:hover{color:#111}
+        body:not(.dark) .nav-tab.active{color:#7C3AED}
+        
         .categoria-section{margin:.4rem 0 .2rem}
         .categoria-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.1rem}
         .categoria-header h3{font-size:.8rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:.3rem}
@@ -102,6 +112,8 @@
         .banner-logo-img{width:30px;height:30px;border-radius:6px;object-fit:cover}
         .banner-install-btn{background:linear-gradient(135deg,#7C3AED,#A78BFA);border:none;color:#fff;padding:.25rem .7rem;border-radius:6px;font-weight:700;font-size:.6rem;cursor:pointer;transition:.3s;display:flex;align-items:center;gap:.2rem}
         .banner-install-btn:hover{transform:scale(1.05);box-shadow:0 0 15px rgba(124,58,237,.3)}
+        
+        .categoria-hidden{display:none}
     </style>
 </head>
 <body>
@@ -128,6 +140,13 @@
             <input type="text" placeholder="🔍 Buscar..." id="searchInput" onkeydown="if(event.key==='Enter') buscarGlobal()" oninput="mostrarSugerencias(this.value)">
             <button onclick="buscarGlobal()"><i class="fas fa-search"></i></button>
             <div class="search-results" id="searchResults"></div>
+        </div>
+        
+        <!-- ⭐ NAVEGACIÓN PESTAÑAS -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="inicio" onclick="cambiarPestana('inicio')"><i class="fas fa-home"></i> Inicio</button>
+            <button class="nav-tab" data-tab="peliculas" onclick="cambiarPestana('peliculas')"><i class="fas fa-film"></i> Películas</button>
+            <button class="nav-tab" data-tab="series" onclick="cambiarPestana('series')"><i class="fas fa-tv"></i> Series</button>
         </div>
     </div>
 
@@ -185,10 +204,11 @@ let paginaCategoria = 1;
 let cargandoCategoria = false;
 let totalPaginasCategoria = 1;
 let scrollTimeout = null;
-let datosEnCache = {};
+let pestanaActual = 'inicio';
+let categoriasCargadas = false;
 
-// ⭐ CATEGORÍAS ÚNICAS Y ORGANIZADAS (sin duplicados)
-const CATEGORIAS = [
+// ⭐ CATEGORÍAS DE PELÍCULAS (con más películas)
+const CATEGORIAS_PELICULAS = [
     { id: 'popular', nombre: '🔥 Populares', icon: 'fa-fire' },
     { id: 'action', nombre: '⚔️ Acción', icon: 'fa-fist-raised' },
     { id: 'thriller', nombre: '🔪 Suspenso', icon: 'fa-knife' },
@@ -198,10 +218,30 @@ const CATEGORIAS = [
     { id: 'sci-fi', nombre: '🚀 Ciencia Ficción', icon: 'fa-rocket' },
     { id: 'romance', nombre: '💕 Romance', icon: 'fa-heart' },
     { id: 'animation', nombre: '🎨 Animación', icon: 'fa-paint-brush' },
-    { id: 'adventure', nombre: '🏔️ Aventura', icon: 'fa-mountain' }
+    { id: 'adventure', nombre: '🏔️ Aventura', icon: 'fa-mountain' },
+    { id: 'crime', nombre: '🔫 Crimen', icon: 'fa-gavel' },
+    { id: 'documentary', nombre: '📹 Documental', icon: 'fa-video' },
+    { id: 'family', nombre: '👨‍👩‍👧‍👦 Familiar', icon: 'fa-users' },
+    { id: 'fantasy', nombre: '🐉 Fantasía', icon: 'fa-dragon' },
+    { id: 'mystery', nombre: '🔍 Misterio', icon: 'fa-search' },
+    { id: 'war', nombre: '⚔️ Guerra', icon: 'fa-shield-halved' },
+    { id: 'western', nombre: '🤠 Western', icon: 'fa-hat-cowboy' }
 ];
 
-const GENEROS = {
+const CATEGORIAS_SERIES = [
+    { id: 'popular_tv', nombre: '🔥 Series Populares', icon: 'fa-fire' },
+    { id: 'action_tv', nombre: '⚔️ Acción', icon: 'fa-fist-raised' },
+    { id: 'comedy_tv', nombre: '😂 Comedia', icon: 'fa-laugh' },
+    { id: 'drama_tv', nombre: '🎭 Drama', icon: 'fa-mask' },
+    { id: 'horror_tv', nombre: '👻 Terror', icon: 'fa-ghost' },
+    { id: 'sci-fi_tv', nombre: '🚀 Ciencia Ficción', icon: 'fa-rocket' },
+    { id: 'animation_tv', nombre: '🎨 Animación', icon: 'fa-paint-brush' },
+    { id: 'crime_tv', nombre: '🔫 Crimen', icon: 'fa-gavel' },
+    { id: 'mystery_tv', nombre: '🔍 Misterio', icon: 'fa-search' }
+];
+
+// ⭐ GÉNEROS PELÍCULAS
+const GENEROS_PELICULAS = {
     'action': 28,
     'thriller': 53,
     'drama': 18,
@@ -210,7 +250,26 @@ const GENEROS = {
     'sci-fi': 878,
     'romance': 10749,
     'animation': 16,
-    'adventure': 12
+    'adventure': 12,
+    'crime': 80,
+    'documentary': 99,
+    'family': 10751,
+    'fantasy': 14,
+    'mystery': 9648,
+    'war': 10752,
+    'western': 37
+};
+
+// ⭐ GÉNEROS SERIES
+const GENEROS_SERIES = {
+    'action_tv': 10759,
+    'comedy_tv': 35,
+    'drama_tv': 18,
+    'horror_tv': 9648,
+    'sci-fi_tv': 10765,
+    'animation_tv': 16,
+    'crime_tv': 80,
+    'mystery_tv': 9648
 };
 
 // ⭐ FUNCIONES
@@ -274,17 +333,15 @@ function crearTarjeta(item) {
         </div>
     `;
     div.onclick = () => {
-        // Guardar estado actual antes de ir al reproductor
         guardarEstadoActual();
         const params = new URLSearchParams();
         params.set('play', item.tmdb_id || item.id);
-        params.set('tipo', 'pelicula');
+        params.set('tipo', item.tipo || 'pelicula');
         window.location.href = `reproductor.html?${params.toString()}`;
     };
     return div;
 }
 
-// ⭐ GUARDAR ESTADO PARA VOLVER CON CACHÉ
 function guardarEstadoActual() {
     const estado = {
         scrollPos: document.getElementById('mainContent').scrollTop,
@@ -296,15 +353,15 @@ function guardarEstadoActual() {
 function restaurarEstado() {
     try {
         const estado = JSON.parse(localStorage.getItem('tely_estado'));
-        if (estado && Date.now() - estado.timestamp < 600000) { // 10 minutos
+        if (estado && Date.now() - estado.timestamp < 600000) {
             document.getElementById('mainContent').scrollTop = estado.scrollPos || 0;
         }
         localStorage.removeItem('tely_estado');
     } catch(e) {}
 }
 
-// ⭐ CARGAR CATEGORÍA CON CACHÉ
-async function cargarCategoria(categoriaId, contenedor, esModal = false, page = 1) {
+// ⭐ CARGAR CATEGORÍA CON CACHÉ (20 películas por página)
+async function cargarCategoria(categoriaId, contenedor, esModal = false, page = 1, esSerie = false) {
     if (esModal && cargandoCategoria) return;
     if (esModal) cargandoCategoria = true;
     
@@ -316,7 +373,7 @@ async function cargarCategoria(categoriaId, contenedor, esModal = false, page = 
     if (cachedData && !esModal) {
         try {
             const parsed = JSON.parse(cachedData);
-            if (Date.now() - parsed.timestamp < 600000) { // 10 minutos de caché
+            if (Date.now() - parsed.timestamp < 600000) {
                 contenedor.innerHTML = '';
                 parsed.items.forEach(item => {
                     contenedor.appendChild(crearTarjeta(item));
@@ -328,7 +385,7 @@ async function cargarCategoria(categoriaId, contenedor, esModal = false, page = 
     
     if (!esModal) {
         contenedor.innerHTML = '';
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 10; i++) {
             const sk = document.createElement('div');
             sk.className = 'skeleton-card';
             contenedor.appendChild(sk);
@@ -339,20 +396,28 @@ async function cargarCategoria(categoriaId, contenedor, esModal = false, page = 
     
     try {
         let data;
-        if (categoriaId === 'popular') {
-            data = await fetchTMDB('movie/popular', { page });
+        const generosMap = esSerie ? GENEROS_SERIES : GENEROS_PELICULAS;
+        const tipoEndpoint = esSerie ? 'tv' : 'movie';
+        
+        if (categoriaId === 'popular' || categoriaId === 'popular_tv') {
+            data = await fetchTMDB(`${tipoEndpoint}/popular`, { page });
         } else {
-            const genreId = GENEROS[categoriaId];
+            const genreId = generosMap[categoriaId];
             if (genreId) {
-                data = await fetchTMDB('discover/movie', { with_genres: genreId, page, sort_by: 'popularity.desc' });
+                data = await fetchTMDB(`discover/${tipoEndpoint}`, { 
+                    with_genres: genreId, 
+                    page,
+                    sort_by: 'popularity.desc',
+                    'vote_count.gte': 100
+                });
             } else {
-                data = await fetchTMDB('movie/popular', { page });
+                data = await fetchTMDB(`${tipoEndpoint}/popular`, { page });
             }
         }
         
         if (!data.results || !data.results.length) {
             if (esModal && page === 1) {
-                grid.innerHTML = '<div style="text-align:center;padding:1rem;color:#64748B;grid-column:1/-1;">No hay más películas</div>';
+                grid.innerHTML = '<div style="text-align:center;padding:1rem;color:#64748B;grid-column:1/-1;">No hay más contenido</div>';
             }
             if (esModal) cargandoCategoria = false;
             return;
@@ -363,9 +428,9 @@ async function cargarCategoria(categoriaId, contenedor, esModal = false, page = 
         const items = data.results.map(p => ({
             id: p.id,
             tmdb_id: p.id,
-            titulo: p.title || 'Sin título',
-            anio: p.release_date ? p.release_date.split('-')[0] : 'N/D',
-            tipo: 'pelicula',
+            titulo: p.title || p.name || 'Sin título',
+            anio: (p.release_date || p.first_air_date) ? (p.release_date || p.first_air_date).split('-')[0] : 'N/D',
+            tipo: esSerie ? 'serie' : 'pelicula',
             portada: getImagenUrl(p.poster_path, 'w342'),
             puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A'
         }));
@@ -403,13 +468,13 @@ async function cargarCategoria(categoriaId, contenedor, esModal = false, page = 
 }
 
 // ⭐ VER MÁS (MODAL)
-window.verMas = function(categoriaId, nombre) {
+window.verMas = function(categoriaId, nombre, esSerie = false) {
     categoriaActual = categoriaId;
     paginaCategoria = 1;
     document.getElementById('modalTitulo').textContent = nombre;
     document.getElementById('modalGrid').innerHTML = '<div class="modal-loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>';
     document.getElementById('modalVerMas').classList.add('show');
-    cargarCategoria(categoriaId, null, true, 1);
+    cargarCategoria(categoriaId, null, true, 1, esSerie);
 };
 
 window.cerrarModal = function() {
@@ -433,7 +498,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (scrollTop + clientHeight >= scrollHeight - 100) {
                 if (paginaCategoria < totalPaginasCategoria) {
                     paginaCategoria++;
-                    cargarCategoria(categoriaActual, null, true, paginaCategoria);
+                    const esSerie = categoriaActual.includes('_tv');
+                    cargarCategoria(categoriaActual, null, true, paginaCategoria, esSerie);
                 }
             }
         }, 300);
@@ -445,23 +511,45 @@ window.addEventListener('popstate', function(e) {
     if (document.getElementById('modalVerMas').classList.contains('show')) {
         cerrarModal();
         e.preventDefault();
-        // Volver a poner el estado para que no cierre la app
         history.pushState(null, '', window.location.href);
     }
 });
 
-// ⭐ CARGAR TODAS LAS CATEGORÍAS CON CACHÉ
+// ⭐ CAMBIAR PESTAÑA
+function cambiarPestana(pestana) {
+    pestanaActual = pestana;
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.tab === pestana);
+    });
+    
+    // Mostrar/ocultar categorías
+    document.querySelectorAll('.categoria-section').forEach(section => {
+        const tipo = section.dataset.tipo;
+        if (pestana === 'inicio') {
+            section.classList.remove('categoria-hidden');
+        } else if (pestana === 'peliculas') {
+            section.classList.toggle('categoria-hidden', tipo !== 'pelicula');
+        } else if (pestana === 'series') {
+            section.classList.toggle('categoria-hidden', tipo !== 'serie');
+        }
+    });
+}
+
+// ⭐ CARGAR TODAS LAS CATEGORÍAS
 async function cargarTodasCategorias() {
+    if (categoriasCargadas) return;
     const container = document.getElementById('contenidoPrincipal');
     container.innerHTML = '';
     
-    for (const cat of CATEGORIAS) {
+    // Cargar películas
+    for (const cat of CATEGORIAS_PELICULAS) {
         const section = document.createElement('div');
         section.className = 'categoria-section';
+        section.dataset.tipo = 'pelicula';
         section.innerHTML = `
             <div class="categoria-header">
                 <h3><i class="fas ${cat.icon}"></i> ${cat.nombre}</h3>
-                <button class="ver-mas-btn" onclick="verMas('${cat.id}', '${cat.nombre}')">
+                <button class="ver-mas-btn" onclick="verMas('${cat.id}', '${cat.nombre}', false)">
                     Ver más <i class="fas fa-ellipsis-h"></i>
                 </button>
             </div>
@@ -470,10 +558,31 @@ async function cargarTodasCategorias() {
         container.appendChild(section);
         
         const scrollContainer = document.getElementById(`scroll-${cat.id}`);
-        await cargarCategoria(cat.id, scrollContainer);
+        await cargarCategoria(cat.id, scrollContainer, false, 1, false);
     }
     
-    // Restaurar posición después de cargar todo
+    // Cargar series
+    for (const cat of CATEGORIAS_SERIES) {
+        const section = document.createElement('div');
+        section.className = 'categoria-section';
+        section.dataset.tipo = 'serie';
+        section.innerHTML = `
+            <div class="categoria-header">
+                <h3><i class="fas ${cat.icon}"></i> ${cat.nombre}</h3>
+                <button class="ver-mas-btn" onclick="verMas('${cat.id}', '${cat.nombre}', true)">
+                    Ver más <i class="fas fa-ellipsis-h"></i>
+                </button>
+            </div>
+            <div class="scroll-horizontal" id="scroll-${cat.id}"></div>
+        `;
+        container.appendChild(section);
+        
+        const scrollContainer = document.getElementById(`scroll-${cat.id}`);
+        await cargarCategoria(cat.id, scrollContainer, false, 1, true);
+    }
+    
+    categoriasCargadas = true;
+    cambiarPestana('inicio');
     setTimeout(restaurarEstado, 300);
 }
 
@@ -574,13 +683,11 @@ function mostrarToast(msg, tipo = 'success') {
 // ⭐ INICIAR
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 2000);
-    // Agregar estado al historial para que el botón atrás funcione bien
     history.pushState(null, '', window.location.href);
 });
 
-// ⭐ CARGAR TODO
 cargarTodasCategorias();
-console.log('✅ TELY - Categorías únicas, caché y botón atrás (una sola vez)');
+console.log('✅ TELY - Con pestañas, más películas por categoría y caché');
 </script>
 </body>
 </html>
