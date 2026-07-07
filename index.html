@@ -128,20 +128,6 @@
         .card-actions .list-btn{color:#3B82F6}
         .card-actions .list-btn:hover{background:rgba(59,130,246,.15)}
         
-        /* ===== BANNER OFFLINE ===== */
-        .offline-banner{
-            display:none;
-            background:rgba(245,158,11,.1);
-            border:1px solid rgba(245,158,11,.2);
-            border-radius:8px;
-            padding:.3rem .5rem;
-            margin:.2rem 0;
-            color:#F59E0B;
-            font-size:.65rem;
-            text-align:center;
-        }
-        .offline-banner i{margin-right:.3rem;}
-        
         #bannerApp {
             display:none;
             position:fixed;
@@ -205,7 +191,7 @@
 </head>
 <body>
 
-<main class="main-content">
+<main class="main-content" id="mainContent">
     <div class="header-flotante">
         <div class="top-header">
             <h1><i class="fas fa-home"></i> TELY</h1>
@@ -233,11 +219,6 @@
             <input type="text" placeholder="🔍 Buscar..." id="searchInput" onkeydown="if(event.key==='Enter') buscarGlobal()" oninput="mostrarSugerencias(this.value)">
             <button onclick="buscarGlobal()"><i class="fas fa-search"></i></button>
             <div class="search-results" id="searchResults"></div>
-        </div>
-        
-        <!-- BANNER OFFLINE -->
-        <div class="offline-banner" id="offlineBanner">
-            <i class="fas fa-wifi"></i> Sin conexión a internet - Mostrando contenido en caché
         </div>
     </div>
 
@@ -311,9 +292,34 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ============================================================
-//  CACHÉ OFFLINE - GUARDAR Y RECUPERAR DATOS
-// ============================================================
+// ⭐ GUARDAR ESTADO DE PESTAÑA Y SCROLL
+function guardarEstado(tab) {
+    try {
+        sessionStorage.setItem('tabActiva', tab);
+    } catch(e) {}
+}
+
+function restaurarEstado() {
+    try {
+        return sessionStorage.getItem('tabActiva') || 'inicio';
+    } catch(e) { return 'inicio'; }
+}
+
+function guardarScroll() {
+    try {
+        const scrollTop = document.getElementById('mainContent').scrollTop;
+        sessionStorage.setItem('scrollPos', scrollTop);
+    } catch(e) {}
+}
+
+function restaurarScroll() {
+    try {
+        const scrollTop = parseInt(sessionStorage.getItem('scrollPos')) || 0;
+        document.getElementById('mainContent').scrollTop = scrollTop;
+    } catch(e) {}
+}
+
+// ⭐ CACHÉ PARA DATOS
 function guardarCache(key, data) {
     try {
         localStorage.setItem(`tely_cache_${key}`, JSON.stringify({
@@ -323,41 +329,26 @@ function guardarCache(key, data) {
     } catch(e) {}
 }
 
-function obtenerCache(key, maxAge = 86400000) { // 24 horas para offline
+function obtenerCache(key, maxAge = 600000) {
     try {
         const cached = localStorage.getItem(`tely_cache_${key}`);
         if (!cached) return null;
         const parsed = JSON.parse(cached);
-        // Sin límite de tiempo para offline (si no hay internet)
-        if (!navigator.onLine) {
-            return parsed.data;
-        }
-        if (Date.now() - parsed.timestamp > maxAge) {
-            localStorage.removeItem(`tely_cache_${key}`);
-            return null;
-        }
+        if (Date.now() - parsed.timestamp > maxAge) return null;
         return parsed.data;
     } catch(e) { return null; }
 }
 
-// ============================================================
-//  DETECTAR ESTADO DE CONEXIÓN
-// ============================================================
-function actualizarEstadoOffline() {
-    const banner = document.getElementById('offlineBanner');
-    if (!navigator.onLine) {
-        banner.style.display = 'block';
-    } else {
-        banner.style.display = 'none';
-    }
-}
+// ⭐ BOTÓN ATRÁS
+history.pushState(null, '', window.location.href);
+window.addEventListener('popstate', function(e) {
+    const tabActiva = document.querySelector('.tab-btn.active');
+    if (tabActiva) guardarEstado(tabActiva.dataset.tab);
+    guardarScroll();
+    return true;
+});
 
-window.addEventListener('online', actualizarEstadoOffline);
-window.addEventListener('offline', actualizarEstadoOffline);
-
-// ============================================================
-//  FUNCIONES DE AUTENTICACIÓN
-// ============================================================
+// ⭐ FUNCIONES DE AUTENTICACIÓN
 function irALogin() { window.location.href = 'login.html'; }
 function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
 function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
@@ -392,6 +383,22 @@ if (localStorage.getItem('theme') === 'light') {
     document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; 
 }
 
+function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    if (tipo === 'pelicula') {
+        return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+    } else {
+        return `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+    }
+}
+
+function generarEnlaceVidsrc(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    if (tipo === 'pelicula') {
+        return `https://vidsrc.in/embed/movie/${tmdb_id}?lang=es`;
+    } else {
+        return `https://vidsrc.in/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es`;
+    }
+}
+
 function getImagenUrl(path, size = 'w342') {
     if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
     return `https://image.tmdb.org/t/p/${size}${path}`;
@@ -416,54 +423,6 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
-function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    if (tipo === 'pelicula') {
-        return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
-    } else {
-        return `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es-MX&autoplay=1&controls=1&logo=0`;
-    }
-}
-
-function generarEnlaceVidsrc(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    if (tipo === 'pelicula') {
-        return `https://vidsrc.in/embed/movie/${tmdb_id}?lang=es`;
-    } else {
-        return `https://vidsrc.in/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es`;
-    }
-}
-
-// ============================================================
-//  GUARDAR PESTAÑA Y SCROLL
-// ============================================================
-function guardarEstado(tab) {
-    try {
-        sessionStorage.setItem('tabActiva', tab);
-    } catch(e) {}
-}
-
-function restaurarEstado() {
-    try {
-        return sessionStorage.getItem('tabActiva') || 'inicio';
-    } catch(e) { return 'inicio'; }
-}
-
-function guardarScroll() {
-    try {
-        const scrollTop = document.getElementById('mainContent').scrollTop;
-        sessionStorage.setItem('scrollPos', scrollTop);
-    } catch(e) {}
-}
-
-function restaurarScroll() {
-    try {
-        const scrollTop = parseInt(sessionStorage.getItem('scrollPos')) || 0;
-        document.getElementById('mainContent').scrollTop = scrollTop;
-    } catch(e) {}
-}
-
-// ============================================================
-//  VARIABLES
-// ============================================================
 let paginaPeliculas = 1;
 let paginaSeries = 1;
 let cargandoPeliculas = false;
@@ -472,9 +431,6 @@ let totalPaginasPeliculas = 1;
 let totalPaginasSeries = 1;
 let scrollTimeout = null;
 
-// ============================================================
-//  FUNCIONES DE UI
-// ============================================================
 function cambiarTab(tab) {
     document.getElementById('tabInicio').style.display = 'none';
     document.getElementById('tabPeliculas').style.display = 'none';
@@ -506,158 +462,12 @@ function cambiarTab(tab) {
     setTimeout(restaurarScroll, 100);
 }
 
-function crearTarjeta(item, esSerie = false) {
-    const div = document.createElement('div');
-    div.className = 'movie-card';
-    const tipo = esSerie ? '📺' : '🎬';
-    const tieneOp2 = item.opcion2 && item.opcion2.trim() !== '';
-    const itemStr = JSON.stringify(item).replace(/"/g, "'");
-    div.innerHTML = `
-        <span class="badge-year">${item.anio || 'N/D'}</span>
-        <span class="badge-type">${tipo}</span>
-        ${tieneOp2 ? '<span class="badge-op2">🔗 Op2</span>' : ''}
-        <img src="${item.portada}" alt="${item.titulo}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-        <div class="info">
-            <h4>${item.titulo}</h4>
-            <div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div>
-            <div class="card-actions">
-                <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorito(${itemStr})"><i class="fas fa-heart"></i></button>
-                <button class="list-btn" onclick="event.stopPropagation(); toggleMiLista(${itemStr})"><i class="fas fa-plus-circle"></i></button>
-            </div>
-        </div>
-    `;
-    div.onclick = () => {
-        if (auth.currentUser) {
-            const params = new URLSearchParams();
-            params.set('play', item.tmdb_id || item.id);
-            params.set('tipo', item.tipo || 'pelicula');
-            window.location.href = `reproductor.html?${params.toString()}`;
-        } else { window.location.href = 'login.html'; }
-    };
-    return div;
-}
-
-// ============================================================
-//  CARGAR CONTENIDO CON CACHÉ OFFLINE
-// ============================================================
-async function cargarContenido() {
-    const cacheKey = 'contenido_inicio';
-    const cachedData = obtenerCache(cacheKey);
-    
-    // Si hay datos en caché y estamos offline, mostrar inmediatamente
-    if (cachedData && !navigator.onLine) {
-        const pelisContainer = document.getElementById('peliculasPopulares');
-        const seriesContainer = document.getElementById('seriesPopulares');
-        pelisContainer.innerHTML = '';
-        seriesContainer.innerHTML = '';
-        cachedData.peliculas.forEach(item => {
-            pelisContainer.appendChild(crearTarjeta(item));
-        });
-        cachedData.series.forEach(item => {
-            seriesContainer.appendChild(crearTarjeta(item, true));
-        });
-        cargarContinuarViendo();
-        return;
-    }
-    
-    // Si hay caché pero estamos online, mostrar caché primero y actualizar en segundo plano
-    if (cachedData) {
-        const pelisContainer = document.getElementById('peliculasPopulares');
-        const seriesContainer = document.getElementById('seriesPopulares');
-        pelisContainer.innerHTML = '';
-        seriesContainer.innerHTML = '';
-        cachedData.peliculas.forEach(item => {
-            pelisContainer.appendChild(crearTarjeta(item));
-        });
-        cachedData.series.forEach(item => {
-            seriesContainer.appendChild(crearTarjeta(item, true));
-        });
-        cargarContinuarViendo();
-    }
-    
-    // Si estamos offline, no intentar fetch
-    if (!navigator.onLine) {
-        return;
-    }
-    
-    try {
-        const [pelis, series] = await Promise.all([
-            fetchTMDB('movie/popular', { page: 1 }),
-            fetchTMDB('tv/popular', { page: 1 })
-        ]);
-
-        const pelisContainer = document.getElementById('peliculasPopulares');
-        const seriesContainer = document.getElementById('seriesPopulares');
-        pelisContainer.innerHTML = '';
-        seriesContainer.innerHTML = '';
-
-        const dbRef = db.ref();
-        const [pSnap, sSnap] = await Promise.all([
-            dbRef.child('contenido_personalizado').once('value'),
-            dbRef.child('series_personalizadas').once('value')
-        ]);
-        const pData = pSnap.val() || {};
-        const sData = sSnap.val() || {};
-        const adminMap = {};
-        Object.values(pData).forEach(i => { adminMap[i.tmdb_id] = i; });
-        Object.values(sData).forEach(i => { adminMap[i.tmdb_id] = i; });
-
-        const peliculasItems = [];
-        (pelis.results || []).slice(0, 12).forEach(p => {
-            const a = adminMap[p.id];
-            const item = {
-                id: p.id, tmdb_id: p.id,
-                titulo: a?.titulo || p.title || 'Sin título',
-                anio: a?.anio || (p.release_date ? p.release_date.split('-')[0] : 'N/D'),
-                tipo: 'pelicula',
-                portada: a?.portada || getImagenUrl(p.poster_path, 'w342'),
-                puntuacion: a?.puntuacion || (p.vote_average ? p.vote_average.toFixed(1) : 'N/A'),
-                url: a?.url || generarEnlaceUnlimplay(p.id, 'pelicula'),
-                opcion2: a?.opcion2 || generarEnlaceVidsrc(p.id, 'pelicula')
-            };
-            peliculasItems.push(item);
-            pelisContainer.appendChild(crearTarjeta(item));
-        });
-
-        const seriesItems = [];
-        (series.results || []).slice(0, 12).forEach(s => {
-            const a = adminMap[s.id];
-            const item = {
-                id: s.id, tmdb_id: s.id,
-                titulo: a?.titulo || s.name || 'Sin título',
-                anio: a?.anio || (s.first_air_date ? s.first_air_date.split('-')[0] : 'N/D'),
-                tipo: 'serie',
-                portada: a?.portada || getImagenUrl(s.poster_path, 'w342'),
-                puntuacion: a?.puntuacion || (s.vote_average ? s.vote_average.toFixed(1) : 'N/A'),
-                url: a?.url || generarEnlaceUnlimplay(s.id, 'serie', 1, 1),
-                opcion2: a?.opcion2 || generarEnlaceVidsrc(s.id, 'serie', 1, 1)
-            };
-            seriesItems.push(item);
-            seriesContainer.appendChild(crearTarjeta(item, true));
-        });
-
-        guardarCache(cacheKey, { peliculas: peliculasItems, series: seriesItems });
-        cargarContinuarViendo();
-    } catch(e) { 
-        console.error('Error cargando contenido:', e);
-        // Si falla y no hay caché, mostrar mensaje
-        if (!cachedData) {
-            document.getElementById('peliculasPopulares').innerHTML = '<p class="empty-msg">Error al cargar contenido</p>';
-            document.getElementById('seriesPopulares').innerHTML = '<p class="empty-msg">Error al cargar contenido</p>';
-        }
-    }
-}
-
-// ============================================================
-//  CARGAR PELÍCULAS Y SERIES CON CACHÉ
-// ============================================================
 async function cargarPeliculas(page = 1) {
     if (cargandoPeliculas) return;
     if (page > totalPaginasPeliculas && page > 1) return;
     
     const cacheKey = `peliculas_page_${page}`;
     const cachedData = obtenerCache(cacheKey);
-    
     if (cachedData && page === 1) {
         const grid = document.getElementById('gridPeliculas');
         grid.innerHTML = '';
@@ -673,15 +483,6 @@ async function cargarPeliculas(page = 1) {
             btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más';
         }
         paginaPeliculas = page;
-        return;
-    }
-    
-    // Si estamos offline y no hay caché, no continuar
-    if (!navigator.onLine && !cachedData) {
-        const grid = document.getElementById('gridPeliculas');
-        if (!grid.querySelector('.movie-card')) {
-            grid.innerHTML = '<p class="empty-msg">Sin conexión - No hay contenido en caché</p>';
-        }
         return;
     }
     
@@ -746,7 +547,6 @@ async function cargarSeries(page = 1) {
     
     const cacheKey = `series_page_${page}`;
     const cachedData = obtenerCache(cacheKey);
-    
     if (cachedData && page === 1) {
         const grid = document.getElementById('gridSeries');
         grid.innerHTML = '';
@@ -762,14 +562,6 @@ async function cargarSeries(page = 1) {
             btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más';
         }
         paginaSeries = page;
-        return;
-    }
-    
-    if (!navigator.onLine && !cachedData) {
-        const grid = document.getElementById('gridSeries');
-        if (!grid.querySelector('.movie-card')) {
-            grid.innerHTML = '<p class="empty-msg">Sin conexión - No hay contenido en caché</p>';
-        }
         return;
     }
     
@@ -829,26 +621,19 @@ async function cargarSeries(page = 1) {
 }
 
 window.cargarMasPeliculas = function() { 
-    if (!cargandoPeliculas && navigator.onLine) {
+    if (!cargandoPeliculas) {
         paginaPeliculas++; 
         cargarPeliculas(paginaPeliculas); 
-    } else if (!navigator.onLine) {
-        mostrarToast('⚠️ Sin conexión a internet', 'warning');
     }
 };
 
 window.cargarMasSeries = function() { 
-    if (!cargandoSeries && navigator.onLine) {
+    if (!cargandoSeries) {
         paginaSeries++; 
         cargarSeries(paginaSeries); 
-    } else if (!navigator.onLine) {
-        mostrarToast('⚠️ Sin conexión a internet', 'warning');
     }
 };
 
-// ============================================================
-//  FAVORITOS Y LISTA
-// ============================================================
 function toggleFavorito(item) {
     if (!auth.currentUser) { window.location.href = 'login.html'; return; }
     const userId = auth.currentUser.uid;
@@ -945,6 +730,116 @@ function cargarMiLista() {
     });
 }
 
+function crearTarjeta(item, esSerie = false) {
+    const div = document.createElement('div');
+    div.className = 'movie-card';
+    const tipo = esSerie ? '📺' : '🎬';
+    const tieneOp2 = item.opcion2 && item.opcion2.trim() !== '';
+    const itemStr = JSON.stringify(item).replace(/"/g, "'");
+    div.innerHTML = `
+        <span class="badge-year">${item.anio || 'N/D'}</span>
+        <span class="badge-type">${tipo}</span>
+        ${tieneOp2 ? '<span class="badge-op2">🔗 Op2</span>' : ''}
+        <img src="${item.portada}" alt="${item.titulo}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+        <div class="info">
+            <h4>${item.titulo}</h4>
+            <div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div>
+            <div class="card-actions">
+                <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorito(${itemStr})"><i class="fas fa-heart"></i></button>
+                <button class="list-btn" onclick="event.stopPropagation(); toggleMiLista(${itemStr})"><i class="fas fa-plus-circle"></i></button>
+            </div>
+        </div>
+    `;
+    div.onclick = () => {
+        if (auth.currentUser) {
+            const params = new URLSearchParams();
+            params.set('play', item.tmdb_id || item.id);
+            params.set('tipo', item.tipo || 'pelicula');
+            window.location.href = `reproductor.html?${params.toString()}`;
+        } else { window.location.href = 'login.html'; }
+    };
+    return div;
+}
+
+async function cargarContenido() {
+    const cacheKey = 'contenido_inicio';
+    const cachedData = obtenerCache(cacheKey);
+    if (cachedData) {
+        const pelisContainer = document.getElementById('peliculasPopulares');
+        const seriesContainer = document.getElementById('seriesPopulares');
+        pelisContainer.innerHTML = '';
+        seriesContainer.innerHTML = '';
+        cachedData.peliculas.forEach(item => {
+            pelisContainer.appendChild(crearTarjeta(item));
+        });
+        cachedData.series.forEach(item => {
+            seriesContainer.appendChild(crearTarjeta(item, true));
+        });
+        cargarContinuarViendo();
+        return;
+    }
+    
+    try {
+        const [pelis, series] = await Promise.all([
+            fetchTMDB('movie/popular', { page: 1 }),
+            fetchTMDB('tv/popular', { page: 1 })
+        ]);
+
+        const pelisContainer = document.getElementById('peliculasPopulares');
+        const seriesContainer = document.getElementById('seriesPopulares');
+        pelisContainer.innerHTML = '';
+        seriesContainer.innerHTML = '';
+
+        const dbRef = db.ref();
+        const [pSnap, sSnap] = await Promise.all([
+            dbRef.child('contenido_personalizado').once('value'),
+            dbRef.child('series_personalizadas').once('value')
+        ]);
+        const pData = pSnap.val() || {};
+        const sData = sSnap.val() || {};
+        const adminMap = {};
+        Object.values(pData).forEach(i => { adminMap[i.tmdb_id] = i; });
+        Object.values(sData).forEach(i => { adminMap[i.tmdb_id] = i; });
+
+        const peliculasItems = [];
+        (pelis.results || []).slice(0, 12).forEach(p => {
+            const a = adminMap[p.id];
+            const item = {
+                id: p.id, tmdb_id: p.id,
+                titulo: a?.titulo || p.title || 'Sin título',
+                anio: a?.anio || (p.release_date ? p.release_date.split('-')[0] : 'N/D'),
+                tipo: 'pelicula',
+                portada: a?.portada || getImagenUrl(p.poster_path, 'w342'),
+                puntuacion: a?.puntuacion || (p.vote_average ? p.vote_average.toFixed(1) : 'N/A'),
+                url: a?.url || generarEnlaceUnlimplay(p.id, 'pelicula'),
+                opcion2: a?.opcion2 || generarEnlaceVidsrc(p.id, 'pelicula')
+            };
+            peliculasItems.push(item);
+            pelisContainer.appendChild(crearTarjeta(item));
+        });
+
+        const seriesItems = [];
+        (series.results || []).slice(0, 12).forEach(s => {
+            const a = adminMap[s.id];
+            const item = {
+                id: s.id, tmdb_id: s.id,
+                titulo: a?.titulo || s.name || 'Sin título',
+                anio: a?.anio || (s.first_air_date ? s.first_air_date.split('-')[0] : 'N/D'),
+                tipo: 'serie',
+                portada: a?.portada || getImagenUrl(s.poster_path, 'w342'),
+                puntuacion: a?.puntuacion || (s.vote_average ? s.vote_average.toFixed(1) : 'N/A'),
+                url: a?.url || generarEnlaceUnlimplay(s.id, 'serie', 1, 1),
+                opcion2: a?.opcion2 || generarEnlaceVidsrc(s.id, 'serie', 1, 1)
+            };
+            seriesItems.push(item);
+            seriesContainer.appendChild(crearTarjeta(item, true));
+        });
+
+        guardarCache(cacheKey, { peliculas: peliculasItems, series: seriesItems });
+        cargarContinuarViendo();
+    } catch(e) { console.error(e); }
+}
+
 function cargarContinuarViendo() {
     const container = document.getElementById('continuarViendo');
     const historial = JSON.parse(localStorage.getItem('historialTely')) || [];
@@ -978,9 +873,6 @@ function cargarContinuarViendo() {
     });
 }
 
-// ============================================================
-//  SCROLL INFINITO
-// ============================================================
 const mainContent = document.getElementById('mainContent');
 mainContent.addEventListener('scroll', function() {
     clearTimeout(scrollTimeout);
@@ -991,11 +883,11 @@ mainContent.addEventListener('scroll', function() {
         
         if (scrollTop + clientHeight >= scrollHeight - 100) {
             if (document.getElementById('tabPeliculas').style.display !== 'none') {
-                if (!cargandoPeliculas && paginaPeliculas < totalPaginasPeliculas && navigator.onLine) {
+                if (!cargandoPeliculas && paginaPeliculas < totalPaginasPeliculas) {
                     cargarMasPeliculas();
                 }
             } else if (document.getElementById('tabSeries').style.display !== 'none') {
-                if (!cargandoSeries && paginaSeries < totalPaginasSeries && navigator.onLine) {
+                if (!cargandoSeries && paginaSeries < totalPaginasSeries) {
                     cargarMasSeries();
                 }
             }
@@ -1004,31 +896,16 @@ mainContent.addEventListener('scroll', function() {
     }, 300);
 });
 
-// ============================================================
-//  BÚSQUEDA
-// ============================================================
 window.mostrarSugerencias = async function(texto) {
     const container = document.getElementById('searchResults');
     if (!texto || texto.length < 2) { container.classList.remove('show'); return; }
-    
-    // Si estamos offline, buscar en caché local
-    if (!navigator.onLine) {
-        container.innerHTML = '<div class="search-result" style="padding:.3rem .5rem;color:#94A3B8;font-size:.6rem;">🔍 Modo offline - Busca en tus descargas</div>';
-        container.classList.add('show');
-        return;
-    }
-    
     try {
         const [pelis, series] = await Promise.all([
             fetchTMDB('search/movie', { query: texto, page: 1 }),
             fetchTMDB('search/tv', { query: texto, page: 1 })
         ]);
         const resultados = [...(pelis.results || []), ...(series.results || [])];
-        if (!resultados.length) { 
-            container.innerHTML = '<div class="search-result" style="padding:.3rem .5rem;color:#94A3B8;font-size:.6rem;">No hay resultados</div>';
-            container.classList.add('show');
-            return;
-        }
+        if (!resultados.length) { container.classList.remove('show'); return; }
         container.innerHTML = '';
         resultados.slice(0, 6).forEach(item => {
             const div = document.createElement('div');
@@ -1057,9 +934,6 @@ window.buscarGlobal = function() {
     if (input.value.trim()) window.mostrarSugerencias(input.value);
 };
 
-// ============================================================
-//  BANNER APK
-// ============================================================
 function detectarPlataforma() {
     const ua = navigator.userAgent || '';
     const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
@@ -1088,8 +962,8 @@ function cerrarBannerApp() {
 }
 
 function descargarAPK() {
-    const urlAPK = 'https://appsgeyser.io/19960416/Tely';
-    mostrarToast('📱 Descargando...', 'info');
+    const urlAPK = 'https://www.mediafire.com/file/vjw88jw597vfwdc/_Tely_19960416.apk/file';
+    mostrarToast('📱 Descargando TELY...', 'info');
     const link = document.createElement('a');
     link.href = urlAPK;
     link.target = '_blank';
@@ -1100,15 +974,12 @@ function descargarAPK() {
     setTimeout(cerrarBannerApp, 2000);
 }
 
-// ============================================================
-//  INICIAR
-// ============================================================
+// ⭐ INICIAR
 document.addEventListener('DOMContentLoaded', function() {
     const tab = restaurarEstado();
     cambiarTab(tab);
     setTimeout(mostrarBannerApp, 2000);
     setTimeout(restaurarScroll, 200);
-    actualizarEstadoOffline();
 });
 
 // Cargar contenido inicial
@@ -1116,7 +987,7 @@ cargarContenido();
 cargarPeliculas(1);
 cargarSeries(1);
 
-console.log('✅ TELY cargado - Con caché offline y modo sin internet');
+console.log('✅ TELY cargado - Con caché y persistencia de estado');
 </script>
 </body>
 </html>
