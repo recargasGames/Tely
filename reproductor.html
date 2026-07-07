@@ -54,10 +54,6 @@
         .back-btn:hover{background:rgba(255,255,255,.1)}
         body:not(.dark) .back-btn{background:rgba(0,0,0,.05);color:#555}
         
-        /* ===== REPRODUCTOR ===== */
-        .player-wrapper{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;width:100%;margin:.2rem 0}
-        .player-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;background:#000}
-        
         .btn-fullscreen{
             background:rgba(255,255,255,.06);
             border:1px solid rgba(124,58,237,.15);
@@ -76,6 +72,10 @@
             background:rgba(255,255,255,.1);
             border-color:#7C3AED;
         }
+        
+        /* ===== REPRODUCTOR ===== */
+        .player-wrapper{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;width:100%;margin:.2rem 0}
+        .player-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;background:#000}
         
         /* ===== INFO ===== */
         .info-top{padding:.2rem 0 .1rem}
@@ -100,6 +100,7 @@
         .btn-opcion.opcion2{border-color:rgba(59,130,246,.4);background:rgba(59,130,246,.08);color:#60A5FA}
         .btn-opcion.opcion2:hover{background:rgba(59,130,246,.2);border-color:#3B82F6}
         .btn-opcion.opcion2.active{background:#3B82F6;border-color:#3B82F6;color:#fff}
+        .btn-opcion.opcion2.oculto{display:none}
         .badge-opcion2{display:inline-block;background:#FBBF24;color:#000;font-size:.4rem;font-weight:700;padding:.02rem .25rem;border-radius:3px;margin-left:.15rem}
         .btn-recargar{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.2);color:#34D399;padding:.25rem .7rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer;transition:.3s}
         .btn-recargar:hover{background:rgba(16,185,129,.25)}
@@ -250,9 +251,6 @@
             color:#fff;
         }
         body:not(.dark) .episodio-item .acciones-ep button:hover{color:#111}
-        .episodio-item .acciones-ep .download-ep{color:#60A5FA}
-        .episodio-item .acciones-ep .download-ep:hover{background:rgba(59,130,246,.15);color:#60A5FA}
-        .episodio-item .acciones-ep .download-ep.descargado{color:#34D399}
         
         /* ===== RECOMENDACIONES ===== */
         .recomendaciones-wrap{margin-top:.2rem}
@@ -358,7 +356,6 @@
         body:fullscreen .player-controls,
         body:fullscreen .episodios-section,
         body:fullscreen .recomendaciones-wrap,
-        body:fullscreen .season-selector-wrap,
         body:fullscreen #bannerApp { display: none !important; }
     </style>
 </head>
@@ -408,7 +405,7 @@
     <!-- ===== OPCIONES ===== -->
     <div class="player-controls" id="playerControls">
         <button class="btn-opcion active" id="btnOp1" onclick="reproducirOpcion(1)"><i class="fas fa-play"></i> Opción 1</button>
-        <button class="btn-opcion opcion2" id="btnOp2" onclick="reproducirOpcion(2)">
+        <button class="btn-opcion opcion2 oculto" id="btnOp2" onclick="reproducirOpcion(2)">
             <i class="fas fa-play"></i> Opción 2 <span class="badge-opcion2">⭐</span>
         </button>
         <button class="btn-recargar" onclick="recargarVideo()"><i class="fas fa-rotate"></i></button>
@@ -471,82 +468,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
-
-// ============================================================
-//  DESCARGA OFFLINE - FUNCIONES GLOBALES
-// ============================================================
-const DB_NAME = 'TELY_Offline';
-const DB_VERSION = 1;
-const STORE_NAME = 'descargas';
-
-function abrirDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onupgradeneeded = (event) => {
-            const db = event.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-                db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-            }
-        };
-        request.onsuccess = (event) => resolve(event.target.result);
-        request.onerror = (event) => reject(event.target.error);
-    });
-}
-
-function guardarDescarga(episodio) {
-    return new Promise((resolve, reject) => {
-        abrirDB().then(db => {
-            const transaction = db.transaction([STORE_NAME], 'readwrite');
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.add(episodio);
-            request.onsuccess = () => { db.close(); resolve(); };
-            request.onerror = () => { db.close(); reject(request.error); };
-        }).catch(reject);
-    });
-}
-
-function obtenerDescargas() {
-    return new Promise((resolve, reject) => {
-        abrirDB().then(db => {
-            const transaction = db.transaction([STORE_NAME], 'readonly');
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.getAll();
-            request.onsuccess = () => { db.close(); resolve(request.result); };
-            request.onerror = () => { db.close(); reject(request.error); };
-        }).catch(reject);
-    });
-}
-
-function eliminarDescarga(id) {
-    return new Promise((resolve, reject) => {
-        abrirDB().then(db => {
-            const transaction = db.transaction([STORE_NAME], 'readwrite');
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.delete(id);
-            request.onsuccess = () => { db.close(); resolve(); };
-            request.onerror = () => { db.close(); reject(request.error); };
-        }).catch(reject);
-    });
-}
-
-function verificarDescargado(id) {
-    return new Promise((resolve) => {
-        abrirDB().then(db => {
-            const transaction = db.transaction([STORE_NAME], 'readonly');
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.get(id);
-            request.onsuccess = () => { db.close(); resolve(!!request.result); };
-            request.onerror = () => { db.close(); resolve(false); };
-        }).catch(() => resolve(false));
-    });
-}
-
-// ============================================================
-//  EXPONER FUNCIONES PARA EL PERFIL (window)
-// ============================================================
-window.guardarDescarga = guardarDescarga;
-window.obtenerDescargas = obtenerDescargas;
-window.eliminarDescarga = eliminarDescarga;
 
 // ============================================================
 //  CACHÉ
@@ -676,6 +597,7 @@ let urlOp1 = null;
 let urlOp2 = null;
 let reproduciendo = false;
 let esSerie = false;
+let opcion2Disponible = false;
 
 // ============================================================
 //  REPRODUCTOR
@@ -732,16 +654,24 @@ function reproducir(url) {
 }
 
 function reproducirOpcion(opcion) {
-    opcionActiva = opcion;
-    document.querySelectorAll('.btn-opcion').forEach(b => b.classList.remove('active'));
     if (opcion === 1) {
-        document.getElementById('btnOp1').classList.add('active');
-        if (urlOp1) { reproducir(urlOp1); }
-        else { mostrarToast('❌ Opción 1 no disponible', 'error'); }
-    } else {
-        document.getElementById('btnOp2').classList.add('active');
-        if (urlOp2) { reproducir(urlOp2); }
-        else { mostrarToast('❌ Opción 2 no disponible', 'error'); }
+        if (urlOp1) {
+            opcionActiva = 1;
+            document.getElementById('btnOp1').classList.add('active');
+            document.getElementById('btnOp2').classList.remove('active');
+            reproducir(urlOp1);
+        } else {
+            mostrarToast('❌ Opción 1 no disponible', 'error');
+        }
+    } else if (opcion === 2 && opcion2Disponible) {
+        if (urlOp2) {
+            opcionActiva = 2;
+            document.getElementById('btnOp2').classList.add('active');
+            document.getElementById('btnOp1').classList.remove('active');
+            reproducir(urlOp2);
+        } else {
+            mostrarToast('❌ Opción 2 no disponible', 'error');
+        }
     }
 }
 
@@ -768,78 +698,6 @@ function reportarFalla() {
 
 function ayuda() {
     mostrarToast('💬 ¿Necesitas ayuda? Contáctanos', 'info');
-}
-
-// ============================================================
-//  DESCARGA DE EPISODIOS
-// ============================================================
-function descargarEpisodioHandler(capIdx) {
-    if (!auth.currentUser) {
-        mostrarToast('⚠️ Inicia sesión para descargar', 'warning');
-        window.location.href = 'login.html';
-        return;
-    }
-    
-    const temp = temporadasActuales[tempActualIndex];
-    if (!temp || !temp.capitulos || !temp.capitulos[capIdx]) {
-        mostrarToast('❌ Episodio no encontrado', 'error');
-        return;
-    }
-    
-    const cap = temp.capitulos[capIdx];
-    if (!cap.url) {
-        mostrarToast('❌ Este episodio no tiene enlace para descargar', 'error');
-        return;
-    }
-    
-    const id = `${tmdbId}_${tempActualIndex}_${capIdx}`;
-    
-    verificarDescargado(id).then(yaDescargado => {
-        if (yaDescargado) {
-            mostrarToast('📥 Ya tienes este episodio descargado', 'info');
-            return;
-        }
-        
-        const episodio = {
-            id: id,
-            tmdb_id: tmdbId,
-            titulo: peliculaActual.titulo + ' - ' + (cap.titulo || `Episodio ${cap.numero || capIdx + 1}`),
-            tipo: 'serie',
-            temporada: tempActualIndex + 1,
-            capitulo: cap.numero || capIdx + 1,
-            url: cap.url,
-            portada: peliculaActual.portada,
-            fecha_descarga: new Date().toISOString(),
-            tamaño: 0
-        };
-        
-        guardarDescarga(episodio).then(() => {
-            mostrarToast('✅ Episodio descargado para ver sin internet', 'success');
-            // Actualizar el botón de descarga en la UI
-            actualizarBotonesDescarga();
-        }).catch(() => {
-            mostrarToast('❌ Error al descargar', 'error');
-        });
-    });
-}
-
-function actualizarBotonesDescarga() {
-    const items = document.querySelectorAll('.episodio-item');
-    items.forEach((item, idx) => {
-        const id = `${tmdbId}_${tempActualIndex}_${idx}`;
-        const btn = item.querySelector('.download-ep');
-        if (btn) {
-            verificarDescargado(id).then(descargado => {
-                if (descargado) {
-                    btn.classList.add('descargado');
-                    btn.innerHTML = '<i class="fas fa-check"></i> Descargado';
-                } else {
-                    btn.classList.remove('descargado');
-                    btn.innerHTML = '<i class="fas fa-download"></i> Descargar';
-                }
-            });
-        }
-    });
 }
 
 // ============================================================
@@ -949,7 +807,17 @@ function cargarReproductor(peli, tempRestaurar = null, capRestaurar = null) {
     document.getElementById('playerTipo').textContent = peli.tipo === 'serie' ? '📺 Serie' : '🎬 Película';
     document.getElementById('playerTipo').style.color = peli.tipo === 'serie' ? '#10B981' : '#A78BFA';
     
-    if (peli.opcion2) { urlOp2 = peli.opcion2; }
+    // ===== MANEJO DE OPCIÓN 2 =====
+    const btnOp2 = document.getElementById('btnOp2');
+    if (peli.opcion2 && peli.opcion2.trim() !== '') {
+        urlOp2 = peli.opcion2;
+        opcion2Disponible = true;
+        btnOp2.classList.remove('oculto');
+    } else {
+        urlOp2 = null;
+        opcion2Disponible = false;
+        btnOp2.classList.add('oculto');
+    }
     
     if (esSerie && peli.temporadas && peli.temporadas.length) {
         temporadasActuales = peli.temporadas;
@@ -978,7 +846,15 @@ function cargarReproductor(peli, tempRestaurar = null, capRestaurar = null) {
         const pc = obtenerCapitulo(tempIndex, 0);
         if (pc) {
             urlOp1 = pc.url;
-            if (pc.opcion2) urlOp2 = pc.opcion2;
+            if (pc.opcion2 && pc.opcion2.trim() !== '') {
+                urlOp2 = pc.opcion2;
+                opcion2Disponible = true;
+                btnOp2.classList.remove('oculto');
+            } else {
+                urlOp2 = null;
+                opcion2Disponible = false;
+                btnOp2.classList.add('oculto');
+            }
             if (urlOp1) {
                 reproducir(urlOp1);
                 document.getElementById('btnOp1').classList.add('active');
@@ -990,6 +866,7 @@ function cargarReproductor(peli, tempRestaurar = null, capRestaurar = null) {
         document.getElementById('episodiosSection').style.display = 'none';
         urlOp1 = peli.url || generarEnlaceUnlimplay(peli.tmdb_id, 'pelicula');
         
+        // Si la película tiene opcion2, ya está cargada arriba
         if (urlOp1) {
             reproducir(urlOp1);
             document.getElementById('btnOp1').classList.add('active');
@@ -1039,7 +916,6 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
             <div class="sinopsis">${cap.sinopsis || ''}</div>
             <div class="acciones-ep">
                 <button onclick="event.stopPropagation(); marcarVisto(${idx})"><i class="fas fa-check"></i> Visto</button>
-                <button class="download-ep" onclick="event.stopPropagation(); descargarEpisodioHandler(${idx})"><i class="fas fa-download"></i> Descargar</button>
                 <button onclick="event.stopPropagation(); reportarEpisodio(${idx})"><i class="fas fa-flag"></i> Reportar</button>
             </div>
         `;
@@ -1048,17 +924,33 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
                 document.querySelectorAll('.episodio-item').forEach(el => el.classList.remove('activo'));
                 d.classList.add('activo');
                 urlOp1 = cap.url;
-                if (cap.opcion2) urlOp2 = cap.opcion2;
-                reproducir(cap.url);
+                
+                // Verificar opcion2 del capítulo
+                const btnOp2 = document.getElementById('btnOp2');
+                if (cap.opcion2 && cap.opcion2.trim() !== '') {
+                    urlOp2 = cap.opcion2;
+                    opcion2Disponible = true;
+                    btnOp2.classList.remove('oculto');
+                } else {
+                    urlOp2 = null;
+                    opcion2Disponible = false;
+                    btnOp2.classList.add('oculto');
+                }
+                
+                // Si estamos en opción 2 y ya no está disponible, cambiar a opción 1
+                if (opcionActiva === 2 && !opcion2Disponible) {
+                    opcionActiva = 1;
+                    document.getElementById('btnOp1').classList.add('active');
+                    document.getElementById('btnOp2').classList.remove('active');
+                }
+                
+                reproducir(urlOp1);
             } else {
                 mostrarToast('❌ Este episodio no tiene enlace', 'error');
             }
         };
         container.appendChild(d);
     });
-    
-    // Actualizar botones de descarga
-    setTimeout(actualizarBotonesDescarga, 300);
 }
 
 function cambiarTempSelect() {
@@ -1068,8 +960,22 @@ function cambiarTempSelect() {
     const c = obtenerCapitulo(idx, 0);
     if (c?.url) {
         urlOp1 = c.url;
-        if (c.opcion2) urlOp2 = c.opcion2;
-        reproducir(c.url);
+        const btnOp2 = document.getElementById('btnOp2');
+        if (c.opcion2 && c.opcion2.trim() !== '') {
+            urlOp2 = c.opcion2;
+            opcion2Disponible = true;
+            btnOp2.classList.remove('oculto');
+        } else {
+            urlOp2 = null;
+            opcion2Disponible = false;
+            btnOp2.classList.add('oculto');
+        }
+        if (opcionActiva === 2 && !opcion2Disponible) {
+            opcionActiva = 1;
+            document.getElementById('btnOp1').classList.add('active');
+            document.getElementById('btnOp2').classList.remove('active');
+        }
+        reproducir(urlOp1);
     }
 }
 
@@ -1192,7 +1098,7 @@ if (tmdbId) {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
 
-console.log('✅ TELY Reproductor - Con descarga offline integrada');
+console.log('✅ TELY Reproductor - Opción 2 mejorada, sin descargas');
 </script>
 </body>
 </html>
