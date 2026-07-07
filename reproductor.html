@@ -21,6 +21,44 @@
         body.dark{background:#0A0A0F;color:#fff}
         body:not(.dark){background:#f0f0f0;color:#111}
         
+        /* ===== OCULTAR BARRA DE ESTADO EN HORIZONTAL ===== */
+        body:fullscreen .header-flotante,
+        body:-webkit-full-screen .header-flotante,
+        body:-moz-full-screen .header-flotante,
+        body:-ms-fullscreen .header-flotante {
+            display: none !important;
+        }
+        
+        /* Cuando el video está en pantalla completa, ocultar todo excepto el video */
+        body:fullscreen .main-content,
+        body:-webkit-full-screen .main-content,
+        body:-moz-full-screen .main-content,
+        body:-ms-fullscreen .main-content {
+            padding: 0 !important;
+            max-width: 100% !important;
+        }
+        
+        body:fullscreen .player-wrapper,
+        body:-webkit-full-screen .player-wrapper,
+        body:-moz-full-screen .player-wrapper,
+        body:-ms-fullscreen .player-wrapper {
+            border-radius: 0 !important;
+            aspect-ratio: auto !important;
+            height: 100vh !important;
+            width: 100vw !important;
+            margin: 0 !important;
+        }
+        
+        body:fullscreen .info-top,
+        body:fullscreen .player-controls,
+        body:fullscreen .episodios-section,
+        body:fullscreen .recomendaciones-wrap,
+        body:fullscreen .btn-actions-modern,
+        body:fullscreen .season-selector-wrap,
+        body:fullscreen #bannerApp {
+            display: none !important;
+        }
+        
         .main-content{width:100%;height:100vh;padding:.3rem .5rem;overflow-y:auto;margin:0 auto;max-width:600px}
         
         .header-flotante{
@@ -58,6 +96,26 @@
         .player-wrapper{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;width:100%;margin:.2rem 0}
         .player-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;background:#000}
         
+        /* Botón para pantalla completa */
+        .btn-fullscreen{
+            background:rgba(255,255,255,.06);
+            border:1px solid rgba(124,58,237,.15);
+            color:#fff;
+            padding:.25rem .6rem;
+            border-radius:6px;
+            font-weight:600;
+            font-size:.65rem;
+            cursor:pointer;
+            transition:.3s;
+            display:flex;
+            align-items:center;
+            gap:.2rem;
+        }
+        .btn-fullscreen:hover{
+            background:rgba(255,255,255,.1);
+            border-color:#7C3AED;
+        }
+        
         /* ===== INFO ===== */
         .info-top{padding:.2rem 0 .1rem}
         .info-top h1{
@@ -87,7 +145,7 @@
         .btn-nueva-ventana{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);color:#EF4444;padding:.25rem .7rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer;transition:.3s}
         .btn-nueva-ventana:hover{background:rgba(239,68,68,.15)}
         
-        /* ===== EPISODIOS - ESTILO IMAGEN ===== */
+        /* ===== EPISODIOS ===== */
         .episodios-section{
             margin-top:.3rem;
             background:rgba(255,255,255,.02);
@@ -100,6 +158,8 @@
             justify-content:space-between;
             align-items:center;
             margin-bottom:.2rem;
+            flex-wrap:wrap;
+            gap:.2rem;
         }
         .episodios-section .section-header h3{
             font-size:.75rem;
@@ -133,6 +193,7 @@
         .episodios-section .section-header .acciones{
             display:flex;
             gap:.4rem;
+            flex-wrap:wrap;
         }
         .episodios-section .section-header .acciones button{
             background:none;
@@ -211,6 +272,7 @@
             gap:.3rem;
             padding-left:1.2rem;
             margin-top:.05rem;
+            flex-wrap:wrap;
         }
         .episodio-item .acciones-ep button{
             background:none;
@@ -228,14 +290,51 @@
         }
         body:not(.dark) .episodio-item .acciones-ep button:hover{color:#111}
         
-        /* ===== RECOMENDACIONES ===== */
-        .recomendaciones{display:flex;gap:.3rem;overflow-x:auto;padding:.2rem 0}
-        .recomendacion{flex:0 0 auto;width:60px;cursor:pointer;border-radius:4px;overflow:hidden;text-align:center}
-        .recomendacion:hover{transform:scale(1.05)}
-        .recomendacion img{width:100%;height:80px;object-fit:cover}
-        .recomendacion p{font-size:.4rem;text-align:center;color:#94A3B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        /* ===== RECOMENDACIONES - IMÁGENES COMPLETAS ===== */
+        .recomendaciones-wrap{margin-top:.2rem}
         .titulo-recomendadas{font-weight:600;font-size:.75rem;color:#fff;margin:.2rem 0 .1rem}
         body:not(.dark) .titulo-recomendadas{color:#111}
+        
+        .recomendaciones{
+            display:flex;
+            gap:.3rem;
+            overflow-x:auto;
+            padding:.2rem 0;
+            scrollbar-width:none;
+        }
+        .recomendaciones::-webkit-scrollbar{display:none}
+        .recomendacion{
+            flex:0 0 auto;
+            width:80px;
+            cursor:pointer;
+            border-radius:8px;
+            overflow:hidden;
+            text-align:center;
+            transition:.3s;
+            background:rgba(255,255,255,.02);
+        }
+        .recomendacion:hover{
+            transform:scale(1.05);
+            box-shadow:0 8px 30px rgba(0,0,0,.3);
+        }
+        .recomendacion img{
+            width:100%;
+            aspect-ratio:2/3;
+            object-fit:cover;
+            border-radius:6px;
+            display:block;
+            background:#1A1A2E;
+        }
+        .recomendacion p{
+            font-size:.45rem;
+            text-align:center;
+            color:#94A3B8;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            margin-top:.05rem;
+            padding:0 .1rem;
+        }
         
         /* ===== LOADING / ERROR ===== */
         .loading-spinner{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#000;color:#A78BFA;gap:.5rem}
@@ -271,6 +370,12 @@
         .episodios-list::-webkit-scrollbar{width:3px}
         .episodios-list::-webkit-scrollbar-track{background:rgba(255,255,255,.02)}
         .episodios-list::-webkit-scrollbar-thumb{background:#7C3AED;border-radius:10px}
+        
+        /* ===== RESPONSIVE ===== */
+        @media(max-width:480px){
+            .recomendacion{width:65px}
+            .recomendacion p{font-size:.4rem}
+        }
     </style>
 </head>
 <body>
@@ -282,6 +387,7 @@
             <div class="top-actions">
                 <button class="back-btn" onclick="volverAlIndex()"><i class="fas fa-arrow-left"></i></button>
                 <button class="theme-btn" onclick="toggleTheme()" id="themeBtn"><i class="fas fa-moon"></i></button>
+                <button class="btn-fullscreen" onclick="toggleFullscreen()"><i class="fas fa-expand"></i></button>
                 <div class="user-menu">
                     <button class="user-btn" onclick="toggleUserMenu()"><i class="fas fa-user-circle"></i></button>
                     <div class="user-dropdown" id="userDropdown">
@@ -325,7 +431,7 @@
         <button class="btn-nueva-ventana" onclick="abrirNuevaVentana()"><i class="fas fa-external-link-alt"></i></button>
     </div>
 
-    <!-- ===== EPISODIOS - ESTILO IMAGEN ===== -->
+    <!-- ===== EPISODIOS ===== -->
     <div class="episodios-section" id="episodiosSection" style="display:none;">
         <div class="section-header">
             <h3><i class="fas fa-list"></i> Episodios</h3>
@@ -341,7 +447,7 @@
     </div>
 
     <!-- ===== RECOMENDACIONES ===== -->
-    <div style="margin-top:.2rem;">
+    <div class="recomendaciones-wrap">
         <h4 class="titulo-recomendadas">Te podría gustar</h4>
         <div class="recomendaciones" id="recomendaciones"></div>
     </div>
@@ -403,9 +509,32 @@ function guardarPestanaActiva() {
     } catch(e) {}
 }
 
+// ===== VOLVER AL ÍNDICE CON UN SOLO CLIC =====
 function volverAlIndex() {
     guardarPestanaActiva();
+    // Salir de pantalla completa si está activa
+    if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+    }
     window.location.href = 'index.html';
+}
+
+// ===== PANTALLA COMPLETA =====
+function toggleFullscreen() {
+    const wrapper = document.getElementById('playerWrapper');
+    if (!document.fullscreenElement) {
+        if (wrapper.requestFullscreen) {
+            wrapper.requestFullscreen();
+        } else if (wrapper.webkitRequestFullscreen) {
+            wrapper.webkitRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        }
+    }
 }
 
 // ===== AUTENTICACIÓN =====
@@ -829,23 +958,26 @@ function reportarEpisodio(idx) {
     mostrarToast('📋 Reporte enviado para este episodio', 'success');
 }
 
-// ===== RECOMENDACIONES =====
+// ===== RECOMENDACIONES - CON IMÁGENES COMPLETAS =====
 async function cargarRecomendaciones(tmdbId) {
     const container = document.getElementById('recomendaciones');
-    container.innerHTML = '<p style="color:#64748B;font-size:.6rem;">Cargando...</p>';
+    container.innerHTML = '<p style="color:#64748B;font-size:.6rem;padding:.5rem;">Cargando...</p>';
     if (!tmdbId) return;
     try {
         const data = await fetchTMDB(`movie/${tmdbId}/recommendations`, { page: 1 });
         container.innerHTML = '';
         if (!data.results || !data.results.length) {
-            container.innerHTML = '<p style="color:#64748B;font-size:.6rem;">Sin recomendaciones</p>';
+            container.innerHTML = '<p style="color:#64748B;font-size:.6rem;padding:.5rem;">Sin recomendaciones</p>';
             return;
         }
         data.results.slice(0, 8).forEach(p => {
             const div = document.createElement('div');
             div.className = 'recomendacion';
             const imgUrl = p.poster_path ? getImagenUrl(p.poster_path, 'w185') : 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
-            div.innerHTML = `<img src="${imgUrl}" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'"><p>${p.title || p.name}</p>`;
+            div.innerHTML = `
+                <img src="${imgUrl}" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+                <p>${p.title || p.name || 'Sin título'}</p>
+            `;
             div.onclick = () => {
                 const tipo = p.media_type === 'tv' ? 'serie' : 'pelicula';
                 window.location.href = `reproductor.html?play=${p.id}&tipo=${tipo}`;
@@ -853,7 +985,7 @@ async function cargarRecomendaciones(tmdbId) {
             container.appendChild(div);
         });
     } catch(e) { 
-        container.innerHTML = '<p style="color:#64748B;font-size:.6rem;">Sin recomendaciones</p>'; 
+        container.innerHTML = '<p style="color:#64748B;font-size:.6rem;padding:.5rem;">Sin recomendaciones</p>'; 
     }
 }
 
@@ -898,64 +1030,12 @@ function descargarAPK() {
     setTimeout(cerrarBannerApp, 2000);
 }
 
-// ===== PANTALLA COMPLETA =====
-function activarPantallaCompleta() {
-    const ua = navigator.userAgent || '';
-    const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
-    const esApp = window.navigator.standalone || 
-                   window.matchMedia('(display-mode: standalone)').matches ||
-                   esWebView;
-    if (esApp && !document.fullscreenElement && !document.webkitFullscreenElement) {
-        try {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            } else if (document.documentElement.webkitRequestFullscreen) {
-                document.documentElement.webkitRequestFullscreen();
-            }
-        } catch(e) {}
-    }
-}
-
-function esNavegadorWeb() {
-    const ua = navigator.userAgent || '';
-    const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
-    const esApp = window.navigator.standalone || 
-                   window.matchMedia('(display-mode: standalone)').matches ||
-                   esWebView;
-    return !esApp;
-}
-
-// ===== BOTÓN ATRÁS =====
-history.pushState(null, '', window.location.href);
-window.addEventListener('popstate', function(e) {
-    volverAlIndex();
-    e.preventDefault();
-    return false;
-});
-document.addEventListener('backbutton', function(e) {
-    volverAlIndex();
-    e.preventDefault();
-    e.stopPropagation();
-    return false;
-}, false);
+// ===== BOTÓN ATRÁS - UN SOLO CLIC =====
+// Ya está implementado en volverAlIndex()
 
 // ===== INICIAR =====
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 2000);
-    setTimeout(activarPantallaCompleta, 1000);
-});
-
-document.addEventListener('click', function() {
-    if (esNavegadorWeb()) return;
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        try {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            } else if (document.documentElement.webkitRequestFullscreen) {
-                document.documentElement.webkitRequestFullscreen();
-            }
-        } catch(e) {}
-    }
 });
 
 guardarPestanaActiva();
@@ -966,7 +1046,7 @@ if (tmdbId) {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
 
-console.log('✅ TELY Reproductor - Estilo imagen: Agente Kim reactivado 2026');
+console.log('✅ TELY Reproductor - Un solo clic para salir, imágenes completas, pantalla completa oculta barra de estado');
 </script>
 </body>
 </html>
