@@ -72,8 +72,13 @@
         .search-result .info .title{font-weight:600;font-size:.7rem}
         .search-result .info .detail{font-size:.55rem;color:#94A3B8}
         
-        /* ⭐ 4 TARJETAS POR FILA */
-        .grid-movies{display:grid;grid-template-columns:repeat(4,1fr);gap:.3rem;padding:.2rem 0}
+        /* ⭐⭐⭐ 4 TARJETAS POR FILA - FORZADO ⭐⭐⭐ */
+        .grid-movies {
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 0.3rem !important;
+            padding: 0.2rem 0 !important;
+        }
         
         .movie-card{background:rgba(255,255,255,.04);border-radius:6px;overflow:hidden;cursor:pointer;border:1px solid rgba(124,58,237,.06);transition:.3s;position:relative}
         .movie-card:hover{transform:translateY(-2px);border-color:rgba(124,58,237,.2)}
@@ -604,7 +609,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 1500);
 });
 
-console.log('🔥 4 tarjetas por fila + Scroll forzado');
+console.log('🔥 4 tarjetas por fila FORZADO + Scroll infinito');
 </script>
 </body>
 </html>
