@@ -46,23 +46,38 @@
         .btn-group{display:flex;gap:.3rem;flex-wrap:wrap;margin:.3rem 0}
         .btn-group .admin-btn{padding:.3rem 1rem;font-size:.75rem}
         
-        .admin-item{display:flex;align-items:center;gap:.8rem;background:rgba(255,255,255,.02);border-radius:8px;padding:.5rem .6rem;border-left:3px solid #7C3AED;margin-bottom:.4rem}
+        /* ⭐ ADMIN ITEM - ENLACES VERTICALES CON INPUT A TODO LO ANCHO */
+        .admin-item{display:flex;flex-direction:column;gap:.3rem;background:rgba(255,255,255,.02);border-radius:8px;padding:.6rem .8rem;border-left:3px solid #7C3AED;margin-bottom:.4rem}
         body:not(.dark) .admin-item{background:rgba(0,0,0,.02)}
+        .admin-item .top-row{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
         .admin-item .thumbnail{width:45px;height:67px;border-radius:4px;object-fit:cover;background:#1A1A2E;flex-shrink:0}
         .admin-item .info-item{flex:1;min-width:0}
-        .admin-item .title{font-weight:600;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .admin-item .title{font-weight:600;font-size:.85rem}
         .admin-item .meta{font-size:.65rem;color:#94A3B8;display:flex;gap:.6rem;flex-wrap:wrap}
-        .admin-item .enlace{font-size:.6rem;color:#60A5FA;word-break:break-all;margin-top:.05rem;padding:.1rem .3rem;background:rgba(59,130,246,.06);border-radius:4px;border:1px solid rgba(59,130,246,.08)}
+        
+        /* ⭐ ENLACES - UNO DEBAJO DEL OTRO, A TODO LO ANCHO */
+        .admin-item .enlace-wrap{width:100%;margin-top:.1rem}
+        .admin-item .enlace{font-size:.6rem;color:#60A5FA;word-break:break-all;padding:.2rem .4rem;background:rgba(59,130,246,.06);border-radius:4px;border:1px solid rgba(59,130,246,.08);width:100%}
         .admin-item .enlace.op1{color:#34D399;border-color:rgba(16,185,129,.15)}
         .admin-item .enlace.op2{color:#60A5FA;border-color:rgba(59,130,246,.15)}
-        .admin-item .actions{display:flex;gap:.2rem;flex-wrap:wrap;flex-shrink:0}
-        .admin-item .actions .admin-btn{padding:.1rem .4rem;font-size:.55rem;border-radius:4px}
-        .admin-item .badge-tipo{font-size:.5rem;font-weight:600;padding:.03rem .3rem;border-radius:4px}
+        
+        /* ⭐ INPUT DE EDICIÓN - A TODO LO ANCHO */
+        .admin-item .edit-input{width:100%;padding:.2rem .4rem;border-radius:4px;border:1px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.6rem;margin-top:.1rem}
+        body:not(.dark) .admin-item .edit-input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
+        .admin-item .edit-input:focus{outline:none;border-color:#7C3AED}
+        
+        .admin-item .edit-actions{display:flex;gap:.2rem;margin-top:.1rem}
+        .admin-item .edit-actions button{padding:.05rem .5rem;font-size:.5rem;border-radius:4px;border:none;cursor:pointer;font-weight:600}
+        .admin-item .edit-actions .save-btn{background:rgba(16,185,129,.15);color:#34D399}
+        .admin-item .edit-actions .save-btn:hover{background:rgba(16,185,129,.25)}
+        .admin-item .edit-actions .cancel-btn{background:rgba(239,68,68,.15);color:#F87171}
+        .admin-item .edit-actions .cancel-btn:hover{background:rgba(239,68,68,.25)}
+        
+        .admin-item .actions{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.2rem}
+        .admin-item .actions .admin-btn{padding:.1rem .6rem;font-size:.55rem;border-radius:4px}
+        .admin-item .badge-tipo{font-size:.5rem;font-weight:600;padding:.03rem .4rem;border-radius:4px}
         .admin-item .badge-tipo.pelicula{background:rgba(124,58,237,.12);color:#A78BFA}
         .admin-item .badge-tipo.serie{background:rgba(16,185,129,.12);color:#34D399}
-        .admin-item .edit-input{width:100%;padding:.1rem .3rem;border-radius:4px;border:1px solid rgba(124,58,237,.15);background:rgba(255,255,255,.05);color:#fff;font-size:.6rem;margin-top:.05rem}
-        body:not(.dark) .admin-item .edit-input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.08)}
-        .admin-item .edit-input:focus{outline:none;border-color:#7C3AED}
         
         .user-dropdown{position:absolute;right:0;top:calc(100% + 8px);background:rgba(26,26,46,.95);border-radius:12px;width:200px;border:1px solid rgba(124,58,237,.15);padding:.4rem 0;display:none;z-index:50;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
@@ -454,7 +469,7 @@ async function fetchTMDB(path, params = {}) {
 
 function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
-// ⭐ GENERAR PELÍCULAS (SIN BOTÓN DETENER - MÁS SIMPLE)
+// ⭐ GENERAR PELÍCULAS
 async function generarPeliculas() {
     if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
     if (generando) { mostrarToast('⏳ Ya está generando...', 'warning'); return; }
@@ -520,7 +535,7 @@ async function generarPeliculas() {
     generando = false;
 }
 
-// ⭐ GENERAR SERIES (SIN BOTÓN DETENER - MÁS SIMPLE)
+// ⭐ GENERAR SERIES
 async function generarSeries() {
     if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
     if (generando) { mostrarToast('⏳ Ya está generando...', 'warning'); return; }
@@ -603,10 +618,11 @@ async function generarSeries() {
     generando = false;
 }
 
-// ⭐ EDITAR ENLACES - FUNCIONES QUE FUNCIONAN
+// ⭐ EDITAR ENLACES - CON INPUT A TODO LO ANCHO
 window.editarEnlace = function(key, tipo, campo) {
     const container = document.getElementById(`item-${key}`);
-    const enlaceDiv = container.querySelector(`.enlace.${campo}`);
+    const enlaceWrap = container.querySelector(`.enlace-wrap.${campo}-wrap`);
+    const enlaceDiv = enlaceWrap.querySelector('.enlace');
     const actionsDiv = container.querySelector('.actions');
     
     if (itemsEditando[key]) {
@@ -617,11 +633,12 @@ window.editarEnlace = function(key, tipo, campo) {
     const currentUrl = enlaceDiv.textContent.replace('🔗', '').trim();
     itemsEditando[key] = true;
     
-    enlaceDiv.innerHTML = `
-        <input class="edit-input" id="edit-input-${key}-${campo}" value="${currentUrl}" placeholder="Pega el nuevo enlace...">
-        <div style="margin-top:.05rem;display:flex;gap:.2rem;">
-            <button class="admin-btn admin-btn-green" style="padding:.05rem .4rem;font-size:.5rem;" onclick="guardarEnlace('${key}', '${tipo}', '${campo}')"><i class="fas fa-check"></i></button>
-            <button class="admin-btn admin-btn-danger" style="padding:.05rem .4rem;font-size:.5rem;" onclick="cancelarEdicion('${key}')"><i class="fas fa-times"></i></button>
+    enlaceWrap.innerHTML = `
+        <div style="font-size:.55rem;color:#94A3B8;margin-bottom:.1rem;">${campo === 'url' ? '🔗 Opción 1' : '🔗 Opción 2'}</div>
+        <input class="edit-input" id="edit-input-${key}-${campo}" value="${currentUrl}" placeholder="Pega el nuevo enlace..." style="width:100%;">
+        <div class="edit-actions">
+            <button class="save-btn" onclick="guardarEnlace('${key}', '${tipo}', '${campo}')"><i class="fas fa-check"></i> Guardar</button>
+            <button class="cancel-btn" onclick="cancelarEdicion('${key}')"><i class="fas fa-times"></i> Cancelar</button>
         </div>
     `;
     
@@ -662,25 +679,27 @@ window.agregarOpcion2 = async function(key, tipo, tmdbId) {
     const container = document.getElementById(`item-${key}`);
     const actionsDiv = container.querySelector('.actions');
     
-    const op2Existente = container.querySelector('.enlace.op2');
+    const op2Existente = container.querySelector('.enlace-wrap.op2-wrap');
     if (op2Existente) {
         editarEnlace(key, tipo, 'op2');
         return;
     }
     
-    const nuevoOp2 = document.createElement('div');
-    nuevoOp2.className = 'enlace op2';
-    nuevoOp2.style.marginTop = '.1rem';
-    nuevoOp2.innerHTML = `
-        <div style="font-size:.5rem;color:#3B82F6;font-weight:600;">🔗 Op2 (agregar):</div>
+    // Crear nuevo wrap para Op2
+    const nuevoWrap = document.createElement('div');
+    nuevoWrap.className = 'enlace-wrap op2-wrap';
+    nuevoWrap.style.marginTop = '.1rem';
+    nuevoWrap.innerHTML = `
+        <div style="font-size:.55rem;color:#3B82F6;margin-bottom:.1rem;">🔗 Opción 2 (agregar)</div>
         <input class="edit-input" id="op2-input-${key}" placeholder="Pega enlace de Vidmoly, BigMoly..." style="width:100%;">
-        <div style="margin-top:.05rem;display:flex;gap:.2rem;">
-            <button class="admin-btn admin-btn-green" style="padding:.05rem .4rem;font-size:.5rem;" onclick="guardarOpcion2('${key}', '${tipo}', '${tmdbId}')"><i class="fas fa-check"></i></button>
-            <button class="admin-btn admin-btn-danger" style="padding:.05rem .4rem;font-size:.5rem;" onclick="cancelarOpcion2('${key}')"><i class="fas fa-times"></i></button>
+        <div class="edit-actions">
+            <button class="save-btn" onclick="guardarOpcion2('${key}', '${tipo}', '${tmdbId}')"><i class="fas fa-check"></i> Guardar</button>
+            <button class="cancel-btn" onclick="cancelarOpcion2('${key}')"><i class="fas fa-times"></i> Cancelar</button>
         </div>
     `;
     
-    container.insertBefore(nuevoOp2, actionsDiv);
+    // Insertar antes de actionsDiv
+    container.insertBefore(nuevoWrap, actionsDiv);
     
     setTimeout(() => {
         const input = document.getElementById(`op2-input-${key}`);
@@ -967,7 +986,7 @@ window.filtrarContenido = function() {
     });
 };
 
-// ⭐ CARGAR CONTENIDO - FUNCIÓN QUE SÍ FUNCIONA
+// ⭐ CARGAR CONTENIDO
 window.cargarContenido = async function() {
     if (!esAdmin) return;
     const container = document.getElementById('listaContenido');
@@ -1028,16 +1047,29 @@ window.cargarContenido = async function() {
                 item.style.borderLeftColor = '#10B981';
                 
                 item.innerHTML = `
-                    <img src="${portada}" class="thumbnail" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-                    <div class="info-item">
-                        <div class="title">${p.titulo} <span class="badge-tipo pelicula">🎬</span></div>
-                        <div class="meta">${p.anio || 'N/D'} • ⭐ ${p.puntuacion || 'N/A'} • TMDB: ${p.tmdb_id}</div>
-                        <div class="enlace op1">🔗 Op1: ${urlOp1}</div>
-                        ${urlOp2 ? `<div class="enlace op2">🔗 Op2: ${urlOp2}</div>` : ''}
+                    <div class="top-row">
+                        <img src="${portada}" class="thumbnail" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+                        <div class="info-item">
+                            <div class="title">${p.titulo} <span class="badge-tipo pelicula">🎬</span></div>
+                            <div class="meta">${p.anio || 'N/D'} • ⭐ ${p.puntuacion || 'N/A'} • TMDB: ${p.tmdb_id}</div>
+                        </div>
                     </div>
+                    
+                    <div class="enlace-wrap url-wrap">
+                        <div style="font-size:.55rem;color:#34D399;margin-bottom:.05rem;">🔗 Opción 1</div>
+                        <div class="enlace op1">${urlOp1}</div>
+                    </div>
+                    
+                    ${urlOp2 ? `
+                    <div class="enlace-wrap op2-wrap">
+                        <div style="font-size:.55rem;color:#60A5FA;margin-bottom:.05rem;">🔗 Opción 2</div>
+                        <div class="enlace op2">${urlOp2}</div>
+                    </div>
+                    ` : ''}
+                    
                     <div class="actions">
-                        <button class="admin-btn admin-btn-blue" onclick="editarEnlace('${key}', 'pelicula', 'url')"><i class="fas fa-pen"></i> Op1</button>
-                        ${urlOp2 ? `<button class="admin-btn admin-btn-purple" onclick="editarEnlace('${key}', 'pelicula', 'op2')"><i class="fas fa-pen"></i> Op2</button>` : `<button class="admin-btn admin-btn-purple" onclick="agregarOpcion2('${key}', 'pelicula', '${p.tmdb_id}')"><i class="fas fa-plus"></i> Op2</button>`}
+                        <button class="admin-btn admin-btn-blue" onclick="editarEnlace('${key}', 'pelicula', 'url')"><i class="fas fa-pen"></i> Editar Op1</button>
+                        ${urlOp2 ? `<button class="admin-btn admin-btn-purple" onclick="editarEnlace('${key}', 'pelicula', 'op2')"><i class="fas fa-pen"></i> Editar Op2</button>` : `<button class="admin-btn admin-btn-purple" onclick="agregarOpcion2('${key}', 'pelicula', '${p.tmdb_id}')"><i class="fas fa-plus"></i> Agregar Op2</button>`}
                         <button class="admin-btn admin-btn-danger" onclick="eliminarItem('${key}', 'pelicula')"><i class="fas fa-trash"></i></button>
                     </div>
                 `;
@@ -1100,16 +1132,29 @@ window.cargarContenido = async function() {
                 }
                 
                 item.innerHTML = `
-                    <img src="${portada}" class="thumbnail" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-                    <div class="info-item">
-                        <div class="title">${s.titulo} <span class="badge-tipo serie">📺</span></div>
-                        <div class="meta">${s.anio || 'N/D'} • ${s.temporadas?.length || 0} temps • ${capsCount} caps • ⭐ ${s.puntuacion || 'N/A'} • TMDB: ${s.tmdb_id}</div>
-                        <div class="enlace op1">🔗 Op1: ${urlOp1}</div>
-                        ${urlOp2 ? `<div class="enlace op2">🔗 Op2: ${urlOp2}</div>` : ''}
+                    <div class="top-row">
+                        <img src="${portada}" class="thumbnail" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+                        <div class="info-item">
+                            <div class="title">${s.titulo} <span class="badge-tipo serie">📺</span></div>
+                            <div class="meta">${s.anio || 'N/D'} • ${s.temporadas?.length || 0} temps • ${capsCount} caps • ⭐ ${s.puntuacion || 'N/A'} • TMDB: ${s.tmdb_id}</div>
+                        </div>
                     </div>
+                    
+                    <div class="enlace-wrap url-wrap">
+                        <div style="font-size:.55rem;color:#34D399;margin-bottom:.05rem;">🔗 Opción 1</div>
+                        <div class="enlace op1">${urlOp1}</div>
+                    </div>
+                    
+                    ${urlOp2 ? `
+                    <div class="enlace-wrap op2-wrap">
+                        <div style="font-size:.55rem;color:#60A5FA;margin-bottom:.05rem;">🔗 Opción 2</div>
+                        <div class="enlace op2">${urlOp2}</div>
+                    </div>
+                    ` : ''}
+                    
                     <div class="actions">
-                        <button class="admin-btn admin-btn-blue" onclick="editarEnlace('${key}', 'serie', 'url')"><i class="fas fa-pen"></i> Op1</button>
-                        ${urlOp2 ? `<button class="admin-btn admin-btn-purple" onclick="editarEnlace('${key}', 'serie', 'op2')"><i class="fas fa-pen"></i> Op2</button>` : `<button class="admin-btn admin-btn-purple" onclick="agregarOpcion2('${key}', 'serie', '${s.tmdb_id}')"><i class="fas fa-plus"></i> Op2</button>`}
+                        <button class="admin-btn admin-btn-blue" onclick="editarEnlace('${key}', 'serie', 'url')"><i class="fas fa-pen"></i> Editar Op1</button>
+                        ${urlOp2 ? `<button class="admin-btn admin-btn-purple" onclick="editarEnlace('${key}', 'serie', 'op2')"><i class="fas fa-pen"></i> Editar Op2</button>` : `<button class="admin-btn admin-btn-purple" onclick="agregarOpcion2('${key}', 'serie', '${s.tmdb_id}')"><i class="fas fa-plus"></i> Agregar Op2</button>`}
                         <button class="toggle-series-btn" id="toggle-btn-${key}" onclick="toggleSerie('${key}')">
                             <i class="fas fa-chevron-${isExpanded ? 'up' : 'down'}"></i> ${isExpanded ? 'Ocultar' : 'Ver caps'}
                         </button>
@@ -1156,7 +1201,7 @@ window.eliminarItem = async function(key, tipo) {
 // ⭐ INICIAR
 cargarContenido();
 cargarPedidos();
-console.log('✅ Admin TELY - Con funciones que sí cargan y Opción 2 funcional');
+console.log('✅ Admin TELY - Enlaces verticales con input a todo lo ancho');
 </script>
 </body>
 </html>
