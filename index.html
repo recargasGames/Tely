@@ -47,7 +47,7 @@
         .search-bar input::placeholder{color:#64748B;font-size:.75rem}
         .search-bar button{padding:.2rem .8rem;border-radius:9999px;border:none;background:#7C3AED;color:#fff;font-size:.75rem;cursor:pointer;transition:.3s}
         .search-bar button:hover{background:#6D28D9}
-        .search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:rgba(26,26,46,.98);border-radius:8px;max-height:200px;overflow-y:auto;display:none;z-index:60;border:1px solid rgba(124,58,237,.15);padding:.15rem 0}
+        .search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:rgba(26,26,46,.98);border-radius:8px;max-height:220px;overflow-y:auto;display:none;z-index:60;border:1px solid rgba(124,58,237,.15);padding:.15rem 0}
         .search-results.show{display:block}
         .search-result{display:flex;align-items:center;gap:.3rem;padding:.2rem .4rem;cursor:pointer;transition:.2s;border-bottom:1px solid rgba(255,255,255,.03)}
         .search-result:last-child{border-bottom:none}
@@ -57,6 +57,13 @@
         .search-result .info .title{font-weight:600;font-size:.7rem;color:#fff}
         .search-result .info .detail{font-size:.55rem;color:#94A3B8}
         .search-result .badge-tipo{font-size:.45rem;background:rgba(124,58,237,.2);padding:.02rem .3rem;border-radius:4px;color:#A78BFA}
+        
+        /* Búsquedas recientes */
+        .recientes-label{font-size:.6rem;color:#64748B;padding:.1rem .4rem;font-weight:600}
+        .search-reciente{display:flex;align-items:center;gap:.3rem;padding:.15rem .4rem;cursor:pointer;transition:.2s}
+        .search-reciente:hover{background:rgba(124,58,237,.05)}
+        .search-reciente i{color:#64748B;font-size:.6rem}
+        .search-reciente .texto{font-size:.65rem;color:#94A3B8}
         
         .grid-movies{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.4rem;padding:.2rem 0}
         
@@ -86,12 +93,6 @@
         .user-dropdown hr{margin:.05rem 0;border:none;border-top:1px solid rgba(124,58,237,.08)}
         .user-menu{position:relative}
         .empty-msg{color:#64748B;font-size:.7rem;padding:.15rem 0}
-        .card-actions{display:flex;gap:2px;margin-top:1px;justify-content:center}
-        .card-actions button{background:none;border:none;cursor:pointer;font-size:.5rem;padding:1px 3px;border-radius:2px;transition:.2s}
-        .card-actions .fav-btn{color:#EF4444}
-        .card-actions .fav-btn:hover{background:rgba(239,68,68,.15)}
-        .card-actions .list-btn{color:#3B82F6}
-        .card-actions .list-btn:hover{background:rgba(59,130,246,.15)}
         
         .offline-banner{display:none;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:.3rem .5rem;margin:.2rem 0;color:#F59E0B;font-size:.65rem;text-align:center}
         .offline-banner i{margin-right:.3rem}
@@ -145,7 +146,7 @@
         </div>
         
         <div class="search-bar">
-            <input type="text" placeholder="🔍 Buscar películas o series..." id="searchInput" onkeydown="if(event.key==='Enter') buscarGlobal()" oninput="mostrarSugerencias(this.value)">
+            <input type="text" placeholder="🔍 Buscar películas o series..." id="searchInput" onkeydown="if(event.key==='Enter') buscarGlobal()" oninput="mostrarSugerencias(this.value)" autocomplete="off">
             <button onclick="buscarGlobal()"><i class="fas fa-search"></i></button>
             <div class="search-results" id="searchResults"></div>
         </div>
@@ -155,12 +156,6 @@
 
     <div id="contenidoPrincipal">
         <div id="tabInicio">
-            <div class="section-title"><i class="fas fa-heart"></i> Mis Favoritos</div>
-            <div class="horizontal-scroll" id="favoritosContainer"><p class="empty-msg">No tienes favoritos aún</p></div>
-
-            <div class="section-title"><i class="fas fa-list"></i> Mi Lista</div>
-            <div class="horizontal-scroll" id="miListaContainer"><p class="empty-msg">No hay contenido en tu lista</p></div>
-
             <div class="section-title"><i class="fas fa-fire"></i> Películas populares</div>
             <div class="grid-movies" id="peliculasPopulares"></div>
 
@@ -230,6 +225,23 @@ let totalPaginasSeries = 1;
 let cargandoPeliculas = false;
 let cargandoSeries = false;
 let scrollTimeout = null;
+
+// ============================================================
+//  BÚSQUEDAS RECIENTES (localStorage)
+// ============================================================
+function guardarBusquedaReciente(texto) {
+    if (!texto || texto.length < 2) return;
+    let recientes = JSON.parse(localStorage.getItem('tely_busquedas_recientes') || '[]');
+    // Eliminar duplicados
+    recientes = recientes.filter(item => item.toLowerCase() !== texto.toLowerCase());
+    recientes.unshift(texto);
+    if (recientes.length > 5) recientes.pop();
+    localStorage.setItem('tely_busquedas_recientes', JSON.stringify(recientes));
+}
+
+function obtenerBusquedasRecientes() {
+    return JSON.parse(localStorage.getItem('tely_busquedas_recientes') || '[]');
+}
 
 // ============================================================
 //  UTILIDADES
@@ -359,10 +371,6 @@ function crearTarjeta(item, esSerie = false) {
         <div class="info">
             <h4>${item.titulo}</h4>
             <div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div>
-            <div class="card-actions">
-                <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorito('${item.id}')"><i class="fas fa-heart"></i></button>
-                <button class="list-btn" onclick="event.stopPropagation(); toggleMiLista('${item.id}')"><i class="fas fa-plus-circle"></i></button>
-            </div>
         </div>
     `;
     const tipoUrl = esSerie ? 'serie' : 'pelicula';
@@ -370,97 +378,6 @@ function crearTarjeta(item, esSerie = false) {
         window.location.href = `reproductor.html?play=${item.id}&tipo=${tipoUrl}`;
     };
     return div;
-}
-
-// ============================================================
-//  FAVORITOS Y LISTA (LOCAL)
-// ============================================================
-function toggleFavorito(id) {
-    const favs = JSON.parse(localStorage.getItem('tely_favoritos') || '[]');
-    const idx = favs.indexOf(String(id));
-    if (idx > -1) {
-        favs.splice(idx, 1);
-        mostrarToast('🗑️ Eliminado de favoritos', 'warning');
-    } else {
-        favs.push(String(id));
-        mostrarToast('❤️ Agregado a favoritos', 'success');
-    }
-    localStorage.setItem('tely_favoritos', JSON.stringify(favs));
-    cargarFavoritos();
-}
-
-function toggleMiLista(id) {
-    const lista = JSON.parse(localStorage.getItem('tely_lista') || '[]');
-    const idx = lista.indexOf(String(id));
-    if (idx > -1) {
-        lista.splice(idx, 1);
-        mostrarToast('🗑️ Eliminado de Mi Lista', 'warning');
-    } else {
-        lista.push(String(id));
-        mostrarToast('📝 Agregado a Mi Lista', 'success');
-    }
-    localStorage.setItem('tely_lista', JSON.stringify(lista));
-    cargarMiLista();
-}
-
-function cargarFavoritos() {
-    const container = document.getElementById('favoritosContainer');
-    const favs = JSON.parse(localStorage.getItem('tely_favoritos') || '[]');
-    container.innerHTML = '';
-    if (!favs.length) {
-        container.innerHTML = '<p class="empty-msg">No tienes favoritos aún</p>';
-        return;
-    }
-    const todas = [...(DATOS_FALLBACK.peliculas || []), ...(DATOS_FALLBACK.series || [])];
-    favs.forEach(id => {
-        const item = todas.find(i => String(i.id) === String(id));
-        if (item) {
-            const div = document.createElement('div');
-            div.className = 'movie-card';
-            div.style.width = '80px';
-            div.style.flexShrink = '0';
-            const esSerie = item.id > 100;
-            div.innerHTML = `
-                <img src="${getImagenUrl(item.portada, 'w342')}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-                <div class="info"><h4>${item.titulo}</h4></div>
-            `;
-            const tipoUrl = esSerie ? 'serie' : 'pelicula';
-            div.onclick = () => {
-                window.location.href = `reproductor.html?play=${item.id}&tipo=${tipoUrl}`;
-            };
-            container.appendChild(div);
-        }
-    });
-}
-
-function cargarMiLista() {
-    const container = document.getElementById('miListaContainer');
-    const lista = JSON.parse(localStorage.getItem('tely_lista') || '[]');
-    container.innerHTML = '';
-    if (!lista.length) {
-        container.innerHTML = '<p class="empty-msg">No hay contenido en tu lista</p>';
-        return;
-    }
-    const todas = [...(DATOS_FALLBACK.peliculas || []), ...(DATOS_FALLBACK.series || [])];
-    lista.forEach(id => {
-        const item = todas.find(i => String(i.id) === String(id));
-        if (item) {
-            const div = document.createElement('div');
-            div.className = 'movie-card';
-            div.style.width = '80px';
-            div.style.flexShrink = '0';
-            const esSerie = item.id > 100;
-            div.innerHTML = `
-                <img src="${getImagenUrl(item.portada, 'w342')}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-                <div class="info"><h4>${item.titulo}</h4></div>
-            `;
-            const tipoUrl = esSerie ? 'serie' : 'pelicula';
-            div.onclick = () => {
-                window.location.href = `reproductor.html?play=${item.id}&tipo=${tipoUrl}`;
-            };
-            container.appendChild(div);
-        }
-    });
 }
 
 // ============================================================
@@ -489,8 +406,6 @@ async function cargarContenido() {
         seriesContainer.innerHTML = '';
         cachedPelis.forEach(item => pelisContainer.appendChild(crearTarjeta(item)));
         cachedSeries.forEach(item => seriesContainer.appendChild(crearTarjeta(item, true)));
-        cargarFavoritos();
-        cargarMiLista();
         return;
     }
     
@@ -500,8 +415,6 @@ async function cargarContenido() {
         seriesContainer.innerHTML = '';
         DATOS_FALLBACK.peliculas.forEach(item => pelisContainer.appendChild(crearTarjeta(item)));
         DATOS_FALLBACK.series.forEach(item => seriesContainer.appendChild(crearTarjeta(item, true)));
-        cargarFavoritos();
-        cargarMiLista();
         return;
     }
     
@@ -547,9 +460,6 @@ async function cargarContenido() {
         DATOS_FALLBACK.peliculas.forEach(item => pelisContainer.appendChild(crearTarjeta(item)));
         DATOS_FALLBACK.series.forEach(item => seriesContainer.appendChild(crearTarjeta(item, true)));
     }
-    
-    cargarFavoritos();
-    cargarMiLista();
 }
 
 // ============================================================
@@ -564,7 +474,6 @@ async function cargarPeliculas(page = 1, append = false) {
     const indicador = document.getElementById('cargandoPeliculasIndicador');
     indicador.style.display = 'block';
     
-    // Si es la primera página, limpiar grid
     if (!append) {
         grid.innerHTML = '';
         for (let i = 0; i < 8; i++) {
@@ -590,7 +499,6 @@ async function cargarPeliculas(page = 1, append = false) {
             puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A'
         }));
         
-        // Si es la primera página, limpiar skeletons
         if (!append) grid.innerHTML = '';
         items.forEach(item => grid.appendChild(crearTarjeta(item)));
         
@@ -662,9 +570,7 @@ mainContent.addEventListener('scroll', function() {
         const scrollHeight = mainContent.scrollHeight;
         const clientHeight = mainContent.clientHeight;
         
-        // Si estamos cerca del final (100px)
         if (scrollTop + clientHeight >= scrollHeight - 100) {
-            // Verificar qué pestaña está activa
             const tabPeliculas = document.getElementById('tabPeliculas');
             const tabSeries = document.getElementById('tabSeries');
             
@@ -684,14 +590,15 @@ mainContent.addEventListener('scroll', function() {
 });
 
 // ============================================================
-//  BÚSQUEDA
+//  BÚSQUEDA (CORREGIDA - CON RECIENTES)
 // ============================================================
 window.mostrarSugerencias = async function(texto) {
     const container = document.getElementById('searchResults');
     const input = document.getElementById('searchInput');
     
     if (!texto || texto.length < 2) { 
-        container.classList.remove('show'); 
+        // Mostrar búsquedas recientes si hay
+        mostrarRecientes();
         return; 
     }
     
@@ -711,13 +618,14 @@ window.mostrarSugerencias = async function(texto) {
         
         resultados.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
         
-        if (!resultados.length) { 
+        container.innerHTML = '';
+        
+        if (!resultados.length) {
             container.innerHTML = '<div class="search-result" style="padding:.3rem .5rem;color:#94A3B8;font-size:.6rem;justify-content:center;">🔍 No hay resultados</div>';
             container.classList.add('show');
             return;
         }
         
-        container.innerHTML = '';
         resultados.slice(0, 8).forEach(item => {
             const div = document.createElement('div');
             div.className = 'search-result';
@@ -736,6 +644,7 @@ window.mostrarSugerencias = async function(texto) {
             
             const tipoUrl = esSerie ? 'serie' : 'pelicula';
             div.onclick = () => {
+                guardarBusquedaReciente(texto);
                 window.location.href = `reproductor.html?play=${item.id}&tipo=${tipoUrl}`;
                 container.classList.remove('show');
                 input.value = '';
@@ -749,9 +658,42 @@ window.mostrarSugerencias = async function(texto) {
     }
 };
 
+function mostrarRecientes() {
+    const container = document.getElementById('searchResults');
+    const recientes = obtenerBusquedasRecientes();
+    
+    if (!recientes.length) {
+        container.classList.remove('show');
+        return;
+    }
+    
+    container.innerHTML = '';
+    const label = document.createElement('div');
+    label.className = 'recientes-label';
+    label.textContent = '🕐 Búsquedas recientes';
+    container.appendChild(label);
+    
+    recientes.forEach(texto => {
+        const div = document.createElement('div');
+        div.className = 'search-reciente';
+        div.innerHTML = `<i class="fas fa-clock-rotate-left"></i><span class="texto">${texto}</span>`;
+        div.onclick = () => {
+            document.getElementById('searchInput').value = texto;
+            container.classList.remove('show');
+            window.mostrarSugerencias(texto);
+        };
+        container.appendChild(div);
+    });
+    
+    container.classList.add('show');
+}
+
 window.buscarGlobal = function() {
     const input = document.getElementById('searchInput');
-    if (input.value.trim()) window.mostrarSugerencias(input.value);
+    if (input.value.trim()) {
+        guardarBusquedaReciente(input.value);
+        window.mostrarSugerencias(input.value);
+    }
 };
 
 // ============================================================
@@ -817,7 +759,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 cargarContenido();
 
-console.log('✅ TELY - Scroll infinito funcionando, sin "Continuar viendo"');
+console.log('✅ TELY - Sin favoritos/lista en inicio, búsqueda con recientes');
 </script>
 </body>
 </html>
