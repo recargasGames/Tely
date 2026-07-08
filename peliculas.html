@@ -21,7 +21,7 @@
         body.dark{background:#0A0A0F;color:#fff}
         body:not(.dark){background:#f0f0f0;color:#111}
         
-        .main-content{width:100%;height:100vh;padding:.3rem .5rem;overflow-y:auto;margin:0 auto;max-width:600px;padding-bottom:80px !important}
+        .main-content{width:100%;height:100vh;padding:.3rem .5rem;overflow-y:auto;margin:0 auto;max-width:600px;padding-bottom:100px !important}
         
         .header-flotante{
             position:sticky;
@@ -96,49 +96,54 @@
         body:not(.dark) .skeleton{background:linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 50%,#e0e0e0 75%);background-size:200% 100%}
         @keyframes skeleton{0%{background-position:-200% 0}100%{background-position:200% 0}}
         
-        /* ⭐ BOTÓN CARGAR MÁS - CORREGIDO */
+        /* ⭐ BOTÓN PERFECTO - GRANDE Y COMPLETO */
         .load-more {
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
-            padding: 0.8rem 0 2rem 0 !important;
-            margin: 0.5rem 0 1rem 0 !important;
-            min-height: 80px !important;
+            padding: 1rem 0 2.5rem 0 !important;
+            margin: 0.5rem 0 !important;
+            min-height: 90px !important;
             width: 100% !important;
             clear: both !important;
         }
         
         .load-more button {
-            background: rgba(124,58,237,.15) !important;
+            background: linear-gradient(135deg, #7C3AED, #6D28D9) !important;
             color: #fff !important;
-            padding: 0.7rem 2rem !important;
+            padding: 0.9rem 2.5rem !important;
             border-radius: 9999px !important;
-            border: 2px solid rgba(124,58,237,.3) !important;
-            font-weight: 700 !important;
+            border: none !important;
+            font-weight: 800 !important;
             cursor: pointer !important;
-            font-size: 0.85rem !important;
-            transition: .3s !important;
-            min-width: 180px !important;
-            min-height: 50px !important;
-            display: inline-block !important;
-            text-align: center !important;
-            line-height: 1.4 !important;
-            white-space: nowrap !important;
+            font-size: 1rem !important;
+            transition: all 0.3s ease !important;
+            min-width: 200px !important;
+            min-height: 56px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.5rem !important;
+            box-shadow: 0 4px 20px rgba(124,58,237,0.4) !important;
+            letter-spacing: 0.5px !important;
         }
         
         .load-more button:hover {
-            background: rgba(124,58,237,.25) !important;
-            border-color: #7C3AED !important;
-            transform: scale(1.02) !important;
+            transform: scale(1.05) !important;
+            box-shadow: 0 6px 30px rgba(124,58,237,0.6) !important;
+        }
+        
+        .load-more button:active {
+            transform: scale(0.95) !important;
         }
         
         body:not(.dark) .load-more button {
-            color: #111 !important;
-            background: rgba(124,58,237,.1) !important;
+            background: linear-gradient(135deg, #7C3AED, #6D28D9) !important;
+            color: #fff !important;
         }
         
         .load-more button:disabled {
-            opacity: .4 !important;
+            opacity: 0.5 !important;
             cursor: not-allowed !important;
             transform: none !important;
         }
@@ -148,7 +153,7 @@
         }
         
         .load-more button:not(.oculto) {
-            display: inline-block !important;
+            display: inline-flex !important;
         }
         
         .user-dropdown{position:absolute;right:0;top:calc(100% + 6px);background:rgba(26,26,46,.95);border-radius:8px;width:160px;border:1px solid rgba(124,58,237,.15);padding:.2rem 0;display:none;z-index:60;box-shadow:0 20px 60px rgba(0,0,0,.5)}
@@ -248,7 +253,7 @@
     </div>
 
     <div class="grid-movies" id="listaPeliculas"></div>
-    <div class="load-more"><button onclick="cargarMasPeliculas()" id="btnMasPeliculas"><i class="fas fa-plus"></i> Cargar más</button></div>
+    <div class="load-more"><button onclick="cargarMasPeliculas()" id="btnMasPeliculas"><i class="fas fa-plus-circle"></i> Cargar más</button></div>
 </main>
 
 <div id="bannerApp">
@@ -289,35 +294,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-document.addEventListener('DOMContentLoaded', function() {
-    const esApp = window.navigator.standalone || 
-                   window.matchMedia('(display-mode: standalone)').matches ||
-                   /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (esApp) {
-        setTimeout(function() {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            } else if (document.documentElement.webkitRequestFullscreen) {
-                document.documentElement.webkitRequestFullscreen();
-            }
-        }, 500);
-    }
-});
-
-document.addEventListener('click', function() {
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen().catch(() => {});
-        } else if (document.documentElement.webkitRequestFullscreen) {
-            document.documentElement.webkitRequestFullscreen();
-        }
-    }
-});
-
-history.pushState(null, '', window.location.href);
-window.addEventListener('popstate', function(e) { return true; });
-document.addEventListener('backbutton', function(e) { return true; }, false);
-
+// ⚡ FUNCIONES RÁPIDAS
 function irALogin() { window.location.href = 'login.html'; }
 function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
 function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
@@ -388,7 +365,6 @@ let cargandoPeliculas = false;
 let totalPaginasPeliculas = 1;
 let filtroGenero = '';
 let filtroAnio = '';
-let scrollTimeout = null;
 
 function toggleFavorito(item) {
     if (!auth.currentUser) { window.location.href = 'login.html'; return; }
@@ -450,13 +426,10 @@ function crearTarjeta(item) {
     return div;
 }
 
-// ⭐ CARGAR PELÍCULAS
+// ⚡ CARGAR PELÍCULAS - RÁPIDO
 async function cargarPeliculas(page = 1) {
     if (cargandoPeliculas) return;
-    if (page > totalPaginasPeliculas && page > 1) {
-        console.log('⚠️ Ya no hay más páginas');
-        return;
-    }
+    if (page > totalPaginasPeliculas && page > 1) return;
     
     cargandoPeliculas = true;
     const grid = document.getElementById('listaPeliculas');
@@ -482,7 +455,6 @@ async function cargarPeliculas(page = 1) {
         
         const data = await fetchTMDB('discover/movie', params);
         totalPaginasPeliculas = data.total_pages || 1;
-        console.log(`📄 Página ${page} de ${totalPaginasPeliculas} | Películas: ${data.results?.length || 0}`);
         
         if (page === 1) grid.innerHTML = '';
         
@@ -517,15 +489,13 @@ async function cargarPeliculas(page = 1) {
         
         if (page >= totalPaginasPeliculas) {
             btn.classList.add('oculto');
-            console.log('🔒 Última página, botón oculto');
         } else {
             btn.classList.remove('oculto');
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más';
-            console.log('🔓 Botón visible, hay más páginas');
+            btn.innerHTML = '<i class="fas fa-plus-circle"></i> Cargar más';
         }
     } catch(e) {
-        console.error('❌ Error:', e);
+        console.error(e);
         if (page === 1) grid.innerHTML = '<p class="empty-msg">Error al cargar películas</p>';
         btn.innerHTML = '⚠️ Error';
         btn.disabled = false;
@@ -536,9 +506,7 @@ async function cargarPeliculas(page = 1) {
 
 window.cargarMasPeliculas = function() { 
     if (!cargandoPeliculas) {
-        const nextPage = paginaPeliculas + 1;
-        console.log('➡️ Cargando página:', nextPage);
-        cargarPeliculas(nextPage); 
+        cargarPeliculas(paginaPeliculas + 1); 
     }
 };
 
@@ -550,34 +518,24 @@ window.aplicarFiltros = function() {
     cargarPeliculas(1);
 };
 
-// ⭐ SCROLL INFINITO - CORREGIDO
+// ⚡ SCROLL INFINITO - ULTRA RÁPIDO (carga a los 100px del final)
 const mainContent = document.getElementById('mainContent');
-let scrollCargando = false;
 
 mainContent.addEventListener('scroll', function() {
-    if (scrollCargando) return;
-    
     const scrollTop = mainContent.scrollTop;
     const scrollHeight = mainContent.scrollHeight;
     const clientHeight = mainContent.clientHeight;
     
-    // Cuando el usuario está cerca del final (menos de 300px)
-    if (scrollTop + clientHeight >= scrollHeight - 300) {
+    // ⚡ CARGA RAPIDÍSIMA - cuando faltan 100px (antes era 300)
+    if (scrollTop + clientHeight >= scrollHeight - 100) {
         const btn = document.getElementById('btnMasPeliculas');
-        
         if (!btn.classList.contains('oculto') && !cargandoPeliculas) {
-            scrollCargando = true;
-            console.log('🔄 Scroll: Cargando más...');
             cargarMasPeliculas();
-            
-            setTimeout(() => {
-                scrollCargando = false;
-            }, 1500);
         }
     }
 });
 
-// ⭐ BÚSQUEDA
+// ⚡ BÚSQUEDA RÁPIDA
 window.mostrarSugerencias = async function(texto) {
     const container = document.getElementById('searchResults');
     if (!texto || texto.length < 2) { container.classList.remove('show'); return; }
@@ -652,14 +610,14 @@ function descargarAPK() {
     setTimeout(cerrarBannerApp, 1000);
 }
 
-// ⭐ INICIAR
+// ⚡ INICIAR RÁPIDO
 cargarPeliculas(1);
 
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 1500);
 });
 
-console.log('✅ Películas - Scroll infinito + Botón Cargar más CORREGIDO');
+console.log('⚡ Scroll ULTRA RÁPIDO + Botón perfecto');
 </script>
 </body>
 </html>
