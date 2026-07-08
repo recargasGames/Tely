@@ -79,12 +79,6 @@
         .skeleton{aspect-ratio:2/3;border-radius:6px;background:linear-gradient(90deg,#1A1A2E 25%,#2D2D44 50%,#1A1A2E 75%);background-size:200% 100%;animation:skeleton 1.5s infinite}
         @keyframes skeleton{0%{background-position:-200% 0}100%{background-position:200% 0}}
         
-        .load-more{display:flex;justify-content:center;padding:.3rem 0;margin:.5rem 0}
-        .load-more button{background:rgba(124,58,237,.15);color:#fff;padding:.3rem 1.2rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);font-weight:600;cursor:pointer;font-size:.7rem;transition:.3s}
-        .load-more button:hover{background:rgba(124,58,237,.25);border-color:#7C3AED}
-        .load-more button:disabled{opacity:.4;cursor:not-allowed}
-        .load-more button.oculto{display:none}
-        
         .user-dropdown{position:absolute;right:0;top:calc(100% + 6px);background:rgba(26,26,46,.95);border-radius:8px;width:160px;border:1px solid rgba(124,58,237,.15);padding:.2rem 0;display:none;z-index:60;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
         .user-dropdown a{display:flex;align-items:center;gap:.3rem;padding:.3rem .6rem;color:#CBD5E1;text-decoration:none;font-size:.75rem;transition:.2s}
@@ -102,6 +96,15 @@
         .offline-banner{display:none;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:.3rem .5rem;margin:.2rem 0;color:#F59E0B;font-size:.65rem;text-align:center}
         .offline-banner i{margin-right:.3rem}
         
+        .load-more{display:flex;justify-content:center;padding:.3rem 0;margin:.5rem 0}
+        .load-more button{background:rgba(124,58,237,.15);color:#fff;padding:.3rem 1.2rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);font-weight:600;cursor:pointer;font-size:.7rem;transition:.3s}
+        .load-more button:hover{background:rgba(124,58,237,.25);border-color:#7C3AED}
+        .load-more button:disabled{opacity:.4;cursor:not-allowed}
+        .load-more button.oculto{display:none}
+        
+        .cargando-indicador{text-align:center;color:#64748B;font-size:.65rem;padding:.2rem 0;display:none}
+        .cargando-indicador i{margin-right:.3rem}
+        
         #bannerApp{display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1A1A2E,#2D2D44);border-top:2px solid #7C3AED;padding:.6rem .8rem;z-index:9999;box-shadow:0 -4px 30px rgba(124,58,237,.3);animation:slideUp 0.5s ease-out}
         @keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
         body.banner-activo{padding-bottom:70px}
@@ -110,7 +113,6 @@
         .banner-install-btn:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(124,58,237,.4)}
         .banner-install-btn:active{transform:scale(0.95)}
         
-        /* Scroll para resultados de búsqueda */
         .search-results::-webkit-scrollbar{width:3px}
         .search-results::-webkit-scrollbar-track{background:rgba(255,255,255,.02)}
         .search-results::-webkit-scrollbar-thumb{background:#7C3AED;border-radius:10px}
@@ -153,9 +155,6 @@
 
     <div id="contenidoPrincipal">
         <div id="tabInicio">
-            <div class="section-title"><i class="fas fa-clock-rotate-left"></i> Continuar viendo</div>
-            <div class="horizontal-scroll" id="continuarViendo"><p class="empty-msg">No has visto nada aún</p></div>
-
             <div class="section-title"><i class="fas fa-heart"></i> Mis Favoritos</div>
             <div class="horizontal-scroll" id="favoritosContainer"><p class="empty-msg">No tienes favoritos aún</p></div>
 
@@ -172,13 +171,13 @@
         <div id="tabPeliculas" style="display:none;">
             <div class="section-title"><i class="fas fa-film"></i> Películas</div>
             <div class="grid-movies" id="gridPeliculas"></div>
-            <div class="load-more"><button onclick="cargarMasPeliculas()" id="btnMasPeliculas"><i class="fas fa-plus"></i> Cargar más</button></div>
+            <div class="cargando-indicador" id="cargandoPeliculasIndicador"><i class="fas fa-spinner fa-spin"></i> Cargando más películas...</div>
         </div>
 
         <div id="tabSeries" style="display:none;">
             <div class="section-title"><i class="fas fa-tv"></i> Series</div>
             <div class="grid-movies" id="gridSeries"></div>
-            <div class="load-more"><button onclick="cargarMasSeries()" id="btnMasSeries"><i class="fas fa-plus"></i> Cargar más</button></div>
+            <div class="cargando-indicador" id="cargandoSeriesIndicador"><i class="fas fa-spinner fa-spin"></i> Cargando más series...</div>
         </div>
     </div>
 </main>
@@ -230,6 +229,7 @@ let totalPaginasPeliculas = 1;
 let totalPaginasSeries = 1;
 let cargandoPeliculas = false;
 let cargandoSeries = false;
+let scrollTimeout = null;
 
 // ============================================================
 //  UTILIDADES
@@ -330,12 +330,14 @@ function cambiarTab(tab) {
         document.getElementById('tabPeliculas').style.display = 'block';
         const grid = document.getElementById('gridPeliculas');
         if (!grid.querySelector('.movie-card')) {
+            paginaPeliculas = 1;
             cargarPeliculas(1);
         }
     } else if (tab === 'series') {
         document.getElementById('tabSeries').style.display = 'block';
         const grid = document.getElementById('gridSeries');
         if (!grid.querySelector('.movie-card')) {
+            paginaSeries = 1;
             cargarSeries(1);
         }
     }
@@ -461,33 +463,6 @@ function cargarMiLista() {
     });
 }
 
-function cargarContinuarViendo() {
-    const container = document.getElementById('continuarViendo');
-    const historial = JSON.parse(localStorage.getItem('historialTely') || '[]');
-    if (!historial.length) { container.innerHTML = '<p class="empty-msg">No has visto nada aún</p>'; return; }
-    container.innerHTML = '';
-    historial.slice(0, 10).forEach(entry => {
-        const div = document.createElement('div');
-        div.className = 'movie-card';
-        div.style.width = '80px';
-        div.style.flexShrink = '0';
-        const pos = entry.temporada !== null && entry.capitulo !== null ? ` T${entry.temporada+1} Cap${entry.capitulo+1}` : '';
-        div.innerHTML = `
-            <img src="${entry.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg'}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-            <div class="info"><h4>${entry.titulo}${pos}</h4></div>
-        `;
-        div.onclick = () => {
-            const params = new URLSearchParams();
-            params.set('play', entry.id || entry.tmdb_id);
-            params.set('tipo', entry.tipo || 'pelicula');
-            if (entry.temporada !== null) params.set('temp', entry.temporada);
-            if (entry.capitulo !== null) params.set('cap', entry.capitulo);
-            window.location.href = `reproductor.html?${params.toString()}`;
-        };
-        container.appendChild(div);
-    });
-}
-
 // ============================================================
 //  CARGAR CONTENIDO
 // ============================================================
@@ -514,7 +489,6 @@ async function cargarContenido() {
         seriesContainer.innerHTML = '';
         cachedPelis.forEach(item => pelisContainer.appendChild(crearTarjeta(item)));
         cachedSeries.forEach(item => seriesContainer.appendChild(crearTarjeta(item, true)));
-        cargarContinuarViendo();
         cargarFavoritos();
         cargarMiLista();
         return;
@@ -526,7 +500,6 @@ async function cargarContenido() {
         seriesContainer.innerHTML = '';
         DATOS_FALLBACK.peliculas.forEach(item => pelisContainer.appendChild(crearTarjeta(item)));
         DATOS_FALLBACK.series.forEach(item => seriesContainer.appendChild(crearTarjeta(item, true)));
-        cargarContinuarViendo();
         cargarFavoritos();
         cargarMiLista();
         return;
@@ -575,27 +548,36 @@ async function cargarContenido() {
         DATOS_FALLBACK.series.forEach(item => seriesContainer.appendChild(crearTarjeta(item, true)));
     }
     
-    cargarContinuarViendo();
     cargarFavoritos();
     cargarMiLista();
 }
 
 // ============================================================
-//  CARGAR MÁS PELÍCULAS / SERIES (CORREGIDO)
+//  SCROLL INFINITO - CARGAR MÁS PELÍCULAS / SERIES
 // ============================================================
-async function cargarPeliculas(page = 1) {
+async function cargarPeliculas(page = 1, append = false) {
     if (cargandoPeliculas) return;
+    if (page > totalPaginasPeliculas && page > 1) return;
+    
     cargandoPeliculas = true;
     const grid = document.getElementById('gridPeliculas');
-    const btn = document.getElementById('btnMasPeliculas');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
-    btn.classList.remove('oculto');
+    const indicador = document.getElementById('cargandoPeliculasIndicador');
+    indicador.style.display = 'block';
+    
+    // Si es la primera página, limpiar grid
+    if (!append) {
+        grid.innerHTML = '';
+        for (let i = 0; i < 8; i++) {
+            const sk = document.createElement('div');
+            sk.className = 'skeleton';
+            grid.appendChild(sk);
+        }
+    }
     
     try {
         const data = await fetch(`https://tely-xi.vercel.app/api/tmdb?path=movie/popular&page=${page}`).then(r => r.json());
         if (!data.results || !data.results.length) {
-            btn.classList.add('oculto');
+            indicador.style.display = 'none';
             cargandoPeliculas = false;
             return;
         }
@@ -607,35 +589,43 @@ async function cargarPeliculas(page = 1) {
             portada: p.poster_path,
             puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A'
         }));
+        
+        // Si es la primera página, limpiar skeletons
+        if (!append) grid.innerHTML = '';
         items.forEach(item => grid.appendChild(crearTarjeta(item)));
+        
         paginaPeliculas = page;
-        if (page >= totalPaginasPeliculas) {
-            btn.classList.add('oculto');
-        } else {
-            btn.classList.remove('oculto');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más';
-        }
+        indicador.style.display = 'none';
+        
     } catch(e) {
-        btn.innerHTML = '⚠️ Error';
-        btn.disabled = false;
+        console.error('Error cargando películas:', e);
+        indicador.style.display = 'none';
     }
     cargandoPeliculas = false;
 }
 
-async function cargarSeries(page = 1) {
+async function cargarSeries(page = 1, append = false) {
     if (cargandoSeries) return;
+    if (page > totalPaginasSeries && page > 1) return;
+    
     cargandoSeries = true;
     const grid = document.getElementById('gridSeries');
-    const btn = document.getElementById('btnMasSeries');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
-    btn.classList.remove('oculto');
+    const indicador = document.getElementById('cargandoSeriesIndicador');
+    indicador.style.display = 'block';
+    
+    if (!append) {
+        grid.innerHTML = '';
+        for (let i = 0; i < 8; i++) {
+            const sk = document.createElement('div');
+            sk.className = 'skeleton';
+            grid.appendChild(sk);
+        }
+    }
     
     try {
         const data = await fetch(`https://tely-xi.vercel.app/api/tmdb?path=tv/popular&page=${page}`).then(r => r.json());
         if (!data.results || !data.results.length) {
-            btn.classList.add('oculto');
+            indicador.style.display = 'none';
             cargandoSeries = false;
             return;
         }
@@ -647,39 +637,54 @@ async function cargarSeries(page = 1) {
             portada: s.poster_path,
             puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A'
         }));
+        
+        if (!append) grid.innerHTML = '';
         items.forEach(item => grid.appendChild(crearTarjeta(item, true)));
+        
         paginaSeries = page;
-        if (page >= totalPaginasSeries) {
-            btn.classList.add('oculto');
-        } else {
-            btn.classList.remove('oculto');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más';
-        }
+        indicador.style.display = 'none';
+        
     } catch(e) {
-        btn.innerHTML = '⚠️ Error';
-        btn.disabled = false;
+        console.error('Error cargando series:', e);
+        indicador.style.display = 'none';
     }
     cargandoSeries = false;
 }
 
-// ✅ FUNCIONES GLOBALES PARA EL BOTÓN "CARGAR MÁS"
-window.cargarMasPeliculas = function() {
-    if (!cargandoPeliculas) {
-        paginaPeliculas++;
-        cargarPeliculas(paginaPeliculas);
-    }
-};
-
-window.cargarMasSeries = function() {
-    if (!cargandoSeries) {
-        paginaSeries++;
-        cargarSeries(paginaSeries);
-    }
-};
+// ============================================================
+//  SCROLL INFINITO - DETECTAR FINAL DE PÁGINA
+// ============================================================
+const mainContent = document.getElementById('mainContent');
+mainContent.addEventListener('scroll', function() {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+        const scrollTop = mainContent.scrollTop;
+        const scrollHeight = mainContent.scrollHeight;
+        const clientHeight = mainContent.clientHeight;
+        
+        // Si estamos cerca del final (100px)
+        if (scrollTop + clientHeight >= scrollHeight - 100) {
+            // Verificar qué pestaña está activa
+            const tabPeliculas = document.getElementById('tabPeliculas');
+            const tabSeries = document.getElementById('tabSeries');
+            
+            if (tabPeliculas.style.display !== 'none') {
+                if (!cargandoPeliculas && paginaPeliculas < totalPaginasPeliculas) {
+                    const nextPage = paginaPeliculas + 1;
+                    cargarPeliculas(nextPage, true);
+                }
+            } else if (tabSeries.style.display !== 'none') {
+                if (!cargandoSeries && paginaSeries < totalPaginasSeries) {
+                    const nextPage = paginaSeries + 1;
+                    cargarSeries(nextPage, true);
+                }
+            }
+        }
+    }, 300);
+});
 
 // ============================================================
-//  BÚSQUEDA (CORREGIDA - DIFERENCIA PELÍCULA/SERIE)
+//  BÚSQUEDA
 // ============================================================
 window.mostrarSugerencias = async function(texto) {
     const container = document.getElementById('searchResults');
@@ -696,7 +701,6 @@ window.mostrarSugerencias = async function(texto) {
             fetch(`https://tely-xi.vercel.app/api/tmdb?path=search/tv&query=${texto}&page=1`).then(r => r.json())
         ]);
         
-        // Combinar resultados con su tipo correcto
         const resultados = [];
         (pelis.results || []).forEach(item => {
             resultados.push({ ...item, tipo: 'pelicula' });
@@ -705,7 +709,6 @@ window.mostrarSugerencias = async function(texto) {
             resultados.push({ ...item, tipo: 'serie' });
         });
         
-        // Ordenar por popularidad
         resultados.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
         
         if (!resultados.length) { 
@@ -731,7 +734,6 @@ window.mostrarSugerencias = async function(texto) {
                 <span class="badge-tipo">${esSerie ? 'Serie' : 'Película'}</span>
             `;
             
-            // ✅ CORREGIDO: usa el tipo correcto
             const tipoUrl = esSerie ? 'serie' : 'pelicula';
             div.onclick = () => {
                 window.location.href = `reproductor.html?play=${item.id}&tipo=${tipoUrl}`;
@@ -800,7 +802,6 @@ function descargarAPK() {
 // ============================================================
 window.addEventListener('online', () => {
     document.getElementById('offlineBanner').style.display = 'none';
-    cargarContenido();
 });
 window.addEventListener('offline', () => {
     document.getElementById('offlineBanner').style.display = 'block';
@@ -816,7 +817,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 cargarContenido();
 
-console.log('✅ TELY - Index corregido: Búsqueda con distinción serie/película, Cargar más visible');
+console.log('✅ TELY - Scroll infinito funcionando, sin "Continuar viendo"');
 </script>
 </body>
 </html>
