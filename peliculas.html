@@ -21,7 +21,7 @@
         body.dark{background:#0A0A0F;color:#fff}
         body:not(.dark){background:#f0f0f0;color:#111}
         
-        .main-content{width:100%;height:100vh;padding:.3rem .5rem 140px .5rem;overflow-y:auto;margin:0 auto;max-width:600px}
+        .main-content{width:100%;height:100vh;padding:.3rem .5rem 120px .5rem;overflow-y:auto;margin:0 auto;max-width:600px}
         
         .header-flotante{
             position:sticky;
@@ -72,21 +72,20 @@
         .search-result .info .title{font-weight:600;font-size:.7rem}
         .search-result .info .detail{font-size:.55rem;color:#94A3B8}
         
-        .grid-movies{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.4rem;padding:.2rem 0}
-        @media(min-width:768px){.grid-movies{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}}
-        @media(min-width:1024px){.grid-movies{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}}
+        /* ⭐ 4 TARJETAS POR FILA */
+        .grid-movies{display:grid;grid-template-columns:repeat(4,1fr);gap:.3rem;padding:.2rem 0}
         
         .movie-card{background:rgba(255,255,255,.04);border-radius:6px;overflow:hidden;cursor:pointer;border:1px solid rgba(124,58,237,.06);transition:.3s;position:relative}
         .movie-card:hover{transform:translateY(-2px);border-color:rgba(124,58,237,.2)}
         body:not(.dark) .movie-card{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.06)}
         .movie-card .poster{width:100%;aspect-ratio:2/3;object-fit:cover;background:#1A1A2E}
         .movie-card .info{padding:.15rem .2rem}
-        .movie-card .info h4{font-size:.6rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .movie-card .info h4{font-size:.55rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         body:not(.dark) .movie-card .info h4{color:#111}
-        .movie-card .info .meta{display:flex;justify-content:space-between;font-size:.45rem;color:#94A3B8}
-        .movie-card .badge-year{position:absolute;top:.15rem;left:.15rem;background:rgba(124,58,237,.85);color:#fff;padding:.03rem .25rem;border-radius:3px;font-size:.35rem;font-weight:700}
-        .movie-card .badge-type{position:absolute;top:.15rem;right:.15rem;background:rgba(0,0,0,.7);color:#fff;padding:.03rem .25rem;border-radius:3px;font-size:.35rem;font-weight:600}
-        .movie-card .badge-op2{position:absolute;bottom:.15rem;right:.15rem;background:rgba(59,130,246,.85);color:#fff;padding:.02rem .15rem;border-radius:3px;font-size:.3rem;font-weight:600}
+        .movie-card .info .meta{display:flex;justify-content:space-between;font-size:.4rem;color:#94A3B8}
+        .movie-card .badge-year{position:absolute;top:.15rem;left:.15rem;background:rgba(124,58,237,.85);color:#fff;padding:.03rem .25rem;border-radius:3px;font-size:.3rem;font-weight:700}
+        .movie-card .badge-type{position:absolute;top:.15rem;right:.15rem;background:rgba(0,0,0,.7);color:#fff;padding:.03rem .25rem;border-radius:3px;font-size:.3rem;font-weight:600}
+        .movie-card .badge-op2{position:absolute;bottom:.15rem;right:.15rem;background:rgba(59,130,246,.85);color:#fff;padding:.02rem .15rem;border-radius:3px;font-size:.25rem;font-weight:600}
         
         .section-title{font-size:.85rem;font-weight:700;margin:.3rem 0 .15rem;display:flex;align-items:center;gap:.2rem}
         .section-title i{color:#7C3AED}
@@ -96,7 +95,6 @@
         body:not(.dark) .skeleton{background:linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 50%,#e0e0e0 75%);background-size:200% 100%}
         @keyframes skeleton{0%{background-position:-200% 0}100%{background-position:200% 0}}
         
-        /* BOTÓN SIEMPRE VISIBLE */
         .load-more {
             display: flex !important;
             justify-content: center !important;
@@ -166,7 +164,7 @@
         .user-menu{position:relative}
         .empty-msg{color:#64748B;font-size:.7rem;padding:.15rem 0}
         .card-actions{display:flex;gap:2px;margin-top:1px;justify-content:center}
-        .card-actions button{background:none;border:none;cursor:pointer;font-size:.5rem;padding:1px 3px;border-radius:2px;transition:.2s}
+        .card-actions button{background:none;border:none;cursor:pointer;font-size:.45rem;padding:1px 3px;border-radius:2px;transition:.2s}
         .card-actions .fav-btn{color:#EF4444}
         .card-actions .fav-btn:hover{background:rgba(239,68,68,.15)}
         .card-actions .list-btn{color:#3B82F6}
@@ -362,7 +360,7 @@ let paginaPeliculas = 1;
 let cargandoPeliculas = false;
 let filtroGenero = '';
 let filtroAnio = '';
-let totalPaginasForzadas = 999; // <--- FORZAMOS 999 PÁGINAS
+let totalPaginasForzadas = 999;
 
 function toggleFavorito(item) {
     if (!auth.currentUser) { window.location.href = 'login.html'; return; }
@@ -424,13 +422,9 @@ function crearTarjeta(item) {
     return div;
 }
 
-// CARGAR PELÍCULAS - FORZADO
 async function cargarPeliculas(page = 1) {
     if (cargandoPeliculas) return;
-    if (page > totalPaginasForzadas) {
-        console.log('Ya no hay más páginas (forzado)');
-        return;
-    }
+    if (page > totalPaginasForzadas) return;
     
     cargandoPeliculas = true;
     const grid = document.getElementById('listaPeliculas');
@@ -487,7 +481,6 @@ async function cargarPeliculas(page = 1) {
         
         paginaPeliculas = page;
         
-        // BOTÓN SIEMPRE VISIBLE A MENOS QUE SEA LA PÁGINA 999
         if (page >= totalPaginasForzadas) {
             btn.classList.add('oculto');
         } else {
@@ -518,14 +511,12 @@ window.aplicarFiltros = function() {
     cargarPeliculas(1);
 };
 
-// SCROLL INFINITO - DETECTA EL FINAL Y CARGA
 const mainContent = document.getElementById('mainContent');
 mainContent.addEventListener('scroll', function() {
     const scrollTop = mainContent.scrollTop;
     const scrollHeight = mainContent.scrollHeight;
     const clientHeight = mainContent.clientHeight;
     
-    // Cuando faltan 80px para el final
     if (scrollTop + clientHeight >= scrollHeight - 80) {
         const btn = document.getElementById('btnMasPeliculas');
         if (!btn.classList.contains('oculto') && !cargandoPeliculas) {
@@ -534,7 +525,6 @@ mainContent.addEventListener('scroll', function() {
     }
 });
 
-// BÚSQUEDA
 window.mostrarSugerencias = async function(texto) {
     const container = document.getElementById('searchResults');
     if (!texto || texto.length < 2) { container.classList.remove('show'); return; }
@@ -567,7 +557,6 @@ window.buscarGlobal = function() {
     if (input.value.trim()) window.mostrarSugerencias(input.value);
 };
 
-// BANNER APK
 function detectarPlataforma() {
     const ua = navigator.userAgent || '';
     const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
@@ -615,7 +604,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 1500);
 });
 
-console.log('🔥 Scroll FORZADO - Carga infinita');
+console.log('🔥 4 tarjetas por fila + Scroll forzado');
 </script>
 </body>
 </html>
