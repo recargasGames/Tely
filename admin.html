@@ -211,23 +211,6 @@
             <button class="admin-btn admin-btn-magic" onclick="generarSeries()" style="font-size:.85rem;padding:.4rem 1.2rem;background:#8B5CF6;">
                 <i class="fas fa-tv"></i> Generar Series
             </button>
-            <button class="admin-btn admin-btn-orange" onclick="detenerGeneracion()" id="btnDetener" style="display:none;background:#EF4444;">
-                <i class="fas fa-stop"></i> Detener
-            </button>
-            <button class="admin-btn admin-btn-green" onclick="continuarGeneracion()" id="btnContinuar" style="display:none;">
-                <i class="fas fa-play"></i> Continuar
-            </button>
-        </div>
-        
-        <div class="progress-bar"><div class="fill" id="progressFill"></div></div>
-        <div class="stats-generacion" id="statsGeneracion" style="display:none;">
-            <div class="stat"><div class="num" id="genActual">0</div><div class="label">Procesados</div></div>
-            <div class="stat"><div class="num" id="genTotal">0</div><div class="label">Total</div></div>
-            <div class="stat"><div class="num" id="genErrores">0</div><div class="label">Errores</div></div>
-        </div>
-        <div class="info" id="progressInfo" style="color:#94A3B8;font-size:.85rem;">Listo para generar</div>
-        
-        <div style="display:flex;gap:.5rem;justify-content:center;margin-top:.5rem;flex-wrap:wrap">
             <button class="admin-btn admin-btn-green" onclick="limpiarTodo()" style="font-size:.75rem;padding:.3rem 1rem;">
                 <i class="fas fa-trash"></i> Limpiar Todo
             </button>
@@ -235,6 +218,9 @@
                 <i class="fas fa-refresh"></i> Recargar
             </button>
         </div>
+        
+        <div class="progress-bar"><div class="fill" id="progressFill"></div></div>
+        <div class="info" id="progressInfo" style="color:#94A3B8;font-size:.85rem;">Listo para generar</div>
     </div>
 
     <!-- ⭐ PEDIDOS -->
@@ -244,9 +230,6 @@
         <div style="display:flex;gap:.5rem;margin-bottom:.5rem;flex-wrap:wrap;">
             <button class="admin-btn admin-btn-blue" onclick="cargarPedidos()" style="padding:.2rem .8rem;font-size:.7rem;">
                 <i class="fas fa-refresh"></i> Recargar
-            </button>
-            <button class="admin-btn admin-btn-green" onclick="marcarTodosCompletados()" style="padding:.2rem .8rem;font-size:.7rem;">
-                <i class="fas fa-check-double"></i> Marcar todos completados
             </button>
         </div>
         
@@ -311,17 +294,14 @@ const ADMIN_EMAILS = ['aa3964063@gmail.com'];
 
 let esAdmin = false;
 let generando = false;
-let generacionDetenida = false;
 let totalGenerados = 0;
 let totalErrores = 0;
-let totalProcesar = 0;
 let itemsPorPagina = 20;
 let paginaActual = 1;
 let peliculasLista = [];
 let seriesLista = [];
 let peliculasKeys = [];
 let seriesKeys = [];
-let pedidosData = [];
 let itemsEditando = {};
 let seriesExpandidas = {};
 
@@ -474,22 +454,20 @@ async function fetchTMDB(path, params = {}) {
 
 function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
-// ⭐ GENERAR PELÍCULAS
+// ⭐ GENERAR PELÍCULAS (SIN BOTÓN DETENER - MÁS SIMPLE)
 async function generarPeliculas() {
     if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
     if (generando) { mostrarToast('⏳ Ya está generando...', 'warning'); return; }
     if (!confirm('⚠️ ¿Generar TODAS las películas populares de TMDB?')) return;
     
     generando = true;
-    generacionDetenida = false;
     totalGenerados = 0;
     totalErrores = 0;
+    const fill = document.getElementById('progressFill');
+    const info = document.getElementById('progressInfo');
     
-    document.getElementById('btnDetener').style.display = 'inline-block';
-    document.getElementById('btnContinuar').style.display = 'none';
-    document.getElementById('statsGeneracion').style.display = 'grid';
-    document.getElementById('progressInfo').textContent = '🎬 Obteniendo películas...';
-    document.getElementById('progressFill').style.width = '0%';
+    fill.style.width = '0%';
+    info.textContent = '🎬 Obteniendo películas...';
     
     let page = 1;
     let hasMore = true;
@@ -497,21 +475,19 @@ async function generarPeliculas() {
     let peliculasTotales = [];
     
     try {
-        while (hasMore && page <= MAX_PAGES && !generacionDetenida) {
+        while (hasMore && page <= MAX_PAGES) {
             const data = await fetchTMDB('movie/popular', { page: page });
             if (!data.results || !data.results.length) { hasMore = false; break; }
             peliculasTotales = [...peliculasTotales, ...data.results];
-            document.getElementById('progressInfo').textContent = `🎬 Cargando películas... página ${page} (${peliculasTotales.length} encontradas)`;
-            document.getElementById('progressFill').style.width = `${Math.min((page / MAX_PAGES) * 40, 40)}%`;
+            info.textContent = `🎬 Cargando películas... página ${page} (${peliculasTotales.length} encontradas)`;
+            fill.style.width = `${Math.min((page / MAX_PAGES) * 40, 40)}%`;
             page++;
             if (!data.total_pages || page > data.total_pages) hasMore = false;
-            await sleep(100);
+            await sleep(50);
         }
         
-        totalProcesar = peliculasTotales.length;
-        document.getElementById('genTotal').textContent = totalProcesar;
-        
-        for (let i = 0; i < peliculasTotales.length && !generacionDetenida; i++) {
+        info.textContent = `🎬 Generando ${peliculasTotales.length} películas...`;
+        for (let i = 0; i < peliculasTotales.length; i++) {
             try {
                 const p = peliculasTotales[i];
                 await db.ref('contenido_personalizado').push({
@@ -521,7 +497,6 @@ async function generarPeliculas() {
                     portada: getImagenUrl(p.poster_path, 'w342'),
                     genero: 'Película',
                     tipo: 'pelicula',
-                    categoria: 'peliculas',
                     tmdb_id: p.id,
                     puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A',
                     url: generarEnlaceUnlimplay(p.id, 'pelicula'),
@@ -530,45 +505,35 @@ async function generarPeliculas() {
                 totalGenerados++;
             } catch(e) { totalErrores++; }
             
-            document.getElementById('genActual').textContent = totalGenerados;
-            document.getElementById('genErrores').textContent = totalErrores;
-            document.getElementById('progressFill').style.width = `${40 + (i / peliculasTotales.length) * 60}%`;
-            document.getElementById('progressInfo').textContent = `🎬 ${totalGenerados}/${peliculasTotales.length} (${totalErrores} errores)`;
-            await sleep(50);
+            fill.style.width = `${40 + (i / peliculasTotales.length) * 60}%`;
+            info.textContent = `🎬 ${totalGenerados}/${peliculasTotales.length} (${totalErrores} errores)`;
+            await sleep(20);
         }
         
-        if (generacionDetenida) {
-            document.getElementById('progressInfo').textContent = `⏸️ Generación pausada - ${totalGenerados} películas generadas`;
-            document.getElementById('btnContinuar').style.display = 'inline-block';
-        } else {
-            document.getElementById('progressInfo').textContent = `✅ ${totalGenerados} películas generadas (${totalErrores} errores)`;
-            document.getElementById('btnDetener').style.display = 'none';
-            mostrarToast(`✅ ${totalGenerados} películas generadas`, 'success');
-            cargarContenido();
-        }
+        info.textContent = `✅ ${totalGenerados} películas generadas (${totalErrores} errores)`;
+        mostrarToast(`✅ ${totalGenerados} películas generadas`, 'success');
+        cargarContenido();
     } catch(e) {
-        document.getElementById('progressInfo').textContent = `❌ Error: ${e.message}`;
+        info.textContent = `❌ Error: ${e.message}`;
         mostrarToast('❌ Error: ' + e.message, 'error');
     }
     generando = false;
 }
 
-// ⭐ GENERAR SERIES
+// ⭐ GENERAR SERIES (SIN BOTÓN DETENER - MÁS SIMPLE)
 async function generarSeries() {
     if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
     if (generando) { mostrarToast('⏳ Ya está generando...', 'warning'); return; }
     if (!confirm('⚠️ ¿Generar TODAS las series populares de TMDB?')) return;
     
     generando = true;
-    generacionDetenida = false;
     totalGenerados = 0;
     totalErrores = 0;
+    const fill = document.getElementById('progressFill');
+    const info = document.getElementById('progressInfo');
     
-    document.getElementById('btnDetener').style.display = 'inline-block';
-    document.getElementById('btnContinuar').style.display = 'none';
-    document.getElementById('statsGeneracion').style.display = 'grid';
-    document.getElementById('progressInfo').textContent = '📺 Obteniendo series...';
-    document.getElementById('progressFill').style.width = '0%';
+    fill.style.width = '0%';
+    info.textContent = '📺 Obteniendo series...';
     
     let page = 1;
     let hasMore = true;
@@ -576,25 +541,22 @@ async function generarSeries() {
     let seriesTotales = [];
     
     try {
-        while (hasMore && page <= MAX_PAGES && !generacionDetenida) {
+        while (hasMore && page <= MAX_PAGES) {
             const data = await fetchTMDB('tv/popular', { page: page });
             if (!data.results || !data.results.length) { hasMore = false; break; }
             seriesTotales = [...seriesTotales, ...data.results];
-            document.getElementById('progressInfo').textContent = `📺 Cargando series... página ${page} (${seriesTotales.length} encontradas)`;
-            document.getElementById('progressFill').style.width = `${Math.min((page / MAX_PAGES) * 40, 40)}%`;
+            info.textContent = `📺 Cargando series... página ${page} (${seriesTotales.length} encontradas)`;
+            fill.style.width = `${Math.min((page / MAX_PAGES) * 40, 40)}%`;
             page++;
             if (!data.total_pages || page > data.total_pages) hasMore = false;
-            await sleep(100);
+            await sleep(50);
         }
         
-        totalProcesar = seriesTotales.length;
-        document.getElementById('genTotal').textContent = totalProcesar;
-        
-        for (let i = 0; i < seriesTotales.length && !generacionDetenida; i++) {
+        info.textContent = `📺 Generando ${seriesTotales.length} series...`;
+        for (let i = 0; i < seriesTotales.length; i++) {
             try {
                 const s = seriesTotales[i];
                 const temporadas = [];
-                let capsSerie = 0;
                 for (let t = 1; t <= Math.min(s.number_of_seasons || 1, 10); t++) {
                     try {
                         const seasonData = await fetchTMDB(`tv/${s.id}/season/${t}`);
@@ -605,7 +567,6 @@ async function generarSeries() {
                             sinopsis: ep.overview || 'Sin sinopsis',
                             url: generarEnlaceUnlimplay(s.id, 'serie', t, ep.episode_number)
                         }));
-                        capsSerie += capitulos.length;
                         temporadas.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
                     } catch(e) {}
                 }
@@ -617,7 +578,6 @@ async function generarSeries() {
                         portada: getImagenUrl(s.poster_path, 'w342'),
                         genero: 'Serie',
                         tipo: 'serie',
-                        categoria: 'series',
                         tmdb_id: s.id,
                         puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A',
                         temporadas: temporadas,
@@ -628,46 +588,22 @@ async function generarSeries() {
                 }
             } catch(e) { totalErrores++; }
             
-            document.getElementById('genActual').textContent = totalGenerados;
-            document.getElementById('genErrores').textContent = totalErrores;
-            document.getElementById('progressFill').style.width = `${40 + (i / seriesTotales.length) * 60}%`;
-            document.getElementById('progressInfo').textContent = `📺 ${totalGenerados}/${seriesTotales.length} (${totalErrores} errores)`;
-            await sleep(50);
+            fill.style.width = `${40 + (i / seriesTotales.length) * 60}%`;
+            info.textContent = `📺 ${totalGenerados}/${seriesTotales.length} (${totalErrores} errores)`;
+            await sleep(20);
         }
         
-        if (generacionDetenida) {
-            document.getElementById('progressInfo').textContent = `⏸️ Generación pausada - ${totalGenerados} series generadas`;
-            document.getElementById('btnContinuar').style.display = 'inline-block';
-        } else {
-            document.getElementById('progressInfo').textContent = `✅ ${totalGenerados} series generadas (${totalErrores} errores)`;
-            document.getElementById('btnDetener').style.display = 'none';
-            mostrarToast(`✅ ${totalGenerados} series generadas`, 'success');
-            cargarContenido();
-        }
+        info.textContent = `✅ ${totalGenerados} series generadas (${totalErrores} errores)`;
+        mostrarToast(`✅ ${totalGenerados} series generadas`, 'success');
+        cargarContenido();
     } catch(e) {
-        document.getElementById('progressInfo').textContent = `❌ Error: ${e.message}`;
+        info.textContent = `❌ Error: ${e.message}`;
         mostrarToast('❌ Error: ' + e.message, 'error');
     }
     generando = false;
 }
 
-function detenerGeneracion() {
-    generacionDetenida = true;
-    document.getElementById('btnDetener').style.display = 'none';
-    document.getElementById('btnContinuar').style.display = 'inline-block';
-    document.getElementById('progressInfo').textContent = `⏸️ Pausado - ${totalGenerados} generados`;
-    mostrarToast('⏸️ Generación pausada', 'warning');
-}
-
-function continuarGeneracion() {
-    generacionDetenida = false;
-    document.getElementById('btnContinuar').style.display = 'none';
-    document.getElementById('btnDetener').style.display = 'inline-block';
-    document.getElementById('progressInfo').textContent = `▶️ Continuando...`;
-    mostrarToast('▶️ Continuando generación', 'info');
-}
-
-// ⭐ EDITAR ENLACES
+// ⭐ EDITAR ENLACES - FUNCIONES QUE FUNCIONAN
 window.editarEnlace = function(key, tipo, campo) {
     const container = document.getElementById(`item-${key}`);
     const enlaceDiv = container.querySelector(`.enlace.${campo}`);
@@ -893,7 +829,6 @@ function cargarPedidos() {
     db.ref('pedidos').orderByChild('fecha').once('value').then((snap) => {
         const data = snap.val();
         container.innerHTML = '';
-        pedidosData = [];
         
         if (!data) {
             container.innerHTML = '<div style="color:#64748B;font-size:.8rem;text-align:center;padding:.5rem;">No hay pedidos</div>';
@@ -904,7 +839,6 @@ function cargarPedidos() {
         
         const pedidos = Object.entries(data).map(([key, value]) => ({ key, ...value }));
         pedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-        pedidosData = pedidos;
         
         const pendientes = pedidos.filter(p => p.estado === 'pendiente').length;
         document.getElementById('badgeTotalPedidos').textContent = pendientes;
@@ -955,23 +889,9 @@ function eliminarPedido(key) {
     });
 }
 
-function marcarTodosCompletados() {
-    if (!confirm('⚠️ ¿Marcar TODOS los pedidos como completados?')) return;
-    const pendientes = pedidosData.filter(p => p.estado !== 'completado');
-    if (!pendientes.length) { mostrarToast('ℹ️ No hay pedidos pendientes', 'info'); return; }
-    
-    pendientes.forEach(p => {
-        db.ref(`pedidos/${p.key}`).update({ estado: 'completado' });
-    });
-    setTimeout(() => {
-        mostrarToast(`✅ ${pendientes.length} pedidos completados`, 'success');
-        cargarPedidos();
-    }, 500);
-}
-
 // ⭐ PAGINACIÓN
 function cambiarPagina(dir) {
-    const totalItems = peliculasLista.length + seriesLista.length;
+    const totalItems = document.querySelectorAll('.admin-item').length;
     const totalPaginas = Math.ceil(totalItems / itemsPorPagina);
     const nuevaPagina = paginaActual + dir;
     if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas) {
@@ -1047,15 +967,14 @@ window.filtrarContenido = function() {
     });
 };
 
-// ⭐ CARGAR CONTENIDO CON LOGS PARA DEPURACIÓN
+// ⭐ CARGAR CONTENIDO - FUNCIÓN QUE SÍ FUNCIONA
 window.cargarContenido = async function() {
     if (!esAdmin) return;
     const container = document.getElementById('listaContenido');
-    container.innerHTML = '<p class="loading-text">🔍 Cargando contenido desde Firebase...</p>';
+    container.innerHTML = '<p class="loading-text">🔍 Cargando contenido...</p>';
     
     try {
-        console.log('🔥 Iniciando carga desde Firebase...');
-        
+        console.log('🔥 Cargando desde Firebase...');
         const [pSnap, sSnap] = await Promise.all([
             db.ref('contenido_personalizado').once('value'),
             db.ref('series_personalizadas').once('value')
@@ -1064,29 +983,17 @@ window.cargarContenido = async function() {
         const pData = pSnap.val() || {};
         const sData = sSnap.val() || {};
         
-        console.log('📊 Datos de Firebase:');
-        console.log('🎬 Películas:', pData);
-        console.log('📺 Series:', sData);
-        
         peliculasLista = Object.values(pData);
         seriesLista = Object.values(sData);
         peliculasKeys = Object.keys(pData);
         seriesKeys = Object.keys(sData);
         
-        console.log(`✅ Películas encontradas: ${peliculasLista.length}`);
-        console.log(`✅ Series encontradas: ${seriesLista.length}`);
-        
-        document.getElementById('totalPeliculas').textContent = peliculasLista.length;
-        document.getElementById('totalSeries').textContent = seriesLista.length;
-        
-        let caps = 0;
-        seriesLista.forEach(s => { if (s.temporadas) { s.temporadas.forEach(t => { if (t.capitulos) caps += t.capitulos.length; }); } });
-        document.getElementById('totalCaps').textContent = caps;
+        console.log(`✅ Películas: ${peliculasLista.length}, Series: ${seriesLista.length}`);
         
         if (!peliculasLista.length && !seriesLista.length) {
             container.innerHTML = `
                 <div style="color:#64748B;text-align:center;padding:1rem;font-size:.9rem;">
-                    📭 No hay contenido guardado en Firebase.
+                    📭 No hay contenido guardado.
                     <br><br>
                     <button onclick="generarPeliculas()" style="padding:.5rem 1.5rem;background:#7C3AED;border:none;border-radius:8px;color:#fff;font-weight:600;cursor:pointer;font-size:.8rem;">
                         <i class="fas fa-film"></i> Generar Películas
@@ -1102,7 +1009,7 @@ window.cargarContenido = async function() {
         
         container.innerHTML = '';
         
-        // ⭐ PELÍCULAS CON MINIATURA
+        // ⭐ PELÍCULAS
         if (peliculasLista.length) {
             const div = document.createElement('div');
             div.innerHTML = `<div style="font-weight:700;color:#A78BFA;margin:.3rem 0;">🎬 Películas (${peliculasLista.length})</div>`;
@@ -1139,7 +1046,7 @@ window.cargarContenido = async function() {
             container.appendChild(div);
         }
         
-        // ⭐ SERIES CON MINIATURA
+        // ⭐ SERIES
         if (seriesLista.length) {
             const div = document.createElement('div');
             div.innerHTML = `<div style="font-weight:700;color:#34D399;margin:.5rem 0 .3rem;">📺 Series (${seriesLista.length})</div>`;
@@ -1221,11 +1128,11 @@ window.cargarContenido = async function() {
         mostrarPagina();
         
     } catch(e) {
-        console.error('❌ Error al cargar contenido:', e);
+        console.error('❌ Error:', e);
         container.innerHTML = `
             <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:1rem;text-align:center;">
-                <p style="color:#EF4444;font-size:.9rem;">❌ Error al cargar el contenido</p>
-                <p style="color:#94A3B8;font-size:.75rem;margin-top:.3rem;word-break:break-all;">${e.message || 'Verifica tu conexión a Firebase'}</p>
+                <p style="color:#EF4444;font-size:.9rem;">❌ Error al cargar</p>
+                <p style="color:#94A3B8;font-size:.75rem;margin-top:.3rem;">${e.message || 'Verifica Firebase'}</p>
                 <button onclick="cargarContenido()" style="margin-top:.5rem;padding:.3rem 1rem;background:#7C3AED;border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:.75rem;">
                     <i class="fas fa-refresh"></i> Reintentar
                 </button>
@@ -1249,7 +1156,7 @@ window.eliminarItem = async function(key, tipo) {
 // ⭐ INICIAR
 cargarContenido();
 cargarPedidos();
-console.log('✅ Admin TELY - Con logs de depuración');
+console.log('✅ Admin TELY - Con funciones que sí cargan y Opción 2 funcional');
 </script>
 </body>
 </html>
