@@ -96,7 +96,7 @@
         body:not(.dark) .skeleton{background:linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 50%,#e0e0e0 75%);background-size:200% 100%}
         @keyframes skeleton{0%{background-position:-200% 0}100%{background-position:200% 0}}
         
-        .load-more{display:flex;justify-content:center;padding:.3rem 0;margin:.5rem 0}
+        .load-more{display:flex;justify-content:center;padding:.1rem 0 .3rem;margin:0}
         .load-more button{background:rgba(124,58,237,.15);color:#fff;padding:.3rem 1.2rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);font-weight:600;cursor:pointer;font-size:.7rem;transition:.3s}
         .load-more button:hover{background:rgba(124,58,237,.25);border-color:#7C3AED}
         body:not(.dark) .load-more button{color:#111;background:rgba(124,58,237,.1)}
@@ -311,14 +311,6 @@ function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     }
 }
 
-function generarEnlaceVidsrc(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    if (tipo === 'pelicula') {
-        return `https://vidsrc.in/embed/movie/${tmdb_id}?lang=es`;
-    } else {
-        return `https://vidsrc.in/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es`;
-    }
-}
-
 function getImagenUrl(path, size = 'w342') {
     if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
     return `https://image.tmdb.org/t/p/${size}${path}`;
@@ -421,7 +413,15 @@ async function cargarPeliculas(page = 1) {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
     btn.classList.remove('oculto');
     
-    if (page === 1) grid.innerHTML = '';
+    if (page === 1) {
+        grid.innerHTML = '';
+        // Mostrar skeletons
+        for (let i = 0; i < 8; i++) {
+            const sk = document.createElement('div');
+            sk.className = 'skeleton';
+            grid.appendChild(sk);
+        }
+    }
     
     try {
         let params = { page };
@@ -430,6 +430,9 @@ async function cargarPeliculas(page = 1) {
         
         const data = await fetchTMDB('discover/movie', params);
         totalPaginasPeliculas = data.total_pages || 1;
+        
+        // Limpiar skeletons
+        if (page === 1) grid.innerHTML = '';
         
         if (!data.results || !data.results.length) {
             if (page === 1) grid.innerHTML = '<p class="empty-msg">No hay películas</p>';
@@ -454,14 +457,15 @@ async function cargarPeliculas(page = 1) {
                 portada: a?.portada || getImagenUrl(p.poster_path, 'w342'),
                 puntuacion: a?.puntuacion || (p.vote_average ? p.vote_average.toFixed(1) : 'N/A'),
                 url: a?.url || generarEnlaceUnlimplay(p.id, 'pelicula'),
-                opcion2: a?.opcion2 || '' // ⭐ CARGA OPCIÓN 2 DESDE FIREBASE
+                opcion2: a?.opcion2 || ''
             };
             grid.appendChild(crearTarjeta(item));
         });
         
         paginaPeliculas = page;
         
-        if (page >= totalPaginasPeliculas) {
+        // ⭐ MOSTRAR BOTÓN SIEMPRE QUE HAYA MÁS PÁGINAS
+        if (page >= totalPaginasPeliculas || totalPaginasPeliculas === 0) {
             btn.classList.add('oculto');
         } else {
             btn.classList.remove('oculto');
@@ -470,17 +474,18 @@ async function cargarPeliculas(page = 1) {
         }
     } catch(e) {
         console.error(e);
+        if (page === 1) grid.innerHTML = '<p class="empty-msg">Error al cargar películas</p>';
         btn.innerHTML = '⚠️ Error';
         btn.disabled = false;
     }
     cargandoPeliculas = false;
 }
 
-// ⭐ BOTÓN CARGAR MÁS (SIN SCROLL INFINITO)
+// ⭐ BOTÓN CARGAR MÁS
 window.cargarMasPeliculas = function() { 
     if (!cargandoPeliculas) {
-        paginaPeliculas++; 
-        cargarPeliculas(paginaPeliculas); 
+        const nextPage = paginaPeliculas + 1;
+        cargarPeliculas(nextPage); 
     }
 };
 
@@ -524,8 +529,6 @@ window.buscarGlobal = function() {
     if (input.value.trim()) window.mostrarSugerencias(input.value);
 };
 
-// ⭐ ELIMINADO: SCROLL INFINITO (SOLO BOTÓN CARGAR MÁS)
-
 // ⭐ BANNER APK
 function detectarPlataforma() {
     const ua = navigator.userAgent || '';
@@ -568,13 +571,14 @@ function descargarAPK() {
     setTimeout(cerrarBannerApp, 1000);
 }
 
+// ⭐ INICIAR
 cargarPeliculas(1);
 
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 1500);
 });
 
-console.log('✅ Películas - Botón Cargar más, Opción 2 desde Firebase, sin scroll infinito');
+console.log('✅ Películas - Botón Cargar más visible, Opción 2 desde Firebase');
 </script>
 </body>
 </html>
