@@ -21,7 +21,7 @@
         body.dark{background:#0A0A0F;color:#fff}
         body:not(.dark){background:#f0f0f0;color:#111}
         
-        .main-content{width:100%;height:100vh;padding:.3rem .5rem 120px .5rem;overflow-y:auto;margin:0 auto;max-width:600px}
+        .main-content{width:100%;height:100vh;padding:.3rem .5rem 140px .5rem;overflow-y:auto;margin:0 auto;max-width:600px}
         
         .header-flotante{
             position:sticky;
@@ -96,7 +96,7 @@
         body:not(.dark) .skeleton{background:linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 50%,#e0e0e0 75%);background-size:200% 100%}
         @keyframes skeleton{0%{background-position:-200% 0}100%{background-position:200% 0}}
         
-        /* BOTÓN ARREGLADO - GRANDE Y COMPLETO */
+        /* BOTÓN SIEMPRE VISIBLE */
         .load-more {
             display: flex !important;
             justify-content: center !important;
@@ -360,9 +360,9 @@ async function fetchTMDB(path, params = {}) {
 
 let paginaPeliculas = 1;
 let cargandoPeliculas = false;
-let totalPaginasPeliculas = 1;
 let filtroGenero = '';
 let filtroAnio = '';
+let totalPaginasForzadas = 999; // <--- FORZAMOS 999 PÁGINAS
 
 function toggleFavorito(item) {
     if (!auth.currentUser) { window.location.href = 'login.html'; return; }
@@ -424,9 +424,13 @@ function crearTarjeta(item) {
     return div;
 }
 
+// CARGAR PELÍCULAS - FORZADO
 async function cargarPeliculas(page = 1) {
     if (cargandoPeliculas) return;
-    if (page > totalPaginasPeliculas && page > 1) return;
+    if (page > totalPaginasForzadas) {
+        console.log('Ya no hay más páginas (forzado)');
+        return;
+    }
     
     cargandoPeliculas = true;
     const grid = document.getElementById('listaPeliculas');
@@ -451,7 +455,6 @@ async function cargarPeliculas(page = 1) {
         if (filtroGenero) params.with_genres = filtroGenero;
         
         const data = await fetchTMDB('discover/movie', params);
-        totalPaginasPeliculas = data.total_pages || 1;
         
         if (page === 1) grid.innerHTML = '';
         
@@ -484,7 +487,8 @@ async function cargarPeliculas(page = 1) {
         
         paginaPeliculas = page;
         
-        if (page >= totalPaginasPeliculas) {
+        // BOTÓN SIEMPRE VISIBLE A MENOS QUE SEA LA PÁGINA 999
+        if (page >= totalPaginasForzadas) {
             btn.classList.add('oculto');
         } else {
             btn.classList.remove('oculto');
@@ -511,18 +515,18 @@ window.aplicarFiltros = function() {
     filtroGenero = document.getElementById('filterGenre').value;
     filtroAnio = document.getElementById('filterYear').value;
     paginaPeliculas = 1;
-    totalPaginasPeliculas = 1;
     cargarPeliculas(1);
 };
 
-// SCROLL RAPIDÍSIMO - CARGA A 50px DEL FINAL
+// SCROLL INFINITO - DETECTA EL FINAL Y CARGA
 const mainContent = document.getElementById('mainContent');
 mainContent.addEventListener('scroll', function() {
     const scrollTop = mainContent.scrollTop;
     const scrollHeight = mainContent.scrollHeight;
     const clientHeight = mainContent.clientHeight;
     
-    if (scrollTop + clientHeight >= scrollHeight - 50) {
+    // Cuando faltan 80px para el final
+    if (scrollTop + clientHeight >= scrollHeight - 80) {
         const btn = document.getElementById('btnMasPeliculas');
         if (!btn.classList.contains('oculto') && !cargandoPeliculas) {
             cargarMasPeliculas();
@@ -530,6 +534,7 @@ mainContent.addEventListener('scroll', function() {
     }
 });
 
+// BÚSQUEDA
 window.mostrarSugerencias = async function(texto) {
     const container = document.getElementById('searchResults');
     if (!texto || texto.length < 2) { container.classList.remove('show'); return; }
@@ -562,6 +567,7 @@ window.buscarGlobal = function() {
     if (input.value.trim()) window.mostrarSugerencias(input.value);
 };
 
+// BANNER APK
 function detectarPlataforma() {
     const ua = navigator.userAgent || '';
     const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
@@ -609,7 +615,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 1500);
 });
 
-console.log('✅ Botón arreglado + Scroll rapidísimo');
+console.log('🔥 Scroll FORZADO - Carga infinita');
 </script>
 </body>
 </html>
