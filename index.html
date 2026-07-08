@@ -292,7 +292,34 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ⭐ GUARDAR ESTADO DE PESTAÑA Y SCROLL
+// ⭐ PANTALLA COMPLETA - SOLO EN APK
+function activarPantallaCompleta() {
+    const ua = navigator.userAgent || '';
+    const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
+    const esApp = window.navigator.standalone || 
+                   window.matchMedia('(display-mode: standalone)').matches ||
+                   esWebView;
+    if (esApp && !document.fullscreenElement && !document.webkitFullscreenElement) {
+        try {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen();
+            }
+        } catch(e) {}
+    }
+}
+
+function esNavegadorWeb() {
+    const ua = navigator.userAgent || '';
+    const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
+    const esApp = window.navigator.standalone || 
+                   window.matchMedia('(display-mode: standalone)').matches ||
+                   esWebView;
+    return !esApp;
+}
+
+// ⭐ GUARDAR ESTADO DE LA PESTAÑA
 function guardarEstado(tab) {
     try {
         sessionStorage.setItem('tabActiva', tab);
@@ -301,10 +328,12 @@ function guardarEstado(tab) {
 
 function restaurarEstado() {
     try {
-        return sessionStorage.getItem('tabActiva') || 'inicio';
+        const tab = sessionStorage.getItem('tabActiva') || 'inicio';
+        return tab;
     } catch(e) { return 'inicio'; }
 }
 
+// ⭐ GUARDAR SCROLL
 function guardarScroll() {
     try {
         const scrollTop = document.getElementById('mainContent').scrollTop;
@@ -319,36 +348,28 @@ function restaurarScroll() {
     } catch(e) {}
 }
 
-// ⭐ CACHÉ PARA DATOS
-function guardarCache(key, data) {
-    try {
-        localStorage.setItem(`tely_cache_${key}`, JSON.stringify({
-            data: data,
-            timestamp: Date.now()
-        }));
-    } catch(e) {}
-}
+// ⭐ ESCUCHAR EVENTO DE SCROLL PARA GUARDAR
+document.addEventListener('DOMContentLoaded', function() {
+    const mainContent = document.getElementById('mainContent');
+    mainContent.addEventListener('scroll', function() {
+        guardarScroll();
+    });
+});
 
-function obtenerCache(key, maxAge = 600000) {
-    try {
-        const cached = localStorage.getItem(`tely_cache_${key}`);
-        if (!cached) return null;
-        const parsed = JSON.parse(cached);
-        if (Date.now() - parsed.timestamp > maxAge) return null;
-        return parsed.data;
-    } catch(e) { return null; }
-}
-
-// ⭐ BOTÓN ATRÁS
+// ⭐ BOTÓN ATRÁS - GUARDA ESTADO ANTES DE IR
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) {
+    // Guardar estado actual antes de salir
     const tabActiva = document.querySelector('.tab-btn.active');
-    if (tabActiva) guardarEstado(tabActiva.dataset.tab);
+    if (tabActiva) {
+        guardarEstado(tabActiva.dataset.tab);
+    }
     guardarScroll();
     return true;
 });
+document.addEventListener('backbutton', function(e) { return true; }, false);
 
-// ⭐ FUNCIONES DE AUTENTICACIÓN
+// ⭐ AUTENTICACIÓN
 function irALogin() { window.location.href = 'login.html'; }
 function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
 function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
@@ -438,6 +459,7 @@ function cambiarTab(tab) {
     
     if (tab === 'inicio') {
         document.getElementById('tabInicio').style.display = 'block';
+        // Cargar contenido de inicio si está vacío
         const pelisPop = document.getElementById('peliculasPopulares');
         if (!pelisPop.querySelector('.movie-card') && !pelisPop.querySelector('.skeleton')) {
             cargarContenido();
@@ -458,33 +480,16 @@ function cambiarTab(tab) {
         btn.classList.toggle('active', btn.dataset.tab === tab);
     });
     
+    // Guardar estado
     guardarEstado(tab);
+    
+    // Restaurar scroll después de cambiar pestaña
     setTimeout(restaurarScroll, 100);
 }
 
 async function cargarPeliculas(page = 1) {
     if (cargandoPeliculas) return;
     if (page > totalPaginasPeliculas && page > 1) return;
-    
-    const cacheKey = `peliculas_page_${page}`;
-    const cachedData = obtenerCache(cacheKey);
-    if (cachedData && page === 1) {
-        const grid = document.getElementById('gridPeliculas');
-        grid.innerHTML = '';
-        cachedData.forEach(item => {
-            grid.appendChild(crearTarjeta(item));
-        });
-        const btn = document.getElementById('btnMasPeliculas');
-        if (page >= totalPaginasPeliculas) {
-            btn.style.display = 'none';
-        } else {
-            btn.style.display = 'flex';
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más';
-        }
-        paginaPeliculas = page;
-        return;
-    }
     
     cargandoPeliculas = true;
     const grid = document.getElementById('gridPeliculas');
@@ -507,9 +512,9 @@ async function cargarPeliculas(page = 1) {
         const adminData = snap.val() || {};
         const adminMap = {};
         Object.values(adminData).forEach(i => { adminMap[i.tmdb_id] = i; });
-        const items = data.results.map(p => {
+        data.results.forEach(p => {
             const a = adminMap[p.id];
-            return {
+            const item = {
                 id: p.id, tmdb_id: p.id,
                 titulo: a?.titulo || p.title || 'Sin título',
                 anio: a?.anio || (p.release_date ? p.release_date.split('-')[0] : 'N/D'),
@@ -518,11 +523,6 @@ async function cargarPeliculas(page = 1) {
                 url: a?.url || generarEnlaceUnlimplay(p.id, 'pelicula'),
                 opcion2: a?.opcion2 || generarEnlaceVidsrc(p.id, 'pelicula')
             };
-        });
-        
-        if (page === 1) guardarCache(cacheKey, items);
-        
-        items.forEach(item => {
             grid.appendChild(crearTarjeta(item));
         });
         if (page >= totalPaginasPeliculas) {
@@ -532,7 +532,6 @@ async function cargarPeliculas(page = 1) {
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más';
         }
-        paginaPeliculas = page;
     } catch(e) {
         console.error(e);
         btn.innerHTML = '⚠️ Error';
@@ -544,26 +543,6 @@ async function cargarPeliculas(page = 1) {
 async function cargarSeries(page = 1) {
     if (cargandoSeries) return;
     if (page > totalPaginasSeries && page > 1) return;
-    
-    const cacheKey = `series_page_${page}`;
-    const cachedData = obtenerCache(cacheKey);
-    if (cachedData && page === 1) {
-        const grid = document.getElementById('gridSeries');
-        grid.innerHTML = '';
-        cachedData.forEach(item => {
-            grid.appendChild(crearTarjeta(item, true));
-        });
-        const btn = document.getElementById('btnMasSeries');
-        if (page >= totalPaginasSeries) {
-            btn.style.display = 'none';
-        } else {
-            btn.style.display = 'flex';
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más';
-        }
-        paginaSeries = page;
-        return;
-    }
     
     cargandoSeries = true;
     const grid = document.getElementById('gridSeries');
@@ -586,9 +565,9 @@ async function cargarSeries(page = 1) {
         const adminData = snap.val() || {};
         const adminMap = {};
         Object.values(adminData).forEach(i => { adminMap[i.tmdb_id] = i; });
-        const items = data.results.map(s => {
+        data.results.forEach(s => {
             const a = adminMap[s.id];
-            return {
+            const item = {
                 id: s.id, tmdb_id: s.id,
                 titulo: a?.titulo || s.name || 'Sin título',
                 anio: a?.anio || (s.first_air_date ? s.first_air_date.split('-')[0] : 'N/D'),
@@ -597,11 +576,6 @@ async function cargarSeries(page = 1) {
                 url: a?.url || generarEnlaceUnlimplay(s.id, 'serie', 1, 1),
                 opcion2: a?.opcion2 || generarEnlaceVidsrc(s.id, 'serie', 1, 1)
             };
-        });
-        
-        if (page === 1) guardarCache(cacheKey, items);
-        
-        items.forEach(item => {
             grid.appendChild(crearTarjeta(item, true));
         });
         if (page >= totalPaginasSeries) {
@@ -611,7 +585,6 @@ async function cargarSeries(page = 1) {
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más';
         }
-        paginaSeries = page;
     } catch(e) {
         console.error(e);
         btn.innerHTML = '⚠️ Error';
@@ -762,23 +735,6 @@ function crearTarjeta(item, esSerie = false) {
 }
 
 async function cargarContenido() {
-    const cacheKey = 'contenido_inicio';
-    const cachedData = obtenerCache(cacheKey);
-    if (cachedData) {
-        const pelisContainer = document.getElementById('peliculasPopulares');
-        const seriesContainer = document.getElementById('seriesPopulares');
-        pelisContainer.innerHTML = '';
-        seriesContainer.innerHTML = '';
-        cachedData.peliculas.forEach(item => {
-            pelisContainer.appendChild(crearTarjeta(item));
-        });
-        cachedData.series.forEach(item => {
-            seriesContainer.appendChild(crearTarjeta(item, true));
-        });
-        cargarContinuarViendo();
-        return;
-    }
-    
     try {
         const [pelis, series] = await Promise.all([
             fetchTMDB('movie/popular', { page: 1 }),
@@ -801,7 +757,6 @@ async function cargarContenido() {
         Object.values(pData).forEach(i => { adminMap[i.tmdb_id] = i; });
         Object.values(sData).forEach(i => { adminMap[i.tmdb_id] = i; });
 
-        const peliculasItems = [];
         (pelis.results || []).slice(0, 12).forEach(p => {
             const a = adminMap[p.id];
             const item = {
@@ -814,11 +769,9 @@ async function cargarContenido() {
                 url: a?.url || generarEnlaceUnlimplay(p.id, 'pelicula'),
                 opcion2: a?.opcion2 || generarEnlaceVidsrc(p.id, 'pelicula')
             };
-            peliculasItems.push(item);
             pelisContainer.appendChild(crearTarjeta(item));
         });
 
-        const seriesItems = [];
         (series.results || []).slice(0, 12).forEach(s => {
             const a = adminMap[s.id];
             const item = {
@@ -831,11 +784,9 @@ async function cargarContenido() {
                 url: a?.url || generarEnlaceUnlimplay(s.id, 'serie', 1, 1),
                 opcion2: a?.opcion2 || generarEnlaceVidsrc(s.id, 'serie', 1, 1)
             };
-            seriesItems.push(item);
             seriesContainer.appendChild(crearTarjeta(item, true));
         });
 
-        guardarCache(cacheKey, { peliculas: peliculasItems, series: seriesItems });
         cargarContinuarViendo();
     } catch(e) { console.error(e); }
 }
@@ -974,12 +925,26 @@ function descargarAPK() {
     setTimeout(cerrarBannerApp, 2000);
 }
 
-// ⭐ INICIAR
+// ⭐ INICIAR - RESTAURAR ESTADO
 document.addEventListener('DOMContentLoaded', function() {
     const tab = restaurarEstado();
     cambiarTab(tab);
     setTimeout(mostrarBannerApp, 2000);
+    setTimeout(activarPantallaCompleta, 1000);
     setTimeout(restaurarScroll, 200);
+});
+
+document.addEventListener('click', function() {
+    if (esNavegadorWeb()) return;
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        try {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen();
+            }
+        } catch(e) {}
+    }
 });
 
 // Cargar contenido inicial
@@ -987,7 +952,7 @@ cargarContenido();
 cargarPeliculas(1);
 cargarSeries(1);
 
-console.log('✅ TELY cargado - Con caché y persistencia de estado');
+console.log('✅ TELY cargado - Guarda estado de pestaña y scroll');
 </script>
 </body>
 </html>
