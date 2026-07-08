@@ -158,10 +158,6 @@
         .pedido-actions .btn-eliminar{background:rgba(239,68,68,.15);color:#F87171}
         .pedido-actions .btn-eliminar:hover{background:rgba(239,68,68,.25)}
         .badge-pedidos{display:inline-block;background:#EF4444;color:#fff;border-radius:9999px;padding:.05rem .5rem;font-size:.55rem;font-weight:700;margin-left:.3rem}
-        
-        .error-box{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:1rem;text-align:center;margin:.5rem 0}
-        .error-box .titulo{color:#EF4444;font-size:.9rem;font-weight:700}
-        .error-box .mensaje{color:#94A3B8;font-size:.75rem;margin-top:.3rem}
     </style>
 </head>
 <body>
@@ -237,9 +233,6 @@
             </button>
             <button class="admin-btn admin-btn-blue" onclick="cargarContenido()" style="font-size:.75rem;padding:.3rem 1rem;">
                 <i class="fas fa-refresh"></i> Recargar
-            </button>
-            <button class="admin-btn admin-btn-blue" onclick="cargarPeliculasDirecto()" style="font-size:.75rem;padding:.3rem 1rem;background:#F59E0B;color:#111;">
-                <i class="fas fa-bolt"></i> Cargar Directo
             </button>
         </div>
     </div>
@@ -1054,37 +1047,13 @@ window.filtrarContenido = function() {
     });
 };
 
-// ⭐ CARGAR CONTENIDO - VERSIÓN CORREGIDA
+// ⭐ CARGAR CONTENIDO CON LOGS PARA DEPURACIÓN
 window.cargarContenido = async function() {
     if (!esAdmin) return;
     const container = document.getElementById('listaContenido');
     container.innerHTML = '<p class="loading-text">🔍 Cargando contenido desde Firebase...</p>';
     
     try {
-        const user = auth.currentUser;
-        if (!user) {
-            container.innerHTML = `
-                <div class="error-box">
-                    <div class="titulo">⛔ No estás autenticado</div>
-                    <div class="mensaje">Debes iniciar sesión para acceder a Firebase</div>
-                    <button onclick="window.location.href='login.html'" style="margin-top:.5rem;padding:.3rem 1rem;background:#7C3AED;border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:.75rem;">
-                        <i class="fas fa-sign-in-alt"></i> Iniciar sesión
-                    </button>
-                </div>
-            `;
-            return;
-        }
-        
-        if (!ADMIN_EMAILS.includes(user.email)) {
-            container.innerHTML = `
-                <div class="error-box">
-                    <div class="titulo">⛔ No tienes permisos de administrador</div>
-                    <div class="mensaje">Email: ${user.email}</div>
-                </div>
-            `;
-            return;
-        }
-        
         console.log('🔥 Iniciando carga desde Firebase...');
         
         const [pSnap, sSnap] = await Promise.all([
@@ -1095,47 +1064,45 @@ window.cargarContenido = async function() {
         const pData = pSnap.val() || {};
         const sData = sSnap.val() || {};
         
-        const totalPelis = Object.keys(pData).length;
-        const totalSeries = Object.keys(sData).length;
-        
-        console.log(`🎬 Películas encontradas: ${totalPelis}`);
-        console.log(`📺 Series encontradas: ${totalSeries}`);
-        
-        // Mostrar en pantalla
-        document.getElementById('totalPeliculas').textContent = totalPelis;
-        document.getElementById('totalSeries').textContent = totalSeries;
-        
-        let caps = 0;
-        Object.values(sData).forEach(s => { if (s.temporadas) { s.temporadas.forEach(t => { if (t.capitulos) caps += t.capitulos.length; }); } });
-        document.getElementById('totalCaps').textContent = caps;
-        
-        if (totalPelis === 0 && totalSeries === 0) {
-            container.innerHTML = `
-                <div class="error-box" style="background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.15);">
-                    <div class="titulo" style="color:#F59E0B;">📭 No hay contenido en Firebase</div>
-                    <div class="mensaje">Presiona "Generar Películas" o "Generar Series" para comenzar.</div>
-                    <div style="margin-top:.5rem;display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;">
-                        <button onclick="generarPeliculas()" style="padding:.4rem 1.2rem;background:#F59E0B;border:none;border-radius:6px;color:#111;font-weight:700;cursor:pointer;font-size:.75rem;">
-                            <i class="fas fa-film"></i> Generar Películas
-                        </button>
-                        <button onclick="generarSeries()" style="padding:.4rem 1.2rem;background:#8B5CF6;border:none;border-radius:6px;color:#fff;font-weight:700;cursor:pointer;font-size:.75rem;">
-                            <i class="fas fa-tv"></i> Generar Series
-                        </button>
-                    </div>
-                </div>
-            `;
-            document.getElementById('paginacionContainer').style.display = 'none';
-            return;
-        }
+        console.log('📊 Datos de Firebase:');
+        console.log('🎬 Películas:', pData);
+        console.log('📺 Series:', sData);
         
         peliculasLista = Object.values(pData);
         seriesLista = Object.values(sData);
         peliculasKeys = Object.keys(pData);
         seriesKeys = Object.keys(sData);
         
+        console.log(`✅ Películas encontradas: ${peliculasLista.length}`);
+        console.log(`✅ Series encontradas: ${seriesLista.length}`);
+        
+        document.getElementById('totalPeliculas').textContent = peliculasLista.length;
+        document.getElementById('totalSeries').textContent = seriesLista.length;
+        
+        let caps = 0;
+        seriesLista.forEach(s => { if (s.temporadas) { s.temporadas.forEach(t => { if (t.capitulos) caps += t.capitulos.length; }); } });
+        document.getElementById('totalCaps').textContent = caps;
+        
+        if (!peliculasLista.length && !seriesLista.length) {
+            container.innerHTML = `
+                <div style="color:#64748B;text-align:center;padding:1rem;font-size:.9rem;">
+                    📭 No hay contenido guardado en Firebase.
+                    <br><br>
+                    <button onclick="generarPeliculas()" style="padding:.5rem 1.5rem;background:#7C3AED;border:none;border-radius:8px;color:#fff;font-weight:600;cursor:pointer;font-size:.8rem;">
+                        <i class="fas fa-film"></i> Generar Películas
+                    </button>
+                    <button onclick="generarSeries()" style="padding:.5rem 1.5rem;background:#8B5CF6;border:none;border-radius:8px;color:#fff;font-weight:600;cursor:pointer;font-size:.8rem;margin-left:.5rem;">
+                        <i class="fas fa-tv"></i> Generar Series
+                    </button>
+                </div>
+            `;
+            document.getElementById('paginacionContainer').style.display = 'none';
+            return;
+        }
+        
         container.innerHTML = '';
         
-        // ⭐ PELÍCULAS
+        // ⭐ PELÍCULAS CON MINIATURA
         if (peliculasLista.length) {
             const div = document.createElement('div');
             div.innerHTML = `<div style="font-weight:700;color:#A78BFA;margin:.3rem 0;">🎬 Películas (${peliculasLista.length})</div>`;
@@ -1172,7 +1139,7 @@ window.cargarContenido = async function() {
             container.appendChild(div);
         }
         
-        // ⭐ SERIES
+        // ⭐ SERIES CON MINIATURA
         if (seriesLista.length) {
             const div = document.createElement('div');
             div.innerHTML = `<div style="font-weight:700;color:#34D399;margin:.5rem 0 .3rem;">📺 Series (${seriesLista.length})</div>`;
@@ -1254,60 +1221,17 @@ window.cargarContenido = async function() {
         mostrarPagina();
         
     } catch(e) {
-        console.error('❌ Error:', e);
+        console.error('❌ Error al cargar contenido:', e);
         container.innerHTML = `
-            <div class="error-box">
-                <div class="titulo">❌ Error al cargar el contenido</div>
-                <div class="mensaje">${e.message || 'Error desconocido'}</div>
+            <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:1rem;text-align:center;">
+                <p style="color:#EF4444;font-size:.9rem;">❌ Error al cargar el contenido</p>
+                <p style="color:#94A3B8;font-size:.75rem;margin-top:.3rem;word-break:break-all;">${e.message || 'Verifica tu conexión a Firebase'}</p>
                 <button onclick="cargarContenido()" style="margin-top:.5rem;padding:.3rem 1rem;background:#7C3AED;border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:.75rem;">
                     <i class="fas fa-refresh"></i> Reintentar
                 </button>
             </div>
         `;
     }
-};
-
-// ⭐ CARGAR PELÍCULAS DIRECTO (BOTÓN DE EMERGENCIA)
-window.cargarPeliculasDirecto = function() {
-    const container = document.getElementById('listaContenido');
-    container.innerHTML = '<p class="loading-text">🔍 Cargando películas directamente...</p>';
-    
-    db.ref('contenido_personalizado').once('value').then((snap) => {
-        const data = snap.val();
-        if (!data) {
-            container.innerHTML = '<p style="color:#F59E0B;">No hay películas en "contenido_personalizado"</p>';
-            return;
-        }
-        
-        const peliculas = Object.values(data);
-        const keys = Object.keys(data);
-        
-        container.innerHTML = `<p style="color:#34D399;">✅ ${peliculas.length} películas encontradas</p>`;
-        
-        let html = '<div style="display:grid;gap:.3rem;margin-top:.3rem;max-height:400px;overflow-y:auto;">';
-        peliculas.forEach((p, i) => {
-            html += `
-                <div style="background:rgba(255,255,255,.03);border-radius:6px;padding:.3rem .5rem;display:flex;align-items:center;gap:.5rem;">
-                    <span>🎬</span>
-                    <span style="flex:1;font-size:.8rem;">${p.titulo || 'Sin título'}</span>
-                    <span style="color:#94A3B8;font-size:.6rem;">${p.anio || 'N/D'}</span>
-                    <span style="color:#34D399;font-size:.6rem;">${p.url ? '🔗' : '❌'}</span>
-                </div>
-            `;
-        });
-        html += '</div>';
-        container.innerHTML += html;
-        
-        // Guardar en variables globales para que funcione la paginación
-        peliculasLista = peliculas;
-        peliculasKeys = keys;
-        document.getElementById('totalPeliculas').textContent = peliculas.length;
-        paginaActual = 1;
-        mostrarPagina();
-        
-    }).catch(e => {
-        container.innerHTML = `<div class="error-box"><div class="titulo">❌ Error</div><div class="mensaje">${e.message}</div></div>`;
-    });
 };
 
 window.eliminarItem = async function(key, tipo) {
@@ -1325,7 +1249,7 @@ window.eliminarItem = async function(key, tipo) {
 // ⭐ INICIAR
 cargarContenido();
 cargarPedidos();
-console.log('✅ Admin TELY - Con carga directa');
+console.log('✅ Admin TELY - Con logs de depuración');
 </script>
 </body>
 </html>
