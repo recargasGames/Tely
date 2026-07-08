@@ -16,7 +16,7 @@
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         html,body{width:100%;height:100%;overflow:hidden;background:#0A0A0F}
-        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;transition:background 0.3s, color 0.3s;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
         ::-webkit-scrollbar{display:none}
         body.dark{background:#0A0A0F;color:#fff}
         body:not(.dark){background:#f0f0f0;color:#111}
@@ -97,7 +97,7 @@
         @keyframes skeleton{0%{background-position:-200% 0}100%{background-position:200% 0}}
         
         .load-more{display:flex;justify-content:center;padding:.2rem 0;margin:0}
-        .load-more button{background:rgba(124,58,237,.15);color:#fff;padding:.3rem 1.2rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);font-weight:600;cursor:pointer;font-size:.7rem;transition:.3s}
+        .load-more button{background:rgba(124,58,237,.15);color:#fff;padding:.35rem 1.5rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);font-weight:600;cursor:pointer;font-size:.75rem;transition:.3s}
         .load-more button:hover{background:rgba(124,58,237,.25);border-color:#7C3AED}
         body:not(.dark) .load-more button{color:#111;background:rgba(124,58,237,.1)}
         .load-more button:disabled{opacity:.4;cursor:not-allowed}
@@ -200,7 +200,13 @@
     </div>
 
     <div class="grid-movies" id="listaPeliculas"></div>
-    <div class="load-more"><button onclick="cargarMasPeliculas()" id="btnMasPeliculas"><i class="fas fa-plus"></i> Cargar más</button></div>
+    
+    <!-- ⭐ BOTÓN CARGAR MÁS - SIEMPRE VISIBLE -->
+    <div class="load-more">
+        <button onclick="cargarMasPeliculas()" id="btnMasPeliculas">
+            <i class="fas fa-plus"></i> Cargar más
+        </button>
+    </div>
 </main>
 
 <div id="bannerApp">
@@ -411,7 +417,6 @@ async function cargarPeliculas(page = 1) {
     const grid = document.getElementById('listaPeliculas');
     const btn = document.getElementById('btnMasPeliculas');
     
-    // Mostrar skeletons solo en la primera página
     if (page === 1) {
         grid.innerHTML = '';
         for (let i = 0; i < 8; i++) {
@@ -433,7 +438,6 @@ async function cargarPeliculas(page = 1) {
         const data = await fetchTMDB('discover/movie', params);
         totalPaginasPeliculas = data.total_pages || 1;
         
-        // Limpiar grid después de los skeletons
         if (page === 1) grid.innerHTML = '';
         
         if (!data.results || !data.results.length) {
@@ -443,7 +447,6 @@ async function cargarPeliculas(page = 1) {
             return;
         }
         
-        // ⭐ CARGAR OPCIÓN 2 DESDE FIREBASE
         const dbRef = db.ref();
         const snap = await dbRef.child('contenido_personalizado').once('value');
         const adminData = snap.val() || {};
@@ -475,7 +478,7 @@ async function cargarPeliculas(page = 1) {
         }
     } catch(e) {
         console.error(e);
-        if (page === 1) grid.innerHTML = '<p class="empty-msg">Error al cargar películas</p>';
+        if (page === 1) grid.innerHTML = '<p class="empty-msg">Error al cargar</p>';
         btn.innerHTML = '⚠️ Error';
         btn.disabled = false;
     }
@@ -497,7 +500,7 @@ window.aplicarFiltros = function() {
     cargarPeliculas(1);
 };
 
-// ⭐ SCROLL INFINITO + BOTÓN VISIBLE
+// ⭐ SCROLL INFINITO - CUANDO LLEGAS AL FINAL
 const mainContent = document.getElementById('mainContent');
 mainContent.addEventListener('scroll', function() {
     clearTimeout(scrollTimeout);
@@ -506,15 +509,15 @@ mainContent.addEventListener('scroll', function() {
         const scrollHeight = mainContent.scrollHeight;
         const clientHeight = mainContent.clientHeight;
         
-        // Cuando el usuario deslice hacia abajo y esté cerca del final
-        if (scrollTop + clientHeight >= scrollHeight - 150) {
+        // Cuando el usuario llegue al final (con 50px de margen)
+        if (scrollTop + clientHeight >= scrollHeight - 50) {
             const btn = document.getElementById('btnMasPeliculas');
-            // Si el botón no está oculto y no está cargando, cargar más
+            // Si el botón no está oculto y no está cargando
             if (!btn.classList.contains('oculto') && !cargandoPeliculas) {
                 cargarMasPeliculas();
             }
         }
-    }, 200);
+    }, 300);
 });
 
 // ⭐ BÚSQUEDA
@@ -562,7 +565,6 @@ function mostrarBannerApp() {
     const banner = document.getElementById('bannerApp');
     if (!banner) return;
     if (localStorage.getItem('bannerAppCerrado') === 'true') return;
-    
     const { esWebView, esNavegador } = detectarPlataforma();
     if (esNavegador) {
         banner.style.display = 'block';
@@ -592,14 +594,13 @@ function descargarAPK() {
     setTimeout(cerrarBannerApp, 1000);
 }
 
-// ⭐ INICIAR
 cargarPeliculas(1);
 
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 1500);
 });
 
-console.log('✅ Películas - Scroll infinito + Botón Cargar más visible, Opción 2 desde Firebase');
+console.log('✅ Películas - Botón Cargar más visible + Scroll infinito');
 </script>
 </body>
 </html>
