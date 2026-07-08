@@ -101,6 +101,7 @@
         .load-more button:hover{background:rgba(124,58,237,.25);border-color:#7C3AED}
         body:not(.dark) .load-more button{color:#111;background:rgba(124,58,237,.1)}
         .load-more button:disabled{opacity:.4;cursor:not-allowed}
+        .load-more button.oculto{display:none}
         
         .user-dropdown{position:absolute;right:0;top:calc(100% + 6px);background:rgba(26,26,46,.95);border-radius:8px;width:160px;border:1px solid rgba(124,58,237,.15);padding:.2rem 0;display:none;z-index:60;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
@@ -345,7 +346,6 @@ async function fetchTMDB(path, params = {}) {
 let paginaPeliculas = 1;
 let cargandoPeliculas = false;
 let totalPaginasPeliculas = 1;
-let scrollTimeout = null;
 let filtroGenero = '';
 let filtroAnio = '';
 
@@ -382,10 +382,12 @@ function toggleMiLista(item) {
 function crearTarjeta(item) {
     const div = document.createElement('div');
     div.className = 'movie-card';
+    const tieneOp2 = item.opcion2 && item.opcion2.trim() !== '' && item.opcion2.startsWith('http');
     const itemStr = JSON.stringify(item).replace(/"/g, "'");
     div.innerHTML = `
         <span class="badge-year">${item.anio || 'N/D'}</span>
         <span class="badge-type">🎬</span>
+        ${tieneOp2 ? '<span class="badge-op2">🔗 Op2</span>' : ''}
         <img src="${item.portada}" alt="${item.titulo}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
         <div class="info">
             <h4>${item.titulo}</h4>
@@ -407,6 +409,7 @@ function crearTarjeta(item) {
     return div;
 }
 
+// ⭐ CARGAR PELÍCULAS CON OPCIÓN 2 DESDE FIREBASE
 async function cargarPeliculas(page = 1) {
     if (cargandoPeliculas) return;
     if (page > totalPaginasPeliculas && page > 1) return;
@@ -416,6 +419,7 @@ async function cargarPeliculas(page = 1) {
     const btn = document.getElementById('btnMasPeliculas');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+    btn.classList.remove('oculto');
     
     if (page === 1) grid.innerHTML = '';
     
@@ -429,11 +433,12 @@ async function cargarPeliculas(page = 1) {
         
         if (!data.results || !data.results.length) {
             if (page === 1) grid.innerHTML = '<p class="empty-msg">No hay películas</p>';
-            btn.style.display = 'none';
+            btn.classList.add('oculto');
             cargandoPeliculas = false;
             return;
         }
         
+        // ⭐ CARGAR OPCIÓN 2 DESDE FIREBASE
         const dbRef = db.ref();
         const snap = await dbRef.child('contenido_personalizado').once('value');
         const adminData = snap.val() || {};
@@ -449,15 +454,17 @@ async function cargarPeliculas(page = 1) {
                 portada: a?.portada || getImagenUrl(p.poster_path, 'w342'),
                 puntuacion: a?.puntuacion || (p.vote_average ? p.vote_average.toFixed(1) : 'N/A'),
                 url: a?.url || generarEnlaceUnlimplay(p.id, 'pelicula'),
-                opcion2: a?.opcion2 || generarEnlaceVidsrc(p.id, 'pelicula')
+                opcion2: a?.opcion2 || '' // ⭐ CARGA OPCIÓN 2 DESDE FIREBASE
             };
             grid.appendChild(crearTarjeta(item));
         });
         
+        paginaPeliculas = page;
+        
         if (page >= totalPaginasPeliculas) {
-            btn.style.display = 'none';
+            btn.classList.add('oculto');
         } else {
-            btn.style.display = 'flex';
+            btn.classList.remove('oculto');
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más';
         }
@@ -469,6 +476,7 @@ async function cargarPeliculas(page = 1) {
     cargandoPeliculas = false;
 }
 
+// ⭐ BOTÓN CARGAR MÁS (SIN SCROLL INFINITO)
 window.cargarMasPeliculas = function() { 
     if (!cargandoPeliculas) {
         paginaPeliculas++; 
@@ -483,6 +491,7 @@ window.aplicarFiltros = function() {
     cargarPeliculas(1);
 };
 
+// ⭐ BÚSQUEDA
 window.mostrarSugerencias = async function(texto) {
     const container = document.getElementById('searchResults');
     if (!texto || texto.length < 2) { container.classList.remove('show'); return; }
@@ -515,22 +524,7 @@ window.buscarGlobal = function() {
     if (input.value.trim()) window.mostrarSugerencias(input.value);
 };
 
-// ⭐ SCROLL INFINITO
-const mainContent = document.getElementById('mainContent');
-mainContent.addEventListener('scroll', function() {
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => {
-        const scrollTop = mainContent.scrollTop;
-        const scrollHeight = mainContent.scrollHeight;
-        const clientHeight = mainContent.clientHeight;
-        
-        if (scrollTop + clientHeight >= scrollHeight - 100) {
-            if (!cargandoPeliculas && paginaPeliculas < totalPaginasPeliculas) {
-                cargarMasPeliculas();
-            }
-        }
-    }, 300);
-});
+// ⭐ ELIMINADO: SCROLL INFINITO (SOLO BOTÓN CARGAR MÁS)
 
 // ⭐ BANNER APK
 function detectarPlataforma() {
@@ -580,7 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 1500);
 });
 
-console.log('✅ Películas cargadas - Sin sidebar, scroll infinito');
+console.log('✅ Películas - Botón Cargar más, Opción 2 desde Firebase, sin scroll infinito');
 </script>
 </body>
 </html>
