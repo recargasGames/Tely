@@ -16,7 +16,7 @@
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         html,body{width:100%;height:100%;overflow:hidden;background:#0A0A0F}
-        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;transition:background 0.3s, color 0.3s;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
         ::-webkit-scrollbar{display:none}
         body.dark{background:#0A0A0F;color:#fff}
         body:not(.dark){background:#f0f0f0;color:#111}
@@ -97,11 +97,12 @@
         @keyframes skeleton{0%{background-position:-200% 0}100%{background-position:200% 0}}
         
         .load-more{display:flex;justify-content:center;padding:.2rem 0;margin:0}
-        .load-more button{background:rgba(124,58,237,.15);color:#fff;padding:.35rem 1.5rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);font-weight:600;cursor:pointer;font-size:.75rem;transition:.3s}
+        .load-more button{background:rgba(124,58,237,.15);color:#fff;padding:.3rem 1.2rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);font-weight:600;cursor:pointer;font-size:.7rem;transition:.3s}
         .load-more button:hover{background:rgba(124,58,237,.25);border-color:#7C3AED}
         body:not(.dark) .load-more button{color:#111;background:rgba(124,58,237,.1)}
         .load-more button:disabled{opacity:.4;cursor:not-allowed}
-        .load-more button.oculto{display:none}
+        .load-more button.oculto{display:none !important}
+        .load-more button:not(.oculto){display:inline-block !important}
         
         .user-dropdown{position:absolute;right:0;top:calc(100% + 6px);background:rgba(26,26,46,.95);border-radius:8px;width:160px;border:1px solid rgba(124,58,237,.15);padding:.2rem 0;display:none;z-index:60;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
@@ -200,13 +201,7 @@
     </div>
 
     <div class="grid-movies" id="listaPeliculas"></div>
-    
-    <!-- ⭐ BOTÓN CARGAR MÁS - SIEMPRE VISIBLE -->
-    <div class="load-more">
-        <button onclick="cargarMasPeliculas()" id="btnMasPeliculas">
-            <i class="fas fa-plus"></i> Cargar más
-        </button>
-    </div>
+    <div class="load-more"><button onclick="cargarMasPeliculas()" id="btnMasPeliculas"><i class="fas fa-plus"></i> Cargar más</button></div>
 </main>
 
 <div id="bannerApp">
@@ -408,15 +403,19 @@ function crearTarjeta(item) {
     return div;
 }
 
-// ⭐ CARGAR PELÍCULAS
+// ⭐ CARGAR PELÍCULAS - CORREGIDO
 async function cargarPeliculas(page = 1) {
     if (cargandoPeliculas) return;
-    if (page > totalPaginasPeliculas && page > 1) return;
+    if (page > totalPaginasPeliculas && page > 1) {
+        console.log('⚠️ Ya no hay más páginas');
+        return;
+    }
     
     cargandoPeliculas = true;
     const grid = document.getElementById('listaPeliculas');
     const btn = document.getElementById('btnMasPeliculas');
     
+    // Mostrar skeletons solo en la primera página
     if (page === 1) {
         grid.innerHTML = '';
         for (let i = 0; i < 8; i++) {
@@ -437,7 +436,9 @@ async function cargarPeliculas(page = 1) {
         
         const data = await fetchTMDB('discover/movie', params);
         totalPaginasPeliculas = data.total_pages || 1;
+        console.log(`📄 Página ${page} de ${totalPaginasPeliculas} | Películas: ${data.results?.length || 0}`);
         
+        // Limpiar grid después de los skeletons
         if (page === 1) grid.innerHTML = '';
         
         if (!data.results || !data.results.length) {
@@ -447,6 +448,7 @@ async function cargarPeliculas(page = 1) {
             return;
         }
         
+        // ⭐ CARGAR OPCIÓN 2 DESDE FIREBASE
         const dbRef = db.ref();
         const snap = await dbRef.child('contenido_personalizado').once('value');
         const adminData = snap.val() || {};
@@ -469,18 +471,22 @@ async function cargarPeliculas(page = 1) {
         
         paginaPeliculas = page;
         
+        // ⭐ CONTROL DE VISIBILIDAD DEL BOTÓN - CORREGIDO
         if (page >= totalPaginasPeliculas) {
             btn.classList.add('oculto');
+            console.log('🔒 Última página, botón oculto');
         } else {
             btn.classList.remove('oculto');
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más';
+            console.log('🔓 Botón visible, hay más páginas');
         }
     } catch(e) {
-        console.error(e);
-        if (page === 1) grid.innerHTML = '<p class="empty-msg">Error al cargar</p>';
+        console.error('❌ Error en cargarPeliculas:', e);
+        if (page === 1) grid.innerHTML = '<p class="empty-msg">Error al cargar películas</p>';
         btn.innerHTML = '⚠️ Error';
         btn.disabled = false;
+        btn.classList.remove('oculto');
     }
     cargandoPeliculas = false;
 }
@@ -489,7 +495,10 @@ async function cargarPeliculas(page = 1) {
 window.cargarMasPeliculas = function() { 
     if (!cargandoPeliculas) {
         const nextPage = paginaPeliculas + 1;
+        console.log('➡️ Cargando página:', nextPage);
         cargarPeliculas(nextPage); 
+    } else {
+        console.log('⏳ Ya está cargando...');
     }
 };
 
@@ -497,10 +506,11 @@ window.aplicarFiltros = function() {
     filtroGenero = document.getElementById('filterGenre').value;
     filtroAnio = document.getElementById('filterYear').value;
     paginaPeliculas = 1;
+    totalPaginasPeliculas = 1;
     cargarPeliculas(1);
 };
 
-// ⭐ SCROLL INFINITO - CUANDO LLEGAS AL FINAL
+// ⭐ SCROLL INFINITO - CORREGIDO
 const mainContent = document.getElementById('mainContent');
 mainContent.addEventListener('scroll', function() {
     clearTimeout(scrollTimeout);
@@ -509,15 +519,21 @@ mainContent.addEventListener('scroll', function() {
         const scrollHeight = mainContent.scrollHeight;
         const clientHeight = mainContent.clientHeight;
         
-        // Cuando el usuario llegue al final (con 50px de margen)
-        if (scrollTop + clientHeight >= scrollHeight - 50) {
+        // Calcular distancia al final
+        const distancia = scrollHeight - (scrollTop + clientHeight);
+        
+        // Cuando el usuario deslice hacia abajo y esté cerca del final (menos de 200px)
+        if (distancia < 200) {
             const btn = document.getElementById('btnMasPeliculas');
-            // Si el botón no está oculto y no está cargando
+            // Si el botón no está oculto y no está cargando, cargar más
             if (!btn.classList.contains('oculto') && !cargandoPeliculas) {
+                console.log('🔄 Scroll infinito activado, distancia:', distancia);
                 cargarMasPeliculas();
+            } else if (btn.classList.contains('oculto')) {
+                console.log('⏹️ Botón oculto, no hay más páginas');
             }
         }
-    }, 300);
+    }, 150);
 });
 
 // ⭐ BÚSQUEDA
@@ -565,6 +581,7 @@ function mostrarBannerApp() {
     const banner = document.getElementById('bannerApp');
     if (!banner) return;
     if (localStorage.getItem('bannerAppCerrado') === 'true') return;
+    
     const { esWebView, esNavegador } = detectarPlataforma();
     if (esNavegador) {
         banner.style.display = 'block';
@@ -594,13 +611,25 @@ function descargarAPK() {
     setTimeout(cerrarBannerApp, 1000);
 }
 
+// ⭐ INICIAR
 cargarPeliculas(1);
 
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 1500);
 });
 
-console.log('✅ Películas - Botón Cargar más visible + Scroll infinito');
+// ⭐ FORZAR VISIBILIDAD DEL BOTÓN (respaldo)
+setTimeout(() => {
+    const btn = document.getElementById('btnMasPeliculas');
+    if (btn && btn.classList.contains('oculto') && paginaPeliculas < totalPaginasPeliculas) {
+        btn.classList.remove('oculto');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más';
+        console.log('🛠️ Botón forzado a visible (respaldo)');
+    }
+}, 3000);
+
+console.log('✅ Películas - Scroll infinito + Botón Cargar más CORREGIDO');
 </script>
 </body>
 </html>
