@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TELY 🎬 - Películas</title>
+    <title>TELY 🎬 - Películas y Series</title>
     <link rel="icon" href="logo.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ========== RESET ========== */
         *{margin:0;padding:0;box-sizing:border-box}
         html,body{width:100%;height:100%;overflow:hidden;background:#0A0A0F}
         body{background:#0A0A0F;color:#fff;font-family:system-ui,-apple-system,sans-serif}
         ::-webkit-scrollbar{display:none}
 
-        /* ========== MAIN ========== */
         .main-content{
             width:100%;
             height:100vh;
@@ -24,7 +22,6 @@
             margin:0 auto;
         }
 
-        /* ========== HEADER ========== */
         .header{
             position:sticky;
             top:0;
@@ -103,7 +100,6 @@
             transform:scale(1.02);
         }
 
-        /* ========== FILTROS ========== */
         .filtros{
             display:flex;
             gap:8px;
@@ -140,7 +136,6 @@
             background:#6D28D9;
         }
 
-        /* ⭐⭐⭐ 4 COLUMNAS POR FILA ⭐⭐⭐ */
         .grid-peliculas{
             display:grid !important;
             grid-template-columns:repeat(4,1fr) !important;
@@ -148,7 +143,6 @@
             padding:12px 0 !important;
         }
 
-        /* ========== TARJETAS ========== */
         .movie-card{
             background:rgba(255,255,255,.04);
             border-radius:10px;
@@ -209,7 +203,6 @@
             font-weight:600;
         }
 
-        /* ========== SKELETON ========== */
         .skeleton{
             aspect-ratio:2/3;
             border-radius:10px;
@@ -222,7 +215,6 @@
             100%{background-position:200% 0}
         }
 
-        /* ========== INDICADOR DE CARGA ========== */
         .loading-indicator{
             text-align:center;
             padding:20px 0;
@@ -244,7 +236,6 @@
             font-size:14px;
         }
 
-        /* ========== FINAL ========== */
         .end-message{
             text-align:center;
             padding:20px 0;
@@ -255,16 +246,31 @@
         .end-message.show{
             display:block;
         }
+
+        .result-badge{
+            display:inline-block;
+            font-size:8px;
+            padding:2px 8px;
+            border-radius:4px;
+            margin-top:4px;
+        }
+        .badge-pelicula{
+            background:rgba(124,58,237,.3);
+            color:#A78BFA;
+        }
+        .badge-serie{
+            background:rgba(59,130,246,.3);
+            color:#60A5FA;
+        }
     </style>
 </head>
 <body>
 
 <main class="main-content" id="mainContent">
 
-    <!-- ===== HEADER ===== -->
     <div class="header">
         <div class="header-top">
-            <h1>🎬 Películas</h1>
+            <h1>🎬 TELY</h1>
             <div class="header-actions">
                 <button onclick="window.location.href='index.html'"><i class="fas fa-home"></i></button>
                 <button onclick="toggleTheme()" id="themeBtn"><i class="fas fa-moon"></i></button>
@@ -272,13 +278,12 @@
             </div>
         </div>
 
-        <!-- ===== BUSCADOR ===== -->
+        <!-- ===== BUSCADOR AUTOMÁTICO ===== -->
         <div class="search-box">
-            <input type="text" placeholder="🔍 Buscar películas..." id="searchInput" onkeydown="if(event.key==='Enter') buscar()">
-            <button onclick="buscar()"><i class="fas fa-search"></i> Buscar</button>
+            <input type="text" placeholder="🔍 Buscar películas o series..." id="searchInput" oninput="buscarAutomatico()">
+            <button onclick="buscarAutomatico()"><i class="fas fa-search"></i></button>
         </div>
 
-        <!-- ===== FILTROS ===== -->
         <div class="filtros">
             <select id="filterYear">
                 <option value="">Todos los años</option>
@@ -299,22 +304,18 @@
         </div>
     </div>
 
-    <!-- ===== GRID 4 COLUMNAS ===== -->
     <div class="grid-peliculas" id="listaPeliculas"></div>
 
-    <!-- ===== INDICADOR DE CARGA ===== -->
     <div class="loading-indicator" id="loadingIndicator">
-        <i class="fas fa-spinner fa-spin"></i> Cargando más películas...
+        <i class="fas fa-spinner fa-spin"></i> Cargando...
     </div>
 
-    <!-- ===== MENSAJE FINAL ===== -->
     <div class="end-message" id="endMessage">
-        🎬 ¡Ya no hay más películas!
+        🎬 ¡Ya no hay más resultados!
     </div>
 
 </main>
 
-<!-- ===== FIREBASE ===== -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -335,7 +336,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 // ============================================================
-// 📌 VARIABLES GLOBALES
+// 📌 VARIABLES
 // ============================================================
 let paginaActual = 1;
 let cargando = false;
@@ -343,9 +344,11 @@ let totalPaginas = 1;
 let filtroGenero = '';
 let filtroAnio = '';
 let yaNoHayMas = false;
+let modoBusqueda = false;
+let timeoutBusqueda = null;
 
 // ============================================================
-// 🛠️ FUNCIONES AUXILIARES
+// 🛠️ FUNCIONES
 // ============================================================
 function getImagen(path) {
     if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
@@ -372,29 +375,40 @@ if (localStorage.getItem('theme') === 'dark') {
 }
 
 // ============================================================
-// 🎴 CREAR TARJETA
+// 🎴 CREAR TARJETA (con soporte para series)
 // ============================================================
-function crearTarjeta(item) {
+function crearTarjeta(item, tipo = 'pelicula') {
     const div = document.createElement('div');
     div.className = 'movie-card';
+    
+    const badgeTipo = tipo === 'serie' ? '📺 Serie' : '🎬 Película';
+    const badgeClass = tipo === 'serie' ? 'badge-serie' : 'badge-pelicula';
+    
     div.innerHTML = `
         <span class="badge-year">${item.anio || 'N/D'}</span>
-        <span class="badge-type">🎬</span>
+        <span class="badge-type">${tipo === 'serie' ? '📺' : '🎬'}</span>
         <img src="${item.portada}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
         <div class="info">
             <h4>${item.titulo}</h4>
-            <div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div>
+            <div class="meta">
+                <span>⭐ ${item.puntuacion || 'N/A'}</span>
+                <span class="result-badge ${badgeClass}">${badgeTipo}</span>
+            </div>
         </div>
     `;
+    
     div.onclick = () => {
-        const params = new URLSearchParams({ play: item.tmdb_id || item.id, tipo: 'pelicula' });
+        const params = new URLSearchParams({
+            play: item.tmdb_id || item.id,
+            tipo: tipo
+        });
         window.location.href = `reproductor.html?${params}`;
     };
     return div;
 }
 
 // ============================================================
-// 📦 CARGAR PELÍCULAS
+// 📦 CARGAR PELÍCULAS (descubrir)
 // ============================================================
 async function cargarPeliculas(page = 1) {
     if (cargando) return;
@@ -408,10 +422,6 @@ async function cargarPeliculas(page = 1) {
     const grid = document.getElementById('listaPeliculas');
     const loading = document.getElementById('loadingIndicator');
     
-    // Mostrar indicador de carga
-    loading.classList.add('show');
-
-    // Mostrar skeletons en la primera página
     if (page === 1) {
         grid.innerHTML = '';
         for (let i = 0; i < 8; i++) {
@@ -421,6 +431,8 @@ async function cargarPeliculas(page = 1) {
         }
     }
 
+    loading.classList.add('show');
+
     try {
         const params = { page };
         if (filtroAnio) params.primary_release_year = filtroAnio;
@@ -429,7 +441,6 @@ async function cargarPeliculas(page = 1) {
         const data = await fetchTMDB('discover/movie', params);
         totalPaginas = data.total_pages || 1;
 
-        // Limpiar skeletons
         if (page === 1) grid.innerHTML = '';
 
         if (!data.results || !data.results.length) {
@@ -439,13 +450,11 @@ async function cargarPeliculas(page = 1) {
             return;
         }
 
-        // Obtener datos personalizados de Firebase
         const snap = await db.ref('contenido_personalizado').once('value');
         const adminData = snap.val() || {};
         const adminMap = {};
         Object.values(adminData).forEach(i => { adminMap[i.tmdb_id] = i; });
 
-        // Crear tarjetas
         data.results.forEach(p => {
             const a = adminMap[p.id];
             const item = {
@@ -456,15 +465,12 @@ async function cargarPeliculas(page = 1) {
                 portada: a?.portada || getImagen(p.poster_path),
                 puntuacion: a?.puntuacion || (p.vote_average ? p.vote_average.toFixed(1) : 'N/A')
             };
-            grid.appendChild(crearTarjeta(item));
+            grid.appendChild(crearTarjeta(item, 'pelicula'));
         });
 
         paginaActual = page;
-
-        // Ocultar indicador de carga
         loading.classList.remove('show');
 
-        // Si ya no hay más páginas, mostrar mensaje final
         if (page >= totalPaginas) {
             yaNoHayMas = true;
             document.getElementById('endMessage').classList.add('show');
@@ -482,29 +488,122 @@ async function cargarPeliculas(page = 1) {
 }
 
 // ============================================================
-// 🔄 CARGAR MÁS (solo desde scroll)
+// 🔍 BUSCADOR AUTOMÁTICO (películas Y series)
 // ============================================================
-function cargarMasPeliculas() {
-    if (!cargando && !yaNoHayMas) {
-        cargarPeliculas(paginaActual + 1);
+window.buscarAutomatico = async function() {
+    const input = document.getElementById('searchInput');
+    const query = input.value.trim();
+    const grid = document.getElementById('listaPeliculas');
+    const loading = document.getElementById('loadingIndicator');
+    const endMsg = document.getElementById('endMessage');
+    
+    // Si el input está vacío, volver a las películas normales
+    if (!query) {
+        modoBusqueda = false;
+        paginaActual = 1;
+        totalPaginas = 1;
+        yaNoHayMas = false;
+        endMsg.classList.remove('show');
+        cargarPeliculas(1);
+        return;
     }
-}
 
-// ============================================================
-// 🎯 FILTROS
-// ============================================================
-window.aplicarFiltros = function() {
-    filtroGenero = document.getElementById('filterGenre').value;
-    filtroAnio = document.getElementById('filterYear').value;
-    paginaActual = 1;
-    totalPaginas = 1;
-    yaNoHayMas = false;
-    document.getElementById('endMessage').classList.remove('show');
-    cargarPeliculas(1);
+    // Limpiar timeout anterior
+    clearTimeout(timeoutBusqueda);
+    
+    // Mostrar skeletons mientras carga
+    grid.innerHTML = '';
+    for (let i = 0; i < 8; i++) {
+        const sk = document.createElement('div');
+        sk.className = 'skeleton';
+        grid.appendChild(sk);
+    }
+    
+    loading.classList.add('show');
+    modoBusqueda = true;
+    endMsg.classList.remove('show');
+
+    try {
+        // Buscar en películas Y series al mismo tiempo
+        const [peliculas, series] = await Promise.all([
+            fetchTMDB('search/movie', { query, page: 1 }),
+            fetchTMDB('search/tv', { query, page: 1 })
+        ]);
+
+        loading.classList.remove('show');
+        grid.innerHTML = '';
+
+        // Combinar resultados
+        const resultados = [];
+        
+        // Agregar películas
+        if (peliculas.results && peliculas.results.length) {
+            peliculas.results.forEach(p => {
+                resultados.push({
+                    ...p,
+                    tipo: 'pelicula',
+                    titulo: p.title,
+                    fecha: p.release_date
+                });
+            });
+        }
+        
+        // Agregar series
+        if (series.results && series.results.length) {
+            series.results.forEach(s => {
+                resultados.push({
+                    ...s,
+                    tipo: 'serie',
+                    titulo: s.name,
+                    fecha: s.first_air_date
+                });
+            });
+        }
+
+        // Ordenar por popularidad
+        resultados.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+
+        if (!resultados.length) {
+            grid.innerHTML = `<p class="empty-msg">🔍 No se encontraron resultados para "${query}"</p>`;
+            return;
+        }
+
+        // Mostrar resultados
+        resultados.forEach(item => {
+            const tarjetaItem = {
+                id: item.id,
+                tmdb_id: item.id,
+                titulo: item.titulo || 'Sin título',
+                anio: item.fecha ? item.fecha.split('-')[0] : 'N/D',
+                portada: getImagen(item.poster_path),
+                puntuacion: item.vote_average ? item.vote_average.toFixed(1) : 'N/A'
+            };
+            grid.appendChild(crearTarjeta(tarjetaItem, item.tipo));
+        });
+
+        // Mostrar mensaje de cuántos resultados hay
+        const totalResultados = resultados.length;
+        const badge = document.createElement('div');
+        badge.style.cssText = `
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 10px;
+            color: #94A3B8;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(124,58,237,.1);
+        `;
+        badge.textContent = `🔍 ${totalResultados} resultados para "${query}" (${peliculas.results?.length || 0} películas, ${series.results?.length || 0} series)`;
+        grid.prepend(badge);
+
+    } catch (e) {
+        console.error('Error en búsqueda:', e);
+        loading.classList.remove('show');
+        grid.innerHTML = '<p class="empty-msg">⚠️ Error al buscar</p>';
+    }
 };
 
 // ============================================================
-// 📜 SCROLL INFINITO - CARGA AUTOMÁTICA
+// 📜 SCROLL INFINITO
 // ============================================================
 const mainContent = document.getElementById('mainContent');
 let timeoutScroll = null;
@@ -516,51 +615,28 @@ mainContent.addEventListener('scroll', function() {
         const scrollHeight = mainContent.scrollHeight;
         const clientHeight = mainContent.clientHeight;
 
-        // 🔥 CARGA CUANDO FALTAN 150px PARA EL FINAL
         if (scrollTop + clientHeight >= scrollHeight - 150) {
-            if (!cargando && !yaNoHayMas) {
-                cargarMasPeliculas();
+            // Solo cargar más si NO estamos en modo búsqueda
+            if (!modoBusqueda && !cargando && !yaNoHayMas) {
+                cargarPeliculas(paginaActual + 1);
             }
         }
     }, 100);
 });
 
 // ============================================================
-// 🔍 BÚSQUEDA
+// 🎯 FILTROS
 // ============================================================
-window.buscar = async function() {
-    const input = document.getElementById('searchInput');
-    const query = input.value.trim();
-    if (!query) return;
-
-    try {
-        const data = await fetchTMDB('search/movie', { query, page: 1 });
-        const grid = document.getElementById('listaPeliculas');
-
-        grid.innerHTML = '';
-
-        if (!data.results || !data.results.length) {
-            grid.innerHTML = '<p class="empty-msg">No se encontraron películas</p>';
-            document.getElementById('endMessage').classList.remove('show');
-            return;
-        }
-
-        data.results.forEach(p => {
-            const item = {
-                id: p.id,
-                tmdb_id: p.id,
-                titulo: p.title || 'Sin título',
-                anio: p.release_date ? p.release_date.split('-')[0] : 'N/D',
-                portada: getImagen(p.poster_path),
-                puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A'
-            };
-            grid.appendChild(crearTarjeta(item));
-        });
-
-        document.getElementById('endMessage').classList.remove('show');
-    } catch (e) {
-        console.error(e);
-    }
+window.aplicarFiltros = function() {
+    filtroGenero = document.getElementById('filterGenre').value;
+    filtroAnio = document.getElementById('filterYear').value;
+    paginaActual = 1;
+    totalPaginas = 1;
+    yaNoHayMas = false;
+    modoBusqueda = false;
+    document.getElementById('endMessage').classList.remove('show');
+    document.getElementById('searchInput').value = '';
+    cargarPeliculas(1);
 };
 
 // ============================================================
@@ -568,7 +644,7 @@ window.buscar = async function() {
 // ============================================================
 cargarPeliculas(1);
 
-console.log('🔥 4 columnas + Scroll infinito automático (sin botón)');
+console.log('🔥 Buscador automático + Series + 4 columnas');
 </script>
 
 </body>
