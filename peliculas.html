@@ -16,12 +16,12 @@
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         html,body{width:100%;height:100%;overflow:hidden;background:#0A0A0F}
-        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;transition:background 0.3s, color 0.3s;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
         ::-webkit-scrollbar{display:none}
         body.dark{background:#0A0A0F;color:#fff}
         body:not(.dark){background:#f0f0f0;color:#111}
         
-        .main-content{width:100%;height:100vh;padding:.3rem .5rem 5rem;overflow-y:auto;margin:0 auto;max-width:600px}
+        .main-content{width:100%;height:100vh;padding:.3rem .5rem;overflow-y:auto;margin:0 auto;max-width:600px;padding-bottom:80px !important}
         
         .header-flotante{
             position:sticky;
@@ -96,6 +96,61 @@
         body:not(.dark) .skeleton{background:linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 50%,#e0e0e0 75%);background-size:200% 100%}
         @keyframes skeleton{0%{background-position:-200% 0}100%{background-position:200% 0}}
         
+        /* ⭐ BOTÓN CARGAR MÁS - CORREGIDO */
+        .load-more {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 0.8rem 0 2rem 0 !important;
+            margin: 0.5rem 0 1rem 0 !important;
+            min-height: 80px !important;
+            width: 100% !important;
+            clear: both !important;
+        }
+        
+        .load-more button {
+            background: rgba(124,58,237,.15) !important;
+            color: #fff !important;
+            padding: 0.7rem 2rem !important;
+            border-radius: 9999px !important;
+            border: 2px solid rgba(124,58,237,.3) !important;
+            font-weight: 700 !important;
+            cursor: pointer !important;
+            font-size: 0.85rem !important;
+            transition: .3s !important;
+            min-width: 180px !important;
+            min-height: 50px !important;
+            display: inline-block !important;
+            text-align: center !important;
+            line-height: 1.4 !important;
+            white-space: nowrap !important;
+        }
+        
+        .load-more button:hover {
+            background: rgba(124,58,237,.25) !important;
+            border-color: #7C3AED !important;
+            transform: scale(1.02) !important;
+        }
+        
+        body:not(.dark) .load-more button {
+            color: #111 !important;
+            background: rgba(124,58,237,.1) !important;
+        }
+        
+        .load-more button:disabled {
+            opacity: .4 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+        }
+        
+        .load-more button.oculto {
+            display: none !important;
+        }
+        
+        .load-more button:not(.oculto) {
+            display: inline-block !important;
+        }
+        
         .user-dropdown{position:absolute;right:0;top:calc(100% + 6px);background:rgba(26,26,46,.95);border-radius:8px;width:160px;border:1px solid rgba(124,58,237,.15);padding:.2rem 0;display:none;z-index:60;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
         body:not(.dark) .user-dropdown{background:rgba(255,255,255,.95);border-color:rgba(0,0,0,.1)}
@@ -119,41 +174,6 @@
         body:not(.dark) .filter-section select{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
         .filter-section button{padding:.2rem .8rem;border-radius:6px;border:none;background:#7C3AED;color:#fff;font-weight:600;font-size:.7rem;cursor:pointer}
         .filter-section button:hover{background:#6D28D9}
-        
-        /* ⭐⭐⭐ BOTÓN FLOTANTE "CARGAR MÁS" - SIEMPRE VISIBLE ⭐⭐⭐ */
-        .btn-cargar-flotante{
-            position:fixed;
-            bottom:70px;
-            left:50%;
-            transform:translateX(-50%);
-            background:linear-gradient(135deg,#7C3AED,#A78BFA);
-            color:#fff;
-            border:none;
-            padding:.5rem 2rem;
-            border-radius:30px;
-            font-weight:700;
-            font-size:.8rem;
-            cursor:pointer;
-            z-index:100;
-            box-shadow:0 8px 30px rgba(124,58,237,.5);
-            display:flex;
-            align-items:center;
-            gap:.3rem;
-            transition:all .3s ease;
-            white-space:nowrap;
-        }
-        .btn-cargar-flotante:hover{
-            transform:translateX(-50%) scale(1.05);
-            box-shadow:0 12px 40px rgba(124,58,237,.7);
-        }
-        .btn-cargar-flotante:disabled{
-            opacity:.5;
-            cursor:not-allowed;
-            transform:translateX(-50%) scale(1);
-        }
-        .btn-cargar-flotante.oculto{
-            display:none;
-        }
         
         #bannerApp {
             display:none;
@@ -228,12 +248,8 @@
     </div>
 
     <div class="grid-movies" id="listaPeliculas"></div>
+    <div class="load-more"><button onclick="cargarMasPeliculas()" id="btnMasPeliculas"><i class="fas fa-plus"></i> Cargar más</button></div>
 </main>
-
-<!-- ⭐⭐⭐ BOTÓN FLOTANTE "CARGAR MÁS" ⭐⭐⭐ -->
-<button class="btn-cargar-flotante" id="btnCargarFlotante" onclick="cargarMasPeliculas()">
-    <i class="fas fa-plus"></i> Cargar más
-</button>
 
 <div id="bannerApp">
     <div style="display:flex;align-items:center;justify-content:space-between;max-width:600px;margin:0 auto;gap:0.4rem;">
@@ -351,7 +367,7 @@ function getImagenUrl(path, size = 'w342') {
 function mostrarToast(msg, tipo = 'success') {
     const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
     const t = document.createElement('div');
-    t.style.cssText = `position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:6px 14px;border-radius:8px;z-index:9999;font-weight:600;font-size:.7rem;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
+    t.style.cssText = `position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:6px 14px;border-radius:8px;z-index:9999;font-weight:600;font-size:.7rem;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
     t.textContent = msg;
     document.body.appendChild(t);
     setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2000);
@@ -372,6 +388,7 @@ let cargandoPeliculas = false;
 let totalPaginasPeliculas = 1;
 let filtroGenero = '';
 let filtroAnio = '';
+let scrollTimeout = null;
 
 function toggleFavorito(item) {
     if (!auth.currentUser) { window.location.href = 'login.html'; return; }
@@ -433,13 +450,17 @@ function crearTarjeta(item) {
     return div;
 }
 
+// ⭐ CARGAR PELÍCULAS
 async function cargarPeliculas(page = 1) {
     if (cargandoPeliculas) return;
-    if (page > totalPaginasPeliculas && page > 1) return;
+    if (page > totalPaginasPeliculas && page > 1) {
+        console.log('⚠️ Ya no hay más páginas');
+        return;
+    }
     
     cargandoPeliculas = true;
     const grid = document.getElementById('listaPeliculas');
-    const btn = document.getElementById('btnCargarFlotante');
+    const btn = document.getElementById('btnMasPeliculas');
     
     if (page === 1) {
         grid.innerHTML = '';
@@ -461,6 +482,7 @@ async function cargarPeliculas(page = 1) {
         
         const data = await fetchTMDB('discover/movie', params);
         totalPaginasPeliculas = data.total_pages || 1;
+        console.log(`📄 Página ${page} de ${totalPaginasPeliculas} | Películas: ${data.results?.length || 0}`);
         
         if (page === 1) grid.innerHTML = '';
         
@@ -495,16 +517,19 @@ async function cargarPeliculas(page = 1) {
         
         if (page >= totalPaginasPeliculas) {
             btn.classList.add('oculto');
+            console.log('🔒 Última página, botón oculto');
         } else {
             btn.classList.remove('oculto');
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más';
+            console.log('🔓 Botón visible, hay más páginas');
         }
     } catch(e) {
-        console.error(e);
-        if (page === 1) grid.innerHTML = '<p class="empty-msg">Error al cargar</p>';
+        console.error('❌ Error:', e);
+        if (page === 1) grid.innerHTML = '<p class="empty-msg">Error al cargar películas</p>';
         btn.innerHTML = '⚠️ Error';
         btn.disabled = false;
+        btn.classList.remove('oculto');
     }
     cargandoPeliculas = false;
 }
@@ -512,6 +537,7 @@ async function cargarPeliculas(page = 1) {
 window.cargarMasPeliculas = function() { 
     if (!cargandoPeliculas) {
         const nextPage = paginaPeliculas + 1;
+        console.log('➡️ Cargando página:', nextPage);
         cargarPeliculas(nextPage); 
     }
 };
@@ -520,20 +546,33 @@ window.aplicarFiltros = function() {
     filtroGenero = document.getElementById('filterGenre').value;
     filtroAnio = document.getElementById('filterYear').value;
     paginaPeliculas = 1;
+    totalPaginasPeliculas = 1;
     cargarPeliculas(1);
 };
 
-// ⭐ SCROLL INFINITO - SOLO PARA QUE FUNCIONE TAMBIÉN AL DESLIZAR
+// ⭐ SCROLL INFINITO - CORREGIDO
 const mainContent = document.getElementById('mainContent');
+let scrollCargando = false;
+
 mainContent.addEventListener('scroll', function() {
+    if (scrollCargando) return;
+    
     const scrollTop = mainContent.scrollTop;
     const scrollHeight = mainContent.scrollHeight;
     const clientHeight = mainContent.clientHeight;
     
-    if (scrollTop + clientHeight >= scrollHeight - 100) {
-        const btn = document.getElementById('btnCargarFlotante');
+    // Cuando el usuario está cerca del final (menos de 300px)
+    if (scrollTop + clientHeight >= scrollHeight - 300) {
+        const btn = document.getElementById('btnMasPeliculas');
+        
         if (!btn.classList.contains('oculto') && !cargandoPeliculas) {
+            scrollCargando = true;
+            console.log('🔄 Scroll: Cargando más...');
             cargarMasPeliculas();
+            
+            setTimeout(() => {
+                scrollCargando = false;
+            }, 1500);
         }
     }
 });
@@ -583,6 +622,7 @@ function mostrarBannerApp() {
     const banner = document.getElementById('bannerApp');
     if (!banner) return;
     if (localStorage.getItem('bannerAppCerrado') === 'true') return;
+    
     const { esWebView, esNavegador } = detectarPlataforma();
     if (esNavegador) {
         banner.style.display = 'block';
@@ -612,13 +652,14 @@ function descargarAPK() {
     setTimeout(cerrarBannerApp, 1000);
 }
 
+// ⭐ INICIAR
 cargarPeliculas(1);
 
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 1500);
 });
 
-console.log('✅ Películas - Botón flotante siempre visible, scroll infinito, Opción 2 desde Firebase');
+console.log('✅ Películas - Scroll infinito + Botón Cargar más CORREGIDO');
 </script>
 </body>
 </html>
