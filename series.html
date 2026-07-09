@@ -128,6 +128,7 @@
         </div>
     </div>
 
+    <!-- ⭐ BUSCADOR - CON oninput CORRECTO ⭐ -->
     <div class="search-bar">
         <input type="text" placeholder="🔍 Buscar series..." id="searchInput" oninput="buscarGlobal()">
         <button onclick="buscarGlobal()"><i class="fas fa-search"></i></button>
@@ -197,10 +198,66 @@ window.cargarMasSeries=function(){if(!cargando){paginaActual++;cargarSeries(pagi
 const mainContent=document.querySelector('.main-content');
 mainContent.addEventListener('scroll',function(){const st=mainContent.scrollTop,sh=mainContent.scrollHeight,ch=mainContent.clientHeight;if(st+ch>=sh-100){const btn=document.getElementById('btnMas');if(btn.style.display!=='none'&&!cargando){window.cargarMasSeries()}}});
 
-window.buscarGlobal=async function(){const input=document.getElementById('searchInput');const texto=input.value.trim();const grid=document.getElementById('listaSeries');if(!texto){cargarSeries(1);return}clearTimeout(timeoutBusqueda);timeoutBusqueda=setTimeout(async()=>{try{const data=await fetchTMDB('search/tv',{query:texto,page:1});grid.innerHTML='';if(!data.results||!data.results.length){grid.innerHTML=`<p class="empty-msg">🔍 No se encontraron resultados para "${texto}"</p>`;document.getElementById('btnMas').style.display='none';return}data.results.slice(0,20).forEach(s=>{const item={id:s.id,tmdb_id:s.id,titulo:s.name||'Sin título',anio:s.first_air_date?s.first_air_date.split('-')[0]:'N/D',portada:getImagenUrl(s.poster_path,'w342'),puntuacion:s.vote_average?s.vote_average.toFixed(1):'N/A'};grid.appendChild(crearTarjeta(item))});document.getElementById('btnMas').style.display='none'}catch(e){console.error(e)}},300)};
+// ⭐⭐ BUSCADOR CORREGIDO ⭐⭐
+window.buscarGlobal = async function() {
+    const input = document.getElementById('searchInput');
+    const texto = input.value.trim();
+    const grid = document.getElementById('listaSeries');
+    const btn = document.getElementById('btnMas');
+    
+    // Si no hay texto, recargar series populares
+    if (!texto) {
+        cargarSeries(1);
+        return;
+    }
+    
+    // Limpiar timeout anterior
+    clearTimeout(timeoutBusqueda);
+    
+    timeoutBusqueda = setTimeout(async () => {
+        try {
+            // Mostrar skeletons mientras carga
+            grid.innerHTML = '';
+            for (let i = 0; i < 12; i++) {
+                const sk = document.createElement('div');
+                sk.className = 'skeleton';
+                grid.appendChild(sk);
+            }
+            
+            const data = await fetchTMDB('search/tv', { query: texto, page: 1 });
+            
+            grid.innerHTML = '';
+            
+            if (!data.results || !data.results.length) {
+                grid.innerHTML = `<p class="empty-msg">🔍 No se encontraron series para "${texto}"</p>`;
+                btn.style.display = 'none';
+                return;
+            }
+            
+            // Mostrar resultados
+            data.results.slice(0, 20).forEach(s => {
+                const item = {
+                    id: s.id,
+                    tmdb_id: s.id,
+                    titulo: s.name || 'Sin título',
+                    anio: s.first_air_date ? s.first_air_date.split('-')[0] : 'N/D',
+                    portada: getImagenUrl(s.poster_path, 'w342'),
+                    puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A'
+                };
+                grid.appendChild(crearTarjeta(item));
+            });
+            
+            btn.style.display = 'none';
+            
+        } catch(e) {
+            console.error('Error en búsqueda:', e);
+            grid.innerHTML = `<p class="empty-msg">⚠️ Error al buscar</p>`;
+        }
+    }, 300);
+};
 
 cargarSeries(1);
-console.log('✅ Series - Carga rápida + buscador en grid + IDs correctos');
+console.log('✅ Series - Buscador CORREGIDO');
 </script>
 </body>
 </html>
