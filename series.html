@@ -4,15 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>TELY 🎬 - Series</title>
+    <link rel="icon" href="logo.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;transition:background 0.3s, color 0.3s;display:flex}
+        body{background:#0A0A0F;color:#fff;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;transition:background .3s,color .3s;display:flex}
         body.dark{background:#0A0A0F;color:#fff}
         body:not(.dark){background:#f0f0f0;color:#111}
+        ::-webkit-scrollbar{display:none}
         
-        .sidebar{position:fixed;top:0;left:0;bottom:0;width:72px;background:rgba(10,10,15,.97);backdrop-filter:blur(12px);border-right:1px solid rgba(124,58,237,.12);z-index:100;display:flex;flex-direction:column;align-items:center;padding:.8rem 0;overflow-y:auto;transition:width 0.3s}
+        .sidebar{position:fixed;top:0;left:0;bottom:0;width:72px;background:rgba(10,10,15,.97);backdrop-filter:blur(12px);border-right:1px solid rgba(124,58,237,.12);z-index:100;display:flex;flex-direction:column;align-items:center;padding:.8rem 0;overflow-y:auto;transition:width .3s}
         body:not(.dark) .sidebar{background:rgba(255,255,255,.97);border-color:rgba(0,0,0,.08)}
         .sidebar:hover{width:200px}
         .sidebar:hover .sidebar-link span{display:inline}
@@ -44,23 +46,14 @@
         .user-btn:hover{background:rgba(124,58,237,.3)}
         body:not(.dark) .user-btn{color:#111}
         
-        .search-bar{display:flex;align-items:center;gap:.5rem;max-width:500px;margin-bottom:1rem;position:relative}
+        .search-bar{display:flex;align-items:center;gap:.5rem;max-width:500px;margin-bottom:1rem}
         .search-bar input{flex:1;padding:.5rem 1rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.9rem;transition:.3s}
-        .search-bar input:focus{outline:none;border-color:#7C3AED;background:rgba(255,255,255,.08)}
+        .search-bar input:focus{outline:none;border-color:#7C3AED}
         .search-bar input::placeholder{color:#64748B}
         body:not(.dark) .search-bar input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
-        body:not(.dark) .search-bar input::placeholder{color:#888}
         .search-bar button{padding:.4rem 1.2rem;border-radius:9999px;border:none;background:#7C3AED;color:#fff;font-size:.9rem;cursor:pointer;transition:.3s}
         .search-bar button:hover{background:#6D28D9}
-        .search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:rgba(26,26,46,.98);border-radius:12px;max-height:300px;overflow-y:auto;display:none;z-index:50;border:1px solid rgba(124,58,237,.15);padding:.3rem 0}
-        .search-results.show{display:block}
-        body:not(.dark) .search-results{background:rgba(255,255,255,.98);border-color:rgba(0,0,0,.1)}
-        .search-result{display:flex;align-items:center;gap:.6rem;padding:.4rem .8rem;cursor:pointer;transition:.2s}
-        .search-result:hover{background:rgba(124,58,237,.1)}
-        .search-result img{width:30px;height:45px;object-fit:cover;border-radius:4px}
-        .search-result .info{flex:1}
-        .search-result .info .title{font-weight:600;font-size:.8rem}
-        .search-result .info .detail{font-size:.65rem;color:#94A3B8}
+        .search-results{display:none !important}
         
         .grid-movies{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem}
         @media(min-width:768px){.grid-movies{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}}
@@ -81,11 +74,11 @@
         .section-title i{color:#7C3AED}
         body:not(.dark) .section-title{color:#111}
         .skeleton{aspect-ratio:2/3;border-radius:8px;background:linear-gradient(90deg,#1A1A2E 25%,#2D2D44 50%,#1A1A2E 75%);background-size:200% 100%;animation:skeleton 1.5s infinite}
-        body:not(.dark) .skeleton{background:linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 50%,#e0e0e0 75%);background-size:200% 100%}
-        @keyframes skeleton{0%{background-position:-200% 0}100%{background-position:200% 0}}
+        body:not(.dark) .skeleton{background:linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 50%,#e0e0e0 75%)}
+        @keyframes skeleton{0%{background-position:-200%}100%{background-position:200%}}
         .load-more{display:flex;justify-content:center;padding:1rem 0}
         .load-more button{background:rgba(124,58,237,.15);color:#fff;padding:.4rem 1.5rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);font-weight:600;cursor:pointer;font-size:.85rem;transition:.3s}
-        .load-more button:hover{background:rgba(124,58,237,.25);border-color:#7C3AED}
+        .load-more button:hover{background:rgba(124,58,237,.25)}
         body:not(.dark) .load-more button{color:#111;background:rgba(124,58,237,.1)}
         
         .user-dropdown{position:absolute;right:0;top:calc(100% + 8px);background:rgba(26,26,46,.95);border-radius:12px;width:200px;border:1px solid rgba(124,58,237,.15);padding:.4rem 0;display:none;z-index:50;box-shadow:0 20px 60px rgba(0,0,0,.5)}
@@ -103,6 +96,7 @@
         .card-actions .fav-btn:hover{background:rgba(239,68,68,.15)}
         .card-actions .list-btn{color:#3B82F6}
         .card-actions .list-btn:hover{background:rgba(59,130,246,.15)}
+        .empty-msg{color:#64748B;font-size:.9rem;padding:1rem 0;text-align:center}
     </style>
 </head>
 <body>
@@ -138,7 +132,7 @@
     </div>
 
     <div class="search-bar">
-        <input type="text" placeholder="🔍 Buscar series..." id="searchInput" onkeydown="if(event.key==='Enter') buscarGlobal()" oninput="mostrarSugerencias(this.value)">
+        <input type="text" placeholder="🔍 Buscar series..." id="searchInput" oninput="buscarGlobal()">
         <button onclick="buscarGlobal()"><i class="fas fa-search"></i></button>
         <div class="search-results" id="searchResults"></div>
     </div>
@@ -150,7 +144,7 @@
         <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
     </div>
 
-    <div class="load-more"><button onclick="cargarMasSeries()"><i class="fas fa-plus"></i> Cargar más</button></div>
+    <div class="load-more"><button onclick="cargarMasSeries()" id="btnMas"><i class="fas fa-plus"></i> Cargar más</button></div>
 </main>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -163,191 +157,55 @@ const firebaseConfig = {
     projectId: "telyx-23210",
     storageBucket: "telyx-23210.firebasestorage.app",
     messagingSenderId: "10164285015",
-    appId: "1:10164285015:web:5cf32bd2831de126c67d12",
-    measurementId: "G-0YEZMJYMJS"
+    appId: "1:10164285015:web:5cf32bd2831de126c67d12"
 };
-
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-let paginaSeries = 1;
-let cargandoSeries = false;
+let paginaActual = 1;
+let cargando = false;
+let totalPaginas = 1;
+let timeoutBusqueda = null;
 
-history.pushState(null, '', window.location.href);
-window.addEventListener('popstate', function(e) { return true; });
-document.addEventListener('backbutton', function(e) { return true; }, false);
+function irALogin(){window.location.href='login.html'}
+function cerrarSesion(){auth.signOut().then(()=>{location.reload()})}
+function toggleUserMenu(){document.getElementById('userDropdown').classList.toggle('show')}
+document.addEventListener('click',(e)=>{const m=document.getElementById('userDropdown');if(m&&!e.target.closest('.user-menu'))m.classList.remove('show')});
+auth.onAuthStateChanged(user=>{document.getElementById('loginBtn').style.display=user?'none':'flex';document.getElementById('logoutBtn').style.display=user?'flex':'none'});
 
-function irALogin() { window.location.href = 'login.html'; }
-function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
-function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
-document.addEventListener('click', (e) => {
-    const menu = document.getElementById('userDropdown');
-    if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
-});
-auth.onAuthStateChanged(user => {
-    document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
-    document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
-});
+function toggleTheme(){const b=document.body;const btn=document.getElementById('themeBtn');if(b.classList.contains('dark')){b.classList.remove('dark');btn.innerHTML='<i class="fas fa-moon"></i>';localStorage.setItem('theme','light')}else{b.classList.add('dark');btn.innerHTML='<i class="fas fa-sun"></i>';localStorage.setItem('theme','dark')}}
+if(localStorage.getItem('theme')==='light'){document.body.classList.remove('dark');document.getElementById('themeBtn').innerHTML='<i class="fas fa-moon"></i>'}else{document.body.classList.add('dark');document.getElementById('themeBtn').innerHTML='<i class="fas fa-sun"></i>'}
 
-function toggleTheme() {
-    const body = document.body;
-    const btn = document.getElementById('themeBtn');
-    if (body.classList.contains('dark')) { body.classList.remove('dark'); btn.innerHTML = '<i class="fas fa-moon"></i>'; localStorage.setItem('theme', 'light'); }
-    else { body.classList.add('dark'); btn.innerHTML = '<i class="fas fa-sun"></i>'; localStorage.setItem('theme', 'dark'); }
-}
-if (localStorage.getItem('theme') === 'light') { document.body.classList.remove('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; }
-else { document.body.classList.add('dark'); document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; }
+function getImagenUrl(path,size='w342'){if(!path)return'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';return`https://image.tmdb.org/t/p/${size}${path}`}
+function generarEnlaceUnlimplay(tmdb_id,tipo,temporada=1,capitulo=1){return`https://unlimplay.com/play/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es-MX&autoplay=1&controls=1&logo=0`}
+function mostrarToast(msg,tipo='success'){const colores={success:'#10B981',warning:'#F59E0B',error:'#EF4444',info:'#3B82F6'};const t=document.createElement('div');t.style.cssText=`position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${colores[tipo]||'#10B981'};color:#fff;padding:10px 20px;border-radius:10px;z-index:9999;font-weight:600;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity .3s;`;t.textContent=msg;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300)},2500)}
+async function fetchTMDB(path,params={}){const q=new URLSearchParams({path,...params});const res=await fetch(`https://tely-xi.vercel.app/api/tmdb?${q}`);if(!res.ok)throw new Error(`Error ${res.status}`);return res.json()}
 
-function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    if (tipo === 'pelicula') return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
-    else return `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es-MX&autoplay=1&controls=1&logo=0`;
-}
+function toggleFavorito(item){if(!auth.currentUser){window.location.href='login.html';return}const uid=auth.currentUser.uid;const ref=db.ref(`usuarios/${uid}/favoritos/${item.id}`);ref.once('value').then(s=>{if(s.exists()){ref.remove();mostrarToast('🗑️ Eliminado','warning')}else{ref.set({id:item.id,titulo:item.titulo,tipo:'serie',portada:item.portada,tmdb_id:item.tmdb_id});mostrarToast('❤️ Agregado','success')}})}
+function toggleMiLista(item){if(!auth.currentUser){window.location.href='login.html';return}const uid=auth.currentUser.uid;const ref=db.ref(`usuarios/${uid}/milista/${item.id}`);ref.once('value').then(s=>{if(s.exists()){ref.remove();mostrarToast('🗑️ Eliminado','warning')}else{ref.set({id:item.id,titulo:item.titulo,tipo:'serie',portada:item.portada,tmdb_id:item.tmdb_id});mostrarToast('📝 Agregado','success')}})}
 
-function generarEnlaceVidsrc(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    if (tipo === 'pelicula') return `https://vidsrc.in/embed/movie/${tmdb_id}?lang=es`;
-    else return `https://vidsrc.in/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es`;
-}
+function crearTarjeta(item){const div=document.createElement('div');div.className='movie-card';const itemStr=JSON.stringify(item).replace(/"/g,"'");div.innerHTML=`
+<span class="badge-year">${item.anio||'N/D'}</span>
+<span class="badge-type">📺</span>
+<img src="${item.portada}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+<div class="info"><h4>${item.titulo}</h4><div class="meta"><span>⭐ ${item.puntuacion||'N/A'}</span></div>
+<div class="card-actions">
+<button class="fav-btn" onclick="event.stopPropagation();toggleFavorito(${itemStr})"><i class="fas fa-heart"></i></button>
+<button class="list-btn" onclick="event.stopPropagation();toggleMiLista(${itemStr})"><i class="fas fa-plus-circle"></i></button>
+</div></div>`;
+div.onclick=()=>{if(auth.currentUser){const p=new URLSearchParams();p.set('play',item.tmdb_id||item.id);p.set('tipo','serie');window.location.href=`reproductor.html?${p}`}else{window.location.href='login.html'}};return div}
 
-function getImagenUrl(path, size = 'w342') {
-    if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
-    return `https://image.tmdb.org/t/p/${size}${path}`;
-}
+async function cargarSeries(page=1){if(cargando||page>totalPaginas&&page>1)return;cargando=true;const grid=document.getElementById('listaSeries');const btn=document.getElementById('btnMas');btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Cargando...';if(page===1){grid.innerHTML='';for(let i=0;i<12;i++){const sk=document.createElement('div');sk.className='skeleton';grid.appendChild(sk)}}try{const data=await fetchTMDB('tv/popular',{page});totalPaginas=data.total_pages||1;if(page===1)grid.innerHTML='';if(!data.results||!data.results.length){if(page===1)grid.innerHTML='<p class="empty-msg">No hay series</p>';btn.style.display='none';cargando=false;return}const snap=await db.ref('series_personalizadas').once('value');const adminData=snap.val()||{};const adminMap={};Object.values(adminData).forEach(i=>{adminMap[i.tmdb_id]=i});data.results.forEach(s=>{const a=adminMap[s.id];const item={id:s.id,tmdb_id:s.id,titulo:a?.titulo||s.name||'Sin título',anio:a?.anio||(s.first_air_date?s.first_air_date.split('-')[0]:'N/D'),portada:a?.portada||getImagenUrl(s.poster_path,'w342'),puntuacion:a?.puntuacion||(s.vote_average?s.vote_average.toFixed(1):'N/A')};grid.appendChild(crearTarjeta(item))});paginaActual=page;if(page>=totalPaginas){btn.style.display='none'}else{btn.style.display='flex';btn.disabled=false;btn.innerHTML='<i class="fas fa-plus"></i> Cargar más'}}catch(e){console.error(e);btn.innerHTML='⚠️ Error';btn.disabled=false}cargando=false}
+window.cargarMasSeries=function(){if(!cargando){paginaActual++;cargarSeries(paginaActual)}};
 
-function mostrarToast(msg, tipo = 'success') {
-    const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
-    const t = document.createElement('div');
-    t.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:10px 20px;border-radius:10px;z-index:9999;font-weight:600;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
-    t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
-}
+const mainContent=document.querySelector('.main-content');
+mainContent.addEventListener('scroll',function(){const st=mainContent.scrollTop;const sh=mainContent.scrollHeight;const ch=mainContent.clientHeight;if(st+ch>=sh-100){const btn=document.getElementById('btnMas');if(btn.style.display!=='none'&&!cargando){window.cargarMasSeries()}}});
 
-async function fetchTMDB(path, params = {}) {
-    const queryParams = new URLSearchParams();
-    queryParams.append('path', path);
-    Object.keys(params).forEach(key => queryParams.append(key, params[key]));
-    const url = `https://tely-xi.vercel.app/api/tmdb?${queryParams.toString()}`;
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    return response.json();
-}
-
-function toggleFavorito(item) {
-    if (!auth.currentUser) { window.location.href = 'login.html'; return; }
-    const userId = auth.currentUser.uid;
-    const favRef = db.ref(`usuarios/${userId}/favoritos/${item.id}`);
-    favRef.once('value').then((snap) => {
-        if (snap.exists()) { favRef.remove(); mostrarToast('🗑️ Eliminado de favoritos', 'warning'); }
-        else { favRef.set({ id: item.id, titulo: item.titulo, tipo: item.tipo || 'serie', portada: item.portada, tmdb_id: item.tmdb_id }); mostrarToast('❤️ Agregado a favoritos', 'success'); }
-    });
-}
-
-function toggleMiLista(item) {
-    if (!auth.currentUser) { window.location.href = 'login.html'; return; }
-    const userId = auth.currentUser.uid;
-    const listaRef = db.ref(`usuarios/${userId}/milista/${item.id}`);
-    listaRef.once('value').then((snap) => {
-        if (snap.exists()) { listaRef.remove(); mostrarToast('🗑️ Eliminado de Mi Lista', 'warning'); }
-        else { listaRef.set({ id: item.id, titulo: item.titulo, tipo: item.tipo || 'serie', portada: item.portada, tmdb_id: item.tmdb_id }); mostrarToast('📝 Agregado a Mi Lista', 'success'); }
-    });
-}
-
-function crearTarjeta(item) {
-    const div = document.createElement('div');
-    div.className = 'movie-card';
-    const itemStr = JSON.stringify(item).replace(/"/g, "'");
-    div.innerHTML = `
-        <span class="badge-year">${item.anio || 'N/D'}</span>
-        <span class="badge-type">📺</span>
-        <img src="${item.portada}" alt="${item.titulo}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-        <div class="info">
-            <h4>${item.titulo}</h4>
-            <div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div>
-            <div class="card-actions">
-                <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorito(${itemStr})"><i class="fas fa-heart"></i></button>
-                <button class="list-btn" onclick="event.stopPropagation(); toggleMiLista(${itemStr})"><i class="fas fa-plus-circle"></i></button>
-            </div>
-        </div>
-    `;
-    div.onclick = () => {
-        if (auth.currentUser) {
-            const params = new URLSearchParams();
-            params.set('play', item.tmdb_id || item.id);
-            params.set('tipo', 'serie');
-            window.location.href = `reproductor.html?${params.toString()}`;
-        } else { window.location.href = 'login.html'; }
-    };
-    return div;
-}
-
-async function cargarSeries(page = 1) {
-    if (cargandoSeries) return;
-    cargandoSeries = true;
-    const container = document.getElementById('listaSeries');
-    if (page === 1) container.innerHTML = '<div class="skeleton"></div>'.repeat(12);
-    try {
-        const data = await fetchTMDB('tv/popular', { page });
-        if (!data.results || !data.results.length) { cargandoSeries = false; return; }
-        if (page === 1) container.innerHTML = '';
-        const dbRef = db.ref();
-        const snap = await dbRef.child('series_personalizadas').once('value');
-        const adminData = snap.val() || {};
-        const adminMap = {};
-        Object.values(adminData).forEach(i => { adminMap[i.tmdb_id] = i; });
-        data.results.forEach(s => {
-            const a = adminMap[s.id];
-            const item = {
-                id: s.id, tmdb_id: s.id,
-                titulo: a?.titulo || s.name || 'Sin título',
-                anio: a?.anio || (s.first_air_date ? s.first_air_date.split('-')[0] : 'N/D'),
-                portada: a?.portada || getImagenUrl(s.poster_path, 'w342'),
-                puntuacion: a?.puntuacion || (s.vote_average ? s.vote_average.toFixed(1) : 'N/A'),
-                url: a?.url || generarEnlaceUnlimplay(s.id, 'serie', 1, 1),
-                opcion2: a?.opcion2 || generarEnlaceVidsrc(s.id, 'serie', 1, 1)
-            };
-            container.appendChild(crearTarjeta(item));
-        });
-    } catch(e) { console.error(e); }
-    cargandoSeries = false;
-}
-
-window.cargarMasSeries = function() { paginaSeries++; cargarSeries(paginaSeries); };
-
-window.mostrarSugerencias = async function(texto) {
-    const container = document.getElementById('searchResults');
-    if (!texto || texto.length < 2) { container.classList.remove('show'); return; }
-    try {
-        const data = await fetchTMDB('search/tv', { query: texto, page: 1 });
-        if (!data.results || !data.results.length) { container.classList.remove('show'); return; }
-        container.innerHTML = '';
-        data.results.slice(0, 8).forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'search-result';
-            div.innerHTML = `
-                <img src="${getImagenUrl(item.poster_path, 'w92')}" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-                <div class="info"><div class="title">${item.name}</div><div class="detail">📺 Serie • ${item.first_air_date ? item.first_air_date.split('-')[0] : 'N/D'}</div></div>
-            `;
-            div.onclick = () => {
-                const params = new URLSearchParams();
-                params.set('play', item.id);
-                params.set('tipo', 'serie');
-                window.location.href = `reproductor.html?${params.toString()}`;
-                container.classList.remove('show');
-            };
-            container.appendChild(div);
-        });
-        container.classList.add('show');
-    } catch(e) { container.classList.remove('show'); }
-};
-
-window.buscarGlobal = function() {
-    const input = document.getElementById('searchInput');
-    if (input.value.trim()) window.mostrarSugerencias(input.value);
-};
+window.buscarGlobal=async function(){const input=document.getElementById('searchInput');const texto=input.value.trim();const grid=document.getElementById('listaSeries');if(!texto){cargarSeries(1);return}clearTimeout(timeoutBusqueda);timeoutBusqueda=setTimeout(async()=>{try{const data=await fetchTMDB('search/tv',{query:texto,page:1});grid.innerHTML='';if(!data.results||!data.results.length){grid.innerHTML=`<p class="empty-msg">🔍 No se encontraron resultados para "${texto}"</p>`;document.getElementById('btnMas').style.display='none';return}data.results.slice(0,20).forEach(s=>{const item={id:s.id,tmdb_id:s.id,titulo:s.name||'Sin título',anio:s.first_air_date?s.first_air_date.split('-')[0]:'N/D',portada:getImagenUrl(s.poster_path,'w342'),puntuacion:s.vote_average?s.vote_average.toFixed(1):'N/A'};grid.appendChild(crearTarjeta(item))});document.getElementById('btnMas').style.display='none'}catch(e){console.error(e)}},300)};
 
 cargarSeries(1);
-console.log('✅ Series cargadas');
+console.log('✅ Series - Carga rápida + buscador en grid');
 </script>
 </body>
 </html>
