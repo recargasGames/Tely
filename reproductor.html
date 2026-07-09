@@ -378,6 +378,8 @@ let reproduciendo = false;
 let esSerie = false;
 let opcion2Disponible = false;
 
+console.log('📌 ID recibido:', tmdbId, '| Tipo:', tipo);
+
 // ============================================================
 //  REPRODUCTOR
 // ============================================================
@@ -482,29 +484,21 @@ async function cargarContenidoReproductor() {
     wrapper.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner"></i><span>Cargando...</span></div>`;
     
     try {
-        // Verificar caché primero
-        const cachedData = obtenerContenidoCache(tmdbId);
-        if (cachedData) {
-            peliculaActual = cachedData;
-            cargarReproductor(cachedData, tempRestaurar, capRestaurar);
-            return;
-        }
-        
-        // Buscar en Firebase (contenido personalizado)
+        // ⭐ PRIMERO VERIFICAR EN FIREBASE CON EL TIPO CORRECTO ⭐
         const dbRef = db.ref();
-        const [pSnap, sSnap] = await Promise.all([
-            dbRef.child('contenido_personalizado').once('value'),
-            dbRef.child('series_personalizadas').once('value')
-        ]);
         
-        const pelis = pSnap.val() ? Object.values(pSnap.val()) : [];
-        const series = sSnap.val() ? Object.values(sSnap.val()) : [];
-        const contenido = [...pelis.map(p => ({ ...p, tipo: 'pelicula' })), ...series.map(s => ({ ...s, tipo: 'serie' }))];
+        // Buscar en el nodo correcto según el tipo
+        const nodo = tipo === 'pelicula' ? 'contenido_personalizado' : 'series_personalizadas';
+        const snap = await dbRef.child(nodo).once('value');
+        const data = snap.val() || {};
+        const items = Object.values(data);
         
-        let item = contenido.find(c => c.tmdb_id == tmdbId);
+        let item = items.find(c => c.tmdb_id == tmdbId);
         
         // Si no está en Firebase, buscar en TMDB
         if (!item && tmdbId) {
+            console.log('🔍 No está en Firebase, buscando en TMDB...');
+            
             if (tipo === 'pelicula') {
                 const data = await fetchTMDB(`movie/${tmdbId}`);
                 if (data && data.id) {
@@ -518,11 +512,11 @@ async function cargarContenidoReproductor() {
                         tmdb_id: data.id,
                         puntuacion: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
                         url: generarEnlaceUnlimplay(data.id, 'pelicula'),
-                        opcion2: '' // Sin Opción 2
+                        opcion2: ''
                     };
                     await dbRef.child('contenido_personalizado').push(item);
                 }
-            } else {
+            } else if (tipo === 'serie') {
                 const data = await fetchTMDB(`tv/${tmdbId}`);
                 if (data && data.id) {
                     const temporadas = [];
@@ -536,7 +530,7 @@ async function cargarContenidoReproductor() {
                                 sinopsis: ep.overview || 'Sin sinopsis',
                                 disponible: true,
                                 url: generarEnlaceUnlimplay(data.id, 'serie', t, ep.episode_number),
-                                opcion2: '' // Sin Opción 2 en capítulos por defecto
+                                opcion2: ''
                             }));
                             temporadas.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
                         } catch(e) {}
@@ -553,7 +547,7 @@ async function cargarContenidoReproductor() {
                             puntuacion: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
                             temporadas: temporadas,
                             url: generarEnlaceUnlimplay(data.id, 'serie', 1, 1),
-                            opcion2: '' // Sin Opción 2
+                            opcion2: ''
                         };
                         await dbRef.child('series_personalizadas').push(item);
                     }
@@ -562,13 +556,15 @@ async function cargarContenidoReproductor() {
         }
         
         if (item) {
+            console.log('✅ Contenido encontrado:', item.titulo, '| Tipo:', item.tipo);
             guardarContenidoEnCache(tmdbId, item);
             peliculaActual = item;
             cargarReproductor(item, tempRestaurar, capRestaurar);
         } else {
-            wrapper.innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>Contenido no encontrado</span><span class="sub">ID: ${tmdbId}</span></div>`;
+            wrapper.innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>Contenido no encontrado</span><span class="sub">ID: ${tmdbId} | Tipo: ${tipo}</span></div>`;
         }
     } catch(e) {
+        console.error('❌ Error:', e);
         wrapper.innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>Error: ${e.message}</span></div>`;
     }
 }
@@ -587,7 +583,7 @@ function cargarReproductor(peli, tempRestaurar = null, capRestaurar = null) {
     
     const btnOp2 = document.getElementById('btnOp2');
     
-    // ⭐ VERIFICAR OPCIÓN 2 (de la película/serie completa)
+    // ⭐ VERIFICAR OPCIÓN 2
     if (peli.opcion2 && peli.opcion2.trim() !== '' && peli.opcion2.startsWith('http')) {
         urlOp2 = peli.opcion2;
         opcion2Disponible = true;
@@ -626,25 +622,20 @@ function cargarReproductor(peli, tempRestaurar = null, capRestaurar = null) {
         const pc = obtenerCapitulo(tempIndex, 0);
         if (pc) {
             urlOp1 = pc.url;
-            // ⭐ VERIFICAR OPCIÓN 2 DEL CAPÍTULO
             if (pc.opcion2 && pc.opcion2.trim() !== '' && pc.opcion2.startsWith('http')) {
                 urlOp2 = pc.opcion2;
                 opcion2Disponible = true;
                 btnOp2.classList.remove('oculto');
+            } else if (peli.opcion2 && peli.opcion2.trim() !== '' && peli.opcion2.startsWith('http')) {
+                urlOp2 = peli.opcion2;
+                opcion2Disponible = true;
+                btnOp2.classList.remove('oculto');
             } else {
-                // Si el capítulo no tiene Op2, pero la serie tiene, usamos la de la serie
-                if (peli.opcion2 && peli.opcion2.trim() !== '' && peli.opcion2.startsWith('http')) {
-                    urlOp2 = peli.opcion2;
-                    opcion2Disponible = true;
-                    btnOp2.classList.remove('oculto');
-                } else {
-                    urlOp2 = null;
-                    opcion2Disponible = false;
-                    btnOp2.classList.add('oculto');
-                }
+                urlOp2 = null;
+                opcion2Disponible = false;
+                btnOp2.classList.add('oculto');
             }
             if (urlOp1) {
-                // Si hay Opción 2 disponible y el usuario la había seleccionado antes, mantenerla
                 if (opcionActiva === 2 && opcion2Disponible && urlOp2) {
                     reproducir(urlOp2);
                     document.getElementById('btnOp2').classList.add('active');
@@ -663,7 +654,6 @@ function cargarReproductor(peli, tempRestaurar = null, capRestaurar = null) {
         urlOp1 = peli.url || generarEnlaceUnlimplay(peli.tmdb_id, 'pelicula');
         
         if (urlOp1) {
-            // Si hay Opción 2 disponible y el usuario la había seleccionado antes, mantenerla
             if (opcionActiva === 2 && opcion2Disponible && urlOp2) {
                 reproducir(urlOp2);
                 document.getElementById('btnOp2').classList.add('active');
@@ -728,13 +718,11 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
                 urlOp1 = cap.url;
                 
                 const btnOp2 = document.getElementById('btnOp2');
-                // Verificar Opción 2 del capítulo
                 if (cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
                     urlOp2 = cap.opcion2;
                     opcion2Disponible = true;
                     btnOp2.classList.remove('oculto');
                 } else if (peliculaActual && peliculaActual.opcion2 && peliculaActual.opcion2.trim() !== '' && peliculaActual.opcion2.startsWith('http')) {
-                    // Usar Op2 de la serie si el capítulo no tiene
                     urlOp2 = peliculaActual.opcion2;
                     opcion2Disponible = true;
                     btnOp2.classList.remove('oculto');
@@ -744,14 +732,12 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
                     btnOp2.classList.add('oculto');
                 }
                 
-                // Si estábamos en Op2 y ya no está disponible, cambiar a Op1
                 if (opcionActiva === 2 && !opcion2Disponible) {
                     opcionActiva = 1;
                     document.getElementById('btnOp1').classList.add('active');
                     document.getElementById('btnOp2').classList.remove('active');
                 }
                 
-                // Si hay Op2 y estábamos en Op2, mantenerla
                 if (opcionActiva === 2 && opcion2Disponible && urlOp2) {
                     reproducir(urlOp2);
                 } else {
@@ -885,7 +871,7 @@ function descargarAPK() {
 }
 
 // ============================================================
-//  BOTÓN ATRÁS - UN SOLO CLIC
+//  BOTÓN ATRÁS
 // ============================================================
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) {
@@ -915,7 +901,7 @@ if (tmdbId) {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
 
-console.log('✅ TELY Reproductor - Opción 2 funcional desde Firebase');
+console.log('✅ TELY Reproductor - CORREGIDO: usa el tipo correcto para buscar en Firebase');
 </script>
 </body>
 </html>
