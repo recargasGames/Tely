@@ -59,7 +59,6 @@
         body:not(.dark) .tab-btn.active{color:#fff}
         body:not(.dark) .tab-btn:hover:not(.active){background:rgba(124,58,237,.08);color:#111}
         
-        /* ⭐ BUSCADOR - SIN SUGERENCIAS FLOTANTES ⭐ */
         .search-bar{display:flex;align-items:center;gap:.3rem;position:relative;margin:.1rem 0}
         .search-bar input{flex:1;padding:.3rem .6rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.8rem;transition:.3s}
         .search-bar input:focus{outline:none;border-color:#7C3AED;background:rgba(255,255,255,.08)}
@@ -85,6 +84,7 @@
         .movie-card .badge-year{position:absolute;top:.15rem;left:.15rem;background:rgba(124,58,237,.85);color:#fff;padding:.03rem .25rem;border-radius:3px;font-size:.35rem;font-weight:700}
         .movie-card .badge-type{position:absolute;top:.15rem;right:.15rem;background:rgba(0,0,0,.7);color:#fff;padding:.03rem .25rem;border-radius:3px;font-size:.35rem;font-weight:600}
         .movie-card .badge-op2{position:absolute;bottom:.15rem;right:.15rem;background:rgba(59,130,246,.85);color:#fff;padding:.02rem .15rem;border-radius:3px;font-size:.3rem;font-weight:600}
+        .movie-card .badge-trailer{position:absolute;bottom:.15rem;left:.15rem;background:rgba(255,0,0,.85);color:#fff;padding:.02rem .2rem;border-radius:3px;font-size:.3rem;font-weight:700}
         
         .section-title{font-size:.85rem;font-weight:700;margin:.3rem 0 .15rem;display:flex;align-items:center;gap:.2rem}
         .section-title i{color:#7C3AED}
@@ -120,6 +120,8 @@
         .card-actions .fav-btn:hover{background:rgba(239,68,68,.15)}
         .card-actions .list-btn{color:#3B82F6}
         .card-actions .list-btn:hover{background:rgba(59,130,246,.15)}
+        .card-actions .trailer-btn{color:#EF4444;background:rgba(255,0,0,.1);padding:1px 6px;border-radius:3px;font-size:.45rem}
+        .card-actions .trailer-btn:hover{background:rgba(255,0,0,.2)}
         
         #bannerApp {
             display:none;
@@ -179,6 +181,64 @@
         }
         .banner-install-btn:active {
             transform:scale(0.95);
+        }
+
+        /* ⭐ MODAL PARA TRÁILER ⭐ */
+        .trailer-modal {
+            display:none;
+            position:fixed;
+            top:0;left:0;right:0;bottom:0;
+            background:rgba(0,0,0,.95);
+            z-index:9999;
+            justify-content:center;
+            align-items:center;
+            padding:1rem;
+        }
+        .trailer-modal.show {
+            display:flex;
+        }
+        .trailer-modal .modal-content {
+            position:relative;
+            width:100%;
+            max-width:600px;
+            background:#000;
+            border-radius:12px;
+            overflow:hidden;
+            aspect-ratio:16/9;
+        }
+        .trailer-modal .modal-content iframe {
+            width:100%;
+            height:100%;
+            border:none;
+        }
+        .trailer-modal .close-modal {
+            position:absolute;
+            top:-40px;
+            right:0;
+            background:none;
+            border:none;
+            color:#fff;
+            font-size:1.8rem;
+            cursor:pointer;
+            z-index:10;
+            padding:.3rem .6rem;
+            transition:.3s;
+        }
+        .trailer-modal .close-modal:hover {
+            transform:scale(1.2);
+        }
+        .trailer-modal .modal-title {
+            position:absolute;
+            bottom:-35px;
+            left:0;
+            color:#94A3B8;
+            font-size:.7rem;
+            font-weight:600;
+            padding:.2rem .4rem;
+        }
+        @media(max-width:480px) {
+            .trailer-modal .close-modal { top:-35px; font-size:1.5rem; }
+            .trailer-modal .modal-title { bottom:-30px; font-size:.6rem; }
         }
     </style>
 </head>
@@ -250,6 +310,15 @@
     </div>
 </main>
 
+<!-- ⭐ MODAL PARA TRÁILER ⭐ -->
+<div class="trailer-modal" id="trailerModal">
+    <div class="modal-content">
+        <button class="close-modal" onclick="cerrarTrailer()"><i class="fas fa-times"></i></button>
+        <iframe id="trailerIframe" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen"></iframe>
+        <div class="modal-title" id="trailerTitle">Cargando tráiler...</div>
+    </div>
+</div>
+
 <div id="bannerApp">
     <div style="display:flex;align-items:center;justify-content:space-between;max-width:600px;margin:0 auto;gap:0.5rem;">
         <div style="display:flex;align-items:center;gap:0.4rem;flex:1;">
@@ -288,7 +357,9 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ⭐ GUARDAR ESTADO
+// ============================================================
+//  GUARDAR ESTADO
+// ============================================================
 function guardarEstado(tab) {
     try { sessionStorage.setItem('tabActiva', tab); } catch(e) {}
 }
@@ -305,7 +376,9 @@ function restaurarScroll() {
     try { document.getElementById('mainContent').scrollTop = parseInt(sessionStorage.getItem('scrollPos')) || 0; } catch(e) {}
 }
 
-// ⭐ PANTALLA COMPLETA
+// ============================================================
+//  PANTALLA COMPLETA
+// ============================================================
 function activarPantallaCompleta() {
     const ua = navigator.userAgent || '';
     const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
@@ -325,6 +398,9 @@ function esNavegadorWeb() {
     return !esApp;
 }
 
+// ============================================================
+//  AUTENTICACIÓN
+// ============================================================
 function irALogin() { window.location.href = 'login.html'; }
 function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
 function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
@@ -359,6 +435,9 @@ if (localStorage.getItem('theme') === 'light') {
     document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; 
 }
 
+// ============================================================
+//  FUNCIONES AUXILIARES
+// ============================================================
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     if (tipo === 'pelicula') {
         return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
@@ -399,6 +478,9 @@ async function fetchTMDB(path, params = {}) {
     return response.json();
 }
 
+// ============================================================
+//  VARIABLES GLOBALES
+// ============================================================
 let paginaPeliculas = 1;
 let paginaSeries = 1;
 let cargandoPeliculas = false;
@@ -408,6 +490,9 @@ let totalPaginasSeries = 1;
 let scrollTimeout = null;
 let timeoutBusqueda = null;
 
+// ============================================================
+//  PESTAÑAS
+// ============================================================
 function cambiarTab(tab) {
     document.getElementById('tabInicio').style.display = 'none';
     document.getElementById('tabPeliculas').style.display = 'none';
@@ -439,6 +524,9 @@ function cambiarTab(tab) {
     setTimeout(restaurarScroll, 100);
 }
 
+// ============================================================
+//  CARGAR PELÍCULAS
+// ============================================================
 async function cargarPeliculas(page = 1) {
     if (cargandoPeliculas) return;
     if (page > totalPaginasPeliculas && page > 1) return;
@@ -492,6 +580,9 @@ async function cargarPeliculas(page = 1) {
     cargandoPeliculas = false;
 }
 
+// ============================================================
+//  CARGAR SERIES
+// ============================================================
 async function cargarSeries(page = 1) {
     if (cargandoSeries) return;
     if (page > totalPaginasSeries && page > 1) return;
@@ -559,6 +650,9 @@ window.cargarMasSeries = function() {
     }
 };
 
+// ============================================================
+//  FAVORITOS Y LISTA
+// ============================================================
 function toggleFavorito(item) {
     if (!auth.currentUser) { window.location.href = 'login.html'; return; }
     const userId = auth.currentUser.uid;
@@ -655,6 +749,9 @@ function cargarMiLista() {
     });
 }
 
+// ============================================================
+//  CREAR TARJETA
+// ============================================================
 function crearTarjeta(item, esSerie = false) {
     const div = document.createElement('div');
     div.className = 'movie-card';
@@ -689,6 +786,57 @@ function crearTarjeta(item, esSerie = false) {
     return div;
 }
 
+// ============================================================
+//  ABRIR TRÁILER EN MODAL
+// ============================================================
+function abrirTrailer(trailerKey, titulo) {
+    const modal = document.getElementById('trailerModal');
+    const iframe = document.getElementById('trailerIframe');
+    const titleEl = document.getElementById('trailerTitle');
+    
+    if (!trailerKey) {
+        mostrarToast('❌ No hay tráiler disponible', 'error');
+        return;
+    }
+    
+    // Cerrar si ya está abierto
+    if (modal.classList.contains('show')) {
+        cerrarTrailer();
+        setTimeout(() => {
+            abrirTrailer(trailerKey, titulo);
+        }, 300);
+        return;
+    }
+    
+    // Construir URL del tráiler (sin autoplay para que el usuario decida)
+    const trailerUrl = `https://www.youtube.com/embed/${trailerKey}?rel=0&modestbranding=1&showinfo=0`;
+    iframe.src = trailerUrl;
+    titleEl.textContent = `🎬 ${titulo || 'Tráiler'}`;
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function cerrarTrailer() {
+    const modal = document.getElementById('trailerModal');
+    const iframe = document.getElementById('trailerIframe');
+    modal.classList.remove('show');
+    iframe.src = ''; // Detener reproducción
+    document.body.style.overflow = '';
+}
+
+// Cerrar modal con Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') cerrarTrailer();
+});
+
+// Cerrar modal al hacer clic fuera del contenido
+document.getElementById('trailerModal').addEventListener('click', function(e) {
+    if (e.target === this) cerrarTrailer();
+});
+
+// ============================================================
+//  CARGAR CONTENIDO INICIAL (CON ESTRENOS Y TRÁILER)
+// ============================================================
 async function cargarContenido() {
     try {
         const [pelis, series, estrenos] = await Promise.all([
@@ -715,31 +863,114 @@ async function cargarContenido() {
         Object.values(pData).forEach(i => { adminMap[i.tmdb_id] = i; });
         Object.values(sData).forEach(i => { adminMap[i.tmdb_id] = i; });
 
-        // ⭐ ESTENOS
+        // ⭐⭐ ESTENOS - CON TRÁILER ⭐⭐
         if (estrenos.results && estrenos.results.length) {
-            estrenos.results.slice(0, 12).forEach(p => {
-                const a = adminMap[p.id];
-                const item = {
-                    id: p.id, tmdb_id: p.id,
-                    titulo: a?.titulo || p.title || 'Sin título',
-                    anio: a?.anio || (p.release_date ? p.release_date.split('-')[0] : 'Próximo'),
-                    tipo: 'pelicula',
-                    portada: a?.portada || getImagenUrl(p.poster_path, 'w342'),
-                    puntuacion: a?.puntuacion || (p.vote_average ? p.vote_average.toFixed(1) : 'N/A'),
-                    url: a?.url || generarEnlaceUnlimplay(p.id, 'pelicula'),
-                    opcion2: a?.opcion2 || generarEnlaceVidsrc(p.id, 'pelicula')
-                };
-                const card = crearTarjeta(item, false);
-                // Badge especial para estrenos
-                const badge = document.createElement('span');
-                badge.className = 'badge-year';
-                badge.style.cssText = 'background:#F59E0B !important; color:#000 !important;';
-                badge.textContent = '🔥 Estreno';
-                const oldBadge = card.querySelector('.badge-year');
-                if (oldBadge) oldBadge.remove();
-                card.prepend(badge);
-                estrenosContainer.appendChild(card);
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            
+            // Filtrar solo películas con fecha futura (próximos 60 días)
+            const estrenosFiltrados = estrenos.results.filter(p => {
+                if (!p.release_date) return false;
+                const fechaEstreno = new Date(p.release_date);
+                fechaEstreno.setHours(0, 0, 0, 0);
+                const diffDias = Math.ceil((fechaEstreno - hoy) / (1000 * 60 * 60 * 24));
+                return diffDias >= 0 && diffDias <= 60;
             });
+            
+            if (estrenosFiltrados.length === 0) {
+                estrenosContainer.innerHTML = '<p class="empty-msg">No hay próximos estrenos disponibles</p>';
+            } else {
+                // Procesar estrenos y obtener tráilers
+                for (const p of estrenosFiltrados.slice(0, 12)) {
+                    const a = adminMap[p.id];
+                    const dias = Math.ceil((new Date(p.release_date) - new Date()) / (1000 * 60 * 60 * 24));
+                    
+                    // ⭐ OBTENER TRÁILER DE LA PELÍCULA ⭐
+                    let trailerKey = null;
+                    try {
+                        const videos = await fetchTMDB(`movie/${p.id}/videos`);
+                        if (videos.results && videos.results.length) {
+                            const trailer = videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+                            if (trailer) {
+                                trailerKey = trailer.key;
+                            }
+                        }
+                    } catch(e) { console.log('Sin tráiler para:', p.title); }
+                    
+                    const item = {
+                        id: p.id, tmdb_id: p.id,
+                        titulo: a?.titulo || p.title || 'Sin título',
+                        anio: a?.anio || (p.release_date ? p.release_date.split('-')[0] : 'Próximo'),
+                        tipo: 'pelicula',
+                        portada: a?.portada || getImagenUrl(p.poster_path, 'w342'),
+                        puntuacion: a?.puntuacion || (p.vote_average ? p.vote_average.toFixed(1) : 'N/A'),
+                        url: a?.url || generarEnlaceUnlimplay(p.id, 'pelicula'),
+                        opcion2: a?.opcion2 || generarEnlaceVidsrc(p.id, 'pelicula'),
+                        trailer: trailerKey
+                    };
+                    
+                    // Crear tarjeta manualmente para agregar badge y botón de tráiler
+                    const card = document.createElement('div');
+                    card.className = 'movie-card';
+                    
+                    // Badge de estreno
+                    const badge = document.createElement('span');
+                    badge.className = 'badge-year';
+                    badge.style.cssText = 'background:#F59E0B !important; color:#000 !important;';
+                    const textoBadge = dias === 0 ? '🔥 HOY' : `🔥 ${dias}d`;
+                    badge.textContent = textoBadge;
+                    
+                    // Badge de tipo
+                    const typeBadge = document.createElement('span');
+                    typeBadge.className = 'badge-type';
+                    typeBadge.textContent = '🎬';
+                    
+                    // Poster
+                    const img = document.createElement('img');
+                    img.className = 'poster';
+                    img.src = item.portada;
+                    img.alt = item.titulo;
+                    img.loading = 'lazy';
+                    img.onerror = function() { this.src = 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg'; };
+                    
+                    // Info
+                    const info = document.createElement('div');
+                    info.className = 'info';
+                    info.innerHTML = `
+                        <h4>${item.titulo}</h4>
+                        <div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div>
+                        <div class="card-actions">
+                            <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorito({id:'${item.id}', titulo:'${item.titulo}', tipo:'pelicula', portada:'${item.portada}', tmdb_id:'${item.id}'})"><i class="fas fa-heart"></i></button>
+                            <button class="list-btn" onclick="event.stopPropagation(); toggleMiLista({id:'${item.id}', titulo:'${item.titulo}', tipo:'pelicula', portada:'${item.portada}', tmdb_id:'${item.id}'})"><i class="fas fa-plus-circle"></i></button>
+                            ${trailerKey ? `<button class="trailer-btn" onclick="event.stopPropagation(); abrirTrailer('${trailerKey}', '${item.titulo}')"><i class="fab fa-youtube"></i> Tráiler</button>` : ''}
+                        </div>
+                    `;
+                    
+                    card.appendChild(badge);
+                    card.appendChild(typeBadge);
+                    card.appendChild(img);
+                    card.appendChild(info);
+                    
+                    // Click en la tarjeta - SIEMPRE abre el tráiler si está disponible
+                    card.onclick = () => {
+                        if (auth.currentUser) {
+                            if (trailerKey) {
+                                abrirTrailer(trailerKey, item.titulo);
+                            } else {
+                                // Si no tiene tráiler, ir al reproductor
+                                const params = new URLSearchParams();
+                                params.set('play', item.id);
+                                params.set('tipo', 'pelicula');
+                                window.location.href = `reproductor.html?${params.toString()}`;
+                            }
+                        } else { 
+                            window.location.href = 'login.html'; 
+                        }
+                    };
+                    
+                    estrenosContainer.appendChild(card);
+                }
+            }
         }
 
         // ⭐ PELÍCULAS POPULARES
@@ -778,6 +1009,9 @@ async function cargarContenido() {
     } catch(e) { console.error(e); }
 }
 
+// ============================================================
+//  CONTINUAR VIENDO
+// ============================================================
 function cargarContinuarViendo() {
     const container = document.getElementById('continuarViendo');
     const historial = JSON.parse(localStorage.getItem('historialTely')) || [];
@@ -811,7 +1045,9 @@ function cargarContinuarViendo() {
     });
 }
 
-// ⭐ SCROLL INFINITO
+// ============================================================
+//  SCROLL INFINITO
+// ============================================================
 const mainContent = document.getElementById('mainContent');
 mainContent.addEventListener('scroll', function() {
     clearTimeout(scrollTimeout);
@@ -828,7 +1064,9 @@ mainContent.addEventListener('scroll', function() {
     }, 300);
 });
 
-// ⭐ BUSCADOR EN GRID
+// ============================================================
+//  BUSCADOR EN GRID
+// ============================================================
 window.buscarGlobal = async function() {
     const input = document.getElementById('searchInput');
     const texto = input.value.trim();
@@ -892,6 +1130,9 @@ window.buscarGlobal = async function() {
     }, 300);
 };
 
+// ============================================================
+//  BANNER APK
+// ============================================================
 function detectarPlataforma() {
     const ua = navigator.userAgent || '';
     const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
@@ -925,7 +1166,9 @@ function descargarAPK() {
     setTimeout(cerrarBannerApp, 2000);
 }
 
-// ⭐ INICIAR
+// ============================================================
+//  INICIAR
+// ============================================================
 document.addEventListener('DOMContentLoaded', function() {
     const tab = restaurarEstado();
     cambiarTab(tab);
@@ -948,7 +1191,7 @@ cargarContenido();
 cargarPeliculas(1);
 cargarSeries(1);
 
-console.log('✅ TELY - Con estrenos + No recarga al volver');
+console.log('✅ TELY - Con estrenos + Tráiler en modal + No recarga al volver');
 </script>
 </body>
 </html>
