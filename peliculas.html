@@ -128,6 +128,7 @@
         </div>
     </div>
 
+    <!-- ⭐ BUSCADOR - CON oninput CORRECTO ⭐ -->
     <div class="search-bar">
         <input type="text" placeholder="🔍 Buscar películas..." id="searchInput" oninput="buscarGlobal()">
         <button onclick="buscarGlobal()"><i class="fas fa-search"></i></button>
@@ -197,10 +198,66 @@ window.cargarMasPeliculas=function(){if(!cargando){paginaActual++;cargarPelicula
 const mainContent=document.querySelector('.main-content');
 mainContent.addEventListener('scroll',function(){const st=mainContent.scrollTop,sh=mainContent.scrollHeight,ch=mainContent.clientHeight;if(st+ch>=sh-100){const btn=document.getElementById('btnMas');if(btn.style.display!=='none'&&!cargando){window.cargarMasPeliculas()}}});
 
-window.buscarGlobal=async function(){const input=document.getElementById('searchInput');const texto=input.value.trim();const grid=document.getElementById('listaPeliculas');if(!texto){cargarPeliculas(1);return}clearTimeout(timeoutBusqueda);timeoutBusqueda=setTimeout(async()=>{try{const data=await fetchTMDB('search/movie',{query:texto,page:1});grid.innerHTML='';if(!data.results||!data.results.length){grid.innerHTML=`<p class="empty-msg">🔍 No se encontraron resultados para "${texto}"</p>`;document.getElementById('btnMas').style.display='none';return}data.results.slice(0,20).forEach(p=>{const item={id:p.id,tmdb_id:p.id,titulo:p.title||'Sin título',anio:p.release_date?p.release_date.split('-')[0]:'N/D',portada:getImagenUrl(p.poster_path,'w342'),puntuacion:p.vote_average?p.vote_average.toFixed(1):'N/A'};grid.appendChild(crearTarjeta(item))});document.getElementById('btnMas').style.display='none'}catch(e){console.error(e)}},300)};
+// ⭐⭐ BUSCADOR CORREGIDO ⭐⭐
+window.buscarGlobal = async function() {
+    const input = document.getElementById('searchInput');
+    const texto = input.value.trim();
+    const grid = document.getElementById('listaPeliculas');
+    const btn = document.getElementById('btnMas');
+    
+    // Si no hay texto, recargar películas populares
+    if (!texto) {
+        cargarPeliculas(1);
+        return;
+    }
+    
+    // Limpiar timeout anterior
+    clearTimeout(timeoutBusqueda);
+    
+    timeoutBusqueda = setTimeout(async () => {
+        try {
+            // Mostrar skeletons mientras carga
+            grid.innerHTML = '';
+            for (let i = 0; i < 12; i++) {
+                const sk = document.createElement('div');
+                sk.className = 'skeleton';
+                grid.appendChild(sk);
+            }
+            
+            const data = await fetchTMDB('search/movie', { query: texto, page: 1 });
+            
+            grid.innerHTML = '';
+            
+            if (!data.results || !data.results.length) {
+                grid.innerHTML = `<p class="empty-msg">🔍 No se encontraron películas para "${texto}"</p>`;
+                btn.style.display = 'none';
+                return;
+            }
+            
+            // Mostrar resultados
+            data.results.slice(0, 20).forEach(p => {
+                const item = {
+                    id: p.id,
+                    tmdb_id: p.id,
+                    titulo: p.title || 'Sin título',
+                    anio: p.release_date ? p.release_date.split('-')[0] : 'N/D',
+                    portada: getImagenUrl(p.poster_path, 'w342'),
+                    puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A'
+                };
+                grid.appendChild(crearTarjeta(item));
+            });
+            
+            btn.style.display = 'none';
+            
+        } catch(e) {
+            console.error('Error en búsqueda:', e);
+            grid.innerHTML = `<p class="empty-msg">⚠️ Error al buscar</p>`;
+        }
+    }, 300);
+};
 
 cargarPeliculas(1);
-console.log('✅ Películas - Carga rápida + buscador en grid + IDs correctos');
+console.log('✅ Películas - Buscador CORREGIDO');
 </script>
 </body>
 </html>
