@@ -59,6 +59,7 @@
         body:not(.dark) .tab-btn.active{color:#fff}
         body:not(.dark) .tab-btn:hover:not(.active){background:rgba(124,58,237,.08);color:#111}
         
+        /* ⭐ BUSCADOR - ocultar sugerencias flotantes ⭐ */
         .search-bar{display:flex;align-items:center;gap:.3rem;position:relative;margin:.1rem 0}
         .search-bar input{flex:1;padding:.3rem .6rem;border-radius:9999px;border:2px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.8rem;transition:.3s}
         .search-bar input:focus{outline:none;border-color:#7C3AED;background:rgba(255,255,255,.08)}
@@ -67,15 +68,7 @@
         body:not(.dark) .search-bar input::placeholder{color:#888}
         .search-bar button{padding:.2rem .8rem;border-radius:9999px;border:none;background:#7C3AED;color:#fff;font-size:.75rem;cursor:pointer;transition:.3s}
         .search-bar button:hover{background:#6D28D9}
-        .search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:rgba(26,26,46,.98);border-radius:8px;max-height:180px;overflow-y:auto;display:none;z-index:60;border:1px solid rgba(124,58,237,.15);padding:.15rem 0}
-        .search-results.show{display:block}
-        body:not(.dark) .search-results{background:rgba(255,255,255,.98);border-color:rgba(0,0,0,.1)}
-        .search-result{display:flex;align-items:center;gap:.3rem;padding:.2rem .4rem;cursor:pointer;transition:.2s}
-        .search-result:hover{background:rgba(124,58,237,.1)}
-        .search-result img{width:20px;height:30px;object-fit:cover;border-radius:3px}
-        .search-result .info{flex:1}
-        .search-result .info .title{font-weight:600;font-size:.7rem}
-        .search-result .info .detail{font-size:.55rem;color:#94A3B8}
+        .search-results{display:none !important}
         
         .grid-movies{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.4rem;padding:.2rem 0}
         @media(min-width:768px){.grid-movies{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}}
@@ -215,8 +208,9 @@
             <button class="tab-btn" data-tab="series" onclick="cambiarTab('series')"><i class="fas fa-tv"></i> Series</button>
         </div>
         
+        <!-- ⭐ BUSCADOR - búsqueda automática sin sugerencias flotantes ⭐ -->
         <div class="search-bar">
-            <input type="text" placeholder="🔍 Buscar..." id="searchInput" onkeydown="if(event.key==='Enter') buscarGlobal()" oninput="mostrarSugerencias(this.value)">
+            <input type="text" placeholder="🔍 Buscar películas o series..." id="searchInput" oninput="buscarGlobal()">
             <button onclick="buscarGlobal()"><i class="fas fa-search"></i></button>
             <div class="search-results" id="searchResults"></div>
         </div>
@@ -224,9 +218,8 @@
 
     <div id="contenidoPrincipal">
         <div id="tabInicio">
-            <div class="section-title"><i class="fas fa-clock-rotate-left"></i> Continuar viendo</div>
-            <div class="horizontal-scroll" id="continuarViendo"><p class="empty-msg">No has visto nada aún</p></div>
-
+            <!-- ⭐ ELIMINADO "Continuar viendo" ⭐ -->
+            
             <div class="section-title"><i class="fas fa-heart text-red-500"></i> Mis Favoritos</div>
             <div class="horizontal-scroll" id="favoritosContainer"><p class="empty-msg">No tienes favoritos aún</p></div>
 
@@ -359,7 +352,6 @@ document.addEventListener('DOMContentLoaded', function() {
 // ⭐ BOTÓN ATRÁS - GUARDA ESTADO ANTES DE IR
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) {
-    // Guardar estado actual antes de salir
     const tabActiva = document.querySelector('.tab-btn.active');
     if (tabActiva) {
         guardarEstado(tabActiva.dataset.tab);
@@ -459,7 +451,6 @@ function cambiarTab(tab) {
     
     if (tab === 'inicio') {
         document.getElementById('tabInicio').style.display = 'block';
-        // Cargar contenido de inicio si está vacío
         const pelisPop = document.getElementById('peliculasPopulares');
         if (!pelisPop.querySelector('.movie-card') && !pelisPop.querySelector('.skeleton')) {
             cargarContenido();
@@ -480,10 +471,7 @@ function cambiarTab(tab) {
         btn.classList.toggle('active', btn.dataset.tab === tab);
     });
     
-    // Guardar estado
     guardarEstado(tab);
-    
-    // Restaurar scroll después de cambiar pestaña
     setTimeout(restaurarScroll, 100);
 }
 
@@ -757,7 +745,8 @@ async function cargarContenido() {
         Object.values(pData).forEach(i => { adminMap[i.tmdb_id] = i; });
         Object.values(sData).forEach(i => { adminMap[i.tmdb_id] = i; });
 
-        (pelis.results || []).slice(0, 12).forEach(p => {
+        // ⭐ AHORA CARGA 20 PELÍCULAS EN LUGAR DE 12 ⭐
+        (pelis.results || []).slice(0, 20).forEach(p => {
             const a = adminMap[p.id];
             const item = {
                 id: p.id, tmdb_id: p.id,
@@ -772,7 +761,8 @@ async function cargarContenido() {
             pelisContainer.appendChild(crearTarjeta(item));
         });
 
-        (series.results || []).slice(0, 12).forEach(s => {
+        // ⭐ AHORA CARGA 20 SERIES EN LUGAR DE 12 ⭐
+        (series.results || []).slice(0, 20).forEach(s => {
             const a = adminMap[s.id];
             const item = {
                 id: s.id, tmdb_id: s.id,
@@ -787,42 +777,11 @@ async function cargarContenido() {
             seriesContainer.appendChild(crearTarjeta(item, true));
         });
 
-        cargarContinuarViendo();
+        // ⭐ ELIMINADO "Continuar viendo" ⭐
     } catch(e) { console.error(e); }
 }
 
-function cargarContinuarViendo() {
-    const container = document.getElementById('continuarViendo');
-    const historial = JSON.parse(localStorage.getItem('historialTely')) || [];
-    if (!historial.length) { container.innerHTML = '<p class="empty-msg">No has visto nada aún</p>'; return; }
-    container.innerHTML = '';
-    historial.slice(0, 10).forEach(entry => {
-        const div = document.createElement('div');
-        div.className = 'movie-card';
-        div.style.width = '80px';
-        div.style.flexShrink = '0';
-        const pos = entry.temporada !== null && entry.capitulo !== null ? ` T${entry.temporada+1} Cap${entry.capitulo+1}` : '';
-        div.innerHTML = `
-            <img src="${entry.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg'}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-            <div class="info"><h4>${entry.titulo}${pos}</h4></div>
-        `;
-        div.onclick = () => {
-            if (auth.currentUser) {
-                const params = new URLSearchParams();
-                let playId = entry.tmdb_id || entry.id;
-                if (playId && typeof playId === 'string' && playId.startsWith('tmdb_')) {
-                    playId = playId.replace('tmdb_', '');
-                }
-                params.set('play', playId);
-                params.set('tipo', entry.tipo || 'pelicula');
-                if (entry.temporada !== null) params.set('temp', entry.temporada);
-                if (entry.capitulo !== null) params.set('cap', entry.capitulo);
-                window.location.href = `reproductor.html?${params.toString()}`;
-            } else { window.location.href = 'login.html'; }
-        };
-        container.appendChild(div);
-    });
-}
+// ⭐ ELIMINADA la función cargarContinuarViendo() ⭐
 
 const mainContent = document.getElementById('mainContent');
 mainContent.addEventListener('scroll', function() {
@@ -847,42 +806,85 @@ mainContent.addEventListener('scroll', function() {
     }, 300);
 });
 
-window.mostrarSugerencias = async function(texto) {
-    const container = document.getElementById('searchResults');
-    if (!texto || texto.length < 2) { container.classList.remove('show'); return; }
-    try {
-        const [pelis, series] = await Promise.all([
-            fetchTMDB('search/movie', { query: texto, page: 1 }),
-            fetchTMDB('search/tv', { query: texto, page: 1 })
-        ]);
-        const resultados = [...(pelis.results || []), ...(series.results || [])];
-        if (!resultados.length) { container.classList.remove('show'); return; }
-        container.innerHTML = '';
-        resultados.slice(0, 6).forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'search-result';
-            const tipo = item.media_type === 'tv' ? '📺 Serie' : '🎬 Película';
-            div.innerHTML = `
-                <img src="${getImagenUrl(item.poster_path, 'w92')}" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-                <div class="info"><div class="title">${item.title || item.name}</div><div class="detail">${tipo}</div></div>
-            `;
-            div.onclick = () => {
-                const tipo = item.media_type === 'tv' ? 'serie' : 'pelicula';
-                const params = new URLSearchParams();
-                params.set('play', item.id);
-                params.set('tipo', tipo);
-                window.location.href = `reproductor.html?${params.toString()}`;
-                container.classList.remove('show');
-            };
-            container.appendChild(div);
-        });
-        container.classList.add('show');
-    } catch(e) { container.classList.remove('show'); }
-};
+// ⭐ BUSCADOR - búsqueda automática sin sugerencias flotantes ⭐
+let timeoutBusqueda = null;
 
-window.buscarGlobal = function() {
+window.buscarGlobal = async function() {
     const input = document.getElementById('searchInput');
-    if (input.value.trim()) window.mostrarSugerencias(input.value);
+    const texto = input.value.trim();
+    const gridPelis = document.querySelector('#tabInicio .grid-movies');
+    const gridSeries = document.querySelector('#tabInicio .grid-movies:last-of-type');
+    
+    // Si no hay texto, recargar contenido normal
+    if (!texto) {
+        cargarContenido();
+        return;
+    }
+    
+    // Limpiar timeout anterior
+    clearTimeout(timeoutBusqueda);
+    
+    timeoutBusqueda = setTimeout(async () => {
+        try {
+            const [pelis, series] = await Promise.all([
+                fetchTMDB('search/movie', { query: texto, page: 1 }),
+                fetchTMDB('search/tv', { query: texto, page: 1 })
+            ]);
+            
+            // Limpiar grids de inicio
+            const pelisContainer = document.getElementById('peliculasPopulares');
+            const seriesContainer = document.getElementById('seriesPopulares');
+            pelisContainer.innerHTML = '';
+            seriesContainer.innerHTML = '';
+            
+            let totalResultados = 0;
+            
+            // Mostrar películas encontradas
+            if (pelis.results && pelis.results.length) {
+                pelis.results.slice(0, 20).forEach(p => {
+                    const item = {
+                        id: p.id, tmdb_id: p.id,
+                        titulo: p.title || 'Sin título',
+                        anio: p.release_date ? p.release_date.split('-')[0] : 'N/D',
+                        tipo: 'pelicula',
+                        portada: getImagenUrl(p.poster_path, 'w342'),
+                        puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A',
+                        url: generarEnlaceUnlimplay(p.id, 'pelicula'),
+                        opcion2: generarEnlaceVidsrc(p.id, 'pelicula')
+                    };
+                    pelisContainer.appendChild(crearTarjeta(item));
+                    totalResultados++;
+                });
+            }
+            
+            // Mostrar series encontradas
+            if (series.results && series.results.length) {
+                series.results.slice(0, 20).forEach(s => {
+                    const item = {
+                        id: s.id, tmdb_id: s.id,
+                        titulo: s.name || 'Sin título',
+                        anio: s.first_air_date ? s.first_air_date.split('-')[0] : 'N/D',
+                        tipo: 'serie',
+                        portada: getImagenUrl(s.poster_path, 'w342'),
+                        puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A',
+                        url: generarEnlaceUnlimplay(s.id, 'serie', 1, 1),
+                        opcion2: generarEnlaceVidsrc(s.id, 'serie', 1, 1)
+                    };
+                    seriesContainer.appendChild(crearTarjeta(item, true));
+                    totalResultados++;
+                });
+            }
+            
+            // Si no hay resultados
+            if (totalResultados === 0) {
+                pelisContainer.innerHTML = `<p class="empty-msg">🔍 No se encontraron resultados para "${texto}"</p>`;
+                seriesContainer.innerHTML = '';
+            }
+            
+        } catch(e) {
+            console.error('Error en búsqueda:', e);
+        }
+    }, 300); // 300ms de delay para no saturar
 };
 
 function detectarPlataforma() {
@@ -952,7 +954,7 @@ cargarContenido();
 cargarPeliculas(1);
 cargarSeries(1);
 
-console.log('✅ TELY cargado - Guarda estado de pestaña y scroll');
+console.log('✅ TELY - Eliminado "Continuar viendo", buscador en grid con 20 resultados');
 </script>
 </body>
 </html>
