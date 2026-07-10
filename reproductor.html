@@ -15,55 +15,23 @@
         ::-webkit-scrollbar{display:none}
         
         .main-content{width:100%;height:100vh;padding:.3rem .5rem;overflow-y:auto;margin:0 auto;max-width:600px}
-        
-        .header-flotante{
-            position:sticky;
-            top:0;
-            z-index:50;
-            background:rgba(10,10,15,.92);
-            backdrop-filter:blur(12px);
-            padding:.3rem .3rem .4rem;
-            border-bottom:1px solid rgba(124,58,237,.1);
-        }
-        
+        .header-flotante{position:sticky;top:0;z-index:50;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);padding:.3rem .3rem .4rem;border-bottom:1px solid rgba(124,58,237,.1)}
         .top-header{display:flex;justify-content:space-between;align-items:center;padding:.1rem 0 .2rem;flex-wrap:wrap;gap:.3rem}
         .top-header h1{font-size:1rem;font-weight:700;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
         .top-actions{display:flex;align-items:center;gap:.5rem}
-        
         .theme-btn{background:rgba(255,255,255,.05);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;transition:.3s;display:flex;align-items:center;justify-content:center}
         .theme-btn:hover{background:rgba(255,255,255,.1)}
-        
         .back-btn{background:rgba(255,255,255,.05);border:none;color:#94A3B8;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;transition:.3s;display:flex;align-items:center;justify-content:center}
         .back-btn:hover{background:rgba(255,255,255,.1)}
-        
-        .btn-fullscreen{
-            background:rgba(255,255,255,.06);
-            border:1px solid rgba(124,58,237,.15);
-            color:#fff;
-            padding:.25rem .6rem;
-            border-radius:6px;
-            font-weight:600;
-            font-size:.65rem;
-            cursor:pointer;
-            transition:.3s;
-            display:flex;
-            align-items:center;
-            gap:.2rem;
-        }
-        .btn-fullscreen:hover{
-            background:rgba(255,255,255,.1);
-            border-color:#7C3AED;
-        }
-        
+        .btn-fullscreen{background:rgba(255,255,255,.06);border:1px solid rgba(124,58,237,.15);color:#fff;padding:.25rem .6rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer;transition:.3s;display:flex;align-items:center;gap:.2rem}
+        .btn-fullscreen:hover{background:rgba(255,255,255,.1);border-color:#7C3AED}
         .player-wrapper{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;width:100%;margin:.2rem 0}
         .player-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;background:#000}
-        
         .info-top{padding:.2rem 0 .1rem}
         .info-top h1{font-size:1.2rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
         .info-top .meta{color:#94A3B8;font-size:.7rem;display:flex;gap:.6rem;flex-wrap:wrap;margin:.05rem 0}
         .info-top .meta .rating{color:#FBBF24;font-weight:700}
         .info-top .sinopsis{color:#94A3B8;font-size:.7rem;line-height:1.4;margin-top:.05rem}
-        
         .player-controls{display:flex;gap:.3rem;flex-wrap:wrap;margin:.2rem 0}
         .btn-opcion{background:rgba(255,255,255,.06);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.25rem .8rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer;transition:.3s}
         .btn-opcion.active{border-color:#7C3AED;background:#7C3AED;color:#fff}
@@ -77,41 +45,32 @@
         .btn-recargar:hover{background:rgba(16,185,129,.25)}
         .btn-nueva-ventana{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);color:#EF4444;padding:.25rem .7rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer;transition:.3s}
         .btn-nueva-ventana:hover{background:rgba(239,68,68,.15)}
-        
-        .loading-spinner{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#000;color:#A78BFA;gap:.5rem}
-        .loading-spinner i{font-size:2.5rem;color:#7C3AED;animation:spin 1s linear infinite}
-        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
         .error-video{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#0A0A0F;color:#EF4444;gap:.5rem;text-align:center;padding:.5rem}
         .error-video i{font-size:2.5rem}
         .error-video .sub{color:#64748B;font-size:.7rem}
-        
         .user-dropdown{position:absolute;right:0;top:calc(100% + 6px);background:rgba(26,26,46,.95);border-radius:8px;width:160px;border:1px solid rgba(124,58,237,.15);padding:.2rem 0;display:none;z-index:60;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
         .user-dropdown a{display:flex;align-items:center;gap:.3rem;padding:.3rem .6rem;color:#CBD5E1;text-decoration:none;font-size:.75rem;transition:.2s}
         .user-dropdown a:hover{background:rgba(124,58,237,.08);color:#fff}
         .user-dropdown hr{margin:.05rem 0;border:none;border-top:1px solid rgba(124,58,237,.08)}
         .user-menu{position:relative}
-        
         .episodios-section{margin-top:.3rem;background:rgba(255,255,255,.02);border-radius:12px;padding:.4rem .5rem;border:1px solid rgba(124,58,237,.06)}
         .episodios-section .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.2rem;flex-wrap:wrap;gap:.2rem}
         .episodios-section .section-header h3{font-size:.75rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:.3rem}
         .episodios-section .section-header .temp-selector{display:flex;align-items:center;gap:.3rem}
         .episodios-section .section-header .temp-selector select{background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(124,58,237,.15);border-radius:6px;padding:.1rem .4rem;font-size:.65rem;font-weight:600;cursor:pointer;outline:none}
-        .episodios-section .section-header .acciones{display:flex;gap:.4rem;flex-wrap:wrap}
         .episodios-section .section-header .acciones button{background:none;border:none;color:#94A3B8;font-size:.55rem;cursor:pointer;transition:.2s;padding:.05rem .3rem;border-radius:4px}
         .episodios-section .section-header .acciones button:hover{background:rgba(124,58,237,.1);color:#fff}
         .episodios-list{display:flex;flex-direction:column;gap:.2rem;max-height:250px;overflow-y:auto;padding-right:.1rem}
         .episodio-item{display:flex;flex-direction:column;padding:.2rem .3rem .15rem;background:rgba(255,255,255,.02);border-radius:6px;cursor:pointer;border:1px solid transparent;transition:.2s}
         .episodio-item:hover{background:rgba(255,255,255,.04)}
         .episodio-item.activo{border-color:#7C3AED;background:rgba(124,58,237,.06)}
-        .episodio-item.sin-enlace{opacity:.4;cursor:not-allowed}
         .episodio-item .top{display:flex;align-items:center;gap:.3rem;flex-wrap:wrap}
         .episodio-item .top .numero{font-size:.55rem;color:#A78BFA;font-weight:700}
         .episodio-item .top .titulo{font-size:.6rem;color:#E2E8F0;font-weight:500;flex:1}
         .episodio-item .top .estado{font-size:.45rem;color:#34D399;font-weight:600}
         .episodio-item .top .estado.no-disponible{color:#EF4444}
         .episodio-item .sinopsis{font-size:.5rem;color:#64748B;margin-top:.03rem;padding-left:1.2rem;line-height:1.2}
-        
         .recomendaciones-wrap{margin-top:.2rem}
         .titulo-recomendadas{font-weight:600;font-size:.75rem;color:#fff;margin:.2rem 0 .1rem}
         .recomendaciones{display:flex;gap:.3rem;overflow-x:auto;padding:.2rem 0;scrollbar-width:none}
@@ -120,25 +79,20 @@
         .recomendacion:hover{transform:scale(1.05);box-shadow:0 8px 30px rgba(0,0,0,.3)}
         .recomendacion img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:6px;display:block;background:#1A1A2E}
         .recomendacion p{font-size:.45rem;text-align:center;color:#94A3B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.05rem;padding:0 .1rem}
-        
         .episodios-list::-webkit-scrollbar{width:3px}
         .episodios-list::-webkit-scrollbar-track{background:rgba(255,255,255,.02)}
         .episodios-list::-webkit-scrollbar-thumb{background:#7C3AED;border-radius:10px}
-        
         @media(max-width:480px){.recomendacion{width:65px}.recomendacion p{font-size:.4rem}}
-        
         body:fullscreen .header-flotante{display:none!important}
         body:fullscreen .main-content{padding:0!important;max-width:100%!important}
         body:fullscreen .player-wrapper{border-radius:0!important;aspect-ratio:auto!important;height:100vh!important;width:100vw!important;margin:0!important}
         body:fullscreen .info-top,body:fullscreen .player-controls,body:fullscreen .episodios-section,body:fullscreen .recomendaciones-wrap,body:fullscreen #bannerApp{display:none!important}
-        
         #bannerApp{display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1A1A2E,#2D2D44);border-top:2px solid #7C3AED;padding:.5rem .6rem;z-index:9999;box-shadow:0 -4px 30px rgba(124,58,237,.3);animation:slideUp 0.5s ease-out}
         @keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
         body.banner-activo{padding-bottom:65px}
         .banner-logo-img{width:32px;height:32px;border-radius:6px;object-fit:cover}
         .banner-install-btn{background:linear-gradient(135deg,#7C3AED,#A78BFA);border:none;color:#fff;padding:.3rem .8rem;border-radius:6px;font-weight:700;font-size:.65rem;cursor:pointer;transition:.3s;display:flex;align-items:center;gap:.2rem}
         .banner-install-btn:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(124,58,237,.4)}
-        
         .episodio-item .badge-op2-ep{font-size:.35rem;background:#3B82F6;color:#fff;padding:.02rem .35rem;border-radius:3px;font-weight:700;margin-left:.2rem}
     </style>
 </head>
@@ -176,11 +130,9 @@
         <div class="sinopsis" id="playerSinopsis">Cargando información...</div>
     </div>
 
+    <!-- ========== REPRODUCTOR ========== -->
     <div class="player-wrapper" id="playerWrapper">
-        <div class="loading-spinner">
-            <i class="fas fa-spinner"></i>
-            <span style="font-size:.75rem;">Cargando reproductor...</span>
-        </div>
+        <!-- El iframe se inserta directamente aquí cuando se carga la página -->
     </div>
 
     <div class="player-controls" id="playerControls">
@@ -192,6 +144,7 @@
         <button class="btn-nueva-ventana" onclick="abrirNuevaVentana()"><i class="fas fa-external-link-alt"></i></button>
     </div>
 
+    <!-- ========== EPISODIOS ========== -->
     <div class="episodios-section" id="episodiosSection" style="display:none;">
         <div class="section-header">
             <h3><i class="fas fa-list"></i> Episodios</h3>
@@ -206,6 +159,7 @@
         <div class="episodios-list" id="episodiosList"></div>
     </div>
 
+    <!-- ========== RECOMENDACIONES ========== -->
     <div class="recomendaciones-wrap">
         <h4 class="titulo-recomendadas">Te podría gustar</h4>
         <div class="recomendaciones" id="recomendaciones"></div>
@@ -260,7 +214,7 @@ const tempRestaurar = params.get('temp') ? parseInt(params.get('temp')) : null;
 const capRestaurar = params.get('cap') ? parseInt(params.get('cap')) : null;
 
 let urlOp1 = null, urlOp2 = null, urlActual = null;
-let opcion2Disponible = false, opcionActiva = 1, reproduciendo = false;
+let opcion2Disponible = false, opcionActiva = 1;
 let esSerie = false;
 let temporadasActuales = [];
 let tempActualIndex = 0;
@@ -350,8 +304,26 @@ function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
 }
 
 // ============================================================
-// ⭐ REPRODUCIR DIRECTO (SIN SPINNER) ⭐
+// ⭐ FUNCIÓN PRINCIPAL: CARGAR Y REPRODUCIR DIRECTO ⭐
 // ============================================================
+function cargarYReproducir() {
+    console.log('⚡ Cargando reproductor directo...');
+    
+    // Si es una película, cargar el enlace de inmediato
+    if (tipo === 'pelicula') {
+        urlOp1 = generarEnlaceUnlimplay(tmdbId, 'pelicula');
+        if (urlOp1) {
+            reproducirDirecto(urlOp1);
+            // Cargar el resto de la info en segundo plano
+            cargarInfoPelicula();
+        }
+    } else {
+        // Es serie - cargar el enlace del primer capítulo de inmediato
+        cargarPrimerCapituloSerie();
+    }
+}
+
+// ⭐ REPRODUCIR DIRECTO (SIN SPINNER) ⭐
 function reproducirDirecto(url) {
     if (!url) return;
     const wrapper = document.getElementById('playerWrapper');
@@ -370,7 +342,7 @@ function reproducirDirecto(url) {
         finalUrl += (finalUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
     }
     
-    // ⭐ CREAR IFRAME DIRECTO SIN SPINNER ⭐
+    // ⭐ CREAR IFRAME DIRECTO ⭐
     const iframe = document.createElement('iframe');
     iframe.src = finalUrl;
     iframe.frameborder = "0";
@@ -384,148 +356,91 @@ function reproducirDirecto(url) {
     wrapper.appendChild(iframe);
 }
 
-function reproducirOpcion(opcion) {
-    if (opcion === 1 && urlOp1) {
-        opcionActiva = 1;
-        document.getElementById('btnOp1').classList.add('active');
-        document.getElementById('btnOp2').classList.remove('active');
-        reproducirDirecto(urlOp1);
-    } else if (opcion === 2 && opcion2Disponible && urlOp2) {
-        opcionActiva = 2;
-        document.getElementById('btnOp2').classList.add('active');
-        document.getElementById('btnOp1').classList.remove('active');
-        reproducirDirecto(urlOp2);
-    } else {
-        mostrarToast('❌ Opción no disponible', 'error');
-    }
-}
-
-function recargarVideo() {
-    if (urlActual) { mostrarToast('🔄 Recargando...', 'info'); reproducirDirecto(urlActual); }
-    else mostrarToast('❌ No hay video', 'error');
-}
-
-function abrirNuevaVentana() {
-    if (urlActual) window.open(urlActual, '_blank');
-    else mostrarToast('❌ No hay enlace', 'error');
-}
-
-function reportarFalla() { mostrarToast('📋 Reporte enviado', 'success'); }
-function ayuda() { mostrarToast('💬 Contáctanos', 'info'); }
-
-// ============================================================
-// CARGAR DATOS Y REPRODUCIR DIRECTO
-// ============================================================
-async function cargarContenido() {
-    const wrapper = document.getElementById('playerWrapper');
-    
+// ⭐ CARGAR PRIMER CAPÍTULO DE SERIE (RÁPIDO) ⭐
+async function cargarPrimerCapituloSerie() {
     try {
-        if (tipo === 'serie') {
-            await cargarSerie();
-        } else {
-            await cargarPelicula();
+        const data = await fetchTMDB(`tv/${tmdbId}`);
+        if (!data || !data.id) {
+            mostrarToast('❌ Serie no encontrada', 'error');
+            return;
         }
-    } catch(e) {
-        console.error('Error:', e);
-        wrapper.innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>Error: ${e.message}</span></div>`;
-    }
-}
-
-async function cargarSerie() {
-    const wrapper = document.getElementById('playerWrapper');
-    
-    // 1. OBTENER DATOS BÁSICOS
-    const data = await fetchTMDB(`tv/${tmdbId}`);
-    if (!data || !data.id) {
-        wrapper.innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>Serie no encontrada</span></div>`;
-        return;
-    }
-    
-    // 2. MOSTRAR INFO
-    document.getElementById('playerTitulo').textContent = data.name || 'Sin título';
-    document.getElementById('playerAnio').textContent = data.first_air_date ? data.first_air_date.split('-')[0] : 'N/D';
-    document.getElementById('playerRating').textContent = data.vote_average ? data.vote_average.toFixed(1) : 'N/A';
-    document.getElementById('playerGenero').textContent = data.genres ? data.genres.map(g => g.name).join(', ') : 'Serie';
-    document.getElementById('playerSinopsis').textContent = data.overview || 'Sin sinopsis';
-    document.getElementById('playerTipo').textContent = '📺 Serie';
-    document.getElementById('playerTipo').style.color = '#10B981';
-    
-    esSerie = true;
-    
-    // 3. CARGAR TEMPORADAS
-    const numTemps = Math.min(data.number_of_seasons || 1, 10);
-    for (let t = 1; t <= numTemps; t++) {
-        temporadasActuales.push({ numero: t, nombre: `Temporada ${t}`, capitulos: [] });
-    }
-    
-    const select = document.getElementById('tempSelect');
-    select.innerHTML = '';
-    temporadasActuales.forEach((t, idx) => {
-        const opt = document.createElement('option');
-        opt.value = idx;
-        opt.textContent = `Temporada ${t.numero}`;
-        select.appendChild(opt);
-    });
-    document.getElementById('episodiosSection').style.display = 'block';
-    
-    // 4. SELECCIONAR TEMPORADA
-    let tempIndex = 0;
-    if (tempRestaurar !== null && tempRestaurar < temporadasActuales.length) {
-        tempIndex = tempRestaurar;
-    }
-    select.value = tempIndex;
-    tempActualIndex = tempIndex;
-    
-    // 5. CARGAR CAPÍTULOS Y OPCIÓN 2
-    await cargarCapitulosYOp2(tempIndex);
-    
-    // 6. ⭐ REPRODUCIR CAPÍTULO DIRECTO (SIN SPINNER) ⭐
-    let capIndex = 0;
-    if (capRestaurar !== null) capIndex = capRestaurar;
-    const temp = temporadasActuales[tempIndex];
-    if (temp && temp.capitulos && temp.capitulos.length > capIndex) {
-        const cap = temp.capitulos[capIndex];
-        if (cap && cap.url) {
-            urlOp1 = cap.url;
-            if (cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
-                urlOp2 = cap.opcion2;
-                opcion2Disponible = true;
-                document.getElementById('btnOp2').classList.remove('oculto');
+        
+        // Mostrar info básica
+        document.getElementById('playerTitulo').textContent = data.name || 'Sin título';
+        document.getElementById('playerAnio').textContent = data.first_air_date ? data.first_air_date.split('-')[0] : 'N/D';
+        document.getElementById('playerRating').textContent = data.vote_average ? data.vote_average.toFixed(1) : 'N/A';
+        document.getElementById('playerGenero').textContent = data.genres ? data.genres.map(g => g.name).join(', ') : 'Serie';
+        document.getElementById('playerSinopsis').textContent = data.overview || 'Sin sinopsis';
+        document.getElementById('playerTipo').textContent = '📺 Serie';
+        document.getElementById('playerTipo').style.color = '#10B981';
+        
+        esSerie = true;
+        
+        // Obtener primera temporada
+        const seasonData = await fetchTMDB(`tv/${tmdbId}/season/1`);
+        if (seasonData && seasonData.episodes && seasonData.episodes.length) {
+            const ep = seasonData.episodes[0];
+            urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', 1, ep.episode_number || 1);
+            if (urlOp1) {
+                reproducirDirecto(urlOp1);
+                document.getElementById('btnOp1').classList.add('active');
             }
-            // ⭐ REPRODUCIR DIRECTO ⭐
-            reproducirDirecto(urlOp1);
-            document.getElementById('btnOp1').classList.add('active');
         }
+        
+        // Cargar temporadas completas en segundo plano
+        cargarTemporadasCompletas(data);
+        
+    } catch(e) {
+        console.error('Error cargando serie:', e);
     }
-    
-    // 7. RECOMENDACIONES
-    cargarRecomendaciones(tmdbId);
 }
 
-async function cargarCapitulosYOp2(tempIndex) {
-    if (!temporadasActuales[tempIndex]) return;
-    const temp = temporadasActuales[tempIndex];
-    
+// ⭐ CARGAR TEMPORADAS COMPLETAS (EN SEGUNDO PLANO) ⭐
+async function cargarTemporadasCompletas(data) {
     try {
-        const data = await fetchTMDB(`tv/${tmdbId}/season/${temp.numero}`);
-        if (!data || !data.episodes) return;
+        const numTemps = Math.min(data.number_of_seasons || 1, 10);
+        for (let t = 1; t <= numTemps; t++) {
+            const seasonData = await fetchTMDB(`tv/${tmdbId}/season/${t}`);
+            if (!seasonData || !seasonData.episodes) continue;
+            const capitulos = seasonData.episodes.map(ep => ({
+                numero: ep.episode_number,
+                titulo: ep.name || `Capítulo ${ep.episode_number}`,
+                sinopsis: ep.overview || 'Sin sinopsis',
+                url: generarEnlaceUnlimplay(tmdbId, 'serie', t, ep.episode_number),
+                opcion2: null
+            }));
+            temporadasActuales.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
+        }
         
-        temp.capitulos = data.episodes.map(ep => ({
-            numero: ep.episode_number,
-            titulo: ep.name || `Episodio ${ep.episode_number}`,
-            sinopsis: ep.overview || 'Sin sinopsis',
-            disponible: true,
-            url: generarEnlaceUnlimplay(tmdbId, 'serie', temp.numero, ep.episode_number),
-            opcion2: null
-        }));
+        // Mostrar episodios
+        document.getElementById('episodiosSection').style.display = 'block';
+        const select = document.getElementById('tempSelect');
+        select.innerHTML = '';
+        temporadasActuales.forEach((t, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = `Temporada ${t.numero}`;
+            select.appendChild(opt);
+        });
         
-        // OPCIÓN 2 DESDE FIREBASE
-        try {
-            const snap = await db.ref('series_personalizadas').once('value');
-            const items = Object.values(snap.val() || {});
-            const item = items.find(i => i.tmdb_id == tmdbId);
-            
-            if (item && item.temporadas) {
+        // Buscar Opción 2 en Firebase (segundo plano)
+        buscarOpcion2Firebase();
+        
+        mostrarEpisodios(0);
+        
+    } catch(e) {
+        console.error('Error cargando temporadas:', e);
+    }
+}
+
+// ⭐ BUSCAR OPCIÓN 2 EN FIREBASE ⭐
+async function buscarOpcion2Firebase() {
+    try {
+        const snap = await db.ref('series_personalizadas').once('value');
+        const items = Object.values(snap.val() || {});
+        const item = items.find(i => i.tmdb_id == tmdbId);
+        if (item && item.temporadas) {
+            temporadasActuales.forEach((temp, tempIdx) => {
                 const fbTemp = item.temporadas.find(t => t.numero == temp.numero);
                 if (fbTemp && fbTemp.capitulos) {
                     temp.capitulos.forEach(cap => {
@@ -535,17 +450,43 @@ async function cargarCapitulosYOp2(tempIndex) {
                         }
                     });
                 }
-            }
-        } catch(e) { console.log('Firebase Op2 no disponible'); }
-        
-        mostrarEpisodios(tempIndex);
-        
-    } catch(e) {
-        console.error('Error cargando capítulos:', e);
-        document.getElementById('episodiosList').innerHTML = '<p style="color:#64748B;padding:.2rem;text-align:center;font-size:.7rem;">Error al cargar capítulos</p>';
-    }
+            });
+            mostrarEpisodios(tempActualIndex);
+        }
+    } catch(e) {}
 }
 
+// ⭐ CARGAR INFO DE PELÍCULA (EN SEGUNDO PLANO) ⭐
+async function cargarInfoPelicula() {
+    try {
+        const data = await fetchTMDB(`movie/${tmdbId}`);
+        if (!data || !data.id) return;
+        
+        document.getElementById('playerTitulo').textContent = data.title || 'Sin título';
+        document.getElementById('playerAnio').textContent = data.release_date ? data.release_date.split('-')[0] : 'N/D';
+        document.getElementById('playerRating').textContent = data.vote_average ? data.vote_average.toFixed(1) : 'N/A';
+        document.getElementById('playerGenero').textContent = data.genres ? data.genres.map(g => g.name).join(', ') : 'Película';
+        document.getElementById('playerSinopsis').textContent = data.overview || 'Sin sinopsis';
+        document.getElementById('playerTipo').textContent = '🎬 Película';
+        document.getElementById('playerTipo').style.color = '#A78BFA';
+        
+        // Buscar Opción 2
+        try {
+            const snap = await db.ref('contenido_personalizado').once('value');
+            const items = Object.values(snap.val() || {});
+            const item = items.find(i => i.tmdb_id == tmdbId);
+            if (item && item.opcion2 && item.opcion2.trim() !== '' && item.opcion2.startsWith('http')) {
+                urlOp2 = item.opcion2;
+                opcion2Disponible = true;
+                document.getElementById('btnOp2').classList.remove('oculto');
+            }
+        } catch(e) {}
+        
+        cargarRecomendaciones(tmdbId);
+    } catch(e) {}
+}
+
+// ⭐ MOSTRAR EPISODIOS ⭐
 function mostrarEpisodios(tempIndex) {
     if (!temporadasActuales[tempIndex]) return;
     const temp = temporadasActuales[tempIndex];
@@ -605,66 +546,41 @@ function mostrarEpisodios(tempIndex) {
     });
 }
 
-async function cambiarTempSelect() {
+function cambiarTempSelect() {
     const select = document.getElementById('tempSelect');
     const idx = parseInt(select.value);
     tempActualIndex = idx;
-    
-    const temp = temporadasActuales[idx];
-    if (!temp.capitulos || !temp.capitulos.length) {
-        await cargarCapitulosYOp2(idx);
+    mostrarEpisodios(idx);
+}
+
+function reproducirOpcion(opcion) {
+    if (opcion === 1 && urlOp1) {
+        opcionActiva = 1;
+        document.getElementById('btnOp1').classList.add('active');
+        document.getElementById('btnOp2').classList.remove('active');
+        reproducirDirecto(urlOp1);
+    } else if (opcion === 2 && opcion2Disponible && urlOp2) {
+        opcionActiva = 2;
+        document.getElementById('btnOp2').classList.add('active');
+        document.getElementById('btnOp1').classList.remove('active');
+        reproducirDirecto(urlOp2);
     } else {
-        mostrarEpisodios(idx);
+        mostrarToast('❌ Opción no disponible', 'error');
     }
 }
 
-// ============================================================
-// PELÍCULA - CARGA DIRECTA
-// ============================================================
-async function cargarPelicula() {
-    const wrapper = document.getElementById('playerWrapper');
-    
-    const data = await fetchTMDB(`movie/${tmdbId}`);
-    if (!data || !data.id) {
-        wrapper.innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>Película no encontrada</span></div>`;
-        return;
-    }
-    
-    document.getElementById('playerTitulo').textContent = data.title || 'Sin título';
-    document.getElementById('playerAnio').textContent = data.release_date ? data.release_date.split('-')[0] : 'N/D';
-    document.getElementById('playerRating').textContent = data.vote_average ? data.vote_average.toFixed(1) : 'N/A';
-    document.getElementById('playerGenero').textContent = data.genres ? data.genres.map(g => g.name).join(', ') : 'Película';
-    document.getElementById('playerSinopsis').textContent = data.overview || 'Sin sinopsis';
-    document.getElementById('playerTipo').textContent = '🎬 Película';
-    document.getElementById('playerTipo').style.color = '#A78BFA';
-    
-    urlOp1 = generarEnlaceUnlimplay(tmdbId, 'pelicula');
-    
-    // Buscar Opción 2
-    try {
-        const snap = await db.ref('contenido_personalizado').once('value');
-        const items = Object.values(snap.val() || {});
-        const item = items.find(i => i.tmdb_id == tmdbId);
-        if (item && item.opcion2 && item.opcion2.trim() !== '' && item.opcion2.startsWith('http')) {
-            urlOp2 = item.opcion2;
-            opcion2Disponible = true;
-            document.getElementById('btnOp2').classList.remove('oculto');
-        }
-    } catch(e) {}
-    
-    if (urlOp1) {
-        if (opcionActiva === 2 && opcion2Disponible && urlOp2) {
-            reproducirDirecto(urlOp2);
-            document.getElementById('btnOp2').classList.add('active');
-            document.getElementById('btnOp1').classList.remove('active');
-        } else {
-            reproducirDirecto(urlOp1);
-            document.getElementById('btnOp1').classList.add('active');
-        }
-    }
-    
-    cargarRecomendaciones(tmdbId);
+function recargarVideo() {
+    if (urlActual) { mostrarToast('🔄 Recargando...', 'info'); reproducirDirecto(urlActual); }
+    else mostrarToast('❌ No hay video', 'error');
 }
+
+function abrirNuevaVentana() {
+    if (urlActual) window.open(urlActual, '_blank');
+    else mostrarToast('❌ No hay enlace', 'error');
+}
+
+function reportarFalla() { mostrarToast('📋 Reporte enviado', 'success'); }
+function ayuda() { mostrarToast('💬 Contáctanos', 'info'); }
 
 // ============================================================
 // RECOMENDACIONES
@@ -743,19 +659,19 @@ document.addEventListener('backbutton', function(e) {
 }, false);
 
 // ============================================================
-// INICIAR - REPRODUCIR DIRECTO
+// INICIAR - CARGA DIRECTA
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 2000);
 });
 
 if (tmdbId) {
-    cargarContenido();
+    cargarYReproducir();
 } else {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
 
-console.log('⚡ Reproductor DIRECTO - Sin spinner');
+console.log('⚡ Reproductor DIRECTO - Carga inmediata del video');
 </script>
 </body>
 </html>
