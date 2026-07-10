@@ -162,6 +162,7 @@ const auth = firebase.auth();
 const db = firebase.database();
 
 let paginaActual = 1, cargando = false, totalPaginas = 1, timeoutBusqueda = null;
+let modoBusqueda = false;
 
 function irALogin(){window.location.href='login.html'}
 function cerrarSesion(){auth.signOut().then(()=>{location.reload()})}
@@ -198,7 +199,7 @@ window.cargarMasPeliculas=function(){if(!cargando){paginaActual++;cargarPelicula
 const mainContent=document.querySelector('.main-content');
 mainContent.addEventListener('scroll',function(){const st=mainContent.scrollTop,sh=mainContent.scrollHeight,ch=mainContent.clientHeight;if(st+ch>=sh-100){const btn=document.getElementById('btnMas');if(btn.style.display!=='none'&&!cargando){window.cargarMasPeliculas()}}});
 
-// ⭐⭐ BUSCADOR CORREGIDO ⭐⭐
+// ⭐⭐ BUSCADOR CORREGIDO - BUSCA EN EL GRID ⭐⭐
 window.buscarGlobal = async function() {
     const input = document.getElementById('searchInput');
     const texto = input.value.trim();
@@ -207,11 +208,13 @@ window.buscarGlobal = async function() {
     
     // Si no hay texto, recargar películas populares
     if (!texto) {
+        modoBusqueda = false;
         cargarPeliculas(1);
+        btn.style.display = 'flex';
         return;
     }
     
-    // Limpiar timeout anterior
+    modoBusqueda = true;
     clearTimeout(timeoutBusqueda);
     
     timeoutBusqueda = setTimeout(async () => {
@@ -234,7 +237,7 @@ window.buscarGlobal = async function() {
                 return;
             }
             
-            // Mostrar resultados
+            // Mostrar resultados en el grid
             data.results.slice(0, 20).forEach(p => {
                 const item = {
                     id: p.id,
@@ -257,7 +260,7 @@ window.buscarGlobal = async function() {
 };
 
 cargarPeliculas(1);
-console.log('✅ Películas - Buscador CORREGIDO');
+console.log('✅ Películas - Buscador CORREGIDO (busca en el grid)');
 </script>
 </body>
 </html>
