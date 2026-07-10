@@ -42,6 +42,8 @@
         .admin-btn-purple:hover{background:#7C3AED}
         .admin-btn-orange{background:#F59E0B;color:#111}
         .admin-btn-orange:hover{background:#D97706}
+        .admin-btn-cyan{background:#06B6D4;color:#fff}
+        .admin-btn-cyan:hover{background:#0891B2}
         
         .btn-group{display:flex;gap:.3rem;flex-wrap:wrap;margin:.3rem 0}
         .btn-group .admin-btn{padding:.3rem 1rem;font-size:.75rem}
@@ -170,25 +172,8 @@
             border-radius:9999px;
         }
         
-        .temporada-caps{
-            margin-top:.2rem;
-            padding:.1rem .2rem;
-            background:rgba(255,255,255,.01);
-            border-radius:4px;
-        }
-        
-        .temporada-header{
-            font-size:.65rem;
-            font-weight:700;
-            color:#34D399;
-            margin:.2rem 0 .1rem;
-            display:flex;
-            align-items:center;
-            gap:.3rem;
-            padding:.05rem .2rem;
-            background:rgba(16,185,129,.05);
-            border-radius:4px;
-        }
+        .temporada-caps{margin-top:.2rem;padding:.1rem .2rem;background:rgba(255,255,255,.01);border-radius:4px}
+        .temporada-header{font-size:.65rem;font-weight:700;color:#34D399;margin:.2rem 0 .1rem;display:flex;align-items:center;gap:.3rem;padding:.05rem .2rem;background:rgba(16,185,129,.05);border-radius:4px}
         
         .paginacion{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.5rem 0;flex-wrap:wrap}
         .paginacion button{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.2rem .8rem;border-radius:6px;font-size:.75rem;cursor:pointer;transition:.2s}
@@ -217,6 +202,10 @@
         .pedido-actions .btn-eliminar{background:rgba(239,68,68,.15);color:#F87171}
         .pedido-actions .btn-eliminar:hover{background:rgba(239,68,68,.25)}
         .badge-pedidos{display:inline-block;background:#EF4444;color:#fff;border-radius:9999px;padding:.05rem .5rem;font-size:.55rem;font-weight:700;margin-left:.3rem}
+        
+        /* Spinner de carga */
+        .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.1);border-radius:50%;border-top-color:#7C3AED;animation:spin 0.8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
     </style>
 </head>
 <body>
@@ -663,6 +652,102 @@ async function generarSeries() {
     generando = false;
 }
 
+// ⭐⭐ FUNCIÓN PARA CARGAR TODAS LAS TEMPORADAS DE UNA SERIE DESDE TMDB ⭐⭐
+window.cargarTodasLasTemporadas = async function(key) {
+    if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
+    if (!confirm('⚠️ ¿Cargar TODAS las temporadas de esta serie desde TMDB?\nEsto puede tomar unos segundos.')) return;
+    
+    const btn = document.getElementById(`btn-cargar-temps-${key}`);
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner"></span> Cargando...';
+    btn.disabled = true;
+    
+    try {
+        // 1. Obtener datos de la serie desde Firebase para saber el TMDB ID
+        const snap = await db.ref(`series_personalizadas/${key}`).once('value');
+        const serie = snap.val();
+        if (!serie) {
+            mostrarToast('❌ Serie no encontrada', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+        }
+        
+        const tmdbId = serie.tmdb_id;
+        if (!tmdbId) {
+            mostrarToast('❌ No tiene TMDB ID', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+        }
+        
+        // 2. Obtener datos de la serie desde TMDB
+        const data = await fetchTMDB(`tv/${tmdbId}`);
+        if (!data || !data.id) {
+            mostrarToast('❌ Serie no encontrada en TMDB', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+        }
+        
+        const numTemporadas = data.number_of_seasons || 1;
+        mostrarToast(`📺 Cargando ${numTemporadas} temporadas...`, 'info');
+        
+        // 3. Obtener cada temporada
+        const nuevasTemporadas = [];
+        for (let t = 1; t <= numTemporadas; t++) {
+            try {
+                const seasonData = await fetchTMDB(`tv/${tmdbId}/season/${t}`);
+                if (!seasonData || !seasonData.episodes) continue;
+                
+                const capitulos = seasonData.episodes.map(ep => ({
+                    numero: ep.episode_number,
+                    titulo: ep.name || `Capítulo ${ep.episode_number}`,
+                    sinopsis: ep.overview || 'Sin sinopsis',
+                    url: generarEnlaceUnlimplay(tmdbId, 'serie', t, ep.episode_number),
+                    opcion2: null
+                }));
+                nuevasTemporadas.push({
+                    numero: t,
+                    nombre: seasonData.name || `Temporada ${t}`,
+                    capitulos: capitulos
+                });
+            } catch(e) {
+                console.error(`Error en temp ${t}:`, e);
+            }
+        }
+        
+        if (nuevasTemporadas.length === 0) {
+            mostrarToast('❌ No se pudieron cargar temporadas', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+        }
+        
+        // 4. Guardar en Firebase
+        await db.ref(`series_personalizadas/${key}/temporadas`).set(nuevasTemporadas);
+        
+        mostrarToast(`✅ ${nuevasTemporadas.length} temporadas cargadas`, 'success');
+        
+        // 5. Actualizar la vista sin recargar la página
+        seriesLista[seriesKeys.indexOf(key)].temporadas = nuevasTemporadas;
+        
+        // Recargar la vista de la serie
+        if (seriesExpandidas[key]) {
+            mostrarCapitulosSerie(key);
+        }
+        
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        
+    } catch(e) {
+        console.error('Error:', e);
+        mostrarToast('❌ Error: ' + e.message, 'error');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+};
+
 // ⭐ EDITAR ENLACES - SIN RECARGAR
 window.editarEnlace = function(key, tipo, campo) {
     const container = document.getElementById(`item-${key}`);
@@ -807,7 +892,10 @@ window.toggleSerie = function(key) {
         container.style.display = 'block';
         btn.innerHTML = '<i class="fas fa-chevron-up"></i> Ocultar';
         // Cargar la primera temporada por defecto
-        if (!serieTempSeleccionada[key]) {
+        const serie = seriesLista[seriesKeys.indexOf(key)];
+        if (serie && serie.temporadas && serie.temporadas.length) {
+            serieTempSeleccionada[key] = serie.temporadas[0].numero.toString();
+        } else {
             serieTempSeleccionada[key] = '1';
         }
         mostrarCapitulosSerie(key);
@@ -833,11 +921,28 @@ function mostrarCapitulosSerie(key) {
     
     const tempSeleccionada = parseInt(serieTempSeleccionada[key]) || 1;
     const serie = seriesLista[seriesKeys.indexOf(key)];
-    if (!serie || !serie.temporadas) return;
+    if (!serie || !serie.temporadas) {
+        container.innerHTML = `
+            <div style="color:#94A3B8;font-size:.65rem;text-align:center;padding:.3rem;">
+                No hay temporadas. 
+                <button class="admin-btn admin-btn-cyan" style="padding:.1rem .6rem;font-size:.55rem;margin-top:.3rem;" onclick="cargarTodasLasTemporadas('${key}')">
+                    <i class="fas fa-download"></i> Cargar todas las temps
+                </button>
+            </div>
+        `;
+        return;
+    }
     
     const temp = serie.temporadas.find(t => t.numero === tempSeleccionada);
     if (!temp) {
-        container.innerHTML = `<div style="color:#64748B;font-size:.65rem;padding:.2rem;">No hay capítulos para la temporada ${tempSeleccionada}</div>`;
+        container.innerHTML = `
+            <div style="color:#64748B;font-size:.65rem;padding:.2rem;">
+                No hay capítulos para la temporada ${tempSeleccionada}
+                <button class="admin-btn admin-btn-cyan" style="padding:.1rem .6rem;font-size:.55rem;margin-left:.3rem;" onclick="cargarTodasLasTemporadas('${key}')">
+                    <i class="fas fa-download"></i> Cargar todas
+                </button>
+            </div>
+        `;
         return;
     }
     
@@ -855,6 +960,9 @@ function mostrarCapitulosSerie(key) {
     html += `
             </select>
             <span class="badge-temp">${temp.capitulos ? temp.capitulos.length : 0} capítulos</span>
+            <button class="admin-btn admin-btn-cyan" style="padding:.05rem .5rem;font-size:.5rem;" onclick="cargarTodasLasTemporadas('${key}')">
+                <i class="fas fa-sync-alt"></i> Recargar temps
+            </button>
         </div>
         <div class="temporada-caps">
     `;
@@ -1240,6 +1348,7 @@ window.cargarContenido = async function() {
                 const portada = s.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
                 const urlOp1 = s.url || 'Sin enlace';
                 const urlOp2 = s.opcion2 || '';
+                const hasTemps = s.temporadas && s.temporadas.length > 0;
                 
                 const item = document.createElement('div');
                 item.className = 'admin-item serie-expandida';
@@ -1263,6 +1372,7 @@ window.cargarContenido = async function() {
                         <div class="info-item">
                             <div class="title">${s.titulo} <span class="badge-tipo serie">📺</span></div>
                             <div class="meta">${s.anio || 'N/D'} • ${s.temporadas?.length || 0} temps • ${capsCount} caps • ⭐ ${s.puntuacion || 'N/A'} • TMDB: ${s.tmdb_id}</div>
+                            ${!hasTemps ? `<span style="color:#F59E0B;font-size:.55rem;display:block;">⚠️ Sin temporadas guardadas</span>` : ''}
                         </div>
                     </div>
                     
@@ -1283,6 +1393,9 @@ window.cargarContenido = async function() {
                         ${urlOp2 ? `<button class="admin-btn admin-btn-purple" onclick="editarEnlace('${key}', 'serie', 'op2')"><i class="fas fa-pen"></i> Editar Op2</button>` : `<button class="admin-btn admin-btn-purple" onclick="agregarOpcion2('${key}', 'serie', '${s.tmdb_id}')"><i class="fas fa-plus"></i> Agregar Op2</button>`}
                         <button class="toggle-series-btn" id="toggle-btn-${key}" onclick="toggleSerie('${key}')">
                             <i class="fas fa-chevron-${isExpanded ? 'up' : 'down'}"></i> ${isExpanded ? 'Ocultar' : 'Ver caps'}
+                        </button>
+                        <button class="admin-btn admin-btn-cyan" id="btn-cargar-temps-${key}" onclick="cargarTodasLasTemporadas('${key}')" style="padding:.1rem .6rem;font-size:.55rem;">
+                            <i class="fas fa-download"></i> Cargar todas las temps
                         </button>
                         <button class="admin-btn admin-btn-danger" onclick="eliminarItem('${key}', 'serie')"><i class="fas fa-trash"></i></button>
                     </div>
@@ -1332,7 +1445,7 @@ window.eliminarItem = async function(key, tipo) {
 // ⭐ INICIAR
 cargarContenido();
 cargarPedidos();
-console.log('✅ Admin TELY - Selector de temporadas dentro de cada serie');
+console.log('✅ Admin TELY - Botón "Cargar todas las temps" + Selector de temporadas');
 </script>
 </body>
 </html>
