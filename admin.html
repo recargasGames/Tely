@@ -46,7 +46,6 @@
         .btn-group{display:flex;gap:.3rem;flex-wrap:wrap;margin:.3rem 0}
         .btn-group .admin-btn{padding:.3rem 1rem;font-size:.75rem}
         
-        /* ⭐ ADMIN ITEM - ENLACES VERTICALES CON INPUT A TODO LO ANCHO */
         .admin-item{display:flex;flex-direction:column;gap:.3rem;background:rgba(255,255,255,.02);border-radius:8px;padding:.6rem .8rem;border-left:3px solid #7C3AED;margin-bottom:.4rem}
         body:not(.dark) .admin-item{background:rgba(0,0,0,.02)}
         .admin-item .top-row{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
@@ -55,13 +54,11 @@
         .admin-item .title{font-weight:600;font-size:.85rem}
         .admin-item .meta{font-size:.65rem;color:#94A3B8;display:flex;gap:.6rem;flex-wrap:wrap}
         
-        /* ⭐ ENLACES - UNO DEBAJO DEL OTRO, A TODO LO ANCHO */
         .admin-item .enlace-wrap{width:100%;margin-top:.1rem}
         .admin-item .enlace{font-size:.6rem;color:#60A5FA;word-break:break-all;padding:.2rem .4rem;background:rgba(59,130,246,.06);border-radius:4px;border:1px solid rgba(59,130,246,.08);width:100%}
         .admin-item .enlace.op1{color:#34D399;border-color:rgba(16,185,129,.15)}
         .admin-item .enlace.op2{color:#60A5FA;border-color:rgba(59,130,246,.15)}
         
-        /* ⭐ INPUT DE EDICIÓN - A TODO LO ANCHO */
         .admin-item .edit-input{width:100%;padding:.2rem .4rem;border-radius:4px;border:1px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.6rem;margin-top:.1rem}
         body:not(.dark) .admin-item .edit-input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
         .admin-item .edit-input:focus{outline:none;border-color:#7C3AED}
@@ -173,6 +170,49 @@
         .pedido-actions .btn-eliminar{background:rgba(239,68,68,.15);color:#F87171}
         .pedido-actions .btn-eliminar:hover{background:rgba(239,68,68,.25)}
         .badge-pedidos{display:inline-block;background:#EF4444;color:#fff;border-radius:9999px;padding:.05rem .5rem;font-size:.55rem;font-weight:700;margin-left:.3rem}
+
+        /* ⭐ SELECTOR DE TEMPORADAS - NUEVO ⭐ */
+        .temp-selector-container{
+            display:flex;
+            gap:.5rem;
+            align-items:center;
+            flex-wrap:wrap;
+            background:rgba(255,255,255,.03);
+            border-radius:8px;
+            padding:.4rem .6rem;
+            margin:.3rem 0 .5rem;
+            border:1px solid rgba(124,58,237,.1);
+        }
+        .temp-selector-container label{
+            font-size:.75rem;
+            color:#94A3B8;
+            font-weight:600;
+        }
+        .temp-selector-container select{
+            padding:.2rem .8rem;
+            border-radius:6px;
+            border:1px solid rgba(124,58,237,.2);
+            background:rgba(255,255,255,.05);
+            color:#fff;
+            font-size:.75rem;
+            cursor:pointer;
+        }
+        body:not(.dark) .temp-selector-container select{
+            background:rgba(0,0,0,.05);
+            color:#111;
+            border-color:rgba(0,0,0,.1);
+        }
+        .temp-selector-container select:focus{
+            outline:none;
+            border-color:#7C3AED;
+        }
+        .temp-selector-container .badge-temp{
+            font-size:.6rem;
+            color:#34D399;
+            background:rgba(16,185,129,.1);
+            padding:.05rem .5rem;
+            border-radius:9999px;
+        }
     </style>
 </head>
 <body>
@@ -268,6 +308,25 @@
                 <i class="fas fa-filter"></i> Filtrar
             </button>
         </div>
+
+        <!-- ⭐ SELECTOR DE TEMPORADAS (NUEVO) ⭐ -->
+        <div class="temp-selector-container" id="tempSelectorContainer">
+            <label><i class="fas fa-layer-group"></i> Temporada:</label>
+            <select id="selectorTempAdmin" onchange="seleccionarTempAdmin()">
+                <option value="todas">Todas</option>
+                <option value="1">Temporada 1</option>
+                <option value="2">Temporada 2</option>
+                <option value="3">Temporada 3</option>
+                <option value="4">Temporada 4</option>
+                <option value="5">Temporada 5</option>
+                <option value="6">Temporada 6</option>
+                <option value="7">Temporada 7</option>
+                <option value="8">Temporada 8</option>
+                <option value="9">Temporada 9</option>
+                <option value="10">Temporada 10</option>
+            </select>
+            <span class="badge-temp" id="tempBadgeAdmin">Mostrando: Todas</span>
+        </div>
         
         <div id="listaContenido" class="max-h-96 overflow-y-auto">
             <p class="loading-text">Cargando contenido...</p>
@@ -319,6 +378,7 @@ let peliculasKeys = [];
 let seriesKeys = [];
 let itemsEditando = {};
 let seriesExpandidas = {};
+let tempFiltroAdmin = 'todas';
 
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) { return true; });
@@ -618,12 +678,11 @@ async function generarSeries() {
     generando = false;
 }
 
-// ⭐ EDITAR ENLACES - CON INPUT A TODO LO ANCHO
+// ⭐ EDITAR ENLACES - SIN RECARGAR
 window.editarEnlace = function(key, tipo, campo) {
     const container = document.getElementById(`item-${key}`);
     const enlaceWrap = container.querySelector(`.enlace-wrap.${campo}-wrap`);
     const enlaceDiv = enlaceWrap.querySelector('.enlace');
-    const actionsDiv = container.querySelector('.actions');
     
     if (itemsEditando[key]) {
         cancelarEdicion(key);
@@ -637,7 +696,7 @@ window.editarEnlace = function(key, tipo, campo) {
         <div style="font-size:.55rem;color:#94A3B8;margin-bottom:.1rem;">${campo === 'url' ? '🔗 Opción 1' : '🔗 Opción 2'}</div>
         <input class="edit-input" id="edit-input-${key}-${campo}" value="${currentUrl}" placeholder="Pega el nuevo enlace..." style="width:100%;">
         <div class="edit-actions">
-            <button class="save-btn" onclick="guardarEnlace('${key}', '${tipo}', '${campo}')"><i class="fas fa-check"></i> Guardar</button>
+            <button class="save-btn" onclick="guardarEnlaceSinRecargar('${key}', '${tipo}', '${campo}')"><i class="fas fa-check"></i> Guardar</button>
             <button class="cancel-btn" onclick="cancelarEdicion('${key}')"><i class="fas fa-times"></i> Cancelar</button>
         </div>
     `;
@@ -653,7 +712,7 @@ window.cancelarEdicion = function(key) {
     cargarContenido();
 };
 
-window.guardarEnlace = async function(key, tipo, campo) {
+window.guardarEnlaceSinRecargar = async function(key, tipo, campo) {
     const input = document.getElementById(`edit-input-${key}-${campo}`);
     if (!input) return;
     
@@ -668,16 +727,23 @@ window.guardarEnlace = async function(key, tipo, campo) {
         await db.ref(`${path}/${key}`).update({ [campo]: nuevoEnlace });
         mostrarToast(`✅ ${campo} actualizada`, 'success');
         delete itemsEditando[key];
-        cargarContenido();
+        
+        // ⭐ ACTUALIZAR SOLO ESE ELEMENTO SIN RECARGAR TODO ⭐
+        const container = document.getElementById(`item-${key}`);
+        const enlaceWrap = container.querySelector(`.enlace-wrap.${campo}-wrap`);
+        enlaceWrap.innerHTML = `
+            <div style="font-size:.55rem;color:${campo === 'url' ? '#34D399' : '#60A5FA'};margin-bottom:.05rem;">🔗 ${campo === 'url' ? 'Opción 1' : 'Opción 2'}</div>
+            <div class="enlace ${campo === 'url' ? 'op1' : 'op2'}">${nuevoEnlace}</div>
+        `;
+        
     } catch(e) {
         mostrarToast('❌ Error: ' + e.message, 'error');
     }
 };
 
-// ⭐ AGREGAR OPCIÓN 2
+// ⭐ AGREGAR OPCIÓN 2 SIN RECARGAR
 window.agregarOpcion2 = async function(key, tipo, tmdbId) {
     const container = document.getElementById(`item-${key}`);
-    const actionsDiv = container.querySelector('.actions');
     
     const op2Existente = container.querySelector('.enlace-wrap.op2-wrap');
     if (op2Existente) {
@@ -685,7 +751,6 @@ window.agregarOpcion2 = async function(key, tipo, tmdbId) {
         return;
     }
     
-    // Crear nuevo wrap para Op2
     const nuevoWrap = document.createElement('div');
     nuevoWrap.className = 'enlace-wrap op2-wrap';
     nuevoWrap.style.marginTop = '.1rem';
@@ -693,13 +758,12 @@ window.agregarOpcion2 = async function(key, tipo, tmdbId) {
         <div style="font-size:.55rem;color:#3B82F6;margin-bottom:.1rem;">🔗 Opción 2 (agregar)</div>
         <input class="edit-input" id="op2-input-${key}" placeholder="Pega enlace de Vidmoly, BigMoly..." style="width:100%;">
         <div class="edit-actions">
-            <button class="save-btn" onclick="guardarOpcion2('${key}', '${tipo}', '${tmdbId}')"><i class="fas fa-check"></i> Guardar</button>
+            <button class="save-btn" onclick="guardarOpcion2SinRecargar('${key}', '${tipo}', '${tmdbId}')"><i class="fas fa-check"></i> Guardar</button>
             <button class="cancel-btn" onclick="cancelarOpcion2('${key}')"><i class="fas fa-times"></i> Cancelar</button>
         </div>
     `;
     
-    // Insertar antes de actionsDiv
-    container.insertBefore(nuevoWrap, actionsDiv);
+    container.insertBefore(nuevoWrap, container.querySelector('.actions'));
     
     setTimeout(() => {
         const input = document.getElementById(`op2-input-${key}`);
@@ -707,7 +771,7 @@ window.agregarOpcion2 = async function(key, tipo, tmdbId) {
     }, 100);
 };
 
-window.guardarOpcion2 = async function(key, tipo, tmdbId) {
+window.guardarOpcion2SinRecargar = async function(key, tipo, tmdbId) {
     const input = document.getElementById(`op2-input-${key}`);
     if (!input) return;
     
@@ -721,14 +785,32 @@ window.guardarOpcion2 = async function(key, tipo, tmdbId) {
         const path = tipo === 'pelicula' ? 'contenido_personalizado' : 'series_personalizadas';
         await db.ref(`${path}/${key}`).update({ opcion2: nuevoEnlace });
         mostrarToast('✅ Opción 2 guardada', 'success');
-        cargarContenido();
+        
+        // ⭐ ACTUALIZAR SOLO ESE ELEMENTO SIN RECARGAR TODO ⭐
+        const container = document.getElementById(`item-${key}`);
+        const op2Wrap = container.querySelector('.enlace-wrap.op2-wrap');
+        op2Wrap.innerHTML = `
+            <div style="font-size:.55rem;color:#60A5FA;margin-bottom:.05rem;">🔗 Opción 2</div>
+            <div class="enlace op2">${nuevoEnlace}</div>
+        `;
+        
+        // Cambiar botón de "Agregar Op2" a "Editar Op2"
+        const actions = container.querySelector('.actions');
+        const agregarBtn = actions.querySelector('.admin-btn-purple');
+        if (agregarBtn) {
+            agregarBtn.innerHTML = '<i class="fas fa-pen"></i> Editar Op2';
+            agregarBtn.setAttribute('onclick', `editarEnlace('${key}', '${tipo}', 'op2')`);
+        }
+        
     } catch(e) {
         mostrarToast('❌ Error: ' + e.message, 'error');
     }
 };
 
 window.cancelarOpcion2 = function(key) {
-    cargarContenido();
+    const container = document.getElementById(`item-${key}`);
+    const op2Wrap = container.querySelector('.enlace-wrap.op2-wrap');
+    if (op2Wrap) op2Wrap.remove();
 };
 
 // ⭐ TOGGLE SERIE
@@ -746,7 +828,19 @@ window.toggleSerie = function(key) {
     }
 };
 
-// ⭐ EDITAR CAPÍTULO SERIE
+// ⭐ SELECTOR DE TEMPORADAS (NUEVO)
+window.seleccionarTempAdmin = function() {
+    tempFiltroAdmin = document.getElementById('selectorTempAdmin').value;
+    const badge = document.getElementById('tempBadgeAdmin');
+    if (tempFiltroAdmin === 'todas') {
+        badge.textContent = 'Mostrando: Todas';
+    } else {
+        badge.textContent = `Mostrando: Temporada ${tempFiltroAdmin}`;
+    }
+    filtrarContenido();
+};
+
+// ⭐ EDITAR CAPÍTULO SERIE SIN RECARGAR
 window.editarCapituloSerie = function(serieKey, tempIndex, capIndex) {
     const inputId = `cap-input-${serieKey}-${tempIndex}-${capIndex}`;
     const input = document.getElementById(inputId);
@@ -787,7 +881,7 @@ window.guardarCapituloSerie = async function(serieKey, tempIndex, capIndex) {
         display.style.display = 'inline';
         display.textContent = nuevoEnlace;
         saveBtn.style.display = 'none';
-        cargarContenido();
+        // No recargar todo, solo actualizar el display
     } catch(e) {
         mostrarToast('❌ Error: ' + e.message, 'error');
     }
@@ -833,7 +927,6 @@ window.guardarCapituloSerieOp2 = async function(serieKey, tempIndex, capIndex) {
         display.style.display = 'inline';
         display.textContent = nuevoEnlace;
         saveBtn.style.display = 'none';
-        cargarContenido();
     } catch(e) {
         mostrarToast('❌ Error: ' + e.message, 'error');
     }
@@ -974,14 +1067,17 @@ window.limpiarTodo = async function() {
 window.filtrarContenido = function() {
     const searchTerm = document.getElementById('searchAdminInput').value.toLowerCase();
     const tipoFilter = document.getElementById('filterAdminTipo').value;
+    const tempFilter = document.getElementById('selectorTempAdmin').value;
     const items = document.querySelectorAll('.admin-item');
     
     items.forEach(item => {
         const titulo = item.dataset.titulo?.toLowerCase() || '';
         const tipo = item.dataset.tipo || '';
+        const temp = item.dataset.temp || '1';
         let match = true;
         if (searchTerm && !titulo.includes(searchTerm)) match = false;
         if (tipoFilter !== 'todos' && tipo !== tipoFilter) match = false;
+        if (tempFilter !== 'todas' && tipo === 'serie' && temp !== tempFilter) match = false;
         item.style.display = match ? 'flex' : 'none';
     });
 };
@@ -1044,6 +1140,7 @@ window.cargarContenido = async function() {
                 item.id = `item-${key}`;
                 item.dataset.titulo = p.titulo;
                 item.dataset.tipo = 'pelicula';
+                item.dataset.temp = '1';
                 item.style.borderLeftColor = '#10B981';
                 
                 item.innerHTML = `
@@ -1096,11 +1193,13 @@ window.cargarContenido = async function() {
                 item.id = `item-${key}`;
                 item.dataset.titulo = s.titulo;
                 item.dataset.tipo = 'serie';
+                item.dataset.temp = '1';
                 item.style.borderLeftColor = '#34D399';
                 
                 let capitulosHTML = '';
                 if (s.temporadas && s.temporadas.length) {
                     s.temporadas.forEach((temp, tempIdx) => {
+                        item.dataset.temp = temp.numero || (tempIdx + 1).toString();
                         capitulosHTML += `<div class="temporada-titulo">📺 Temporada ${temp.numero || tempIdx + 1}</div>`;
                         if (temp.capitulos && temp.capitulos.length) {
                             temp.capitulos.forEach((cap, capIdx) => {
@@ -1171,6 +1270,10 @@ window.cargarContenido = async function() {
         
         paginaActual = 1;
         mostrarPagina();
+        // Aplicar filtro de temporada si está seleccionado
+        if (tempFiltroAdmin !== 'todas') {
+            filtrarContenido();
+        }
         
     } catch(e) {
         console.error('❌ Error:', e);
@@ -1201,7 +1304,7 @@ window.eliminarItem = async function(key, tipo) {
 // ⭐ INICIAR
 cargarContenido();
 cargarPedidos();
-console.log('✅ Admin TELY - Enlaces verticales con input a todo lo ancho');
+console.log('✅ Admin TELY - Sin recargas + Selector de temporadas');
 </script>
 </body>
 </html>
