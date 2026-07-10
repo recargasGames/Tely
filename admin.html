@@ -87,16 +87,8 @@
         .user-menu{position:relative}
         
         .loading-text{color:#64748B;font-size:.9rem}
-        .magic-section{background:rgba(245,158,11,.08);border:2px solid rgba(245,158,11,.3);border-radius:12px;padding:1.2rem;margin:.5rem 0;text-align:center}
-        .magic-section .big-icon{font-size:4rem;color:#F59E0B;margin-bottom:.5rem}
-        .magic-section .info{font-size:.85rem;color:#94A3B8;margin-top:.5rem}
-        .magic-section .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:1rem 0;padding:1rem;background:rgba(0,0,0,.2);border-radius:8px}
-        .magic-section .stats .stat{text-align:center}
-        .magic-section .stats .stat .num{font-size:1.5rem;font-weight:700;color:#F59E0B}
-        .magic-section .stats .stat .label{font-size:.7rem;color:#94A3B8}
         .progress-bar{height:6px;background:rgba(255,255,255,.1);border-radius:3px;margin-top:.5rem;overflow:hidden}
         .progress-bar .fill{height:100%;width:0%;background:linear-gradient(90deg,#F59E0B,#F97316);border-radius:3px;transition:width 0.5s}
-        .badge-no-op2{display:inline-block;padding:.05rem .4rem;border-radius:4px;background:rgba(239,68,68,.15);color:#F87171;font-size:.5rem;font-weight:600}
         .badge-count{display:inline-block;padding:.05rem .5rem;border-radius:9999px;background:rgba(124,58,237,.2);color:#A78BFA;font-size:.65rem;font-weight:600}
         .admin-protected{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:.5rem 1rem;text-align:center;margin-bottom:.5rem;font-size:.8rem;color:#34D399}
         .admin-protected i{color:#34D399}
@@ -138,15 +130,70 @@
         .serie-expandida{border-left-color:#34D399!important}
         .toggle-series-btn{background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.2);color:#3B82F6;padding:.1rem .4rem;border-radius:4px;font-size:.55rem;font-weight:600;cursor:pointer;transition:.2s}
         .toggle-series-btn:hover{background:rgba(59,130,246,.25)}
-        .temporada-titulo{font-size:.65rem;font-weight:600;color:#34D399;margin:.2rem 0 .05rem;display:flex;align-items:center;gap:.2rem}
+        
+        /* ⭐ SELECTOR DE TEMPORADA DENTRO DE LA SERIE ⭐ */
+        .temp-selector-serie{
+            display:flex;
+            align-items:center;
+            gap:.5rem;
+            margin:.3rem 0 .2rem;
+            flex-wrap:wrap;
+        }
+        .temp-selector-serie label{
+            font-size:.65rem;
+            color:#94A3B8;
+            font-weight:600;
+        }
+        .temp-selector-serie select{
+            padding:.1rem .6rem;
+            border-radius:6px;
+            border:1px solid rgba(124,58,237,.2);
+            background:rgba(255,255,255,.05);
+            color:#fff;
+            font-size:.65rem;
+            cursor:pointer;
+        }
+        body:not(.dark) .temp-selector-serie select{
+            background:rgba(0,0,0,.05);
+            color:#111;
+            border-color:rgba(0,0,0,.1);
+        }
+        .temp-selector-serie select:focus{
+            outline:none;
+            border-color:#7C3AED;
+        }
+        .temp-selector-serie .badge-temp{
+            font-size:.55rem;
+            color:#34D399;
+            background:rgba(16,185,129,.1);
+            padding:.03rem .4rem;
+            border-radius:9999px;
+        }
+        
+        .temporada-caps{
+            margin-top:.2rem;
+            padding:.1rem .2rem;
+            background:rgba(255,255,255,.01);
+            border-radius:4px;
+        }
+        
+        .temporada-header{
+            font-size:.65rem;
+            font-weight:700;
+            color:#34D399;
+            margin:.2rem 0 .1rem;
+            display:flex;
+            align-items:center;
+            gap:.3rem;
+            padding:.05rem .2rem;
+            background:rgba(16,185,129,.05);
+            border-radius:4px;
+        }
         
         .paginacion{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.5rem 0;flex-wrap:wrap}
         .paginacion button{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.2rem .8rem;border-radius:6px;font-size:.75rem;cursor:pointer;transition:.2s}
         .paginacion button:hover{background:rgba(124,58,237,.3)}
         .paginacion button:disabled{opacity:.3;cursor:not-allowed}
-        .paginacion .pagina-actual{background:#7C3AED;color:#fff;padding:.2rem .8rem;border-radius:6px;font-size:.75rem;font-weight:700}
-        body:not(.dark) .paginacion button{color:#111;background:rgba(124,58,237,.08)}
-        body:not(.dark) .paginacion button:hover{background:rgba(124,58,237,.2)}
         .paginacion .info-pagina{color:#94A3B8;font-size:.7rem}
         .paginacion select{padding:.2rem .4rem;border-radius:4px;background:rgba(255,255,255,.05);color:#fff;border:1px solid rgba(124,58,237,.2);font-size:.7rem}
         body:not(.dark) .paginacion select{background:rgba(0,0,0,.05);color:#111}
@@ -170,49 +217,6 @@
         .pedido-actions .btn-eliminar{background:rgba(239,68,68,.15);color:#F87171}
         .pedido-actions .btn-eliminar:hover{background:rgba(239,68,68,.25)}
         .badge-pedidos{display:inline-block;background:#EF4444;color:#fff;border-radius:9999px;padding:.05rem .5rem;font-size:.55rem;font-weight:700;margin-left:.3rem}
-
-        /* ⭐ SELECTOR DE TEMPORADAS - NUEVO ⭐ */
-        .temp-selector-container{
-            display:flex;
-            gap:.5rem;
-            align-items:center;
-            flex-wrap:wrap;
-            background:rgba(255,255,255,.03);
-            border-radius:8px;
-            padding:.4rem .6rem;
-            margin:.3rem 0 .5rem;
-            border:1px solid rgba(124,58,237,.1);
-        }
-        .temp-selector-container label{
-            font-size:.75rem;
-            color:#94A3B8;
-            font-weight:600;
-        }
-        .temp-selector-container select{
-            padding:.2rem .8rem;
-            border-radius:6px;
-            border:1px solid rgba(124,58,237,.2);
-            background:rgba(255,255,255,.05);
-            color:#fff;
-            font-size:.75rem;
-            cursor:pointer;
-        }
-        body:not(.dark) .temp-selector-container select{
-            background:rgba(0,0,0,.05);
-            color:#111;
-            border-color:rgba(0,0,0,.1);
-        }
-        .temp-selector-container select:focus{
-            outline:none;
-            border-color:#7C3AED;
-        }
-        .temp-selector-container .badge-temp{
-            font-size:.6rem;
-            color:#34D399;
-            background:rgba(16,185,129,.1);
-            padding:.05rem .5rem;
-            border-radius:9999px;
-        }
     </style>
 </head>
 <body>
@@ -293,7 +297,7 @@
         </div>
     </div>
 
-    <!-- ⭐ CONTENIDO CON MINIATURAS -->
+    <!-- ⭐ CONTENIDO -->
     <div class="admin-card">
         <h3><i class="fas fa-list text-emerald-500"></i> Contenido en Firebase</h3>
         
@@ -307,25 +311,6 @@
             <button class="admin-btn admin-btn-blue" onclick="filtrarContenido()" style="padding:.3rem 1rem;font-size:.75rem;">
                 <i class="fas fa-filter"></i> Filtrar
             </button>
-        </div>
-
-        <!-- ⭐ SELECTOR DE TEMPORADAS (NUEVO) ⭐ -->
-        <div class="temp-selector-container" id="tempSelectorContainer">
-            <label><i class="fas fa-layer-group"></i> Temporada:</label>
-            <select id="selectorTempAdmin" onchange="seleccionarTempAdmin()">
-                <option value="todas">Todas</option>
-                <option value="1">Temporada 1</option>
-                <option value="2">Temporada 2</option>
-                <option value="3">Temporada 3</option>
-                <option value="4">Temporada 4</option>
-                <option value="5">Temporada 5</option>
-                <option value="6">Temporada 6</option>
-                <option value="7">Temporada 7</option>
-                <option value="8">Temporada 8</option>
-                <option value="9">Temporada 9</option>
-                <option value="10">Temporada 10</option>
-            </select>
-            <span class="badge-temp" id="tempBadgeAdmin">Mostrando: Todas</span>
         </div>
         
         <div id="listaContenido" class="max-h-96 overflow-y-auto">
@@ -378,7 +363,7 @@ let peliculasKeys = [];
 let seriesKeys = [];
 let itemsEditando = {};
 let seriesExpandidas = {};
-let tempFiltroAdmin = 'todas';
+let serieTempSeleccionada = {};
 
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) { return true; });
@@ -728,7 +713,6 @@ window.guardarEnlaceSinRecargar = async function(key, tipo, campo) {
         mostrarToast(`✅ ${campo} actualizada`, 'success');
         delete itemsEditando[key];
         
-        // ⭐ ACTUALIZAR SOLO ESE ELEMENTO SIN RECARGAR TODO ⭐
         const container = document.getElementById(`item-${key}`);
         const enlaceWrap = container.querySelector(`.enlace-wrap.${campo}-wrap`);
         enlaceWrap.innerHTML = `
@@ -786,15 +770,15 @@ window.guardarOpcion2SinRecargar = async function(key, tipo, tmdbId) {
         await db.ref(`${path}/${key}`).update({ opcion2: nuevoEnlace });
         mostrarToast('✅ Opción 2 guardada', 'success');
         
-        // ⭐ ACTUALIZAR SOLO ESE ELEMENTO SIN RECARGAR TODO ⭐
         const container = document.getElementById(`item-${key}`);
         const op2Wrap = container.querySelector('.enlace-wrap.op2-wrap');
-        op2Wrap.innerHTML = `
-            <div style="font-size:.55rem;color:#60A5FA;margin-bottom:.05rem;">🔗 Opción 2</div>
-            <div class="enlace op2">${nuevoEnlace}</div>
-        `;
+        if (op2Wrap) {
+            op2Wrap.innerHTML = `
+                <div style="font-size:.55rem;color:#60A5FA;margin-bottom:.05rem;">🔗 Opción 2</div>
+                <div class="enlace op2">${nuevoEnlace}</div>
+            `;
+        }
         
-        // Cambiar botón de "Agregar Op2" a "Editar Op2"
         const actions = container.querySelector('.actions');
         const agregarBtn = actions.querySelector('.admin-btn-purple');
         if (agregarBtn) {
@@ -822,30 +806,98 @@ window.toggleSerie = function(key) {
     if (seriesExpandidas[key]) {
         container.style.display = 'block';
         btn.innerHTML = '<i class="fas fa-chevron-up"></i> Ocultar';
+        // Cargar la primera temporada por defecto
+        if (!serieTempSeleccionada[key]) {
+            serieTempSeleccionada[key] = '1';
+        }
+        mostrarCapitulosSerie(key);
     } else {
         container.style.display = 'none';
         btn.innerHTML = '<i class="fas fa-chevron-down"></i> Ver caps';
     }
 };
 
-// ⭐ SELECTOR DE TEMPORADAS (NUEVO)
-window.seleccionarTempAdmin = function() {
-    tempFiltroAdmin = document.getElementById('selectorTempAdmin').value;
-    const badge = document.getElementById('tempBadgeAdmin');
-    if (tempFiltroAdmin === 'todas') {
-        badge.textContent = 'Mostrando: Todas';
-    } else {
-        badge.textContent = `Mostrando: Temporada ${tempFiltroAdmin}`;
+// ⭐ CAMBIAR TEMPORADA EN LA SERIE
+window.cambiarTempSerie = function(key) {
+    const select = document.getElementById(`temp-select-${key}`);
+    if (select) {
+        serieTempSeleccionada[key] = select.value;
+        mostrarCapitulosSerie(key);
     }
-    filtrarContenido();
 };
 
-// ⭐ EDITAR CAPÍTULO SERIE SIN RECARGAR
-window.editarCapituloSerie = function(serieKey, tempIndex, capIndex) {
-    const inputId = `cap-input-${serieKey}-${tempIndex}-${capIndex}`;
+// ⭐ MOSTRAR CAPÍTULOS DE LA TEMPORADA SELECCIONADA
+function mostrarCapitulosSerie(key) {
+    const container = document.getElementById(`serie-detalle-${key}`);
+    if (!container) return;
+    
+    const tempSeleccionada = parseInt(serieTempSeleccionada[key]) || 1;
+    const serie = seriesLista[seriesKeys.indexOf(key)];
+    if (!serie || !serie.temporadas) return;
+    
+    const temp = serie.temporadas.find(t => t.numero === tempSeleccionada);
+    if (!temp) {
+        container.innerHTML = `<div style="color:#64748B;font-size:.65rem;padding:.2rem;">No hay capítulos para la temporada ${tempSeleccionada}</div>`;
+        return;
+    }
+    
+    let html = `
+        <div class="temp-selector-serie">
+            <label><i class="fas fa-layer-group"></i> Temporada:</label>
+            <select id="temp-select-${key}" onchange="cambiarTempSerie('${key}')">
+    `;
+    
+    serie.temporadas.forEach(t => {
+        const selected = t.numero === tempSeleccionada ? 'selected' : '';
+        html += `<option value="${t.numero}" ${selected}>Temporada ${t.numero}</option>`;
+    });
+    
+    html += `
+            </select>
+            <span class="badge-temp">${temp.capitulos ? temp.capitulos.length : 0} capítulos</span>
+        </div>
+        <div class="temporada-caps">
+    `;
+    
+    if (temp.capitulos && temp.capitulos.length) {
+        temp.capitulos.forEach((cap, idx) => {
+            const capUrl = cap.url || 'Sin enlace';
+            const capOp2 = cap.opcion2 || '';
+            html += `
+                <div class="capitulo-detalle">
+                    <div class="cap-titulo">Cap ${cap.numero || idx + 1}: ${cap.titulo || 'Sin título'}</div>
+                    <div class="cap-meta">${cap.sinopsis || 'Sin sinopsis'}</div>
+                    <div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.1rem;">
+                        <span style="color:#34D399;">▶ Op1:</span>
+                        <span id="cap-display-${key}-${tempSeleccionada}-${idx}">${capUrl}</span>
+                        <input class="edit-input" id="cap-input-${key}-${tempSeleccionada}-${idx}" value="${capUrl}" style="display:none;width:80px;">
+                        <button class="admin-btn admin-btn-blue" style="padding:.05rem .3rem;font-size:.45rem;" onclick="editarCapituloSerie('${key}', ${tempSeleccionada}, ${idx})"><i class="fas fa-pen"></i></button>
+                        <button class="admin-btn admin-btn-green" id="cap-save-${key}-${tempSeleccionada}-${idx}" style="display:none;padding:.05rem .3rem;font-size:.45rem;" onclick="guardarCapituloSerie('${key}', ${tempSeleccionada}, ${idx})"><i class="fas fa-check"></i></button>
+                    </div>
+                    <div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.1rem;">
+                        <span style="color:#3B82F6;">▶ Op2:</span>
+                        <span id="cap-op2-display-${key}-${tempSeleccionada}-${idx}">${capOp2}</span>
+                        <input class="edit-input" id="cap-op2-input-${key}-${tempSeleccionada}-${idx}" value="${capOp2}" style="display:none;width:80px;">
+                        <button class="admin-btn admin-btn-purple" style="padding:.05rem .3rem;font-size:.45rem;" onclick="editarCapituloSerieOp2('${key}', ${tempSeleccionada}, ${idx})"><i class="fas fa-pen"></i></button>
+                        <button class="admin-btn admin-btn-green" id="cap-op2-save-${key}-${tempSeleccionada}-${idx}" style="display:none;padding:.05rem .3rem;font-size:.45rem;" onclick="guardarCapituloSerieOp2('${key}', ${tempSeleccionada}, ${idx})"><i class="fas fa-check"></i></button>
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        html += `<div style="color:#64748B;font-size:.65rem;padding:.2rem;">No hay capítulos en esta temporada</div>`;
+    }
+    
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
+// ⭐ EDITAR CAPÍTULO SERIE
+window.editarCapituloSerie = function(serieKey, tempNum, capIndex) {
+    const inputId = `cap-input-${serieKey}-${tempNum}-${capIndex}`;
     const input = document.getElementById(inputId);
-    const display = document.getElementById(`cap-display-${serieKey}-${tempIndex}-${capIndex}`);
-    const saveBtn = document.getElementById(`cap-save-${serieKey}-${tempIndex}-${capIndex}`);
+    const display = document.getElementById(`cap-display-${serieKey}-${tempNum}-${capIndex}`);
+    const saveBtn = document.getElementById(`cap-save-${serieKey}-${tempNum}-${capIndex}`);
     
     if (input.style.display === 'none' || !input.style.display) {
         input.style.display = 'inline-block';
@@ -856,11 +908,11 @@ window.editarCapituloSerie = function(serieKey, tempIndex, capIndex) {
     }
 };
 
-window.guardarCapituloSerie = async function(serieKey, tempIndex, capIndex) {
-    const inputId = `cap-input-${serieKey}-${tempIndex}-${capIndex}`;
+window.guardarCapituloSerie = async function(serieKey, tempNum, capIndex) {
+    const inputId = `cap-input-${serieKey}-${tempNum}-${capIndex}`;
     const input = document.getElementById(inputId);
-    const display = document.getElementById(`cap-display-${serieKey}-${tempIndex}-${capIndex}`);
-    const saveBtn = document.getElementById(`cap-save-${serieKey}-${tempIndex}-${capIndex}`);
+    const display = document.getElementById(`cap-display-${serieKey}-${tempNum}-${capIndex}`);
+    const saveBtn = document.getElementById(`cap-save-${serieKey}-${tempNum}-${capIndex}`);
     
     const nuevoEnlace = input.value.trim();
     if (!nuevoEnlace) {
@@ -872,6 +924,9 @@ window.guardarCapituloSerie = async function(serieKey, tempIndex, capIndex) {
         const snap = await db.ref(`series_personalizadas/${serieKey}`).once('value');
         const serie = snap.val();
         if (!serie) { mostrarToast('❌ Serie no encontrada', 'error'); return; }
+        
+        const tempIndex = serie.temporadas.findIndex(t => t.numero === tempNum);
+        if (tempIndex === -1) { mostrarToast('❌ Temporada no encontrada', 'error'); return; }
         
         serie.temporadas[tempIndex].capitulos[capIndex].url = nuevoEnlace;
         await db.ref(`series_personalizadas/${serieKey}`).update({ temporadas: serie.temporadas });
@@ -881,17 +936,18 @@ window.guardarCapituloSerie = async function(serieKey, tempIndex, capIndex) {
         display.style.display = 'inline';
         display.textContent = nuevoEnlace;
         saveBtn.style.display = 'none';
-        // No recargar todo, solo actualizar el display
+        // Actualizar el caché local
+        seriesLista[seriesKeys.indexOf(serieKey)] = serie;
     } catch(e) {
         mostrarToast('❌ Error: ' + e.message, 'error');
     }
 };
 
-window.editarCapituloSerieOp2 = function(serieKey, tempIndex, capIndex) {
-    const inputId = `cap-op2-input-${serieKey}-${tempIndex}-${capIndex}`;
+window.editarCapituloSerieOp2 = function(serieKey, tempNum, capIndex) {
+    const inputId = `cap-op2-input-${serieKey}-${tempNum}-${capIndex}`;
     const input = document.getElementById(inputId);
-    const display = document.getElementById(`cap-op2-display-${serieKey}-${tempIndex}-${capIndex}`);
-    const saveBtn = document.getElementById(`cap-op2-save-${serieKey}-${tempIndex}-${capIndex}`);
+    const display = document.getElementById(`cap-op2-display-${serieKey}-${tempNum}-${capIndex}`);
+    const saveBtn = document.getElementById(`cap-op2-save-${serieKey}-${tempNum}-${capIndex}`);
     
     if (input.style.display === 'none' || !input.style.display) {
         input.style.display = 'inline-block';
@@ -902,11 +958,11 @@ window.editarCapituloSerieOp2 = function(serieKey, tempIndex, capIndex) {
     }
 };
 
-window.guardarCapituloSerieOp2 = async function(serieKey, tempIndex, capIndex) {
-    const inputId = `cap-op2-input-${serieKey}-${tempIndex}-${capIndex}`;
+window.guardarCapituloSerieOp2 = async function(serieKey, tempNum, capIndex) {
+    const inputId = `cap-op2-input-${serieKey}-${tempNum}-${capIndex}`;
     const input = document.getElementById(inputId);
-    const display = document.getElementById(`cap-op2-display-${serieKey}-${tempIndex}-${capIndex}`);
-    const saveBtn = document.getElementById(`cap-op2-save-${serieKey}-${tempIndex}-${capIndex}`);
+    const display = document.getElementById(`cap-op2-display-${serieKey}-${tempNum}-${capIndex}`);
+    const saveBtn = document.getElementById(`cap-op2-save-${serieKey}-${tempNum}-${capIndex}`);
     
     const nuevoEnlace = input.value.trim();
     if (!nuevoEnlace) {
@@ -919,6 +975,9 @@ window.guardarCapituloSerieOp2 = async function(serieKey, tempIndex, capIndex) {
         const serie = snap.val();
         if (!serie) { mostrarToast('❌ Serie no encontrada', 'error'); return; }
         
+        const tempIndex = serie.temporadas.findIndex(t => t.numero === tempNum);
+        if (tempIndex === -1) { mostrarToast('❌ Temporada no encontrada', 'error'); return; }
+        
         serie.temporadas[tempIndex].capitulos[capIndex].opcion2 = nuevoEnlace;
         await db.ref(`series_personalizadas/${serieKey}`).update({ temporadas: serie.temporadas });
         
@@ -927,6 +986,7 @@ window.guardarCapituloSerieOp2 = async function(serieKey, tempIndex, capIndex) {
         display.style.display = 'inline';
         display.textContent = nuevoEnlace;
         saveBtn.style.display = 'none';
+        seriesLista[seriesKeys.indexOf(serieKey)] = serie;
     } catch(e) {
         mostrarToast('❌ Error: ' + e.message, 'error');
     }
@@ -1067,17 +1127,14 @@ window.limpiarTodo = async function() {
 window.filtrarContenido = function() {
     const searchTerm = document.getElementById('searchAdminInput').value.toLowerCase();
     const tipoFilter = document.getElementById('filterAdminTipo').value;
-    const tempFilter = document.getElementById('selectorTempAdmin').value;
     const items = document.querySelectorAll('.admin-item');
     
     items.forEach(item => {
         const titulo = item.dataset.titulo?.toLowerCase() || '';
         const tipo = item.dataset.tipo || '';
-        const temp = item.dataset.temp || '1';
         let match = true;
         if (searchTerm && !titulo.includes(searchTerm)) match = false;
         if (tipoFilter !== 'todos' && tipo !== tipoFilter) match = false;
-        if (tempFilter !== 'todas' && tipo === 'serie' && temp !== tempFilter) match = false;
         item.style.display = match ? 'flex' : 'none';
     });
 };
@@ -1089,7 +1146,6 @@ window.cargarContenido = async function() {
     container.innerHTML = '<p class="loading-text">🔍 Cargando contenido...</p>';
     
     try {
-        console.log('🔥 Cargando desde Firebase...');
         const [pSnap, sSnap] = await Promise.all([
             db.ref('contenido_personalizado').once('value'),
             db.ref('series_personalizadas').once('value')
@@ -1102,8 +1158,6 @@ window.cargarContenido = async function() {
         seriesLista = Object.values(sData);
         peliculasKeys = Object.keys(pData);
         seriesKeys = Object.keys(sData);
-        
-        console.log(`✅ Películas: ${peliculasLista.length}, Series: ${seriesLista.length}`);
         
         if (!peliculasLista.length && !seriesLista.length) {
             container.innerHTML = `
@@ -1140,7 +1194,6 @@ window.cargarContenido = async function() {
                 item.id = `item-${key}`;
                 item.dataset.titulo = p.titulo;
                 item.dataset.tipo = 'pelicula';
-                item.dataset.temp = '1';
                 item.style.borderLeftColor = '#10B981';
                 
                 item.innerHTML = `
@@ -1193,41 +1246,15 @@ window.cargarContenido = async function() {
                 item.id = `item-${key}`;
                 item.dataset.titulo = s.titulo;
                 item.dataset.tipo = 'serie';
-                item.dataset.temp = '1';
                 item.style.borderLeftColor = '#34D399';
                 
-                let capitulosHTML = '';
-                if (s.temporadas && s.temporadas.length) {
-                    s.temporadas.forEach((temp, tempIdx) => {
-                        item.dataset.temp = temp.numero || (tempIdx + 1).toString();
-                        capitulosHTML += `<div class="temporada-titulo">📺 Temporada ${temp.numero || tempIdx + 1}</div>`;
-                        if (temp.capitulos && temp.capitulos.length) {
-                            temp.capitulos.forEach((cap, capIdx) => {
-                                const capUrl = cap.url || 'Sin enlace';
-                                const capOp2 = cap.opcion2 || '';
-                                capitulosHTML += `
-                                    <div class="capitulo-detalle">
-                                        <div class="cap-titulo">Cap ${cap.numero || capIdx + 1}: ${cap.titulo || 'Sin título'}</div>
-                                        <div class="cap-meta">${cap.sinopsis || 'Sin sinopsis'}</div>
-                                        <div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.1rem;">
-                                            <span style="color:#34D399;">▶ Op1:</span>
-                                            <span id="cap-display-${key}-${tempIdx}-${capIdx}">${capUrl}</span>
-                                            <input class="edit-input" id="cap-input-${key}-${tempIdx}-${capIdx}" value="${capUrl}" style="display:none;width:80px;">
-                                            <button class="admin-btn admin-btn-blue" style="padding:.05rem .3rem;font-size:.45rem;" onclick="editarCapituloSerie('${key}', ${tempIdx}, ${capIdx})"><i class="fas fa-pen"></i></button>
-                                            <button class="admin-btn admin-btn-green" id="cap-save-${key}-${tempIdx}-${capIdx}" style="display:none;padding:.05rem .3rem;font-size:.45rem;" onclick="guardarCapituloSerie('${key}', ${tempIdx}, ${capIdx})"><i class="fas fa-check"></i></button>
-                                        </div>
-                                        <div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.1rem;">
-                                            <span style="color:#3B82F6;">▶ Op2:</span>
-                                            <span id="cap-op2-display-${key}-${tempIdx}-${capIdx}">${capOp2}</span>
-                                            <input class="edit-input" id="cap-op2-input-${key}-${tempIdx}-${capIdx}" value="${capOp2}" style="display:none;width:80px;">
-                                            <button class="admin-btn admin-btn-purple" style="padding:.05rem .3rem;font-size:.45rem;" onclick="editarCapituloSerieOp2('${key}', ${tempIdx}, ${capIdx})"><i class="fas fa-pen"></i></button>
-                                            <button class="admin-btn admin-btn-green" id="cap-op2-save-${key}-${tempIdx}-${capIdx}" style="display:none;padding:.05rem .3rem;font-size:.45rem;" onclick="guardarCapituloSerieOp2('${key}', ${tempIdx}, ${capIdx})"><i class="fas fa-check"></i></button>
-                                        </div>
-                                    </div>
-                                `;
-                            });
-                        }
-                    });
+                // Inicializar temporada seleccionada
+                if (!serieTempSeleccionada[key]) {
+                    if (s.temporadas && s.temporadas.length) {
+                        serieTempSeleccionada[key] = s.temporadas[0].numero.toString();
+                    } else {
+                        serieTempSeleccionada[key] = '1';
+                    }
                 }
                 
                 item.innerHTML = `
@@ -1260,20 +1287,21 @@ window.cargarContenido = async function() {
                         <button class="admin-btn admin-btn-danger" onclick="eliminarItem('${key}', 'serie')"><i class="fas fa-trash"></i></button>
                     </div>
                     <div id="serie-detalle-${key}" style="display:${isExpanded ? 'block' : 'none'};margin-top:.3rem;background:rgba(255,255,255,.02);border-radius:6px;padding:.2rem;">
-                        ${capitulosHTML}
+                        ${isExpanded ? `<div style="color:#94A3B8;font-size:.65rem;text-align:center;padding:.3rem;">Cargando capítulos...</div>` : ''}
                     </div>
                 `;
                 div.appendChild(item);
+                
+                // Si está expandida, cargar los capítulos
+                if (isExpanded) {
+                    setTimeout(() => mostrarCapitulosSerie(key), 100);
+                }
             });
             container.appendChild(div);
         }
         
         paginaActual = 1;
         mostrarPagina();
-        // Aplicar filtro de temporada si está seleccionado
-        if (tempFiltroAdmin !== 'todas') {
-            filtrarContenido();
-        }
         
     } catch(e) {
         console.error('❌ Error:', e);
@@ -1304,7 +1332,7 @@ window.eliminarItem = async function(key, tipo) {
 // ⭐ INICIAR
 cargarContenido();
 cargarPedidos();
-console.log('✅ Admin TELY - Sin recargas + Selector de temporadas');
+console.log('✅ Admin TELY - Selector de temporadas dentro de cada serie');
 </script>
 </body>
 </html>
