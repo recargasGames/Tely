@@ -203,13 +203,8 @@ const db = firebase.database();
 // ============================================================
 // ⭐⭐ PROXY CONFIGURACIÓN ⭐⭐
 // ============================================================
-// CAMBIA ESTA URL POR EL PROXY QUE QUIERAS USAR
-const PROXY_URL = 'https://cors-anywhere.herokuapp.com/'; // Proxy público (puedes cambiarlo)
-// const PROXY_URL = 'https://tu-propio-proxy.com/'; // Si tienes tu propio proxy
-
+const PROXY_URL = 'https://cors-anywhere.herokuapp.com/';
 let proxyActivo = false;
-
-// Servidores que necesitan proxy
 const SERVICIOS_CON_PROXY = ['unlimplay.com', 'unlimplay.net', 'unlimplay.org'];
 
 function necesitaProxy(url) {
@@ -219,14 +214,10 @@ function necesitaProxy(url) {
 
 function aplicarProxy(url) {
     if (!proxyActivo || !necesitaProxy(url)) return url;
-    // Si ya tiene proxy, no aplicarlo de nuevo
     if (url.startsWith(PROXY_URL)) return url;
     return PROXY_URL + url;
 }
 
-// ============================================================
-// FUNCIÓN PARA ACTIVAR/DESACTIVAR PROXY
-// ============================================================
 function toggleProxy() {
     proxyActivo = !proxyActivo;
     const btn = document.getElementById('btnProxy');
@@ -247,7 +238,6 @@ function toggleProxy() {
         mostrarToast('🛡️ Proxy desactivado', 'warning');
     }
     
-    // Recargar el video si hay uno actual
     if (urlActual) {
         recargarVideo();
     }
@@ -347,14 +337,17 @@ async function fetchTMDB(path, params = {}) {
     return res.json();
 }
 
+// ⭐⭐⭐ FUNCIÓN GENERAR ENLACE - CORREGIDA ⭐⭐⭐
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     let url;
     if (tipo === 'pelicula') {
         url = `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
     } else {
-        url = `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+        // ⭐ ASEGURAR QUE TEMPORADA Y CAPÍTULO SEAN NÚMEROS ⭐
+        const temp = parseInt(temporada) || 1;
+        const cap = parseInt(capitulo) || 1;
+        url = `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temp}/${cap}?lang=es-MX&autoplay=1&controls=1&logo=0`;
     }
-    // Aplicar proxy si está activo
     if (proxyActivo && necesitaProxy(url)) {
         url = aplicarProxy(url);
     }
@@ -362,13 +355,12 @@ function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
 }
 
 // ============================================================
-// ⭐ REPRODUCIR DIRECTO (CON PROXY) ⭐
+// ⭐ REPRODUCIR DIRECTO ⭐
 // ============================================================
 function reproducirDirecto(url) {
     if (!url) return;
     const wrapper = document.getElementById('playerWrapper');
     
-    // Aplicar proxy si está activo y el enlace lo necesita
     let finalUrl = url;
     if (proxyActivo && necesitaProxy(url)) {
         finalUrl = aplicarProxy(url);
@@ -376,8 +368,6 @@ function reproducirDirecto(url) {
     }
     
     urlActual = finalUrl;
-    
-    // Agregar timestamp para evitar caché
     finalUrl += (finalUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
     
     const iframe = document.createElement('iframe');
@@ -404,7 +394,6 @@ async function cargarPelicula() {
             document.getElementById('btnOp1').classList.add('active');
         }
         
-        // Buscar Opción 2
         const snap = await db.ref('contenido_personalizado').once('value');
         const items = Object.values(snap.val() || {});
         const item = items.find(i => i.tmdb_id == tmdbId);
@@ -416,7 +405,6 @@ async function cargarPelicula() {
             console.log('✅ Opción 2 encontrada');
         }
         
-        // Cargar info
         const data = await fetchTMDB(`movie/${tmdbId}`);
         if (data && data.id) {
             document.getElementById('playerTitulo').textContent = data.title || 'Sin título';
@@ -436,11 +424,11 @@ async function cargarPelicula() {
 }
 
 // ============================================================
-// ⭐ CARGAR SERIE ⭐
+// ⭐ CARGAR SERIE - CORREGIDA ⭐
 // ============================================================
 async function cargarSerie() {
     try {
-        // 1. OBTENER DATOS DE FIREBASE PRIMERO
+        // 1. OBTENER DATOS DE FIREBASE
         let serieFirebase = null;
         let opcion2Global = null;
         try {
@@ -458,7 +446,7 @@ async function cargarSerie() {
             }
         } catch(e) { console.log('Firebase no disponible'); }
         
-        // 2. SI HAY DATOS EN FIREBASE, MOSTRAR EPISODIOS DE INMEDIATO
+        // 2. SI HAY DATOS EN FIREBASE, MOSTRAR EPISODIOS
         if (temporadasActuales.length) {
             document.getElementById('episodiosSection').style.display = 'block';
             const select = document.getElementById('tempSelect');
@@ -484,7 +472,11 @@ async function cargarSerie() {
             
             const cap = temporadasActuales[tempIndex]?.capitulos?.[capIndex];
             if (cap && cap.url) {
-                urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', temporadasActuales[tempIndex].numero, cap.numero || capIndex + 1);
+                // ⭐ GENERAR ENLACE CON TEMPORADA Y CAPÍTULO CORRECTOS ⭐
+                const tempNum = temporadasActuales[tempIndex].numero || 1;
+                const capNum = cap.numero || capIndex + 1;
+                urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
+                
                 if (cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
                     urlOp2 = cap.opcion2;
                     opcion2Disponible = true;
@@ -511,7 +503,6 @@ async function cargarSerie() {
             document.getElementById('playerSinopsis').textContent = data.overview || 'Sin sinopsis';
             document.getElementById('playerTipo').textContent = '📺 Serie';
             document.getElementById('playerTipo').style.color = '#10B981';
-            
             esSerie = true;
         }
         
@@ -526,14 +517,13 @@ async function cargarSerie() {
                         numero: ep.episode_number,
                         titulo: ep.name || `Capítulo ${ep.episode_number}`,
                         sinopsis: ep.overview || 'Sin sinopsis',
-                        url: generarEnlaceUnlimplay(tmdbId, 'serie', t, ep.episode_number),
+                        url: null, // Se generará después
                         opcion2: null
                     }));
                     temporadasActuales.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
                 } catch(e) {}
             }
             
-            // Guardar en Firebase para la próxima
             if (temporadasActuales.length) {
                 try {
                     await db.ref('series_personalizadas').push({
@@ -551,7 +541,6 @@ async function cargarSerie() {
                 } catch(e) {}
             }
             
-            // Mostrar episodios
             if (temporadasActuales.length && !document.getElementById('episodiosSection').style.display) {
                 document.getElementById('episodiosSection').style.display = 'block';
                 const select = document.getElementById('tempSelect');
@@ -576,8 +565,10 @@ async function cargarSerie() {
                 }
                 
                 const cap = temporadasActuales[tempIndex]?.capitulos?.[capIndex];
-                if (cap && cap.url && !urlOp1) {
-                    urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', temporadasActuales[tempIndex].numero, cap.numero || capIndex + 1);
+                if (cap && !urlOp1) {
+                    const tempNum = temporadasActuales[tempIndex].numero || 1;
+                    const capNum = cap.numero || capIndex + 1;
+                    urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
                     reproducirDirecto(urlOp1);
                     document.getElementById('btnOp1').classList.add('active');
                 }
@@ -586,7 +577,7 @@ async function cargarSerie() {
             }
         }
         
-        // 5. BUSCAR OPCIÓN 2 POR CAPÍTULO
+        // 5. BUSCAR OPCIÓN 2
         if (!opcion2Disponible) {
             try {
                 const snap = await db.ref('series_personalizadas').once('value');
@@ -642,16 +633,23 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
         return;
     }
     
+    const tempNum = temp.numero || 1;
+    
     temp.capitulos.forEach((cap, idx) => {
         const d = document.createElement('div');
         d.className = 'episodio-item';
         if (idx === capSeleccionado) d.classList.add('activo');
         const tieneOp2 = cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http');
+        const capNum = cap.numero || idx + 1;
+        // Generar URL si no tiene
+        if (!cap.url) {
+            cap.url = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
+        }
         
         d.innerHTML = `
             <div class="top">
-                <span class="numero">${cap.numero || idx + 1}.</span>
-                <span class="titulo">${cap.titulo || 'Episodio ' + (idx + 1)}</span>
+                <span class="numero">${capNum}.</span>
+                <span class="titulo">${cap.titulo || 'Episodio ' + capNum}</span>
                 ${tieneOp2 ? '<span class="badge-op2-ep">⭐ Op2</span>' : ''}
                 ${proxyActivo && cap.url && necesitaProxy(cap.url) ? '<span class="proxy-badge">🛡️ Proxy</span>' : ''}
             </div>
@@ -664,7 +662,7 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
             document.querySelectorAll('.episodio-item').forEach(el => el.classList.remove('activo'));
             d.classList.add('activo');
             
-            urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', temp.numero, cap.numero || idx + 1);
+            urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
             if (cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
                 urlOp2 = cap.opcion2;
                 opcion2Disponible = true;
@@ -701,7 +699,9 @@ function cambiarTempSelect() {
     if (temp && temp.capitulos && temp.capitulos.length) {
         const cap = temp.capitulos[0];
         if (cap && cap.url) {
-            urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', temp.numero, cap.numero || 1);
+            const tempNum = temp.numero || 1;
+            const capNum = cap.numero || 1;
+            urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
             if (cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
                 urlOp2 = cap.opcion2;
                 opcion2Disponible = true;
@@ -861,7 +861,6 @@ document.addEventListener('backbutton', function(e) {
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 2000);
-    // Verificar estado del proxy guardado
     const proxyState = localStorage.getItem('proxyActivo');
     if (proxyState === 'true') {
         proxyActivo = true;
@@ -871,34 +870,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('proxyIndicator').style.display = 'inline';
     }
 });
-
-// Guardar estado del proxy
-function toggleProxy() {
-    proxyActivo = !proxyActivo;
-    const btn = document.getElementById('btnProxy');
-    const status = document.getElementById('proxyStatus');
-    const indicator = document.getElementById('proxyIndicator');
-    
-    if (proxyActivo) {
-        btn.classList.add('active');
-        status.textContent = 'ON';
-        status.style.color = '#34D399';
-        indicator.style.display = 'inline';
-        localStorage.setItem('proxyActivo', 'true');
-        mostrarToast('🛡️ Proxy activado', 'success');
-    } else {
-        btn.classList.remove('active');
-        status.textContent = 'OFF';
-        status.style.color = '#94A3B8';
-        indicator.style.display = 'none';
-        localStorage.setItem('proxyActivo', 'false');
-        mostrarToast('🛡️ Proxy desactivado', 'warning');
-    }
-    
-    if (urlActual) {
-        recargarVideo();
-    }
-}
 
 if (tmdbId) {
     if (tipo === 'pelicula') {
@@ -910,7 +881,7 @@ if (tmdbId) {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
 
-console.log('⚡ Reproductor con PROXY - Activa/Desactiva con un botón');
+console.log('⚡ Reproductor CORREGIDO - Series funcionando');
 </script>
 </body>
 </html>
