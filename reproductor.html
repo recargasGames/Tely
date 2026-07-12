@@ -94,9 +94,10 @@
         .banner-logo-img{width:32px;height:32px;border-radius:6px;object-fit:cover}
         .banner-install-btn{background:linear-gradient(135deg,#7C3AED,#A78BFA);border:none;color:#fff;padding:.3rem .8rem;border-radius:6px;font-weight:700;font-size:.65rem;cursor:pointer;transition:.3s;display:flex;align-items:center;gap:.2rem}
         .banner-install-btn:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(124,58,237,.4)}
-        .episodio-item .badge-op2-ep{font-size:.35rem;background:#3B82F6;color:#fff;padding:.02rem .35rem;border-radius:3px;font-weight:700;margin-left:.2rem}
         #proxyIndicator{display:none;color:#10B981;font-size:.6rem;}
         #proxyIndicator i{margin-right:.2rem;}
+        .badge-disponible{font-size:.5rem;color:#34D399;font-weight:600;margin-left:.3rem;}
+        .badge-disponible i{margin-right:.15rem;}
     </style>
 </head>
 <body>
@@ -611,7 +612,7 @@ async function cargarSerie() {
 }
 
 // ============================================================
-// MOSTRAR EPISODIOS (SIN BADGE PROXY)
+// ⭐ MOSTRAR EPISODIOS (CON "✅ Disponible" en vez de "Op2") ⭐
 // ============================================================
 function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
     if (!temporadasActuales[tempIndex]) return;
@@ -640,7 +641,7 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
             <div class="top">
                 <span class="numero">${capNum}.</span>
                 <span class="titulo">${cap.titulo || 'Episodio ' + capNum}</span>
-                ${tieneOp2 ? '<span class="badge-op2-ep">⭐ Op2</span>' : ''}
+                ${tieneOp2 ? '<span class="badge-disponible"><i class="fas fa-check-circle"></i> Disponible</span>' : ''}
             </div>
             <div class="sinopsis">${cap.sinopsis || ''}</div>
         `;
@@ -867,7 +868,7 @@ if (tmdbId) {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
 
-console.log('⚡ Reproductor - SIN badge "Proxy" en capítulos');
+console.log('⚡ Reproductor - "✅ Disponible" en capítulos, sin "Op2"');
 </script>
 </body>
 </html>
