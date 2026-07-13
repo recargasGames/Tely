@@ -30,6 +30,11 @@
         .btn-proxy.active{background:rgba(16,185,129,.2);border-color:#10B981}
         .player-wrapper{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;width:100%;margin:.2rem 0}
         .player-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;background:#000}
+        .player-wrapper .error-overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.85);color:#EF4444;gap:.5rem;padding:.5rem;text-align:center;z-index:10}
+        .player-wrapper .error-overlay i{font-size:2.5rem}
+        .player-wrapper .error-overlay .sub{color:#94A3B8;font-size:.7rem}
+        .player-wrapper .error-overlay .btn-reintentar{background:#7C3AED;border:none;color:#fff;padding:.3rem 1.5rem;border-radius:6px;font-weight:600;font-size:.7rem;cursor:pointer;transition:.3s}
+        .player-wrapper .error-overlay .btn-reintentar:hover{background:#6D28D9}
         .info-top{padding:.2rem 0 .1rem}
         .info-top h1{font-size:1.2rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
         .info-top .meta{color:#94A3B8;font-size:.7rem;display:flex;gap:.6rem;flex-wrap:wrap;margin:.05rem 0}
@@ -48,9 +53,6 @@
         .btn-recargar:hover{background:rgba(16,185,129,.25)}
         .btn-nueva-ventana{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);color:#EF4444;padding:.25rem .7rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer;transition:.3s}
         .btn-nueva-ventana:hover{background:rgba(239,68,68,.15)}
-        .error-video{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#0A0A0F;color:#EF4444;gap:.5rem;text-align:center;padding:.5rem}
-        .error-video i{font-size:2.5rem}
-        .error-video .sub{color:#64748B;font-size:.7rem}
         .user-dropdown{position:absolute;right:0;top:calc(100% + 6px);background:rgba(26,26,46,.95);border-radius:8px;width:160px;border:1px solid rgba(124,58,237,.15);padding:.2rem 0;display:none;z-index:60;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
         .user-dropdown a{display:flex;align-items:center;gap:.3rem;padding:.3rem .6rem;color:#CBD5E1;text-decoration:none;font-size:.75rem;transition:.2s}
@@ -98,6 +100,9 @@
         #proxyIndicator i{margin-right:.2rem;}
         .badge-disponible{font-size:.5rem;color:#34D399;font-weight:600;margin-left:.3rem;}
         .badge-disponible i{margin-right:.15rem;}
+        .loading-spinner{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#000;color:#A78BFA;gap:.5rem}
+        .loading-spinner i{font-size:2.5rem;color:#7C3AED;animation:spin 1s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
     </style>
 </head>
 <body>
@@ -136,7 +141,12 @@
         <div class="sinopsis" id="playerSinopsis">Cargando información...</div>
     </div>
 
-    <div class="player-wrapper" id="playerWrapper"></div>
+    <div class="player-wrapper" id="playerWrapper">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner"></i>
+            <span style="font-size:.75rem;">Cargando reproductor...</span>
+        </div>
+    </div>
 
     <div class="player-controls" id="playerControls">
         <button class="btn-opcion active" id="btnOp1" onclick="reproducirOpcion(1)"><i class="fas fa-play"></i> Opción 1</button>
@@ -203,11 +213,14 @@ const auth = firebase.auth();
 const db = firebase.database();
 
 // ============================================================
-// PROXY
+// ⭐⭐ PROXY - CAMBIADO POR UNO QUE FUNCIONA ⭐⭐
 // ============================================================
-const PROXY_URL = 'https://cors-anywhere.herokuapp.com/';
-let proxyActivo = false;
-const SERVICIOS_CON_PROXY = ['unlimplay.com', 'unlimplay.net', 'unlimplay.org'];
+const PROXY_URL = 'https://api.allorigins.win/raw?url='; // Proxy que funciona
+// const PROXY_URL = 'https://corsproxy.io/?'; // Alternativa
+// const PROXY_URL = 'https://cors-anywhere.herokuapp.com/'; // Alternativa
+
+let proxyActivo = true; // ⭐ ACTIVADO POR DEFECTO
+const SERVICIOS_CON_PROXY = ['unlimplay.com', 'unlimplay.net', 'unlimplay.org', 'vidmoly.biz'];
 
 function necesitaProxy(url) {
     if (!url) return false;
@@ -216,8 +229,17 @@ function necesitaProxy(url) {
 
 function aplicarProxy(url) {
     if (!proxyActivo || !necesitaProxy(url)) return url;
-    if (url.startsWith(PROXY_URL)) return url;
-    return PROXY_URL + url;
+    // Limpiar URL si ya tiene proxy
+    let cleanUrl = url;
+    SERVICIOS_CON_PROXY.forEach(s => {
+        if (cleanUrl.includes(s)) {
+            cleanUrl = cleanUrl.split(s)[1] ? s + cleanUrl.split(s)[1] : cleanUrl;
+        }
+    });
+    if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+        return PROXY_URL + encodeURIComponent(cleanUrl);
+    }
+    return PROXY_URL + encodeURIComponent(url);
 }
 
 function toggleProxy() {
@@ -262,6 +284,9 @@ let opcion2Disponible = false, opcionActiva = 1;
 let esSerie = false;
 let temporadasActuales = [];
 let tempActualIndex = 0;
+let intentosCarga = 0;
+
+console.log('📌 ID:', tmdbId, '| Tipo:', tipo);
 
 // ============================================================
 // FUNCIONES BÁSICAS
@@ -353,19 +378,45 @@ function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
 }
 
 // ============================================================
-// REPRODUCIR DIRECTO
+// ⭐ REPRODUCIR CON MANEJO DE ERRORES ⭐
 // ============================================================
-function reproducirDirecto(url) {
-    if (!url) return;
+function mostrarError(mensaje) {
     const wrapper = document.getElementById('playerWrapper');
+    wrapper.innerHTML = `
+        <div class="error-overlay">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span style="font-size:.9rem;font-weight:700;">${mensaje || 'No se pudo cargar el video'}</span>
+            <span class="sub">${urlActual ? 'El enlace podría estar caído o bloqueado' : 'Verifica tu conexión'}</span>
+            <button class="btn-reintentar" onclick="recargarVideo()"><i class="fas fa-rotate"></i> Reintentar</button>
+            ${proxyActivo ? `<span class="sub" style="margin-top:.2rem;">🛡️ Proxy activado</span>` : `<button class="btn-reintentar" style="background:#F59E0B;color:#111;margin-top:.3rem;" onclick="toggleProxy();setTimeout(recargarVideo,500)"><i class="fas fa-shield-alt"></i> Activar Proxy</button>`}
+        </div>
+    `;
+}
+
+function reproducirDirecto(url) {
+    if (!url) {
+        mostrarError('No hay enlace disponible');
+        return;
+    }
     
+    const wrapper = document.getElementById('playerWrapper');
     let finalUrl = url;
+    
     if (proxyActivo && necesitaProxy(url)) {
         finalUrl = aplicarProxy(url);
+        console.log('🛡️ Proxy aplicado:', finalUrl);
     }
     
     urlActual = finalUrl;
     finalUrl += (finalUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+    
+    // Mostrar loading
+    wrapper.innerHTML = `
+        <div class="loading-spinner">
+            <i class="fas fa-spinner"></i>
+            <span style="font-size:.75rem;">Cargando video...</span>
+        </div>
+    `;
     
     const iframe = document.createElement('iframe');
     iframe.src = finalUrl;
@@ -376,12 +427,79 @@ function reproducirDirecto(url) {
     iframe.style.cssText = "width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;";
     iframe.loading = "eager";
     
+    // Timeout para detectar error de carga
+    let cargado = false;
+    const timeout = setTimeout(() => {
+        if (!cargado) {
+            mostrarError('El video tardó demasiado en cargar');
+        }
+    }, 15000);
+    
+    iframe.onload = function() {
+        cargado = true;
+        clearTimeout(timeout);
+        // Remover el spinner si existe
+        const spinner = wrapper.querySelector('.loading-spinner');
+        if (spinner) spinner.style.display = 'none';
+    };
+    
     wrapper.innerHTML = '';
     wrapper.appendChild(iframe);
+    
+    // Si después de 5 segundos el iframe no cargó, mostrar error
+    setTimeout(() => {
+        if (!cargado && wrapper.querySelector('iframe')) {
+            const iframeCheck = wrapper.querySelector('iframe');
+            if (iframeCheck && !iframeCheck.contentWindow) {
+                cargado = true;
+                mostrarError('No se pudo cargar el video');
+            }
+        }
+    }, 8000);
 }
 
 // ============================================================
-// ⭐ CARGAR SERIE - RÁPIDO ⭐
+// ⭐ CARGAR PELÍCULA ⭐
+// ============================================================
+async function cargarPelicula() {
+    try {
+        urlOp1 = generarEnlaceUnlimplay(tmdbId, 'pelicula');
+        if (urlOp1) {
+            reproducirDirecto(urlOp1);
+            document.getElementById('btnOp1').classList.add('active');
+        }
+        
+        const snap = await db.ref('contenido_personalizado').once('value');
+        const items = Object.values(snap.val() || {});
+        const item = items.find(i => i.tmdb_id == tmdbId);
+        
+        if (item && item.opcion2 && item.opcion2.trim() !== '' && item.opcion2.startsWith('http')) {
+            urlOp2 = item.opcion2;
+            opcion2Disponible = true;
+            document.getElementById('btnOp2').classList.remove('oculto');
+        }
+        
+        const data = await fetchTMDB(`movie/${tmdbId}`);
+        if (data && data.id) {
+            document.getElementById('playerTitulo').textContent = data.title || 'Sin título';
+            document.getElementById('playerAnio').textContent = data.release_date ? data.release_date.split('-')[0] : 'N/D';
+            document.getElementById('playerRating').textContent = data.vote_average ? data.vote_average.toFixed(1) : 'N/A';
+            document.getElementById('playerGenero').textContent = data.genres ? data.genres.map(g => g.name).join(', ') : 'Película';
+            document.getElementById('playerSinopsis').textContent = data.overview || 'Sin sinopsis';
+            document.getElementById('playerTipo').textContent = '🎬 Película';
+            document.getElementById('playerTipo').style.color = '#A78BFA';
+        }
+        
+        cargarRecomendacionesPelicula(tmdbId);
+        
+    } catch(e) {
+        console.error('Error:', e);
+        mostrarError('Error al cargar la película');
+    }
+}
+
+// ============================================================
+// ⭐ CARGAR SERIE ⭐
 // ============================================================
 async function cargarSerie() {
     try {
@@ -416,6 +534,8 @@ async function cargarSerie() {
                 reproducirDirecto(urlOp1);
                 document.getElementById('btnOp1').classList.add('active');
             }
+        } else {
+            mostrarError('No se encontraron capítulos para esta serie');
         }
         
         // 3. CARGAR TEMPORADAS Y OPCIÓN 2 EN SEGUNDO PLANO
@@ -423,6 +543,7 @@ async function cargarSerie() {
         
     } catch(e) {
         console.error('Error:', e);
+        mostrarError('Error al cargar la serie');
     }
 }
 
@@ -441,9 +562,7 @@ async function cargarTemporadasYOp2() {
                     opcion2Global = item.opcion2;
                 }
                 if (item.temporadas && item.temporadas.length) {
-                    // ⭐ ORDENAR TEMPORADAS
                     temporadasActuales = item.temporadas.sort((a, b) => a.numero - b.numero);
-                    // ⭐ ORDENAR CAPÍTULOS DENTRO DE CADA TEMPORADA
                     temporadasActuales.forEach(temp => {
                         if (temp.capitulos) {
                             temp.capitulos = temp.capitulos.sort((a, b) => a.numero - b.numero);
@@ -478,7 +597,6 @@ async function cargarTemporadasYOp2() {
             try {
                 const seasonData = await fetchTMDB(`tv/${tmdbId}/season/${t}`);
                 if (!seasonData || !seasonData.episodes) continue;
-                // ⭐ ORDENAR CAPÍTULOS POR EPISODE_NUMBER ⭐
                 const capitulos = seasonData.episodes
                     .sort((a, b) => a.episode_number - b.episode_number)
                     .map(ep => ({
@@ -542,7 +660,7 @@ function mostrarEpisodiosConTemporadas(temporadas) {
 }
 
 // ============================================================
-// ⭐ MOSTRAR EPISODIOS (CON NÚMEROS CORRECTOS) ⭐
+// ⭐ MOSTRAR EPISODIOS ⭐
 // ============================================================
 function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
     if (!temporadasActuales[tempIndex]) return;
@@ -555,7 +673,6 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
         return;
     }
     
-    // ⭐ ORDENAR CAPÍTULOS POR NÚMERO ⭐
     const capitulosOrdenados = [...temp.capitulos].sort((a, b) => a.numero - b.numero);
     const tempNum = temp.numero || 1;
     
@@ -664,8 +781,16 @@ function reproducirOpcion(opcion) {
 }
 
 function recargarVideo() {
-    if (urlActual) { mostrarToast('🔄 Recargando...', 'info'); reproducirDirecto(urlActual); }
-    else mostrarToast('❌ No hay video', 'error');
+    if (urlActual) {
+        // Extraer la URL original sin el proxy
+        let urlOriginal = urlActual;
+        if (urlOriginal.includes(PROXY_URL)) {
+            urlOriginal = decodeURIComponent(urlOriginal.replace(PROXY_URL, ''));
+        }
+        reproducirDirecto(urlOriginal);
+    } else {
+        mostrarToast('❌ No hay video para recargar', 'error');
+    }
 }
 
 function abrirNuevaVentana() {
@@ -780,14 +905,13 @@ document.addEventListener('backbutton', function(e) {
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 2000);
-    const proxyState = localStorage.getItem('proxyActivo');
-    if (proxyState === 'true') {
-        proxyActivo = true;
-        document.getElementById('btnProxy').classList.add('active');
-        document.getElementById('proxyStatus').textContent = 'ON';
-        document.getElementById('proxyStatus').style.color = '#34D399';
-        document.getElementById('proxyIndicator').style.display = 'inline';
-    }
+    // Proxy activado por defecto
+    proxyActivo = true;
+    document.getElementById('btnProxy').classList.add('active');
+    document.getElementById('proxyStatus').textContent = 'ON';
+    document.getElementById('proxyStatus').style.color = '#34D399';
+    document.getElementById('proxyIndicator').style.display = 'inline';
+    localStorage.setItem('proxyActivo', 'true');
 });
 
 if (tmdbId) {
@@ -797,10 +921,10 @@ if (tmdbId) {
         cargarSerie();
     }
 } else {
-    document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
+    document.getElementById('playerWrapper').innerHTML = `<div class="error-overlay"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
 
-console.log('⚡ Reproductor - Capítulos ORDENADOS + ✅ Disponible en TODOS');
+console.log('⚡ Reproductor - Proxy ALLORIGINS (funciona) + Manejo de errores');
 </script>
 </body>
 </html>
