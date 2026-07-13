@@ -381,38 +381,45 @@ function reproducirDirecto(url) {
 }
 
 // ============================================================
-// CARGAR PELÍCULA
+// ⭐ CARGAR SERIE - RÁPIDO ⭐
 // ============================================================
-async function cargarPelicula() {
+async function cargarSerie() {
     try {
-        urlOp1 = generarEnlaceUnlimplay(tmdbId, 'pelicula');
-        if (urlOp1) {
-            reproducirDirecto(urlOp1);
-            document.getElementById('btnOp1').classList.add('active');
-        }
+        // 1. OBTENER EL PRIMER CAPÍTULO DE INMEDIATO (sin esperar a Firebase)
+        let tempIndex = 0;
+        let capIndex = 0;
         
-        const snap = await db.ref('contenido_personalizado').once('value');
-        const items = Object.values(snap.val() || {});
-        const item = items.find(i => i.tmdb_id == tmdbId);
+        if (tempRestaurar !== null) tempIndex = tempRestaurar;
+        if (capRestaurar !== null) capIndex = capRestaurar;
         
-        if (item && item.opcion2 && item.opcion2.trim() !== '' && item.opcion2.startsWith('http')) {
-            urlOp2 = item.opcion2;
-            opcion2Disponible = true;
-            document.getElementById('btnOp2').classList.remove('oculto');
-        }
-        
-        const data = await fetchTMDB(`movie/${tmdbId}`);
+        // 2. GENERAR ENLACE DEL PRIMER CAPÍTULO (usando TMDB directamente)
+        const data = await fetchTMDB(`tv/${tmdbId}`);
         if (data && data.id) {
-            document.getElementById('playerTitulo').textContent = data.title || 'Sin título';
-            document.getElementById('playerAnio').textContent = data.release_date ? data.release_date.split('-')[0] : 'N/D';
+            document.getElementById('playerTitulo').textContent = data.name || 'Sin título';
+            document.getElementById('playerAnio').textContent = data.first_air_date ? data.first_air_date.split('-')[0] : 'N/D';
             document.getElementById('playerRating').textContent = data.vote_average ? data.vote_average.toFixed(1) : 'N/A';
-            document.getElementById('playerGenero').textContent = data.genres ? data.genres.map(g => g.name).join(', ') : 'Película';
+            document.getElementById('playerGenero').textContent = data.genres ? data.genres.map(g => g.name).join(', ') : 'Serie';
             document.getElementById('playerSinopsis').textContent = data.overview || 'Sin sinopsis';
-            document.getElementById('playerTipo').textContent = '🎬 Película';
-            document.getElementById('playerTipo').style.color = '#A78BFA';
+            document.getElementById('playerTipo').textContent = '📺 Serie';
+            document.getElementById('playerTipo').style.color = '#10B981';
+            esSerie = true;
         }
         
-        cargarRecomendacionesPelicula(tmdbId);
+        // 3. REPRODUCIR EL PRIMER CAPÍTULO DE INMEDIATO
+        const seasonData = await fetchTMDB(`tv/${tmdbId}/season/${tempIndex + 1}`);
+        if (seasonData && seasonData.episodes && seasonData.episodes.length) {
+            const ep = seasonData.episodes[capIndex] || seasonData.episodes[0];
+            const tempNum = tempIndex + 1;
+            const capNum = ep.episode_number || 1;
+            urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
+            if (urlOp1) {
+                reproducirDirecto(urlOp1);
+                document.getElementById('btnOp1').classList.add('active');
+            }
+        }
+        
+        // 4. CARGAR TEMPORADAS Y OPCIÓN 2 EN SEGUNDO PLANO
+        cargarTemporadasYOp2();
         
     } catch(e) {
         console.error('Error:', e);
@@ -420,10 +427,11 @@ async function cargarPelicula() {
 }
 
 // ============================================================
-// CARGAR SERIE
+// ⭐ CARGAR TEMPORADAS Y OPCIÓN 2 (EN SEGUNDO PLANO) ⭐
 // ============================================================
-async function cargarSerie() {
+async function cargarTemporadasYOp2() {
     try {
+        // 1. OBTENER DATOS DE FIREBASE
         let opcion2Global = null;
         try {
             const snap = await db.ref('series_personalizadas').once('value');
@@ -439,181 +447,94 @@ async function cargarSerie() {
             }
         } catch(e) { console.log('Firebase no disponible'); }
         
-        // Mostrar episodios si hay datos en Firebase
+        // 2. SI HAY DATOS EN FIREBASE, MOSTRAR
         if (temporadasActuales.length) {
-            document.getElementById('episodiosSection').style.display = 'block';
-            const select = document.getElementById('tempSelect');
-            select.innerHTML = '';
-            temporadasActuales.forEach((t, idx) => {
-                const opt = document.createElement('option');
-                opt.value = idx;
-                opt.textContent = `Temporada ${t.numero}`;
-                select.appendChild(opt);
-            });
-            
-            let tempIndex = 0;
-            if (tempRestaurar !== null && tempRestaurar < temporadasActuales.length) {
-                tempIndex = tempRestaurar;
+            mostrarEpisodiosConTemporadas(temporadasActuales);
+            // Verificar Opción 2 del capítulo actual
+            const temp = temporadasActuales[tempActualIndex];
+            const capActual = temp?.capitulos?.find(c => c.url === urlOp1);
+            if (capActual && capActual.opcion2 && capActual.opcion2.trim() !== '' && capActual.opcion2.startsWith('http')) {
+                urlOp2 = capActual.opcion2;
+                opcion2Disponible = true;
+                document.getElementById('btnOp2').classList.remove('oculto');
+            } else if (opcion2Global) {
+                urlOp2 = opcion2Global;
+                opcion2Disponible = true;
+                document.getElementById('btnOp2').classList.remove('oculto');
             }
-            select.value = tempIndex;
-            tempActualIndex = tempIndex;
-            
-            let capIndex = 0;
-            if (capRestaurar !== null && temporadasActuales[tempIndex]?.capitulos?.length > capIndex) {
-                capIndex = capRestaurar;
-            }
-            
-            const cap = temporadasActuales[tempIndex]?.capitulos?.[capIndex];
-            if (cap && cap.url) {
-                const tempNum = temporadasActuales[tempIndex].numero || 1;
-                const capNum = cap.numero || capIndex + 1;
-                urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
-                
-                if (cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
-                    urlOp2 = cap.opcion2;
-                    opcion2Disponible = true;
-                    document.getElementById('btnOp2').classList.remove('oculto');
-                } else if (opcion2Global) {
-                    urlOp2 = opcion2Global;
-                    opcion2Disponible = true;
-                    document.getElementById('btnOp2').classList.remove('oculto');
-                }
-                reproducirDirecto(urlOp1);
-                document.getElementById('btnOp1').classList.add('active');
-            }
-            
-            mostrarEpisodios(tempIndex, capIndex);
+            return;
         }
         
-        // Obtener datos de TMDB
+        // 3. SI NO HAY DATOS EN FIREBASE, CARGAR DE TMDB
         const data = await fetchTMDB(`tv/${tmdbId}`);
-        if (data && data.id) {
-            document.getElementById('playerTitulo').textContent = data.name || 'Sin título';
-            document.getElementById('playerAnio').textContent = data.first_air_date ? data.first_air_date.split('-')[0] : 'N/D';
-            document.getElementById('playerRating').textContent = data.vote_average ? data.vote_average.toFixed(1) : 'N/A';
-            document.getElementById('playerGenero').textContent = data.genres ? data.genres.map(g => g.name).join(', ') : 'Serie';
-            document.getElementById('playerSinopsis').textContent = data.overview || 'Sin sinopsis';
-            document.getElementById('playerTipo').textContent = '📺 Serie';
-            document.getElementById('playerTipo').style.color = '#10B981';
-            esSerie = true;
-        }
+        if (!data || !data.id) return;
         
-        // Si no hay datos en Firebase, cargar de TMDB
-        if (!temporadasActuales.length && data) {
-            const numTemps = Math.min(data.number_of_seasons || 1, 10);
-            for (let t = 1; t <= numTemps; t++) {
-                try {
-                    const seasonData = await fetchTMDB(`tv/${tmdbId}/season/${t}`);
-                    if (!seasonData || !seasonData.episodes) continue;
-                    const capitulos = seasonData.episodes.map(ep => ({
-                        numero: ep.episode_number,
-                        titulo: ep.name || `Capítulo ${ep.episode_number}`,
-                        sinopsis: ep.overview || 'Sin sinopsis',
-                        url: null,
-                        opcion2: null
-                    }));
-                    temporadasActuales.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
-                } catch(e) {}
-            }
-            
-            if (temporadasActuales.length) {
-                try {
-                    await db.ref('series_personalizadas').push({
-                        titulo: data.name,
-                        anio: data.first_air_date ? data.first_air_date.split('-')[0] : 'N/D',
-                        sinopsis: data.overview || 'Sin sinopsis',
-                        portada: getImagenUrl(data.poster_path, 'w342'),
-                        genero: data.genres ? data.genres.map(g => g.name).join(', ') : 'Serie',
-                        tipo: 'serie',
-                        tmdb_id: data.id,
-                        puntuacion: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
-                        temporadas: temporadasActuales,
-                        url: generarEnlaceUnlimplay(data.id, 'serie', 1, 1)
-                    });
-                } catch(e) {}
-            }
-            
-            if (temporadasActuales.length && !document.getElementById('episodiosSection').style.display) {
-                document.getElementById('episodiosSection').style.display = 'block';
-                const select = document.getElementById('tempSelect');
-                select.innerHTML = '';
-                temporadasActuales.forEach((t, idx) => {
-                    const opt = document.createElement('option');
-                    opt.value = idx;
-                    opt.textContent = `Temporada ${t.numero}`;
-                    select.appendChild(opt);
-                });
-                
-                let tempIndex = 0;
-                if (tempRestaurar !== null && tempRestaurar < temporadasActuales.length) {
-                    tempIndex = tempRestaurar;
-                }
-                select.value = tempIndex;
-                tempActualIndex = tempIndex;
-                
-                let capIndex = 0;
-                if (capRestaurar !== null && temporadasActuales[tempIndex]?.capitulos?.length > capIndex) {
-                    capIndex = capRestaurar;
-                }
-                
-                const cap = temporadasActuales[tempIndex]?.capitulos?.[capIndex];
-                if (cap && !urlOp1) {
-                    const tempNum = temporadasActuales[tempIndex].numero || 1;
-                    const capNum = cap.numero || capIndex + 1;
-                    urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
-                    reproducirDirecto(urlOp1);
-                    document.getElementById('btnOp1').classList.add('active');
-                }
-                
-                mostrarEpisodios(tempIndex, capIndex);
-            }
-        }
-        
-        // Buscar Opción 2
-        if (!opcion2Disponible) {
+        const numTemps = Math.min(data.number_of_seasons || 1, 10);
+        for (let t = 1; t <= numTemps; t++) {
             try {
-                const snap = await db.ref('series_personalizadas').once('value');
-                const items = Object.values(snap.val() || {});
-                const item = items.find(i => i.tmdb_id == tmdbId);
-                if (item && item.temporadas) {
-                    temporadasActuales.forEach((temp, tempIdx) => {
-                        const fbTemp = item.temporadas.find(t => t.numero == temp.numero);
-                        if (fbTemp && fbTemp.capitulos) {
-                            temp.capitulos.forEach(cap => {
-                                const fbCap = fbTemp.capitulos.find(c => c.numero == cap.numero);
-                                if (fbCap && fbCap.opcion2) {
-                                    cap.opcion2 = fbCap.opcion2;
-                                }
-                            });
-                        }
-                    });
-                    mostrarEpisodios(tempActualIndex);
-                    
-                    const temp = temporadasActuales[tempActualIndex];
-                    const capActual = temp?.capitulos?.find(c => c.url === urlOp1);
-                    if (capActual && capActual.opcion2 && capActual.opcion2.trim() !== '' && capActual.opcion2.startsWith('http')) {
-                        urlOp2 = capActual.opcion2;
-                        opcion2Disponible = true;
-                        document.getElementById('btnOp2').classList.remove('oculto');
-                    } else if (opcion2Global) {
-                        urlOp2 = opcion2Global;
-                        opcion2Disponible = true;
-                        document.getElementById('btnOp2').classList.remove('oculto');
-                    }
-                }
+                const seasonData = await fetchTMDB(`tv/${tmdbId}/season/${t}`);
+                if (!seasonData || !seasonData.episodes) continue;
+                const capitulos = seasonData.episodes.map(ep => ({
+                    numero: ep.episode_number,
+                    titulo: ep.name || `Capítulo ${ep.episode_number}`,
+                    sinopsis: ep.overview || 'Sin sinopsis',
+                    url: generarEnlaceUnlimplay(tmdbId, 'serie', t, ep.episode_number),
+                    opcion2: null
+                }));
+                temporadasActuales.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
             } catch(e) {}
         }
         
-        cargarRecomendacionesSerie(tmdbId);
+        if (temporadasActuales.length) {
+            // Guardar en Firebase
+            try {
+                await db.ref('series_personalizadas').push({
+                    titulo: data.name,
+                    anio: data.first_air_date ? data.first_air_date.split('-')[0] : 'N/D',
+                    sinopsis: data.overview || 'Sin sinopsis',
+                    portada: getImagenUrl(data.poster_path, 'w342'),
+                    genero: data.genres ? data.genres.map(g => g.name).join(', ') : 'Serie',
+                    tipo: 'serie',
+                    tmdb_id: data.id,
+                    puntuacion: data.vote_average ? data.vote_average.toFixed(1) : 'N/A',
+                    temporadas: temporadasActuales,
+                    url: generarEnlaceUnlimplay(data.id, 'serie', 1, 1)
+                });
+            } catch(e) {}
+            
+            mostrarEpisodiosConTemporadas(temporadasActuales);
+        }
         
     } catch(e) {
-        console.error('Error:', e);
+        console.error('Error cargando temporadas:', e);
     }
 }
 
 // ============================================================
-// ⭐ MOSTRAR EPISODIOS (CON "✅ Disponible" en vez de "Op2") ⭐
+// ⭐ MOSTRAR EPISODIOS (CON "✅ Disponible" en TODOS) ⭐
 // ============================================================
+function mostrarEpisodiosConTemporadas(temporadas) {
+    if (!temporadas || !temporadas.length) return;
+    
+    document.getElementById('episodiosSection').style.display = 'block';
+    const select = document.getElementById('tempSelect');
+    select.innerHTML = '';
+    temporadas.forEach((t, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = `Temporada ${t.numero}`;
+        select.appendChild(opt);
+    });
+    
+    let tempIndex = 0;
+    if (tempRestaurar !== null && tempRestaurar < temporadas.length) {
+        tempIndex = tempRestaurar;
+    }
+    select.value = tempIndex;
+    tempActualIndex = tempIndex;
+    mostrarEpisodios(tempIndex);
+}
+
 function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
     if (!temporadasActuales[tempIndex]) return;
     const temp = temporadasActuales[tempIndex];
@@ -631,17 +552,17 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
         const d = document.createElement('div');
         d.className = 'episodio-item';
         if (idx === capSeleccionado) d.classList.add('activo');
-        const tieneOp2 = cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http');
         const capNum = cap.numero || idx + 1;
         if (!cap.url) {
             cap.url = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
         }
         
+        // ⭐ TODOS los capítulos tienen "✅ Disponible" ⭐
         d.innerHTML = `
             <div class="top">
                 <span class="numero">${capNum}.</span>
                 <span class="titulo">${cap.titulo || 'Episodio ' + capNum}</span>
-                ${tieneOp2 ? '<span class="badge-disponible"><i class="fas fa-check-circle"></i> Disponible</span>' : ''}
+                <span class="badge-disponible"><i class="fas fa-check-circle"></i> Disponible</span>
             </div>
             <div class="sinopsis">${cap.sinopsis || ''}</div>
         `;
@@ -653,6 +574,8 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
             d.classList.add('activo');
             
             urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
+            
+            // Verificar Opción 2 del capítulo
             if (cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
                 urlOp2 = cap.opcion2;
                 opcion2Disponible = true;
@@ -712,6 +635,45 @@ function cambiarTempSelect() {
                 reproducirDirecto(urlOp1);
             }
         }
+    }
+}
+
+// ============================================================
+// CARGAR PELÍCULA
+// ============================================================
+async function cargarPelicula() {
+    try {
+        urlOp1 = generarEnlaceUnlimplay(tmdbId, 'pelicula');
+        if (urlOp1) {
+            reproducirDirecto(urlOp1);
+            document.getElementById('btnOp1').classList.add('active');
+        }
+        
+        const snap = await db.ref('contenido_personalizado').once('value');
+        const items = Object.values(snap.val() || {});
+        const item = items.find(i => i.tmdb_id == tmdbId);
+        
+        if (item && item.opcion2 && item.opcion2.trim() !== '' && item.opcion2.startsWith('http')) {
+            urlOp2 = item.opcion2;
+            opcion2Disponible = true;
+            document.getElementById('btnOp2').classList.remove('oculto');
+        }
+        
+        const data = await fetchTMDB(`movie/${tmdbId}`);
+        if (data && data.id) {
+            document.getElementById('playerTitulo').textContent = data.title || 'Sin título';
+            document.getElementById('playerAnio').textContent = data.release_date ? data.release_date.split('-')[0] : 'N/D';
+            document.getElementById('playerRating').textContent = data.vote_average ? data.vote_average.toFixed(1) : 'N/A';
+            document.getElementById('playerGenero').textContent = data.genres ? data.genres.map(g => g.name).join(', ') : 'Película';
+            document.getElementById('playerSinopsis').textContent = data.overview || 'Sin sinopsis';
+            document.getElementById('playerTipo').textContent = '🎬 Película';
+            document.getElementById('playerTipo').style.color = '#A78BFA';
+        }
+        
+        cargarRecomendacionesPelicula(tmdbId);
+        
+    } catch(e) {
+        console.error('Error:', e);
     }
 }
 
@@ -868,7 +830,7 @@ if (tmdbId) {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
 
-console.log('⚡ Reproductor - "✅ Disponible" en capítulos, sin "Op2"');
+console.log('⚡ Reproductor - Primer capítulo RÁPIDO + ✅ Disponible en TODOS los capítulos');
 </script>
 </body>
 </html>
