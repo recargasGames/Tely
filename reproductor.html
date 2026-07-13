@@ -385,14 +385,13 @@ function reproducirDirecto(url) {
 // ============================================================
 async function cargarSerie() {
     try {
-        // 1. OBTENER EL PRIMER CAPÍTULO DE INMEDIATO (sin esperar a Firebase)
+        // 1. OBTENER EL PRIMER CAPÍTULO DE INMEDIATO
         let tempIndex = 0;
         let capIndex = 0;
         
         if (tempRestaurar !== null) tempIndex = tempRestaurar;
         if (capRestaurar !== null) capIndex = capRestaurar;
         
-        // 2. GENERAR ENLACE DEL PRIMER CAPÍTULO (usando TMDB directamente)
         const data = await fetchTMDB(`tv/${tmdbId}`);
         if (data && data.id) {
             document.getElementById('playerTitulo').textContent = data.name || 'Sin título';
@@ -405,10 +404,11 @@ async function cargarSerie() {
             esSerie = true;
         }
         
-        // 3. REPRODUCIR EL PRIMER CAPÍTULO DE INMEDIATO
+        // 2. REPRODUCIR EL PRIMER CAPÍTULO
         const seasonData = await fetchTMDB(`tv/${tmdbId}/season/${tempIndex + 1}`);
         if (seasonData && seasonData.episodes && seasonData.episodes.length) {
-            const ep = seasonData.episodes[capIndex] || seasonData.episodes[0];
+            const epsOrdenados = [...seasonData.episodes].sort((a, b) => a.episode_number - b.episode_number);
+            const ep = epsOrdenados[capIndex] || epsOrdenados[0];
             const tempNum = tempIndex + 1;
             const capNum = ep.episode_number || 1;
             urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
@@ -418,7 +418,7 @@ async function cargarSerie() {
             }
         }
         
-        // 4. CARGAR TEMPORADAS Y OPCIÓN 2 EN SEGUNDO PLANO
+        // 3. CARGAR TEMPORADAS Y OPCIÓN 2 EN SEGUNDO PLANO
         cargarTemporadasYOp2();
         
     } catch(e) {
@@ -427,11 +427,10 @@ async function cargarSerie() {
 }
 
 // ============================================================
-// ⭐ CARGAR TEMPORADAS Y OPCIÓN 2 (EN SEGUNDO PLANO) ⭐
+// ⭐ CARGAR TEMPORADAS Y OPCIÓN 2 (CON ORDEN) ⭐
 // ============================================================
 async function cargarTemporadasYOp2() {
     try {
-        // 1. OBTENER DATOS DE FIREBASE
         let opcion2Global = null;
         try {
             const snap = await db.ref('series_personalizadas').once('value');
@@ -442,15 +441,20 @@ async function cargarTemporadasYOp2() {
                     opcion2Global = item.opcion2;
                 }
                 if (item.temporadas && item.temporadas.length) {
-                    temporadasActuales = item.temporadas;
+                    // ⭐ ORDENAR TEMPORADAS
+                    temporadasActuales = item.temporadas.sort((a, b) => a.numero - b.numero);
+                    // ⭐ ORDENAR CAPÍTULOS DENTRO DE CADA TEMPORADA
+                    temporadasActuales.forEach(temp => {
+                        if (temp.capitulos) {
+                            temp.capitulos = temp.capitulos.sort((a, b) => a.numero - b.numero);
+                        }
+                    });
                 }
             }
         } catch(e) { console.log('Firebase no disponible'); }
         
-        // 2. SI HAY DATOS EN FIREBASE, MOSTRAR
         if (temporadasActuales.length) {
             mostrarEpisodiosConTemporadas(temporadasActuales);
-            // Verificar Opción 2 del capítulo actual
             const temp = temporadasActuales[tempActualIndex];
             const capActual = temp?.capitulos?.find(c => c.url === urlOp1);
             if (capActual && capActual.opcion2 && capActual.opcion2.trim() !== '' && capActual.opcion2.startsWith('http')) {
@@ -465,7 +469,7 @@ async function cargarTemporadasYOp2() {
             return;
         }
         
-        // 3. SI NO HAY DATOS EN FIREBASE, CARGAR DE TMDB
+        // SI NO HAY DATOS EN FIREBASE, CARGAR DE TMDB
         const data = await fetchTMDB(`tv/${tmdbId}`);
         if (!data || !data.id) return;
         
@@ -474,19 +478,21 @@ async function cargarTemporadasYOp2() {
             try {
                 const seasonData = await fetchTMDB(`tv/${tmdbId}/season/${t}`);
                 if (!seasonData || !seasonData.episodes) continue;
-                const capitulos = seasonData.episodes.map(ep => ({
-                    numero: ep.episode_number,
-                    titulo: ep.name || `Capítulo ${ep.episode_number}`,
-                    sinopsis: ep.overview || 'Sin sinopsis',
-                    url: generarEnlaceUnlimplay(tmdbId, 'serie', t, ep.episode_number),
-                    opcion2: null
-                }));
+                // ⭐ ORDENAR CAPÍTULOS POR EPISODE_NUMBER ⭐
+                const capitulos = seasonData.episodes
+                    .sort((a, b) => a.episode_number - b.episode_number)
+                    .map(ep => ({
+                        numero: ep.episode_number,
+                        titulo: ep.name || `Capítulo ${ep.episode_number}`,
+                        sinopsis: ep.overview || 'Sin sinopsis',
+                        url: generarEnlaceUnlimplay(tmdbId, 'serie', t, ep.episode_number),
+                        opcion2: null
+                    }));
                 temporadasActuales.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
             } catch(e) {}
         }
         
         if (temporadasActuales.length) {
-            // Guardar en Firebase
             try {
                 await db.ref('series_personalizadas').push({
                     titulo: data.name,
@@ -511,7 +517,7 @@ async function cargarTemporadasYOp2() {
 }
 
 // ============================================================
-// ⭐ MOSTRAR EPISODIOS (CON "✅ Disponible" en TODOS) ⭐
+// ⭐ MOSTRAR EPISODIOS CON TEMPORADAS ⭐
 // ============================================================
 function mostrarEpisodiosConTemporadas(temporadas) {
     if (!temporadas || !temporadas.length) return;
@@ -535,6 +541,9 @@ function mostrarEpisodiosConTemporadas(temporadas) {
     mostrarEpisodios(tempIndex);
 }
 
+// ============================================================
+// ⭐ MOSTRAR EPISODIOS (CON NÚMEROS CORRECTOS) ⭐
+// ============================================================
 function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
     if (!temporadasActuales[tempIndex]) return;
     const temp = temporadasActuales[tempIndex];
@@ -546,9 +555,11 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
         return;
     }
     
+    // ⭐ ORDENAR CAPÍTULOS POR NÚMERO ⭐
+    const capitulosOrdenados = [...temp.capitulos].sort((a, b) => a.numero - b.numero);
     const tempNum = temp.numero || 1;
     
-    temp.capitulos.forEach((cap, idx) => {
+    capitulosOrdenados.forEach((cap, idx) => {
         const d = document.createElement('div');
         d.className = 'episodio-item';
         if (idx === capSeleccionado) d.classList.add('activo');
@@ -557,7 +568,6 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
             cap.url = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
         }
         
-        // ⭐ TODOS los capítulos tienen "✅ Disponible" ⭐
         d.innerHTML = `
             <div class="top">
                 <span class="numero">${capNum}.</span>
@@ -575,7 +585,6 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
             
             urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
             
-            // Verificar Opción 2 del capítulo
             if (cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
                 urlOp2 = cap.opcion2;
                 opcion2Disponible = true;
@@ -635,45 +644,6 @@ function cambiarTempSelect() {
                 reproducirDirecto(urlOp1);
             }
         }
-    }
-}
-
-// ============================================================
-// CARGAR PELÍCULA
-// ============================================================
-async function cargarPelicula() {
-    try {
-        urlOp1 = generarEnlaceUnlimplay(tmdbId, 'pelicula');
-        if (urlOp1) {
-            reproducirDirecto(urlOp1);
-            document.getElementById('btnOp1').classList.add('active');
-        }
-        
-        const snap = await db.ref('contenido_personalizado').once('value');
-        const items = Object.values(snap.val() || {});
-        const item = items.find(i => i.tmdb_id == tmdbId);
-        
-        if (item && item.opcion2 && item.opcion2.trim() !== '' && item.opcion2.startsWith('http')) {
-            urlOp2 = item.opcion2;
-            opcion2Disponible = true;
-            document.getElementById('btnOp2').classList.remove('oculto');
-        }
-        
-        const data = await fetchTMDB(`movie/${tmdbId}`);
-        if (data && data.id) {
-            document.getElementById('playerTitulo').textContent = data.title || 'Sin título';
-            document.getElementById('playerAnio').textContent = data.release_date ? data.release_date.split('-')[0] : 'N/D';
-            document.getElementById('playerRating').textContent = data.vote_average ? data.vote_average.toFixed(1) : 'N/A';
-            document.getElementById('playerGenero').textContent = data.genres ? data.genres.map(g => g.name).join(', ') : 'Película';
-            document.getElementById('playerSinopsis').textContent = data.overview || 'Sin sinopsis';
-            document.getElementById('playerTipo').textContent = '🎬 Película';
-            document.getElementById('playerTipo').style.color = '#A78BFA';
-        }
-        
-        cargarRecomendacionesPelicula(tmdbId);
-        
-    } catch(e) {
-        console.error('Error:', e);
     }
 }
 
@@ -830,7 +800,7 @@ if (tmdbId) {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
 
-console.log('⚡ Reproductor - Primer capítulo RÁPIDO + ✅ Disponible en TODOS los capítulos');
+console.log('⚡ Reproductor - Capítulos ORDENADOS + ✅ Disponible en TODOS');
 </script>
 </body>
 </html>
