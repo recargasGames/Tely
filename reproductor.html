@@ -204,10 +204,9 @@ const auth = firebase.auth();
 const db = firebase.database();
 
 // ============================================================
-// ⭐ PROXY DE VERCEL ⭐
+// ⭐ PROXY QUE FUNCIONA - ALLORIGINS ⭐
 // ============================================================
-// ⚠️ CAMBIA ESTA URL POR LA DE TU PROYECTO EN VERCEL ⚠️
-const PROXY_URL = 'https://proxy-seven-teal-30.vercel.app//api/proxy?url=';
+const PROXY_URL = 'https://api.allorigins.win/raw?url=';
 
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     let url;
@@ -218,7 +217,7 @@ function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
         const cap = parseInt(capitulo) || 1;
         url = `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temp}/${cap}?lang=es-MX&autoplay=1&controls=1&logo=0`;
     }
-    // ⭐ USAR PROXY DE VERCEL ⭐
+    // ⭐ USAR PROXY ALLORIGINS ⭐
     return PROXY_URL + encodeURIComponent(url);
 }
 
@@ -789,8 +788,7 @@ if (tmdbId) {
     `;
 }
 
-console.log('⚡ Reproductor con PROXY de VERCEL - Sin VPN');
-console.log('📡 Proxy URL:', PROXY_URL);
+console.log('⚡ Reproductor - Proxy ALLORIGINS');
 </script>
 </body>
 </html>
