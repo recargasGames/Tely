@@ -1,14 +1,7 @@
 {
-    "version": 2,
     "functions": {
-        "api/tmdb.js": {
-            "maxDuration": 10
+        "api/proxy.js": {
+            "maxDuration": 30
         }
-    },
-    "routes": [
-        {
-            "src": "/api/tmdb",
-            "dest": "/api/tmdb.js"
-        }
-    ]
+    }
 }
