@@ -27,11 +27,6 @@
         .btn-fullscreen:hover{background:rgba(255,255,255,.1);border-color:#7C3AED}
         .player-wrapper{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;width:100%;margin:.2rem 0}
         .player-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;background:#000}
-        .player-wrapper .error-overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.85);color:#EF4444;gap:.5rem;padding:.5rem;text-align:center;z-index:10}
-        .player-wrapper .error-overlay i{font-size:2.5rem}
-        .player-wrapper .error-overlay .sub{color:#94A3B8;font-size:.7rem}
-        .player-wrapper .error-overlay .btn-reintentar{background:#7C3AED;border:none;color:#fff;padding:.3rem 1.5rem;border-radius:6px;font-weight:600;font-size:.7rem;cursor:pointer;transition:.3s}
-        .player-wrapper .error-overlay .btn-reintentar:hover{background:#6D28D9}
         .info-top{padding:.2rem 0 .1rem}
         .info-top h1{font-size:1.2rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
         .info-top .meta{color:#94A3B8;font-size:.7rem;display:flex;gap:.6rem;flex-wrap:wrap;margin:.05rem 0}
@@ -209,52 +204,22 @@ const auth = firebase.auth();
 const db = firebase.database();
 
 // ============================================================
-// ⭐⭐ PROXY AUTOMÁTICO - MULTIPLES OPCIONES ⭐⭐
+// ⭐ PROXY DE VERCEL - CAMBIA ESTO POR TU URL ⭐
 // ============================================================
-// Lista de proxies que funcionan para desbloquear Unlimplay
-const PROXY_LIST = [
-    'https://api.allorigins.win/raw?url=',
-    'https://corsproxy.io/?',
-    'https://proxy.cors.sh/',
-    'https://cors-anywhere.herokuapp.com/'
-];
+// 🔥 CAMBIA ESTA URL POR LA DE TU PROYECTO EN VERCEL 🔥
+const PROXY_URL = 'https://tely-xi.vercel.app/api/proxy?url=';
 
-let proxyActivo = true; // Siempre activo
-let proxyIndex = 0; // Empezamos con el primero
-const SERVICIOS_CON_PROXY = ['unlimplay.com', 'unlimplay.net', 'unlimplay.org', 'vidmoly.biz'];
-
-function necesitaProxy(url) {
-    if (!url) return false;
-    return SERVICIOS_CON_PROXY.some(s => url.includes(s));
-}
-
-function getProxyUrl() {
-    return PROXY_LIST[proxyIndex % PROXY_LIST.length];
-}
-
-function cambiarProxy() {
-    proxyIndex++;
-    console.log('🔄 Cambiando a proxy:', getProxyUrl());
-}
-
-function aplicarProxy(url) {
-    if (!necesitaProxy(url)) return url;
-    // Limpiar URL de proxies anteriores
-    let cleanUrl = url;
-    PROXY_LIST.forEach(p => {
-        if (cleanUrl.includes(p)) {
-            cleanUrl = cleanUrl.replace(p, '');
-        }
-    });
-    // Si ya está codificado, decodificar
-    try {
-        if (cleanUrl.includes('%')) {
-            cleanUrl = decodeURIComponent(cleanUrl);
-        }
-    } catch(e) {}
-    
-    const proxy = getProxyUrl();
-    return proxy + encodeURIComponent(cleanUrl);
+function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    let url;
+    if (tipo === 'pelicula') {
+        url = `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+    } else {
+        const temp = parseInt(temporada) || 1;
+        const cap = parseInt(capitulo) || 1;
+        url = `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temp}/${cap}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+    }
+    // ⭐ USAR PROXY DE VERCEL ⭐
+    return PROXY_URL + encodeURIComponent(url);
 }
 
 // ============================================================
@@ -275,7 +240,8 @@ let esSerie = false;
 let temporadasActuales = [];
 let tempActualIndex = 0;
 let serieOp2Global = null;
-let intentosCarga = 0;
+
+console.log('📌 ID:', tmdbId, '| Tipo:', tipo);
 
 // ============================================================
 // FUNCIONES BÁSICAS
@@ -351,64 +317,26 @@ async function fetchTMDB(path, params = {}) {
     return res.json();
 }
 
-function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    let url;
-    if (tipo === 'pelicula') {
-        url = `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
-    } else {
-        const temp = parseInt(temporada) || 1;
-        const cap = parseInt(capitulo) || 1;
-        url = `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temp}/${cap}?lang=es-MX&autoplay=1&controls=1&logo=0`;
-    }
-    if (necesitaProxy(url)) {
-        url = aplicarProxy(url);
-    }
-    return url;
-}
-
 // ============================================================
-// ⭐ REPRODUCIR CON PROXY (INTENTA CON TODOS) ⭐
+// ⭐ REPRODUCIR DIRECTO ⭐
 // ============================================================
-function mostrarErrorProxy(mensaje) {
-    const wrapper = document.getElementById('playerWrapper');
-    wrapper.innerHTML = `
-        <div class="error-overlay">
-            <i class="fas fa-exclamation-triangle"></i>
-            <span style="font-size:.9rem;font-weight:700;">${mensaje || 'No se pudo cargar el video'}</span>
-            <span class="sub">Probando con otro proxy...</span>
-            <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-top:.3rem;">
-                <button class="btn-reintentar" onclick="recargarVideo()"><i class="fas fa-rotate"></i> Reintentar</button>
-                <button class="btn-reintentar" style="background:#F59E0B;color:#111;" onclick="cambiarProxy();recargarVideo();"><i class="fas fa-exchange-alt"></i> Cambiar proxy</button>
-            </div>
-        </div>
-    `;
-}
-
 function reproducirDirecto(url) {
-    if (!url) {
-        mostrarErrorProxy('No hay enlace disponible');
-        return;
-    }
-    
+    if (!url) return;
     const wrapper = document.getElementById('playerWrapper');
+    urlActual = url;
+    
     let finalUrl = url;
-    
-    if (necesitaProxy(url)) {
-        finalUrl = aplicarProxy(url);
-        console.log('🛡️ Proxy usado:', getProxyUrl());
-        console.log('🔗 URL final:', finalUrl);
+    if (finalUrl.includes('unlimplay.com')) {
+        if (!finalUrl.includes('autoplay')) {
+            finalUrl += finalUrl.includes('?') ? '&autoplay=1&controls=1&logo=0' : '?autoplay=1&controls=1&logo=0';
+        }
+        if (finalUrl.includes('unlimplay.com/play/') && !finalUrl.includes('unlimplay.com/play/embed/')) {
+            finalUrl = finalUrl.replace('unlimplay.com/play/', 'unlimplay.com/play/embed/');
+        }
+        finalUrl += '&t=' + Date.now();
+    } else {
+        finalUrl += (finalUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
     }
-    
-    urlActual = finalUrl;
-    finalUrl += (finalUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
-    
-    // Mostrar loading
-    wrapper.innerHTML = `
-        <div class="loading-spinner">
-            <i class="fas fa-spinner"></i>
-            <span style="font-size:.75rem;">Cargando video...</span>
-        </div>
-    `;
     
     const iframe = document.createElement('iframe');
     iframe.src = finalUrl;
@@ -419,59 +347,8 @@ function reproducirDirecto(url) {
     iframe.style.cssText = "width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;";
     iframe.loading = "eager";
     
-    let cargado = false;
-    const timeout = setTimeout(() => {
-        if (!cargado) {
-            // Si falla, intentar con otro proxy
-            if (intentosCarga < PROXY_LIST.length) {
-                intentosCarga++;
-                cambiarProxy();
-                console.log('🔄 Intentando con proxy:', getProxyUrl());
-                // Reintentar con el nuevo proxy
-                const nuevaUrl = generarEnlaceUnlimplay(tmdbId, tipo, 
-                    parseInt(url.split('/')[5]) || 1, 
-                    parseInt(url.split('/')[6]) || 1
-                );
-                if (nuevaUrl && nuevaUrl !== url) {
-                    reproducirDirecto(nuevaUrl);
-                    return;
-                }
-            }
-            mostrarErrorProxy('El video tardó demasiado en cargar');
-        }
-    }, 20000);
-    
-    iframe.onload = function() {
-        cargado = true;
-        clearTimeout(timeout);
-        const spinner = wrapper.querySelector('.loading-spinner');
-        if (spinner) spinner.style.display = 'none';
-        intentosCarga = 0;
-    };
-    
     wrapper.innerHTML = '';
     wrapper.appendChild(iframe);
-    
-    // Si el iframe falla silenciosamente, intentar con otro proxy
-    setTimeout(() => {
-        if (!cargado && wrapper.querySelector('iframe')) {
-            const iframeCheck = wrapper.querySelector('iframe');
-            if (iframeCheck && !iframeCheck.contentWindow) {
-                cargado = true;
-                if (intentosCarga < PROXY_LIST.length) {
-                    intentosCarga++;
-                    cambiarProxy();
-                    const nuevaUrl = generarEnlaceUnlimplay(tmdbId, tipo, 
-                        parseInt(url.split('/')[5]) || 1, 
-                        parseInt(url.split('/')[6]) || 1
-                    );
-                    if (nuevaUrl && nuevaUrl !== url) {
-                        reproducirDirecto(nuevaUrl);
-                    }
-                }
-            }
-        }
-    }, 10000);
 }
 
 // ============================================================
@@ -572,7 +449,6 @@ async function cargarSerie() {
             }
             
             if (urlOp1) {
-                intentosCarga = 0;
                 reproducirDirecto(urlOp1);
                 document.getElementById('btnOp1').classList.add('active');
             }
@@ -630,7 +506,6 @@ async function cargarPelicula() {
         } catch(e) {}
         
         if (urlOp1) {
-            intentosCarga = 0;
             if (opcionActiva === 2 && opcion2Disponible && urlOp2) {
                 reproducirDirecto(urlOp2);
                 document.getElementById('btnOp2').classList.add('active');
@@ -740,10 +615,8 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
             }
             
             if (opcionActiva === 2 && opcion2Disponible && urlOp2) {
-                intentosCarga = 0;
                 reproducirDirecto(urlOp2);
             } else {
-                intentosCarga = 0;
                 reproducirDirecto(urlOp1);
             }
         };
@@ -783,10 +656,8 @@ function cambiarTempSelect() {
                 document.getElementById('btnOp2').classList.remove('active');
             }
             if (opcionActiva === 2 && opcion2Disponible && urlOp2) {
-                intentosCarga = 0;
                 reproducirDirecto(urlOp2);
             } else {
-                intentosCarga = 0;
                 reproducirDirecto(urlOp1);
             }
         }
@@ -798,13 +669,11 @@ function reproducirOpcion(opcion) {
         opcionActiva = 1;
         document.getElementById('btnOp1').classList.add('active');
         document.getElementById('btnOp2').classList.remove('active');
-        intentosCarga = 0;
         reproducirDirecto(urlOp1);
     } else if (opcion === 2 && opcion2Disponible && urlOp2) {
         opcionActiva = 2;
         document.getElementById('btnOp2').classList.add('active');
         document.getElementById('btnOp1').classList.remove('active');
-        intentosCarga = 0;
         reproducirDirecto(urlOp2);
     } else {
         mostrarToast('❌ Opción no disponible', 'error');
@@ -812,52 +681,13 @@ function reproducirOpcion(opcion) {
 }
 
 function recargarVideo() {
-    if (urlActual) {
-        intentosCarga = 0;
-        let urlOriginal = urlActual;
-        // Limpiar proxy de la URL
-        PROXY_LIST.forEach(p => {
-            if (urlOriginal.includes(p)) {
-                try {
-                    urlOriginal = decodeURIComponent(urlOriginal.replace(p, ''));
-                } catch(e) {}
-            }
-        });
-        // Si la URL tiene timestamp, quitarlo
-        urlOriginal = urlOriginal.split('?t=')[0];
-        // Reconstruir URL sin proxy
-        if (urlOriginal.includes('unlimplay.com')) {
-            const parts = urlOriginal.split('/');
-            const tmdbId = parts[4];
-            const tipo = 'serie';
-            const temp = parseInt(parts[5]) || 1;
-            const cap = parseInt(parts[6]) || 1;
-            const nuevaUrl = generarEnlaceUnlimplay(tmdbId, tipo, temp, cap);
-            if (nuevaUrl) {
-                urlOriginal = nuevaUrl;
-            }
-        }
-        reproducirDirecto(urlOriginal);
-    } else {
-        mostrarToast('❌ No hay video para recargar', 'error');
-    }
+    if (urlActual) { mostrarToast('🔄 Recargando...', 'info'); reproducirDirecto(urlActual); }
+    else mostrarToast('❌ No hay video', 'error');
 }
 
 function abrirNuevaVentana() {
-    if (urlActual) {
-        let cleanUrl = urlActual;
-        PROXY_LIST.forEach(p => {
-            if (cleanUrl.includes(p)) {
-                try {
-                    cleanUrl = decodeURIComponent(cleanUrl.replace(p, ''));
-                } catch(e) {}
-            }
-        });
-        cleanUrl = cleanUrl.split('?t=')[0];
-        window.open(cleanUrl, '_blank');
-    } else {
-        mostrarToast('❌ No hay enlace', 'error');
-    }
+    if (urlActual) window.open(urlActual, '_blank');
+    else mostrarToast('❌ No hay enlace', 'error');
 }
 
 function reportarFalla() { mostrarToast('📋 Reporte enviado', 'success'); }
@@ -961,7 +791,7 @@ if (tmdbId) {
     `;
 }
 
-console.log('⚡ Reproductor con PROXY AUTOMÁTICO - Sin VPN');
+console.log('⚡ Reproductor con PROXY de VERCEL - Sin VPN');
 </script>
 </body>
 </html>
