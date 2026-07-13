@@ -204,9 +204,9 @@ const auth = firebase.auth();
 const db = firebase.database();
 
 // ============================================================
-// ⭐ PROXY DE VERCEL - CAMBIA ESTO POR TU URL ⭐
+// ⭐ PROXY DE VERCEL ⭐
 // ============================================================
-// 🔥 CAMBIA ESTA URL POR LA DE TU PROYECTO EN VERCEL 🔥
+// ⚠️ CAMBIA ESTA URL POR LA DE TU PROYECTO EN VERCEL ⚠️
 const PROXY_URL = 'https://tely-xi.vercel.app/api/proxy?url=';
 
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
@@ -240,8 +240,6 @@ let esSerie = false;
 let temporadasActuales = [];
 let tempActualIndex = 0;
 let serieOp2Global = null;
-
-console.log('📌 ID:', tmdbId, '| Tipo:', tipo);
 
 // ============================================================
 // FUNCIONES BÁSICAS
@@ -792,6 +790,7 @@ if (tmdbId) {
 }
 
 console.log('⚡ Reproductor con PROXY de VERCEL - Sin VPN');
+console.log('📡 Proxy URL:', PROXY_URL);
 </script>
 </body>
 </html>
