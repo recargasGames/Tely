@@ -64,7 +64,7 @@
         .titulo-recomendadas{font-weight:600;font-size:.75rem;color:#fff;margin:.2rem 0 .1rem}
         .recomendaciones{display:flex;gap:.3rem;overflow-x:auto;padding:.2rem 0;scrollbar-width:none}
         .recomendaciones::-webkit-scrollbar{display:none}
-        .recomendacion{flex:0 0 auto;width:80px;cursor:pointer;border-radius:8px;overflow:hidden;text-align:center;transition:.3s;background:rgba(255,255,255,.02)}
+        .recomendacion{flex:0 0 auto;width:80px;cursor:pointer;border-radius:8px;overflow:hidden;transition:.3s;background:rgba(255,255,255,.02)}
         .recomendacion:hover{transform:scale(1.05);box-shadow:0 8px 30px rgba(0,0,0,.3)}
         .recomendacion img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:6px;display:block;background:#1A1A2E}
         .recomendacion p{font-size:.45rem;text-align:center;color:#94A3B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.05rem;padding:0 .1rem}
@@ -108,7 +108,7 @@
     <div class="player-controls" id="playerControls">
         <button class="btn-opcion active" id="btnOp1" onclick="reproducirOpcion(1)"><i class="fas fa-play"></i> Unlimplay Latino</button>
         <button class="btn-opcion opcion2" id="btnOp2" onclick="reproducirOpcion(2)">
-            <i class="fas fa-play"></i> Fastream Latino <span class="badge-opcion2">✅</span>
+            <i class="fas fa-play"></i> Opción 2 Latino <span class="badge-opcion2">✅</span>
         </button>
         <button class="btn-recargar" onclick="recargarVideo()"><i class="fas fa-rotate"></i></button>
         <button class="btn-nueva-ventana" onclick="abrirNuevaVentana()"><i class="fas fa-external-link-alt"></i></button>
@@ -151,21 +151,21 @@ let temporadasActuales = [];
 let tempActualIndex = 0;
 
 // ============================================================
-// ✅ GENERAR AMBOS ENLACES (LATINO + SIN PUBLICIDAD)
+// ✅ FORMATO ACTUALIZADO QUE DETECTA LOS SERVIDORES DE UNLIMPLAY
 // ============================================================
 function generarEnlaces(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     if (!tmdb_id) return { op1: null, op2: null };
     
     if (tipo === 'pelicula') {
         return {
-            op1: `https://unlimplay.com/play/movie/${tmdb_id}?lang=es-MX&audio=latino&noads=1`,
-            op2: `https://fastream.to/embed/movie/${tmdb_id}?lang=es&audio=latino&ads=0`
+            op1: `https://unlimplay.com/play/movie/${tmdb_id}?source=tmdb&lang=es-MX&audio=latino&noads=1&v=${Date.now()}`,
+            op2: `https://fastream.to/embed/movie/${tmdb_id}?lang=es&audio=latino&ads=0&v=${Date.now()}`
         };
     } else {
-        // Formato válido para ambos servidores en series
+        // NUEVO FORMATO PARA SERIES: reconoce servidores hoy mismo
         return {
-            op1: `https://unlimplay.com/play/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es-MX&audio=latino&noads=1`,
-            op2: `https://fastream.to/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es&audio=latino&ads=0`
+            op1: `https://unlimplay.com/play/tv/${tmdb_id}/${temporada}/${capitulo}?source=tmdb&lang=es-MX&audio=latino&noads=1&v=${Date.now()}`,
+            op2: `https://fastream.to/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es&audio=latino&ads=0&v=${Date.now()}`
         };
     }
 }
@@ -178,7 +178,7 @@ function reproducirDirecto(url) {
     }
     urlActual = url;
     const iframe = Object.assign(document.createElement('iframe'), {
-        src: url + '&t=' + Date.now(),
+        src: url,
         frameBorder: '0',
         allow: 'autoplay; encrypted-media; picture-in-picture; fullscreen',
         allowFullScreen: true,
@@ -309,6 +309,11 @@ function reproducirOpcion(opcion) {
 function recargarVideo() { urlActual && reproducirDirecto(urlActual); }
 function abrirNuevaVentana() { urlActual && window.open(urlActual, '_blank'); }
 function volverAlIndex() { window.location.href = 'index.html'; }
+function toggleTheme() { document.body.classList.toggle('dark'); }
+function toggleFullscreen() {
+    const w = document.getElementById('playerWrapper');
+    document.fullscreenElement ? document.exitFullscreen() : w.requestFullscreen?.();
+}
 
 if (tmdbId) {
     tipo === 'pelicula' ? cargarPelicula() : cargarSerie();
