@@ -23,11 +23,11 @@
             background:rgba(10,10,15,.92);
             backdrop-filter:blur(12px);
             padding:.3rem .3rem .4rem;
-            border-bottom:1px solid rgba(124,58,237,.1);
+            border-bottom:1px solid rgba(255,255,255,.08);
         }
         
         .top-header{display:flex;justify-content:space-between;align-items:center;padding:.1rem 0 .2rem;flex-wrap:wrap;gap:.3rem}
-        .top-header h1{font-size:1rem;font-weight:700;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .top-header h1{font-size:1rem;font-weight:700;color:#fff}
         .top-actions{display:flex;align-items:center;gap:.5rem}
         
         .theme-btn{background:rgba(255,255,255,.05);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;transition:.3s;display:flex;align-items:center;justify-content:center}
@@ -38,7 +38,7 @@
         
         .btn-fullscreen{
             background:rgba(255,255,255,.06);
-            border:1px solid rgba(124,58,237,.15);
+            border:1px solid rgba(255,255,255,.15);
             color:#fff;
             padding:.25rem .6rem;
             border-radius:6px;
@@ -52,23 +52,23 @@
         }
         .btn-fullscreen:hover{
             background:rgba(255,255,255,.1);
-            border-color:#7C3AED;
+            border-color:rgba(255,255,255,.25);
         }
         
         .player-wrapper{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;width:100%;margin:.2rem 0}
         .player-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;background:#000}
         
         .info-top{padding:.2rem 0 .1rem}
-        .info-top h1{font-size:1.2rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#7C3AED,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .info-top h1{font-size:1.2rem;font-weight:700;color:#fff}
         .info-top .meta{color:#94A3B8;font-size:.7rem;display:flex;gap:.6rem;flex-wrap:wrap;margin:.05rem 0}
         .info-top .meta .rating{color:#FBBF24;font-weight:700}
         .info-top .sinopsis{color:#94A3B8;font-size:.7rem;line-height:1.4;margin-top:.05rem}
         
         .player-controls{display:flex;gap:.3rem;flex-wrap:wrap;margin:.2rem 0}
-        .btn-opcion{background:rgba(255,255,255,.06);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.25rem .8rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer;transition:.3s}
-        .btn-opcion.active{border-color:#7C3AED;background:#7C3AED;color:#fff}
-        .btn-opcion:hover{border-color:#7C3AED}
-        .btn-opcion.opcion2{border-color:rgba(59,130,246,.4);background:rgba(59,130,246,.08);color:#60A5FA}
+        .btn-opcion{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#fff;padding:.25rem .8rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer;transition:.3s}
+        .btn-opcion.active{border-color:#fff;background:rgba(255,255,255,.15);color:#fff}
+        .btn-opcion:hover{border-color:rgba(255,255,255,.3)}
+        .btn-opcion.opcion2{border:1px solid rgba(59,130,246,.4);background:rgba(59,130,246,.08);color:#60A5FA}
         .btn-opcion.opcion2:hover{background:rgba(59,130,246,.2);border-color:#3B82F6}
         .btn-opcion.opcion2.active{background:#3B82F6;border-color:#3B82F6;color:#fff}
         .btn-opcion.opcion2.oculto{display:none}
@@ -78,42 +78,42 @@
         .btn-nueva-ventana{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);color:#EF4444;padding:.25rem .7rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer;transition:.3s}
         .btn-nueva-ventana:hover{background:rgba(239,68,68,.15)}
         
-        .loading-spinner{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#000;color:#A78BFA;gap:.5rem}
-        .loading-spinner i{font-size:2.5rem;color:#7C3AED;animation:spin 1s linear infinite}
+        .loading-spinner{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#000;color:#fff;gap:.5rem}
+        .loading-spinner i{font-size:2.5rem;color:#fff;animation:spin 1s linear infinite}
         @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
         .error-video{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#0A0A0F;color:#EF4444;gap:.5rem;text-align:center;padding:.5rem}
         .error-video i{font-size:2.5rem}
         .error-video .sub{color:#64748B;font-size:.7rem}
         
-        .user-dropdown{position:absolute;right:0;top:calc(100% + 6px);background:rgba(26,26,46,.95);border-radius:8px;width:160px;border:1px solid rgba(124,58,237,.15);padding:.2rem 0;display:none;z-index:60;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+        .user-dropdown{position:absolute;right:0;top:calc(100% + 6px);background:rgba(26,26,46,.95);border-radius:8px;width:160px;border:1px solid rgba(255,255,255,.1);padding:.2rem 0;display:none;z-index:60;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
         .user-dropdown a{display:flex;align-items:center;gap:.3rem;padding:.3rem .6rem;color:#CBD5E1;text-decoration:none;font-size:.75rem;transition:.2s}
-        .user-dropdown a:hover{background:rgba(124,58,237,.08);color:#fff}
-        .user-dropdown hr{margin:.05rem 0;border:none;border-top:1px solid rgba(124,58,237,.08)}
+        .user-dropdown a:hover{background:rgba(255,255,255,.08);color:#fff}
+        .user-dropdown hr{margin:.05rem 0;border:none;border-top:1px solid rgba(255,255,255,.08)}
         .user-menu{position:relative}
         
-        .episodios-section{margin-top:.3rem;background:rgba(255,255,255,.02);border-radius:12px;padding:.4rem .5rem;border:1px solid rgba(124,58,237,.06)}
+        .episodios-section{margin-top:.3rem;background:rgba(255,255,255,.02);border-radius:12px;padding:.4rem .5rem;border:1px solid rgba(255,255,255,.06)}
         .episodios-section .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.2rem;flex-wrap:wrap;gap:.2rem}
         .episodios-section .section-header h3{font-size:.75rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:.3rem}
         .episodios-section .section-header .temp-selector{display:flex;align-items:center;gap:.3rem}
-        .episodios-section .section-header .temp-selector select{background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(124,58,237,.15);border-radius:6px;padding:.1rem .4rem;font-size:.65rem;font-weight:600;cursor:pointer;outline:none}
+        .episodios-section .section-header .temp-selector select{background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:.1rem .4rem;font-size:.65rem;font-weight:600;cursor:pointer;outline:none}
         .episodios-section .section-header .acciones{display:flex;gap:.4rem;flex-wrap:wrap}
         .episodios-section .section-header .acciones button{background:none;border:none;color:#94A3B8;font-size:.55rem;cursor:pointer;transition:.2s;padding:.05rem .3rem;border-radius:4px}
-        .episodios-section .section-header .acciones button:hover{background:rgba(124,58,237,.1);color:#fff}
+        .episodios-section .section-header .acciones button:hover{background:rgba(255,255,255,.1);color:#fff}
         .episodios-list{display:flex;flex-direction:column;gap:.2rem;max-height:250px;overflow-y:auto;padding-right:.1rem}
         .episodio-item{display:flex;flex-direction:column;padding:.2rem .3rem .15rem;background:rgba(255,255,255,.02);border-radius:6px;cursor:pointer;border:1px solid transparent;transition:.2s}
         .episodio-item:hover{background:rgba(255,255,255,.04)}
-        .episodio-item.activo{border-color:#7C3AED;background:rgba(124,58,237,.06)}
+        .episodio-item.activo{border-color:#fff;background:rgba(255,255,255,.06)}
         .episodio-item.sin-enlace{opacity:.4;cursor:not-allowed}
         .episodio-item .top{display:flex;align-items:center;gap:.3rem;flex-wrap:wrap}
-        .episodio-item .top .numero{font-size:.55rem;color:#A78BFA;font-weight:700}
+        .episodio-item .top .numero{font-size:.55rem;color:#fff;font-weight:700}
         .episodio-item .top .titulo{font-size:.6rem;color:#E2E8F0;font-weight:500;flex:1}
         .episodio-item .top .estado{font-size:.45rem;color:#34D399;font-weight:600}
         .episodio-item .top .estado.no-disponible{color:#EF4444}
         .episodio-item .sinopsis{font-size:.5rem;color:#64748B;margin-top:.03rem;padding-left:1.2rem;line-height:1.2}
         .episodio-item .acciones-ep{display:flex;gap:.3rem;padding-left:1.2rem;margin-top:.05rem;flex-wrap:wrap}
         .episodio-item .acciones-ep button{background:none;border:none;color:#64748B;font-size:.45rem;cursor:pointer;transition:.2s;padding:.03rem .2rem;border-radius:3px}
-        .episodio-item .acciones-ep button:hover{background:rgba(124,58,237,.08);color:#fff}
+        .episodio-item .acciones-ep button:hover{background:rgba(255,255,255,.08);color:#fff}
         
         .recomendaciones-wrap{margin-top:.2rem}
         .titulo-recomendadas{font-weight:600;font-size:.75rem;color:#fff;margin:.2rem 0 .1rem}
@@ -126,7 +126,7 @@
         
         .episodios-list::-webkit-scrollbar{width:3px}
         .episodios-list::-webkit-scrollbar-track{background:rgba(255,255,255,.02)}
-        .episodios-list::-webkit-scrollbar-thumb{background:#7C3AED;border-radius:10px}
+        .episodios-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1)}
         
         @media(max-width:480px){.recomendacion{width:65px}.recomendacion p{font-size:.4rem}}
         
@@ -135,12 +135,12 @@
         body:fullscreen .player-wrapper{border-radius:0!important;aspect-ratio:auto!important;height:100vh!important;width:100vw!important;margin:0!important}
         body:fullscreen .info-top,body:fullscreen .player-controls,body:fullscreen .episodios-section,body:fullscreen .recomendaciones-wrap,body:fullscreen #bannerApp{display:none!important}
         
-        #bannerApp{display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1A1A2E,#2D2D44);border-top:2px solid #7C3AED;padding:.5rem .6rem;z-index:9999;box-shadow:0 -4px 30px rgba(124,58,237,.3);animation:slideUp 0.5s ease-out}
+        #bannerApp{display:none;position:fixed;bottom:0;left:0;right:0;background:#1A1A2E;border-top:1px solid rgba(255,255,255,.1);padding:.5rem .6rem;z-index:9999;box-shadow:0 -4px 30px rgba(0,0,0,.5);animation:slideUp 0.5s ease-out}
         @keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
         body.banner-activo{padding-bottom:65px}
         .banner-logo-img{width:32px;height:32px;border-radius:6px;object-fit:cover}
-        .banner-install-btn{background:linear-gradient(135deg,#7C3AED,#A78BFA);border:none;color:#fff;padding:.3rem .8rem;border-radius:6px;font-weight:700;font-size:.65rem;cursor:pointer;transition:.3s;display:flex;align-items:center;gap:.2rem}
-        .banner-install-btn:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(124,58,237,.4)}
+        .banner-install-btn{background:#fff;color:#111;border:none;padding:.3rem .8rem;border-radius:6px;font-weight:700;font-size:.65rem;cursor:pointer;transition:.3s;display:flex;align-items:center;gap:.2rem}
+        .banner-install-btn:hover{transform:scale(1.05);box-shadow:0 0 15px rgba(255,255,255,.3)}
         
         .episodio-item .badge-op2-ep{font-size:.35rem;background:#3B82F6;color:#fff;padding:.02rem .35rem;border-radius:3px;font-weight:700;margin-left:.2rem}
     </style>
@@ -174,7 +174,7 @@
             <span id="playerAnio">-</span>
             <span class="rating">⭐ <span id="playerRating">-</span></span>
             <span id="playerGenero">-</span>
-            <span id="playerTipo" style="color:#A78BFA;">🎬</span>
+            <span id="playerTipo">🎬</span>
         </div>
         <div class="sinopsis" id="playerSinopsis">Cargando información...</div>
     </div>
@@ -235,9 +235,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <script>
-// ============================================================
-// CONFIGURACIÓN
-// ============================================================
 const firebaseConfig = {
     apiKey: "AIzaSyBPBDEVUR7hjNrxCYrefF9Sbl0Wofp3VoQ",
     authDomain: "telyx-23210.firebaseapp.com",
@@ -250,9 +247,6 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// ============================================================
-// VARIABLES
-// ============================================================
 const params = new URLSearchParams(window.location.search);
 let tmdbId = params.get('play');
 if (tmdbId && typeof tmdbId === 'string' && tmdbId.startsWith('tmdb_')) {
@@ -275,9 +269,6 @@ let opcion2Disponible = false;
 
 console.log('📌 ID:', tmdbId, '| Tipo:', tipo);
 
-// ============================================================
-// FUNCIONES BÁSICAS
-// ============================================================
 function volverAlIndex() {
     if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
     window.location.href = 'index.html';
@@ -322,9 +313,6 @@ function toggleTheme() {
 if (localStorage.getItem('theme') === 'light') { 
     document.body.classList.remove('dark'); 
     document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; 
-} else { 
-    document.body.classList.add('dark'); 
-    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; 
 }
 
 function getImagenUrl(path, size = 'w342') {
@@ -357,9 +345,6 @@ function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     }
 }
 
-// ============================================================
-// REPRODUCTOR
-// ============================================================
 function reproducir(url) {
     if (reproduciendo && urlActual === url) return;
     reproduciendo = true;
@@ -439,22 +424,17 @@ function abrirNuevaVentana() {
 function reportarFalla() { mostrarToast('📋 Reporte enviado', 'success'); }
 function ayuda() { mostrarToast('💬 Contáctanos', 'info'); }
 
-// ============================================================
-// CARGAR DATOS DE LA SERIE (CON OPCIÓN 2 SÍNCRONA)
-// ============================================================
 async function cargarDatosSerie() {
     const wrapper = document.getElementById('playerWrapper');
     wrapper.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner"></i><span>Cargando...</span></div>`;
     
     try {
-        // 1. OBTENER DATOS BÁSICOS DE LA SERIE
         const data = await fetchTMDB(`tv/${tmdbId}`);
         if (!data || !data.id) {
             wrapper.innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>Serie no encontrada</span></div>`;
             return;
         }
         
-        // 2. GUARDAR DATOS DE LA SERIE
         serieData = {
             id: data.id,
             tmdb_id: data.id,
@@ -468,7 +448,6 @@ async function cargarDatosSerie() {
             tipo: 'serie'
         };
         
-        // 3. MOSTRAR INFORMACIÓN BÁSICA
         document.getElementById('playerTitulo').textContent = serieData.titulo;
         document.getElementById('playerAnio').textContent = serieData.anio;
         document.getElementById('playerRating').textContent = serieData.puntuacion;
@@ -477,13 +456,11 @@ async function cargarDatosSerie() {
         document.getElementById('playerTipo').textContent = '📺 Serie';
         document.getElementById('playerTipo').style.color = '#10B981';
         
-        // 4. CARGAR TEMPORADAS (SOLO NÚMEROS)
         const numTemps = Math.min(serieData.numero_temporadas, 10);
         for (let t = 1; t <= numTemps; t++) {
             temporadasActuales.push({ numero: t, nombre: `Temporada ${t}`, capitulos: [] });
         }
         
-        // 5. MOSTRAR SELECT DE TEMPORADAS
         const select = document.getElementById('tempSelect');
         select.innerHTML = '';
         temporadasActuales.forEach((t, idx) => {
@@ -495,7 +472,6 @@ async function cargarDatosSerie() {
         
         document.getElementById('episodiosSection').style.display = 'block';
         
-        // 6. CARGAR LA TEMPORADA SELECCIONADA (con Opción 2)
         let tempIndex = 0;
         if (tempRestaurar !== null && tempRestaurar < temporadasActuales.length) {
             tempIndex = tempRestaurar;
@@ -503,10 +479,8 @@ async function cargarDatosSerie() {
         select.value = tempIndex;
         tempActualIndex = tempIndex;
         
-        // ⭐ CARGAR CAPÍTULOS Y OPCIÓN 2 JUNTOS ⭐
         await cargarCapitulosYOp2(tempIndex);
         
-        // 7. REPRODUCIR EL CAPÍTULO CORRECTO
         let capIndex = 0;
         if (capRestaurar !== null) capIndex = capRestaurar;
         const temp = temporadasActuales[tempIndex];
@@ -514,7 +488,6 @@ async function cargarDatosSerie() {
             const cap = temp.capitulos[capIndex];
             if (cap && cap.url) {
                 urlOp1 = cap.url;
-                // La Opción 2 ya está cargada desde Firebase
                 if (cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
                     urlOp2 = cap.opcion2;
                     opcion2Disponible = true;
@@ -531,10 +504,8 @@ async function cargarDatosSerie() {
             }
         }
         
-        // 8. CARGAR RECOMENDACIONES EN SEGUNDO PLANO
         cargarRecomendaciones(tmdbId);
         
-        // 9. OCULTAR SPINNER DEL PLAYER
         const spinner = wrapper.querySelector('.loading-spinner');
         if (spinner) spinner.style.display = 'none';
         
@@ -544,29 +515,23 @@ async function cargarDatosSerie() {
     }
 }
 
-// ============================================================
-// CARGAR CAPÍTULOS Y OPCIÓN 2 (SÍNCRONO)
-// ============================================================
 async function cargarCapitulosYOp2(tempIndex) {
     if (!temporadasActuales[tempIndex]) return;
     const temp = temporadasActuales[tempIndex];
     
     try {
-        // 1. OBTENER CAPÍTULOS DE LA API
         const data = await fetchTMDB(`tv/${tmdbId}/season/${temp.numero}`);
         if (!data || !data.episodes) return;
         
-        // 2. GUARDAR CAPÍTULOS (sin Opción 2 aún)
         temp.capitulos = data.episodes.map(ep => ({
             numero: ep.episode_number,
             titulo: ep.name || `Episodio ${ep.episode_number}`,
             sinopsis: ep.overview || 'Sin sinopsis',
             disponible: true,
             url: generarEnlaceUnlimplay(tmdbId, 'serie', temp.numero, ep.episode_number),
-            opcion2: null // Se llenará desde Firebase
+            opcion2: null
         }));
         
-        // 3. BUSCAR OPCIÓN 2 EN FIREBASE (ESPERAR A QUE TERMINE)
         try {
             const snap = await db.ref('series_personalizadas').once('value');
             const data2 = snap.val() || {};
@@ -576,7 +541,6 @@ async function cargarCapitulosYOp2(tempIndex) {
             if (item && item.temporadas) {
                 const fbTemp = item.temporadas.find(t => t.numero == temp.numero);
                 if (fbTemp && fbTemp.capitulos) {
-                    // Actualizar opcion2 de cada capítulo
                     temp.capitulos.forEach((cap, idx) => {
                         const fbCap = fbTemp.capitulos.find(c => c.numero == cap.numero);
                         if (fbCap && fbCap.opcion2 && fbCap.opcion2.trim() !== '') {
@@ -587,10 +551,8 @@ async function cargarCapitulosYOp2(tempIndex) {
             }
         } catch(e) {
             console.error('Error buscando Opción 2 en Firebase:', e);
-            // Si falla Firebase, seguir sin Opción 2
         }
         
-        // 4. MOSTRAR EPISODIOS (con Opción 2 ya cargada)
         mostrarEpisodios(tempIndex);
         
     } catch(e) {
@@ -600,9 +562,6 @@ async function cargarCapitulosYOp2(tempIndex) {
     }
 }
 
-// ============================================================
-// MOSTRAR EPISODIOS
-// ============================================================
 function mostrarEpisodios(tempIndex) {
     if (!temporadasActuales[tempIndex]) return;
     const temp = temporadasActuales[tempIndex];
@@ -639,7 +598,6 @@ function mostrarEpisodios(tempIndex) {
             
             urlOp1 = cap.url;
             
-            // Verificar Opción 2 del capítulo (ya cargada)
             if (cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
                 urlOp2 = cap.opcion2;
                 opcion2Disponible = true;
@@ -666,9 +624,6 @@ function mostrarEpisodios(tempIndex) {
     });
 }
 
-// ============================================================
-// CAMBIAR TEMPORADA
-// ============================================================
 async function cambiarTempSelect() {
     const select = document.getElementById('tempSelect');
     const idx = parseInt(select.value);
@@ -682,9 +637,6 @@ async function cambiarTempSelect() {
     }
 }
 
-// ============================================================
-// RECOMENDACIONES
-// ============================================================
 async function cargarRecomendaciones(tmdbId) {
     const container = document.getElementById('recomendaciones');
     container.innerHTML = '<p style="color:#64748B;font-size:.6rem;padding:.5rem;">Cargando...</p>';
@@ -709,9 +661,6 @@ async function cargarRecomendaciones(tmdbId) {
     } catch(e) { container.innerHTML = '<p style="color:#64748B;font-size:.6rem;padding:.5rem;">Sin recomendaciones</p>'; }
 }
 
-// ============================================================
-// BANNER APK
-// ============================================================
 function detectarPlataforma() {
     const ua = navigator.userAgent || '';
     const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
@@ -745,9 +694,6 @@ function descargarAPK() {
     setTimeout(cerrarBannerApp, 2000);
 }
 
-// ============================================================
-// BOTÓN ATRÁS
-// ============================================================
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) {
     volverAlIndex();
@@ -761,9 +707,6 @@ document.addEventListener('backbutton', function(e) {
     return false;
 }, false);
 
-// ============================================================
-// INICIAR
-// ============================================================
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 2000);
 });
@@ -773,7 +716,6 @@ if (tmdbId) {
         esSerie = true;
         cargarDatosSerie();
     } else {
-        // Película - cargar rápido
         cargarPelicula();
     }
 } else {
@@ -796,11 +738,10 @@ async function cargarPelicula() {
         document.getElementById('playerGenero').textContent = data.genres ? data.genres.map(g => g.name).join(', ') : 'Película';
         document.getElementById('playerSinopsis').textContent = data.overview || 'Sin sinopsis';
         document.getElementById('playerTipo').textContent = '🎬 Película';
-        document.getElementById('playerTipo').style.color = '#A78BFA';
+        document.getElementById('playerTipo').style.color = '#fff';
         
         urlOp1 = generarEnlaceUnlimplay(tmdbId, 'pelicula');
         
-        // Buscar Opción 2 en Firebase (síncrono)
         try {
             const snap = await db.ref('contenido_personalizado').once('value');
             const items = Object.values(snap.val() || {});
@@ -831,7 +772,7 @@ async function cargarPelicula() {
     }
 }
 
-console.log('⚡ Reproductor - Opción 2 cargada JUNTO con los capítulos');
+console.log('⚡ Reproductor sin color morado, listo');
 </script>
 </body>
 </html>
