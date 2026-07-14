@@ -196,7 +196,7 @@ const auth = firebase.auth();
 const db = firebase.database();
 
 // ============================================================
-// VARIABLES
+// ⭐ VARIABLES
 // ============================================================
 const params = new URLSearchParams(window.location.search);
 let tmdbId = params.get('play');
@@ -213,10 +213,8 @@ let esSerie = false;
 let temporadasActuales = [];
 let tempActualIndex = 0;
 
-console.log('📌 ID:', tmdbId, '| Tipo:', tipo);
-
 // ============================================================
-// FUNCIONES BÁSICAS
+// ⭐ FUNCIONES
 // ============================================================
 function volverAlIndex() {
     if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
@@ -289,6 +287,7 @@ async function fetchTMDB(path, params = {}) {
     return res.json();
 }
 
+// ⭐ SOLO GENERA ENLACE DE UNLIMPLAY (PRINCIPAL)
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     const temp = parseInt(temporada) || 1;
     const cap = parseInt(capitulo) || 1;
@@ -300,20 +299,8 @@ function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     }
 }
 
-// ⭐ FUNCIÓN PARA OPCIÓN 2 (BIGMOLY/VIDSRC)
-function generarEnlaceOpcion2(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    const temp = parseInt(temporada) || 1;
-    const cap = parseInt(capitulo) || 1;
-    
-    if (tipo === 'pelicula') {
-        return `https://vidsrc.in/embed/movie/${tmdb_id}?lang=es`;
-    } else {
-        return `https://vidsrc.in/embed/tv/${tmdb_id}/${temp}/${cap}?lang=es`;
-    }
-}
-
 // ============================================================
-// ⭐ REPRODUCIR DIRECTO (SIN SPINNER) ⭐
+// ⭐ REPRODUCIR DIRECTO (SIN SPINNER)
 // ============================================================
 function reproducirDirecto(url) {
     if (!url) return;
@@ -347,26 +334,33 @@ function reproducirDirecto(url) {
 }
 
 // ============================================================
-// ⭐ CARGAR PELÍCULA ⭐
+// ⭐ CARGAR PELÍCULA
 // ============================================================
 async function cargarPelicula() {
     try {
-        // 1. GENERAR ENLACE DE OPCIÓN 1
+        // 1. GENERAR ENLACE DE OPCIÓN 1 (UNLIMPLAY)
         urlOp1 = generarEnlaceUnlimplay(tmdbId, 'pelicula');
         if (urlOp1) {
             reproducirDirecto(urlOp1);
             document.getElementById('btnOp1').classList.add('active');
         }
         
-        // 2. GENERAR OPCIÓN 2 (VIDSRC)
-        urlOp2 = generarEnlaceOpcion2(tmdbId, 'pelicula');
-        if (urlOp2) {
-            opcion2Disponible = true;
-            document.getElementById('btnOp2').classList.remove('oculto');
-            console.log('✅ Opción 2 disponible (VIDSRC)');
+        // 2. BUSCAR OPCIÓN 2 EN FIREBASE (SOLO LA QUE TÚ AGREGASTE)
+        try {
+            const snap = await db.ref('contenido_personalizado').once('value');
+            const items = Object.values(snap.val() || {});
+            const item = items.find(i => String(i.tmdb_id) === String(tmdbId));
+            if (item && item.opcion2 && item.opcion2.trim() !== '' && item.opcion2.startsWith('http')) {
+                urlOp2 = item.opcion2;
+                opcion2Disponible = true;
+                document.getElementById('btnOp2').classList.remove('oculto');
+                console.log('✅ Opción 2 encontrada en Firebase');
+            }
+        } catch(e) {
+            console.log('Firebase no disponible para Opción 2');
         }
         
-        // 3. CARGAR INFO
+        // 3. CARGAR INFO DE TMDB
         const data = await fetchTMDB(`movie/${tmdbId}`);
         if (data && data.id) {
             document.getElementById('playerTitulo').textContent = data.title || 'Sin título';
@@ -383,11 +377,18 @@ async function cargarPelicula() {
         
     } catch(e) {
         console.error('Error:', e);
+        document.getElementById('playerWrapper').innerHTML = `
+            <div class="error-video">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Error al cargar la película</span>
+                <span class="sub">${e.message}</span>
+            </div>
+        `;
     }
 }
 
 // ============================================================
-// ⭐ CARGAR SERIE ⭐
+// ⭐ CARGAR SERIE
 // ============================================================
 async function cargarSerie() {
     try {
@@ -426,18 +427,40 @@ async function cargarSerie() {
                         titulo: ep.name || `Capítulo ${ep.episode_number}`,
                         sinopsis: ep.overview || 'Sin sinopsis',
                         url: generarEnlaceUnlimplay(tmdbId, 'serie', t, ep.episode_number),
-                        opcion2: generarEnlaceOpcion2(tmdbId, 'serie', t, ep.episode_number)
+                        opcion2: null
                     }));
                 temporadasActuales.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
             } catch(e) {}
         }
         
-        // 4. MOSTRAR EPISODIOS
+        // 4. BUSCAR OPCIÓN 2 EN FIREBASE (PARA TODOS LOS CAPÍTULOS)
+        try {
+            const snap = await db.ref('series_personalizadas').once('value');
+            const items = Object.values(snap.val() || {});
+            const item = items.find(i => String(i.tmdb_id) === String(tmdbId));
+            if (item && item.temporadas) {
+                temporadasActuales.forEach((temp, tempIdx) => {
+                    const fbTemp = item.temporadas.find(t => t.numero === temp.numero);
+                    if (fbTemp && fbTemp.capitulos) {
+                        temp.capitulos.forEach(cap => {
+                            const fbCap = fbTemp.capitulos.find(c => c.numero === cap.numero);
+                            if (fbCap && fbCap.opcion2 && fbCap.opcion2.trim() !== '' && fbCap.opcion2.startsWith('http')) {
+                                cap.opcion2 = fbCap.opcion2;
+                            }
+                        });
+                    }
+                });
+            }
+        } catch(e) {
+            console.log('Firebase no disponible para Opción 2');
+        }
+        
+        // 5. MOSTRAR EPISODIOS
         if (temporadasActuales.length) {
             mostrarEpisodiosConTemporadas(temporadasActuales);
         }
         
-        // 5. REPRODUCIR EL CAPÍTULO CORRECTO
+        // 6. REPRODUCIR EL CAPÍTULO CORRECTO
         let tempIndex = 0;
         let capIndex = 0;
         if (tempRestaurar !== null && tempRestaurar < temporadasActuales.length) {
@@ -453,11 +476,13 @@ async function cargarSerie() {
             const tempNum = temp.numero || 1;
             const capNum = cap.numero || 1;
             urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
-            urlOp2 = generarEnlaceOpcion2(tmdbId, 'serie', tempNum, capNum);
             
-            if (urlOp2) {
+            // Verificar si el capítulo tiene Op2
+            if (cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
+                urlOp2 = cap.opcion2;
                 opcion2Disponible = true;
                 document.getElementById('btnOp2').classList.remove('oculto');
+                console.log('✅ Opción 2 encontrada para este capítulo');
             }
             
             if (urlOp1) {
@@ -466,7 +491,7 @@ async function cargarSerie() {
             }
         }
         
-        // 6. RECOMENDACIONES
+        // 7. RECOMENDACIONES
         cargarRecomendacionesSerie(tmdbId);
         
     } catch(e) {
@@ -482,7 +507,7 @@ async function cargarSerie() {
 }
 
 // ============================================================
-// ⭐ MOSTRAR EPISODIOS ⭐
+// ⭐ MOSTRAR EPISODIOS
 // ============================================================
 function mostrarEpisodiosConTemporadas(temporadas) {
     if (!temporadas || !temporadas.length) return;
@@ -527,7 +552,6 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
         const capNum = cap.numero || idx + 1;
         if (!cap.url) {
             cap.url = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
-            cap.opcion2 = generarEnlaceOpcion2(tmdbId, 'serie', tempNum, capNum);
         }
         const tieneOp2 = cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http');
         
@@ -547,12 +571,14 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
             d.classList.add('activo');
             
             urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
-            urlOp2 = generarEnlaceOpcion2(tmdbId, 'serie', tempNum, capNum);
             
-            if (urlOp2) {
+            // Verificar Opción 2 del capítulo (desde Firebase)
+            if (cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
+                urlOp2 = cap.opcion2;
                 opcion2Disponible = true;
                 document.getElementById('btnOp2').classList.remove('oculto');
             } else {
+                urlOp2 = null;
                 opcion2Disponible = false;
                 document.getElementById('btnOp2').classList.add('oculto');
             }
@@ -586,12 +612,13 @@ function cambiarTempSelect() {
             const tempNum = temp.numero || 1;
             const capNum = cap.numero || 1;
             urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
-            urlOp2 = generarEnlaceOpcion2(tmdbId, 'serie', tempNum, capNum);
             
-            if (urlOp2) {
+            if (cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
+                urlOp2 = cap.opcion2;
                 opcion2Disponible = true;
                 document.getElementById('btnOp2').classList.remove('oculto');
             } else {
+                urlOp2 = null;
                 opcion2Disponible = false;
                 document.getElementById('btnOp2').classList.add('oculto');
             }
@@ -641,7 +668,7 @@ function reportarFalla() { mostrarToast('📋 Reporte enviado', 'success'); }
 function ayuda() { mostrarToast('💬 Contáctanos', 'info'); }
 
 // ============================================================
-// ⭐ RECOMENDACIONES ⭐
+// ⭐ RECOMENDACIONES
 // ============================================================
 async function cargarRecomendacionesPelicula(tmdbId) {
     const container = document.getElementById('recomendaciones');
@@ -691,7 +718,7 @@ async function cargarRecomendacionesSerie(tmdbId) {
 }
 
 // ============================================================
-// ⭐ BANNER APK ⭐
+// ⭐ BANNER APK
 // ============================================================
 function detectarPlataforma() {
     const ua = navigator.userAgent || '';
@@ -724,7 +751,7 @@ function descargarAPK() {
 }
 
 // ============================================================
-// ⭐ BOTÓN ATRÁS ⭐
+// ⭐ BOTÓN ATRÁS
 // ============================================================
 history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', function(e) {
@@ -740,7 +767,7 @@ document.addEventListener('backbutton', function(e) {
 }, false);
 
 // ============================================================
-// ⭐ INICIO ⭐
+// ⭐ INICIO
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(mostrarBannerApp, 2000);
@@ -756,7 +783,7 @@ if (tmdbId) {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
 
-console.log('⚡ Reproductor - Unlimplay + Opción 2 (VIDSRC)');
+console.log('⚡ Reproductor - Unlimplay + Opción 2 (solo la que tú agregas)');
 </script>
 </body>
 </html>
