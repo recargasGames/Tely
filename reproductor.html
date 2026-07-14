@@ -289,7 +289,7 @@ async function fetchTMDB(path, params = {}) {
 }
 
 // ============================================================
-// ✅ FUNCIÓN CORREGIDA: VALIDA ID Y FORMATO CORRECTO
+// ✅ FUNCIÓN DE ENLACES CORREGIDA (USA /tv/ NO /serie/)
 // ============================================================
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     if (!tmdb_id) return null;
@@ -301,7 +301,7 @@ function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
 }
 
 // ============================================================
-// ⭐ REPRODUCIR DIRECTO (SIN CARGA INFINITA) ⭐
+// ✅ REPRODUCTOR SIN SANDBOX (ELIMINADO EL ERROR PRINCIPAL)
 // ============================================================
 function reproducirDirecto(url) {
     if (!url) {
@@ -313,6 +313,7 @@ function reproducirDirecto(url) {
     urlActual = url;
     
     let finalUrl = url;
+    // Agregar parámetros de audio latino y evitar caché
     if (finalUrl.includes('unlimplay.com')) {
         if (!finalUrl.includes('lang=es')) finalUrl += finalUrl.includes('?') ? '&lang=es-MX' : '?lang=es-MX';
         if (!finalUrl.includes('autoplay')) finalUrl += '&autoplay=1&controls=1&logo=0';
@@ -320,16 +321,15 @@ function reproducirDirecto(url) {
             finalUrl = finalUrl.replace('unlimplay.com/play/', 'unlimplay.com/play/embed/');
         }
     }
-    // Evitar caché para no quedarse en negro
     finalUrl += (finalUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
     
+    // SIN SANDBOX! ESA ERA LA CAUSA DEL ERROR
     const iframe = document.createElement('iframe');
     iframe.src = finalUrl;
     iframe.frameborder = "0";
     iframe.referrerpolicy = "no-referrer-when-downgrade";
     iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
     iframe.allowfullscreen = true;
-    iframe.sandbox = "allow-same-origin allow-scripts allow-popups allow-forms allow-presentation";
     iframe.style.cssText = "width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;";
     iframe.loading = "eager";
     
@@ -338,7 +338,7 @@ function reproducirDirecto(url) {
 }
 
 // ============================================================
-// ⭐ CARGAR PELÍCULA ⭐
+// ⭐ CARGAR PELÍCULA (CARGA INMEDIATA) ⭐
 // ============================================================
 async function cargarPelicula() {
     try {
@@ -376,26 +376,14 @@ async function cargarPelicula() {
 }
 
 // ============================================================
-// ✅ FUNCIÓN CARGAR SERIE CORREGIDA: YA NO SE QUEDA EN NEGRO ⭐
+// ✅ CARGAR SERIE CORREGIDA (MUESTRA EPISODIOS Y REPRODUCE)
 // ============================================================
 async function cargarSerie() {
     try {
         let serieFirebase = null;
         let opcion2Global = null;
         
-        // Cargar datos primero de Firebase
-        try {
-            const snap = await db.ref('series_personalizadas').once('value');
-            const items = Object.values(snap.val() || {});
-            const item = items.find(i => i.tmdb_id == tmdbId);
-            if (item) {
-                serieFirebase = item;
-                if (item.opcion2?.trim().startsWith('http')) opcion2Global = item.opcion2;
-                if (item.temporadas?.length) temporadasActuales = item.temporadas;
-            }
-        } catch(e) { console.log('Firebase sin datos, cargando de TMDB...'); }
-
-        // Cargar información básica de la serie primero
+        // Cargar información de la serie PRIMERO
         const data = await fetchTMDB(`tv/${tmdbId}`);
         if (data?.id) {
             document.getElementById('playerTitulo').textContent = data.name || 'Sin título';
@@ -407,6 +395,18 @@ async function cargarSerie() {
             document.getElementById('playerTipo').style.color = '#10B981';
             esSerie = true;
         }
+
+        // Cargar datos personalizados de Firebase
+        try {
+            const snap = await db.ref('series_personalizadas').once('value');
+            const items = Object.values(snap.val() || {});
+            const item = items.find(i => i.tmdb_id == tmdbId);
+            if (item) {
+                serieFirebase = item;
+                if (item.opcion2?.trim().startsWith('http')) opcion2Global = item.opcion2;
+                if (item.temporadas?.length) temporadasActuales = item.temporadas;
+            }
+        } catch(e) { console.log('Cargando temporadas desde TMDB...'); }
 
         // Si no hay temporadas en Firebase, cargar de TMDB
         if (!temporadasActuales.length && data) {
@@ -427,7 +427,7 @@ async function cargarSerie() {
             }
         }
 
-        // Mostrar sección de episodios
+        // Mostrar episodios y reproducir PRIMERO INMEDIATAMENTE
         if (temporadasActuales.length) {
             document.getElementById('episodiosSection').style.display = 'block';
             const select = document.getElementById('tempSelect');
@@ -457,7 +457,7 @@ async function cargarSerie() {
                     opcion2Disponible = true;
                     document.getElementById('btnOp2').classList.remove('oculto');
                 }
-                // ✅ REPRODUCIR INMEDIATAMENTE - NO QUEDA EN NEGRO
+                // ✅ REPRODUCCIÓN SIN ESPERAS
                 reproducirDirecto(urlOp1);
                 document.getElementById('btnOp1').classList.add('active');
             }
@@ -475,7 +475,7 @@ async function cargarSerie() {
 }
 
 // ============================================================
-// ⭐ MOSTRAR EPISODIOS CORREGIDO ⭐
+// ⭐ MOSTRAR EPISODIOS ⭐
 // ============================================================
 function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
     if (!temporadasActuales[tempIndex]) return;
@@ -642,7 +642,7 @@ if (tmdbId) {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-circle"></i><span>Falta el ID del contenido</span><span class="sub">Vuelve atrás y selecciona algo</span></div>`;
 }
 
-console.log('✅ Reproductor TELY listo - Sin errores de pantalla negra');
+console.log('✅ Reproductor TELY - LISTO SIN ERRORES');
 </script>
 </body>
 </html>
