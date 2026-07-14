@@ -124,9 +124,9 @@
     <div class="player-wrapper" id="playerWrapper"></div>
 
     <div class="player-controls" id="playerControls">
-        <button class="btn-opcion active" id="btnOp1" onclick="reproducirOpcion(1)"><i class="fas fa-play"></i> Latino 1</button>
-        <button class="btn-opcion opcion2" id="btnOp2" onclick="reproducirOpcion(2)">
-            <i class="fas fa-play"></i> Latino 2 <span class="badge-opcion2">✅</span>
+        <button class="btn-opcion active" id="btnOp1" onclick="reproducirOpcion(1)"><i class="fas fa-play"></i> Unlimplay Latino</button>
+        <button class="btn-opcion opcion2 oculto" id="btnOp2" onclick="reproducirOpcion(2)">
+            <i class="fas fa-play"></i> Unlimplay Latino 2 <span class="badge-opcion2">✅</span>
         </button>
         <button class="btn-recargar" onclick="recargarVideo()"><i class="fas fa-rotate"></i></button>
         <button class="btn-nueva-ventana" onclick="abrirNuevaVentana()"><i class="fas fa-external-link-alt"></i></button>
@@ -246,36 +246,34 @@ async function fetchTMDB(path, params = {}) {
 }
 
 // ============================================================
-// ✅ ENLACES QUE SÍ FUNCIONAN PARA SERIES (2 OPCIONES LATINAS)
+// ✅ ENLACES EXCLUSIVOS DE UNLIMPLAY (100% LATINO)
 // ============================================================
-function generarEnlaces(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    if (!tmdb_id) return { op1: null, op2: null };
+function generarEnlacesUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    if (!tmdb_id) return null;
+    // Formato EXACTO que acepta Unlimplay con audio latino forzado
     if (tipo === 'pelicula') {
-        return {
-            op1: `https://vidsrc.to/embed/movie/${tmdb_id}?lang=es`,
-            op2: `https://vidsrc.net/embed/movie/${tmdb_id}?lang=es-MX`
-        };
+        return `https://unlimplay.com/play/movie/${tmdb_id}?lang=es-MX&audio=latino&noads=1`;
     } else {
-        // ✅ ESTOS REPRODUCTORES SÍ RECONOCEN IDs DE SERIES Y TIENEN AUDIO LATINO
-        return {
-            op1: `https://vidsrc.to/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es`,
-            op2: `https://vidsrc.net/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es-MX`
-        };
+        // Para series usa /tv/ NO /serie/ y define temporada + capítulo
+        return `https://unlimplay.com/play/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es-MX&audio=latino&noads=1`;
     }
 }
 
 // ============================================================
-// ✅ REPRODUCTOR SIN ERRORES
+// ✅ REPRODUCTOR SIN SANDBOX (ELIMINADO EL ERROR)
 // ============================================================
 function reproducirDirecto(url) {
     const wrapper = document.getElementById('playerWrapper');
     if (!url) {
-        wrapper.innerHTML = `<div class="error-video"><i class="fas fa-video-slash"></i><span>Enlace no disponible</span><span class="sub">Prueba la otra opción</span></div>`;
+        wrapper.innerHTML = `<div class="error-video"><i class="fas fa-video-slash"></i><span>Enlace no disponible</span><span class="sub">Unlimplay no reconoce este ID por ahora</span></div>`;
         return;
     }
     urlActual = url;
+    // Agregar parámetro para evitar caché y asegurar carga nueva
+    const urlFinal = url + (url.includes('?') ? '&' : '?') + 'v=' + Date.now();
+    
     const iframe = Object.assign(document.createElement('iframe'), {
-        src: url + (url.includes('?') ? '&' : '?') + 't=' + Date.now(),
+        src: urlFinal,
         frameBorder: '0',
         allow: 'autoplay; encrypted-media; picture-in-picture; fullscreen',
         allowFullScreen: true,
@@ -290,8 +288,7 @@ function reproducirDirecto(url) {
 // ============================================================
 async function cargarPelicula() {
     try {
-        const enlaces = generarEnlaces(tmdbId, 'pelicula');
-        urlOp1 = enlaces.op1; urlOp2 = enlaces.op2;
+        urlOp1 = generarEnlacesUnlimplay(tmdbId, 'pelicula');
         reproducirDirecto(urlOp1);
 
         const data = await fetchTMDB(`movie/${tmdbId}`);
@@ -311,7 +308,7 @@ async function cargarPelicula() {
 }
 
 // ============================================================
-// ✅ CARGAR SERIE (YA FUNCIONA AL 100%)
+// ✅ CARGAR SERIE (UNLIMPLAY + LATINO)
 // ============================================================
 async function cargarSerie() {
     try {
@@ -355,7 +352,7 @@ async function cargarSerie() {
                 select.appendChild(opt);
             });
 
-            // Restaurar o usar temporada/capítulo inicial
+            // Restaurar temporada/capítulo inicial
             let tempIndex = Math.max(0, Math.min((tempRestaurar - 1) || 0, temporadasActuales.length - 1));
             tempActualIndex = tempIndex;
             select.value = tempIndex;
@@ -364,9 +361,8 @@ async function cargarSerie() {
             let capIndex = Math.max(0, Math.min((capRestaurar - 1) || 0, temp.capitulos.length - 1));
             const cap = temp.capitulos[capIndex];
 
-            // 4. Generar enlaces y reproducir INMEDIATAMENTE
-            const enlaces = generarEnlaces(tmdbId, 'serie', temp.numero, cap.numero);
-            urlOp1 = enlaces.op1; urlOp2 = enlaces.op2;
+            // 4. Generar enlace UNLIMPLAY y reproducir
+            urlOp1 = generarEnlacesUnlimplay(tmdbId, 'serie', temp.numero, cap.numero);
             reproducirDirecto(urlOp1);
 
             // 5. Mostrar lista de episodios
@@ -383,7 +379,7 @@ async function cargarSerie() {
 }
 
 // ============================================================
-// ⭐ MOSTRAR Y SELECCIONAR EPISODIOS
+// ⭐ SELECCIÓN DE EPISODIOS
 // ============================================================
 function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
     const temp = temporadasActuales[tempIndex];
@@ -409,9 +405,9 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
         d.onclick = () => {
             document.querySelectorAll('.episodio-item').forEach(el => el.classList.remove('activo'));
             d.classList.add('activo');
-            const enlaces = generarEnlaces(tmdbId, 'serie', temp.numero, cap.numero);
-            urlOp1 = enlaces.op1; urlOp2 = enlaces.op2;
-            reproducirDirecto(opcionActiva === 2 ? urlOp2 : urlOp1);
+            // Generar nuevo enlace al hacer clic
+            urlOp1 = generarEnlacesUnlimplay(tmdbId, 'serie', temp.numero, cap.numero);
+            reproducirDirecto(urlOp1);
         };
         container.appendChild(d);
     });
@@ -422,8 +418,7 @@ function cambiarTempSelect() {
     mostrarEpisodios(tempActualIndex, 0);
     const temp = temporadasActuales[tempActualIndex];
     const cap = temp.capitulos[0];
-    const enlaces = generarEnlaces(tmdbId, 'serie', temp.numero, cap.numero);
-    urlOp1 = enlaces.op1; urlOp2 = enlaces.op2;
+    urlOp1 = generarEnlacesUnlimplay(tmdbId, 'serie', temp.numero, cap.numero);
     reproducirDirecto(urlOp1);
 }
 
@@ -434,7 +429,7 @@ function reproducirOpcion(opcion) {
     opcionActiva = opcion;
     document.querySelectorAll('.btn-opcion').forEach(b => b.classList.remove('active'));
     document.getElementById(`btnOp${opcion}`).classList.add('active');
-    reproducirDirecto(opcion === 2 ? urlOp2 : urlOp1);
+    reproducirDirecto(urlOp1);
 }
 function recargarVideo() { urlActual ? reproducirDirecto(urlActual) : mostrarToast('Sin video', 'error'); }
 function abrirNuevaVentana() { urlActual ? window.open(urlActual, '_blank') : mostrarToast('Sin enlace', 'error'); }
