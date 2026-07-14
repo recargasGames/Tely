@@ -33,13 +33,7 @@
         .info-top .meta .rating{color:#FBBF24;font-weight:700}
         .sinopsis{color:#94A3B8;font-size:.7rem;line-height:1.4;margin-top:.05rem}
         .player-controls{display:flex;gap:.3rem;flex-wrap:wrap;margin:.2rem 0}
-        .btn-opcion{background:rgba(255,255,255,.06);border:1px solid rgba(124,58,237,.2);color:#fff;padding:.25rem .8rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer;transition:.3s}
-        .btn-opcion.active{border-color:#7C3AED;background:#7C3AED;color:#fff}
-        .btn-opcion:hover{border-color:#7C3AED}
-        .btn-opcion.opcion2{border-color:rgba(59,130,246,.4);background:rgba(59,130,246,.08);color:#60A5FA}
-        .btn-opcion.opcion2:hover{background:rgba(59,130,246,.2);border-color:#3B82F6}
-        .btn-opcion.opcion2.active{background:#3B82F6;border-color:#3B82F6;color:#fff}
-        .badge-opcion2{display:inline-block;background:#FBBF24;color:#000;font-size:.4rem;font-weight:700;padding:.02rem .25rem;border-radius:3px;margin-left:.15rem}
+        .btn-opcion{background:rgba(124,58,237,.2);border:1px solid #7C3AED;color:#fff;padding:.25rem .8rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer}
         .btn-recargar{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.2);color:#34D399;padding:.25rem .7rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer;transition:.3s}
         .btn-recargar:hover{background:rgba(16,185,129,.25)}
         .btn-nueva-ventana{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);color:#EF4444;padding:.25rem .7rem;border-radius:6px;font-weight:600;font-size:.65rem;cursor:pointer;transition:.3s}
@@ -60,22 +54,11 @@
         .episodio-item .top .numero{font-size:.55rem;color:#A78BFA;font-weight:700}
         .episodio-item .top .titulo{font-size:.6rem;color:#E2E8F0;font-weight:500;flex:1}
         .episodio-item .sinopsis{font-size:.5rem;color:#64748B;margin-top:.03rem;padding-left:1.2rem;line-height:1.2}
-        .recomendaciones-wrap{margin-top:.2rem}
-        .titulo-recomendadas{font-weight:600;font-size:.75rem;color:#fff;margin:.2rem 0 .1rem}
-        .recomendaciones{display:flex;gap:.3rem;overflow-x:auto;padding:.2rem 0;scrollbar-width:none}
-        .recomendaciones::-webkit-scrollbar{display:none}
-        .recomendacion{flex:0 0 auto;width:80px;cursor:pointer;border-radius:8px;overflow:hidden;transition:.3s;background:rgba(255,255,255,.02)}
-        .recomendacion:hover{transform:scale(1.05);box-shadow:0 8px 30px rgba(0,0,0,.3)}
-        .recomendacion img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:6px;display:block;background:#1A1A2E}
-        .recomendacion p{font-size:.45rem;text-align:center;color:#94A3B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.05rem;padding:0 .1rem}
-        .episodios-list::-webkit-scrollbar{width:3px}
-        .episodios-list::-webkit-scrollbar-track{background:rgba(255,255,255,.02)}
-        .episodios-list::-webkit-scrollbar-thumb{background:#7C3AED;border-radius:10px}
-        @media(max-width:480px){.recomendacion{width:65px}.recomendacion p{font-size:.4rem}}
+        @media(max-width:480px){}
         body:fullscreen .header-flotante{display:none!important}
         body:fullscreen .main-content{padding:0!important;max-width:100%!important}
         body:fullscreen .player-wrapper{border-radius:0!important;aspect-ratio:auto!important;height:100vh!important;width:100vw!important;margin:0!important}
-        body:fullscreen .info-top,body:fullscreen .player-controls,body:fullscreen .episodios-section,body:fullscreen .recomendaciones-wrap{display:none!important}
+        body:fullscreen .info-top,body:fullscreen .player-controls,body:fullscreen .episodios-section{display:none!important}
     </style>
 </head>
 <body>
@@ -106,10 +89,7 @@
     <div class="player-wrapper" id="playerWrapper"></div>
 
     <div class="player-controls" id="playerControls">
-        <button class="btn-opcion active" id="btnOp1" onclick="reproducirOpcion(1)"><i class="fas fa-play"></i> Unlimplay Latino</button>
-        <button class="btn-opcion opcion2" id="btnOp2" onclick="reproducirOpcion(2)">
-            <i class="fas fa-play"></i> Opción 2 Latino <span class="badge-opcion2">✅</span>
-        </button>
+        <button class="btn-opcion" disabled><i class="fas fa-play"></i> Unlimplay Latino</button>
         <button class="btn-recargar" onclick="recargarVideo()"><i class="fas fa-rotate"></i></button>
         <button class="btn-nueva-ventana" onclick="abrirNuevaVentana()"><i class="fas fa-external-link-alt"></i></button>
     </div>
@@ -145,35 +125,27 @@ const tipo = params.get('tipo') || 'pelicula';
 const tempRestaurar = parseInt(params.get('temp')) || 1;
 const capRestaurar = parseInt(params.get('cap')) || 1;
 
-let urlOp1 = null, urlOp2 = null, urlActual = null;
-let opcionActiva = 1;
+let urlActual = null;
 let temporadasActuales = [];
 let tempActualIndex = 0;
 
 // ============================================================
-// ✅ FORMATO ACTUALIZADO QUE DETECTA LOS SERVIDORES DE UNLIMPLAY
+// SOLO UNLIMPLAY - FORMATO EXACTO PARA DETECTAR SERVIDORES
 // ============================================================
-function generarEnlaces(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    if (!tmdb_id) return { op1: null, op2: null };
-    
+function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    if (!tmdb_id) return null;
+    const marca = Date.now();
     if (tipo === 'pelicula') {
-        return {
-            op1: `https://unlimplay.com/play/movie/${tmdb_id}?source=tmdb&lang=es-MX&audio=latino&noads=1&v=${Date.now()}`,
-            op2: `https://fastream.to/embed/movie/${tmdb_id}?lang=es&audio=latino&ads=0&v=${Date.now()}`
-        };
+        return `https://unlimplay.com/play/movie/${tmdb_id}?ref=tely&lang=es-MX&audio=latino&noads=1&_=${marca}`;
     } else {
-        // NUEVO FORMATO PARA SERIES: reconoce servidores hoy mismo
-        return {
-            op1: `https://unlimplay.com/play/tv/${tmdb_id}/${temporada}/${capitulo}?source=tmdb&lang=es-MX&audio=latino&noads=1&v=${Date.now()}`,
-            op2: `https://fastream.to/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es&audio=latino&ads=0&v=${Date.now()}`
-        };
+        return `https://unlimplay.com/play/tv/${tmdb_id}/${temporada}/${capitulo}?ref=tely&lang=es-MX&audio=latino&noads=1&_=${marca}`;
     }
 }
 
 function reproducirDirecto(url) {
     const wrapper = document.getElementById('playerWrapper');
     if (!url) {
-        wrapper.innerHTML = `<div class="error-video"><i class="fas fa-video-slash"></i><span>Servidor no disponible</span><span class="sub">Prueba la otra opción</span></div>`;
+        wrapper.innerHTML = `<div class="error-video"><i class="fas fa-video-slash"></i><span>Sin enlace</span></div>`;
         return;
     }
     urlActual = url;
@@ -197,9 +169,8 @@ async function fetchTMDB(path, params = {}) {
 
 async function cargarPelicula() {
     try {
-        const enlaces = generarEnlaces(tmdbId, 'pelicula');
-        urlOp1 = enlaces.op1; urlOp2 = enlaces.op2;
-        reproducirDirecto(urlOp1);
+        urlActual = generarEnlaceUnlimplay(tmdbId, 'pelicula');
+        reproducirDirecto(urlActual);
 
         const data = await fetchTMDB(`movie/${tmdbId}`);
         if (data?.id) {
@@ -257,9 +228,8 @@ async function cargarSerie() {
             const capIndex = Math.max(0, Math.min(capRestaurar - 1, temp.capitulos.length - 1));
             const cap = temp.capitulos[capIndex];
 
-            const enlaces = generarEnlaces(tmdbId, 'serie', temp.numero, cap.numero);
-            urlOp1 = enlaces.op1; urlOp2 = enlaces.op2;
-            reproducirDirecto(urlOp1);
+            urlActual = generarEnlaceUnlimplay(tmdbId, 'serie', temp.numero, cap.numero);
+            reproducirDirecto(urlActual);
             mostrarEpisodios(tempIndex, capIndex);
         }
     } catch(e) { console.error('Error serie:', e); }
@@ -283,9 +253,8 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
         d.onclick = () => {
             document.querySelectorAll('.episodio-item').forEach(el => el.classList.remove('activo'));
             d.classList.add('activo');
-            const enlaces = generarEnlaces(tmdbId, 'serie', temp.numero, cap.numero);
-            urlOp1 = enlaces.op1; urlOp2 = enlaces.op2;
-            reproducirDirecto(opcionActiva === 2 ? urlOp2 : urlOp1);
+            urlActual = generarEnlaceUnlimplay(tmdbId, 'serie', temp.numero, cap.numero);
+            reproducirDirecto(urlActual);
         };
         container.appendChild(d);
     });
@@ -295,17 +264,10 @@ function cambiarTempSelect() {
     tempActualIndex = parseInt(document.getElementById('tempSelect').value);
     mostrarEpisodios(tempActualIndex, 0);
     const temp = temporadasActuales[tempActualIndex];
-    const enlaces = generarEnlaces(tmdbId, 'serie', temp.numero, temp.capitulos[0].numero);
-    urlOp1 = enlaces.op1; urlOp2 = enlaces.op2;
-    reproducirDirecto(opcionActiva === 2 ? urlOp2 : urlOp1);
+    urlActual = generarEnlaceUnlimplay(tmdbId, 'serie', temp.numero, temp.capitulos[0].numero);
+    reproducirDirecto(urlActual);
 }
 
-function reproducirOpcion(opcion) {
-    opcionActiva = opcion;
-    document.querySelectorAll('.btn-opcion').forEach(b => b.classList.remove('active'));
-    document.getElementById(`btnOp${opcion}`).classList.add('active');
-    reproducirDirecto(opcion === 2 ? urlOp2 : urlOp1);
-}
 function recargarVideo() { urlActual && reproducirDirecto(urlActual); }
 function abrirNuevaVentana() { urlActual && window.open(urlActual, '_blank'); }
 function volverAlIndex() { window.location.href = 'index.html'; }
