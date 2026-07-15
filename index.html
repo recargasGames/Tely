@@ -82,6 +82,9 @@
         .movie-card .badge-year{position:absolute;top:.15rem;left:.15rem;background:rgba(124,58,237,.85);color:#fff;padding:.03rem .25rem;border-radius:3px;font-size:.35rem;font-weight:700}
         .movie-card .badge-type{position:absolute;top:.15rem;right:.15rem;background:rgba(0,0,0,.7);color:#fff;padding:.03rem .25rem;border-radius:3px;font-size:.35rem;font-weight:600}
         .movie-card .badge-op2{position:absolute;bottom:.15rem;right:.15rem;background:rgba(59,130,246,.85);color:#fff;padding:.02rem .15rem;border-radius:3px;font-size:.3rem;font-weight:600}
+        .movie-card .badge-db{position:absolute;bottom:.15rem;left:.15rem;font-size:.3rem;font-weight:700;padding:.01rem .15rem;border-radius:2px}
+        .movie-card .badge-db.db1{background:rgba(16,185,129,.7);color:#fff}
+        .movie-card .badge-db.db2{background:rgba(236,72,153,.7);color:#fff}
         
         .section-title{font-size:.85rem;font-weight:700;margin:.3rem 0 .15rem;display:flex;align-items:center;gap:.2rem}
         .section-title i{color:#7C3AED}
@@ -269,7 +272,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <script>
 // ============================================================
-// 🔥 CONFIGURACIÓN - DB1 (PRINCIPAL) - tely-c9776
+// 🔥 CONFIGURACIÓN - DB1 (PRINCIPAL)
 // ============================================================
 const firebaseConfig1 = {
     apiKey: "AIzaSyDSCjhkZBmBfpgsyLPdN50ISvgvzfGRH2Q",
@@ -281,7 +284,7 @@ const firebaseConfig1 = {
 };
 
 // ============================================================
-// 🔥 CONFIGURACIÓN - DB2 (SECUNDARIA) - tely-bd2
+// 🔥 CONFIGURACIÓN - DB2 (SECUNDARIA)
 // ============================================================
 const firebaseConfig2 = {
     apiKey: "AIzaSyCEw5ZmFF4wWBgkAb5dR_hh_DClFmtN4KE",
@@ -303,7 +306,7 @@ const app2 = firebase.initializeApp(firebaseConfig2, 'app2');
 const db2 = firebase.database(app2);
 
 // ============================================================
-// ⭐⭐ PROXY SILENCIOSO (AUTOMÁTICO, SIN BOTÓN) ⭐⭐
+// ⭐⭐ PROXY SILENCIOSO
 // ============================================================
 const PROXY_URL = 'https://corsproxy.io/?';
 
@@ -311,9 +314,7 @@ async function fetchConProxy(url) {
     try {
         const response = await fetch(url);
         if (response.ok) return response;
-    } catch(e) {
-        console.log('⚠️ Falló directo, usando proxy...');
-    }
+    } catch(e) {}
     const proxyUrl = PROXY_URL + encodeURIComponent(url);
     const response = await fetch(proxyUrl);
     return response;
@@ -327,7 +328,6 @@ async function fetchTMDB(path, params = {}) {
         if (!response.ok) throw new Error(`Error: ${response.status}`);
         return response.json();
     } catch(e) {
-        console.error('❌ Error en fetchTMDB:', e);
         const res = await fetch(url);
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         return res.json();
@@ -335,364 +335,127 @@ async function fetchTMDB(path, params = {}) {
 }
 
 // ============================================================
-// ⭐ BUSCAR OPCIÓN 2 EN AMBAS BASES (para el badge)
+// ⭐ CARGAR CONTENIDO DE FIREBASE (DB1 + DB2)
 // ============================================================
-async function tieneOpcion2(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    // Buscar en DB1
+async function cargarContenidoFirebase() {
+    console.log('📡 Cargando contenido de Firebase...');
+    
     try {
-        if (tipo === 'pelicula') {
-            const snap = await db1.ref('contenido_personalizado').orderByChild('tmdb_id').equalTo(parseInt(tmdb_id)).once('value');
-            const data = snap.val();
-            if (data) {
-                const keys = Object.keys(data);
-                for (const key of keys) {
-                    if (data[key].opcion2 && data[key].opcion2.trim() !== '' && data[key].opcion2.startsWith('http')) {
-                        return true;
-                    }
-                }
-            }
-        } else {
-            const snap = await db1.ref('series_personalizadas').orderByChild('tmdb_id').equalTo(parseInt(tmdb_id)).once('value');
-            const data = snap.val();
-            if (data) {
-                const keys = Object.keys(data);
-                for (const key of keys) {
-                    const serie = data[key];
-                    if (serie.temporadas) {
-                        for (const temp of serie.temporadas) {
-                            if (temp.capitulos) {
-                                for (const cap of temp.capitulos) {
-                                    if (cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (serie.opcion2 && serie.opcion2.trim() !== '' && serie.opcion2.startsWith('http')) {
-                        return true;
-                    }
-                }
-            }
-        }
-    } catch(e) {}
-    
-    // Buscar en DB2
-    try {
-        if (tipo === 'pelicula') {
-            const snap = await db2.ref('contenido_personalizado').orderByChild('tmdb_id').equalTo(parseInt(tmdb_id)).once('value');
-            const data = snap.val();
-            if (data) {
-                const keys = Object.keys(data);
-                for (const key of keys) {
-                    if (data[key].opcion2 && data[key].opcion2.trim() !== '' && data[key].opcion2.startsWith('http')) {
-                        return true;
-                    }
-                }
-            }
-        } else {
-            const snap = await db2.ref('series_personalizadas').orderByChild('tmdb_id').equalTo(parseInt(tmdb_id)).once('value');
-            const data = snap.val();
-            if (data) {
-                const keys = Object.keys(data);
-                for (const key of keys) {
-                    const serie = data[key];
-                    if (serie.temporadas) {
-                        for (const temp of serie.temporadas) {
-                            if (temp.capitulos) {
-                                for (const cap of temp.capitulos) {
-                                    if (cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (serie.opcion2 && serie.opcion2.trim() !== '' && serie.opcion2.startsWith('http')) {
-                        return true;
-                    }
-                }
-            }
-        }
-    } catch(e) {}
-    
-    return false;
-}
-
-// ============================================================
-// GUARDAR ESTADO
-// ============================================================
-function guardarEstado(tab) {
-    try { sessionStorage.setItem('tabActiva', tab); } catch(e) {}
-}
-function restaurarEstado() {
-    try { return sessionStorage.getItem('tabActiva') || 'inicio'; } catch(e) { return 'inicio'; }
-}
-function guardarScroll() {
-    try { sessionStorage.setItem('scrollPos', document.getElementById('mainContent').scrollTop); } catch(e) {}
-}
-function restaurarScroll() {
-    try { document.getElementById('mainContent').scrollTop = parseInt(sessionStorage.getItem('scrollPos')) || 0; } catch(e) {}
-}
-
-// ============================================================
-// PANTALLA COMPLETA
-// ============================================================
-function activarPantallaCompleta() {
-    const ua = navigator.userAgent || '';
-    const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
-    const esApp = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches || esWebView;
-    if (esApp && !document.fullscreenElement && !document.webkitFullscreenElement) {
-        try {
-            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
-            else if (document.documentElement.webkitRequestFullscreen) document.documentElement.webkitRequestFullscreen();
-        } catch(e){}
-    }
-}
-function esNavegadorWeb() {
-    const ua = navigator.userAgent || '';
-    const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
-    const esApp = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches || esWebView;
-    return !esApp;
-}
-
-// ============================================================
-// AUTENTICACIÓN
-// ============================================================
-function irALogin() { window.location.href = 'login.html'; }
-function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
-function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
-document.addEventListener('click', (e) => {
-    const menu = document.getElementById('userDropdown');
-    if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
-});
-auth.onAuthStateChanged(user => {
-    document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
-    document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
-    if (user) { cargarFavoritos(); cargarMiLista(); }
-});
-
-// ============================================================
-// TEMA
-// ============================================================
-function toggleTheme() {
-    const body = document.body;
-    const btn = document.getElementById('themeBtn');
-    if (body.classList.contains('dark')) { 
-        body.classList.remove('dark'); 
-        btn.innerHTML = '<i class="fas fa-moon"></i>'; 
-        localStorage.setItem('theme', 'light'); 
-    } else { 
-        body.classList.add('dark'); 
-        btn.innerHTML = '<i class="fas fa-sun"></i>'; 
-        localStorage.setItem('theme', 'dark'); 
-    }
-}
-if (localStorage.getItem('theme') === 'light') { 
-    document.body.classList.remove('dark'); 
-    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; 
-} else { 
-    document.body.classList.add('dark'); 
-    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; 
-}
-
-// ============================================================
-// FUNCIONES AUXILIARES
-// ============================================================
-function getImagenUrl(path, size = 'w342') {
-    if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
-    return `https://image.tmdb.org/t/p/${size}${path}`;
-}
-function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    if (tipo === 'pelicula') return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
-    return `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es-MX&autoplay=1&controls=1&logo=0`;
-}
-function mostrarToast(msg, tipo = 'success') {
-    const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
-    const t = document.createElement('div');
-    t.style.cssText = `position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:6px 14px;border-radius:8px;z-index:9999;font-weight:600;font-size:.7rem;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
-    t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2000);
-}
-
-// ============================================================
-// VARIABLES
-// ============================================================
-let paginaPeliculas = 1, paginaSeries = 1;
-let cargandoPeliculas = false, cargandoSeries = false;
-let totalPaginasPeliculas = 1, totalPaginasSeries = 1;
-let scrollTimeout = null, timeoutBusqueda = null;
-
-// ============================================================
-// PESTAÑAS
-// ============================================================
-function cambiarTab(tab) {
-    document.getElementById('tabInicio').style.display = 'none';
-    document.getElementById('tabPeliculas').style.display = 'none';
-    document.getElementById('tabSeries').style.display = 'none';
-    
-    if (tab === 'inicio') {
-        document.getElementById('tabInicio').style.display = 'block';
-        const p = document.getElementById('peliculasPopulares');
-        if (!p.querySelector('.movie-card') && !p.querySelector('.skeleton')) cargarInicio();
-    } else if (tab === 'peliculas') {
-        document.getElementById('tabPeliculas').style.display = 'block';
-        if (!document.getElementById('gridPeliculas').querySelector('.movie-card')) cargarPeliculas(1);
-    } else if (tab === 'series') {
-        document.getElementById('tabSeries').style.display = 'block';
-        if (!document.getElementById('gridSeries').querySelector('.movie-card')) cargarSeries(1);
-    }
-    
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-    guardarEstado(tab);
-    setTimeout(restaurarScroll, 100);
-}
-
-// ============================================================
-// CARGAR INICIO (RÁPIDO)
-// ============================================================
-async function cargarInicio() {
-    try {
-        const [pelis, series, estrenos] = await Promise.all([
-            fetchTMDB('movie/popular', { page: 1 }),
-            fetchTMDB('tv/popular', { page: 1 }),
-            fetchTMDB('movie/upcoming', { page: 1 })
+        // Cargar DB1
+        const [pSnap1, sSnap1] = await Promise.all([
+            db1.ref('contenido_personalizado').once('value'),
+            db1.ref('series_personalizadas').once('value')
         ]);
+        const pelis1 = pSnap1.val() || {};
+        const series1 = sSnap1.val() || {};
+        
+        // Cargar DB2
+        const [pSnap2, sSnap2] = await Promise.all([
+            db2.ref('contenido_personalizado').once('value'),
+            db2.ref('series_personalizadas').once('value')
+        ]);
+        const pelis2 = pSnap2.val() || {};
+        const series2 = sSnap2.val() || {};
+        
+        // Unir y eliminar duplicados por tmdb_id
+        const todasPelis = { ...pelis1, ...pelis2 };
+        const todasSeries = { ...series1, ...series2 };
+        
+        const totalPelis = Object.keys(todasPelis).length;
+        const totalSeries = Object.keys(todasSeries).length;
+        console.log(`📊 Total: ${totalPelis} películas, ${totalSeries} series (sin duplicados)`);
+        
+        // Mostrar en el índice
+        mostrarContenidoFirebase(todasPelis, todasSeries);
+        
+    } catch(e) {
+        console.error('❌ Error cargando Firebase:', e);
+    }
+}
 
-        const pelisContainer = document.getElementById('peliculasPopulares');
-        const seriesContainer = document.getElementById('seriesPopulares');
-        const estrenosContainer = document.getElementById('estrenosContainer');
-        pelisContainer.innerHTML = '';
-        seriesContainer.innerHTML = '';
-        estrenosContainer.innerHTML = '';
-
-        if (estrenos.results && estrenos.results.length) {
-            estrenos.results.slice(0, 12).forEach(async p => {
-                const item = {
-                    id: p.id, tmdb_id: p.id,
-                    titulo: p.title || 'Sin título',
-                    anio: p.release_date ? p.release_date.split('-')[0] : 'Próximo',
-                    portada: getImagenUrl(p.poster_path, 'w342'),
-                    puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A'
-                };
-                const card = await crearTarjeta(item);
-                const badge = document.createElement('span');
-                badge.className = 'badge-year';
-                badge.style.cssText = 'background:#F59E0B !important; color:#000 !important;';
-                badge.textContent = '🔥 Estreno';
-                const oldBadge = card.querySelector('.badge-year');
-                if (oldBadge) oldBadge.remove();
-                card.prepend(badge);
-                estrenosContainer.appendChild(card);
-            });
-        }
-
-        for (const p of (pelis.results || []).slice(0, 12)) {
+function mostrarContenidoFirebase(pelis, series) {
+    // Mostrar películas en grid de películas populares
+    const container = document.getElementById('peliculasPopulares');
+    container.innerHTML = '';
+    const pelisArray = Object.values(pelis);
+    if (pelisArray.length) {
+        pelisArray.slice(0, 20).forEach(p => {
             const item = {
-                id: p.id, tmdb_id: p.id,
-                titulo: p.title || 'Sin título',
-                anio: p.release_date ? p.release_date.split('-')[0] : 'N/D',
-                portada: getImagenUrl(p.poster_path, 'w342'),
-                puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A'
+                id: p.tmdb_id || p.id,
+                tmdb_id: p.tmdb_id || p.id,
+                titulo: p.titulo || 'Sin título',
+                anio: p.anio || 'N/D',
+                portada: p.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
+                puntuacion: p.puntuacion || 'N/A'
             };
-            pelisContainer.appendChild(await crearTarjeta(item));
-        }
-
-        for (const s of (series.results || []).slice(0, 12)) {
+            const card = crearTarjeta(item, false);
+            // Badge para saber de qué base viene
+            const dbBadge = document.createElement('span');
+            dbBadge.className = 'badge-db ' + (p._db || 'db1');
+            dbBadge.textContent = p._db === 'db2' ? '🩷' : '🟢';
+            card.querySelector('.badge-type').after(dbBadge);
+            container.appendChild(card);
+        });
+    } else {
+        container.innerHTML = '<p class="empty-msg">No hay películas en Firebase</p>';
+    }
+    
+    // Mostrar series
+    const sContainer = document.getElementById('seriesPopulares');
+    sContainer.innerHTML = '';
+    const seriesArray = Object.values(series);
+    if (seriesArray.length) {
+        seriesArray.slice(0, 20).forEach(s => {
             const item = {
-                id: s.id, tmdb_id: s.id,
-                titulo: s.name || 'Sin título',
-                anio: s.first_air_date ? s.first_air_date.split('-')[0] : 'N/D',
-                portada: getImagenUrl(s.poster_path, 'w342'),
-                puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A'
+                id: s.tmdb_id || s.id,
+                tmdb_id: s.tmdb_id || s.id,
+                titulo: s.titulo || 'Sin título',
+                anio: s.anio || 'N/D',
+                portada: s.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
+                puntuacion: s.puntuacion || 'N/A'
             };
-            seriesContainer.appendChild(await crearTarjeta(item, true));
-        }
-    } catch(e) { console.error(e); }
+            const card = crearTarjeta(item, true);
+            const dbBadge = document.createElement('span');
+            dbBadge.className = 'badge-db ' + (s._db || 'db1');
+            dbBadge.textContent = s._db === 'db2' ? '🩷' : '🟢';
+            card.querySelector('.badge-type').after(dbBadge);
+            sContainer.appendChild(card);
+        });
+    } else {
+        sContainer.innerHTML = '<p class="empty-msg">No hay series en Firebase</p>';
+    }
 }
 
 // ============================================================
-// CARGAR PELÍCULAS
+// CREAR TARJETA
 // ============================================================
-async function cargarPeliculas(page = 1) {
-    if (cargandoPeliculas || (page > totalPaginasPeliculas && page > 1)) return;
-    cargandoPeliculas = true;
-    const grid = document.getElementById('gridPeliculas');
-    const btn = document.getElementById('btnMasPeliculas');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
-    if (page === 1) grid.innerHTML = '';
-    try {
-        const data = await fetchTMDB('movie/popular', { page });
-        totalPaginasPeliculas = data.total_pages || 1;
-        if (!data.results || !data.results.length) {
-            if (page === 1) grid.innerHTML = '<p class="empty-msg">No hay películas</p>';
-            btn.style.display = 'none';
-            cargandoPeliculas = false;
-            return;
-        }
-        for (const p of data.results) {
-            const item = {
-                id: p.id, tmdb_id: p.id,
-                titulo: p.title || 'Sin título',
-                anio: p.release_date ? p.release_date.split('-')[0] : 'N/D',
-                portada: getImagenUrl(p.poster_path, 'w342'),
-                puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A'
-            };
-            grid.appendChild(await crearTarjeta(item));
-        }
-        paginaPeliculas = page;
-        if (page >= totalPaginasPeliculas) btn.style.display = 'none';
-        else { btn.style.display = 'flex'; btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más'; }
-    } catch(e) { console.error(e); btn.innerHTML = '⚠️ Error'; btn.disabled = false; }
-    cargandoPeliculas = false;
+function crearTarjeta(item, esSerie = false) {
+    const div = document.createElement('div');
+    div.className = 'movie-card';
+    const tipo = esSerie ? '📺' : '🎬';
+    const idReal = item.tmdb_id || item.id;
+    const tipoReal = esSerie ? 'serie' : 'pelicula';
+    div.innerHTML = `
+        <span class="badge-year">${item.anio || 'N/D'}</span>
+        <span class="badge-type">${tipo}</span>
+        <img src="${item.portada}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+        <div class="info">
+            <h4>${item.titulo}</h4>
+            <div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div>
+            <div class="card-actions">
+                <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorito({id:'${idReal}', titulo:'${item.titulo}', tipo:'${tipoReal}', portada:'${item.portada}', tmdb_id:'${idReal}'})"><i class="fas fa-heart"></i></button>
+                <button class="list-btn" onclick="event.stopPropagation(); toggleMiLista({id:'${idReal}', titulo:'${item.titulo}', tipo:'${tipoReal}', portada:'${item.portada}', tmdb_id:'${idReal}'})"><i class="fas fa-plus-circle"></i></button>
+            </div>
+        </div>
+    `;
+    div.onclick = () => {
+        if (auth.currentUser) {
+            const p = new URLSearchParams({ play: idReal, tipo: tipoReal });
+            window.location.href = `reproductor.html?${p}`;
+        } else { window.location.href = 'login.html'; }
+    };
+    return div;
 }
-
-window.cargarMasPeliculas = function() {
-    if (!cargandoPeliculas) { paginaPeliculas++; cargarPeliculas(paginaPeliculas); }
-};
-
-// ============================================================
-// CARGAR SERIES
-// ============================================================
-async function cargarSeries(page = 1) {
-    if (cargandoSeries || (page > totalPaginasSeries && page > 1)) return;
-    cargandoSeries = true;
-    const grid = document.getElementById('gridSeries');
-    const btn = document.getElementById('btnMasSeries');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
-    if (page === 1) grid.innerHTML = '';
-    try {
-        const data = await fetchTMDB('tv/popular', { page });
-        totalPaginasSeries = data.total_pages || 1;
-        if (!data.results || !data.results.length) {
-            if (page === 1) grid.innerHTML = '<p class="empty-msg">No hay series</p>';
-            btn.style.display = 'none';
-            cargandoSeries = false;
-            return;
-        }
-        for (const s of data.results) {
-            const item = {
-                id: s.id, tmdb_id: s.id,
-                titulo: s.name || 'Sin título',
-                anio: s.first_air_date ? s.first_air_date.split('-')[0] : 'N/D',
-                portada: getImagenUrl(s.poster_path, 'w342'),
-                puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A'
-            };
-            grid.appendChild(await crearTarjeta(item, true));
-        }
-        paginaSeries = page;
-        if (page >= totalPaginasSeries) btn.style.display = 'none';
-        else { btn.style.display = 'flex'; btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más'; }
-    } catch(e) { console.error(e); btn.innerHTML = '⚠️ Error'; btn.disabled = false; }
-    cargandoSeries = false;
-}
-
-window.cargarMasSeries = function() {
-    if (!cargandoSeries) { paginaSeries++; cargarSeries(paginaSeries); }
-};
 
 // ============================================================
 // FAVORITOS Y LISTA
@@ -765,71 +528,191 @@ function cargarMiLista() {
 }
 
 // ============================================================
-// CREAR TARJETA (CON OPCIÓN 2)
+// FUNCIONES BÁSICAS
 // ============================================================
-async function crearTarjeta(item, esSerie = false) {
-    const div = document.createElement('div');
-    div.className = 'movie-card';
-    const tipo = esSerie ? '📺' : '🎬';
-    const idReal = item.tmdb_id || item.id;
-    const tipoReal = esSerie ? 'serie' : 'pelicula';
-    
-    // Verificar si tiene Opción 2
-    const tieneOp2 = await tieneOpcion2(idReal, tipoReal);
-    
-    div.innerHTML = `
-        <span class="badge-year">${item.anio || 'N/D'}</span>
-        <span class="badge-type">${tipo}</span>
-        ${tieneOp2 ? '<span class="badge-op2"><i class="fas fa-play"></i> Op2</span>' : ''}
-        <img src="${item.portada}" class="poster" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-        <div class="info">
-            <h4>${item.titulo}</h4>
-            <div class="meta"><span>⭐ ${item.puntuacion || 'N/A'}</span></div>
-            <div class="card-actions">
-                <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorito({id:'${idReal}', titulo:'${item.titulo}', tipo:'${tipoReal}', portada:'${item.portada}', tmdb_id:'${idReal}'})"><i class="fas fa-heart"></i></button>
-                <button class="list-btn" onclick="event.stopPropagation(); toggleMiLista({id:'${idReal}', titulo:'${item.titulo}', tipo:'${tipoReal}', portada:'${item.portada}', tmdb_id:'${idReal}'})"><i class="fas fa-plus-circle"></i></button>
-            </div>
-        </div>
-    `;
-    div.onclick = () => {
-        if (auth.currentUser) {
-            const p = new URLSearchParams({ play: idReal, tipo: tipoReal });
-            window.location.href = `reproductor.html?${p}`;
-        } else { window.location.href = 'login.html'; }
-    };
-    return div;
+function getImagenUrl(path, size = 'w342') {
+    if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
+    return `https://image.tmdb.org/t/p/${size}${path}`;
+}
+function mostrarToast(msg, tipo = 'success') {
+    const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
+    const t = document.createElement('div');
+    t.style.cssText = `position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:${colores[tipo] || '#10B981'};color:#fff;padding:6px 14px;border-radius:8px;z-index:9999;font-weight:600;font-size:.7rem;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity 0.3s;`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2000);
+}
+
+function guardarEstado(tab) {
+    try { sessionStorage.setItem('tabActiva', tab); } catch(e) {}
+}
+function restaurarEstado() {
+    try { return sessionStorage.getItem('tabActiva') || 'inicio'; } catch(e) { return 'inicio'; }
+}
+function guardarScroll() {
+    try { sessionStorage.setItem('scrollPos', document.getElementById('mainContent').scrollTop); } catch(e) {}
+}
+function restaurarScroll() {
+    try { document.getElementById('mainContent').scrollTop = parseInt(sessionStorage.getItem('scrollPos')) || 0; } catch(e) {}
+}
+
+function irALogin() { window.location.href = 'login.html'; }
+function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
+function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('userDropdown');
+    if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
+});
+
+auth.onAuthStateChanged(user => {
+    document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
+    document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
+    if (user) { cargarFavoritos(); cargarMiLista(); }
+});
+
+function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('themeBtn');
+    if (body.classList.contains('dark')) { 
+        body.classList.remove('dark'); 
+        btn.innerHTML = '<i class="fas fa-moon"></i>'; 
+        localStorage.setItem('theme', 'light'); 
+    } else { 
+        body.classList.add('dark'); 
+        btn.innerHTML = '<i class="fas fa-sun"></i>'; 
+        localStorage.setItem('theme', 'dark'); 
+    }
+}
+if (localStorage.getItem('theme') === 'light') { 
+    document.body.classList.remove('dark'); 
+    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>'; 
+} else { 
+    document.body.classList.add('dark'); 
+    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>'; 
 }
 
 // ============================================================
-// SCROLL INFINITO
+// PESTAÑAS
 // ============================================================
-const main = document.getElementById('mainContent');
-main.addEventListener('scroll', function() {
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => {
-        const st = main.scrollTop, sh = main.scrollHeight, ch = main.clientHeight;
-        if (st + ch >= sh - 100) {
-            if (document.getElementById('tabPeliculas').style.display !== 'none') {
-                if (!cargandoPeliculas && paginaPeliculas < totalPaginasPeliculas) cargarMasPeliculas();
-            } else if (document.getElementById('tabSeries').style.display !== 'none') {
-                if (!cargandoSeries && paginaSeries < totalPaginasSeries) cargarMasSeries();
-            }
-        }
-        guardarScroll();
-    }, 300);
-});
+function cambiarTab(tab) {
+    document.getElementById('tabInicio').style.display = 'none';
+    document.getElementById('tabPeliculas').style.display = 'none';
+    document.getElementById('tabSeries').style.display = 'none';
+    
+    if (tab === 'inicio') {
+        document.getElementById('tabInicio').style.display = 'block';
+        cargarContenidoFirebase();
+    } else if (tab === 'peliculas') {
+        document.getElementById('tabPeliculas').style.display = 'block';
+        cargarPeliculasTMDB(1);
+    } else if (tab === 'series') {
+        document.getElementById('tabSeries').style.display = 'block';
+        cargarSeriesTMDB(1);
+    }
+    
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    guardarEstado(tab);
+    setTimeout(restaurarScroll, 100);
+}
 
 // ============================================================
-// BUSCADOR
+// CARGAR PELÍCULAS DE TMDB (para pestaña Películas)
+// ============================================================
+let paginaPeliculas = 1, paginaSeries = 1;
+let cargandoPeliculas = false, cargandoSeries = false;
+let totalPaginasPeliculas = 1, totalPaginasSeries = 1;
+let scrollTimeout = null, timeoutBusqueda = null;
+
+async function cargarPeliculasTMDB(page = 1) {
+    if (cargandoPeliculas || (page > totalPaginasPeliculas && page > 1)) return;
+    cargandoPeliculas = true;
+    const grid = document.getElementById('gridPeliculas');
+    const btn = document.getElementById('btnMasPeliculas');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+    if (page === 1) grid.innerHTML = '';
+    try {
+        const data = await fetchTMDB('movie/popular', { page });
+        totalPaginasPeliculas = data.total_pages || 1;
+        if (!data.results || !data.results.length) {
+            if (page === 1) grid.innerHTML = '<p class="empty-msg">No hay películas</p>';
+            btn.style.display = 'none';
+            cargandoPeliculas = false;
+            return;
+        }
+        data.results.forEach(p => {
+            const item = {
+                id: p.id, tmdb_id: p.id,
+                titulo: p.title || 'Sin título',
+                anio: p.release_date ? p.release_date.split('-')[0] : 'N/D',
+                portada: getImagenUrl(p.poster_path, 'w342'),
+                puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A'
+            };
+            grid.appendChild(crearTarjeta(item));
+        });
+        paginaPeliculas = page;
+        if (page >= totalPaginasPeliculas) btn.style.display = 'none';
+        else { btn.style.display = 'flex'; btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más'; }
+    } catch(e) { console.error(e); btn.innerHTML = '⚠️ Error'; btn.disabled = false; }
+    cargandoPeliculas = false;
+}
+
+window.cargarMasPeliculas = function() {
+    if (!cargandoPeliculas) { paginaPeliculas++; cargarPeliculasTMDB(paginaPeliculas); }
+};
+
+// ============================================================
+// CARGAR SERIES DE TMDB (para pestaña Series)
+// ============================================================
+async function cargarSeriesTMDB(page = 1) {
+    if (cargandoSeries || (page > totalPaginasSeries && page > 1)) return;
+    cargandoSeries = true;
+    const grid = document.getElementById('gridSeries');
+    const btn = document.getElementById('btnMasSeries');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+    if (page === 1) grid.innerHTML = '';
+    try {
+        const data = await fetchTMDB('tv/popular', { page });
+        totalPaginasSeries = data.total_pages || 1;
+        if (!data.results || !data.results.length) {
+            if (page === 1) grid.innerHTML = '<p class="empty-msg">No hay series</p>';
+            btn.style.display = 'none';
+            cargandoSeries = false;
+            return;
+        }
+        data.results.forEach(s => {
+            const item = {
+                id: s.id, tmdb_id: s.id,
+                titulo: s.name || 'Sin título',
+                anio: s.first_air_date ? s.first_air_date.split('-')[0] : 'N/D',
+                portada: getImagenUrl(s.poster_path, 'w342'),
+                puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A'
+            };
+            grid.appendChild(crearTarjeta(item, true));
+        });
+        paginaSeries = page;
+        if (page >= totalPaginasSeries) btn.style.display = 'none';
+        else { btn.style.display = 'flex'; btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Cargar más'; }
+    } catch(e) { console.error(e); btn.innerHTML = '⚠️ Error'; btn.disabled = false; }
+    cargandoSeries = false;
+}
+
+window.cargarMasSeries = function() {
+    if (!cargandoSeries) { paginaSeries++; cargarSeriesTMDB(paginaSeries); }
+};
+
+// ============================================================
+// BUSCADOR GLOBAL
 // ============================================================
 window.buscarGlobal = async function() {
     const input = document.getElementById('searchInput');
     const texto = input.value.trim();
     
     if (!texto) {
-        if (document.getElementById('tabInicio').style.display !== 'none') { cargarInicio(); return; }
-        if (document.getElementById('tabPeliculas').style.display !== 'none') { cargarPeliculas(1); return; }
-        if (document.getElementById('tabSeries').style.display !== 'none') { cargarSeries(1); return; }
+        if (document.getElementById('tabInicio').style.display !== 'none') { cargarContenidoFirebase(); return; }
+        if (document.getElementById('tabPeliculas').style.display !== 'none') { cargarPeliculasTMDB(1); return; }
+        if (document.getElementById('tabSeries').style.display !== 'none') { cargarSeriesTMDB(1); return; }
         return;
     }
     
@@ -837,7 +720,6 @@ window.buscarGlobal = async function() {
     timeoutBusqueda = setTimeout(async () => {
         try {
             let grid, btn, tipo, data;
-            const esInicio = document.getElementById('tabInicio').style.display !== 'none';
             const esPeliculas = document.getElementById('tabPeliculas').style.display !== 'none';
             const esSeries = document.getElementById('tabSeries').style.display !== 'none';
             
@@ -852,28 +734,62 @@ window.buscarGlobal = async function() {
                 btn = document.getElementById('btnMasSeries');
                 tipo = 'serie';
             } else {
-                const [pelis, series] = await Promise.all([
-                    fetchTMDB('search/movie', { query: texto, page: 1 }),
-                    fetchTMDB('search/tv', { query: texto, page: 1 })
-                ]);
+                // Buscar en Firebase primero (DB1 + DB2)
+                const resultados = await buscarEnFirebase(texto);
                 const pC = document.getElementById('peliculasPopulares');
                 const sC = document.getElementById('seriesPopulares');
-                pC.innerHTML = ''; sC.innerHTML = '';
+                pC.innerHTML = '';
+                sC.innerHTML = '';
+                
                 let total = 0;
-                if (pelis.results && pelis.results.length) {
-                    for (const p of pelis.results.slice(0, 12)) {
-                        const item = { id: p.id, tmdb_id: p.id, titulo: p.title || 'Sin título', anio: p.release_date ? p.release_date.split('-')[0] : 'N/D', portada: getImagenUrl(p.poster_path, 'w342'), puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A' };
-                        pC.appendChild(await crearTarjeta(item));
+                if (resultados.peliculas && resultados.peliculas.length) {
+                    resultados.peliculas.slice(0, 20).forEach(p => {
+                        pC.appendChild(crearTarjeta(p));
                         total++;
+                    });
+                }
+                if (resultados.series && resultados.series.length) {
+                    resultados.series.slice(0, 20).forEach(s => {
+                        sC.appendChild(crearTarjeta(s, true));
+                        total++;
+                    });
+                }
+                
+                // Si no hay en Firebase, buscar en TMDB
+                if (total === 0) {
+                    const [pelisTMDB, seriesTMDB] = await Promise.all([
+                        fetchTMDB('search/movie', { query: texto, page: 1 }),
+                        fetchTMDB('search/tv', { query: texto, page: 1 })
+                    ]);
+                    
+                    if (pelisTMDB.results && pelisTMDB.results.length) {
+                        pelisTMDB.results.slice(0, 12).forEach(p => {
+                            const item = {
+                                id: p.id, tmdb_id: p.id,
+                                titulo: p.title || 'Sin título',
+                                anio: p.release_date ? p.release_date.split('-')[0] : 'N/D',
+                                portada: getImagenUrl(p.poster_path, 'w342'),
+                                puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A'
+                            };
+                            pC.appendChild(crearTarjeta(item));
+                            total++;
+                        });
+                    }
+                    if (seriesTMDB.results && seriesTMDB.results.length) {
+                        seriesTMDB.results.slice(0, 12).forEach(s => {
+                            const item = {
+                                id: s.id, tmdb_id: s.id,
+                                titulo: s.name || 'Sin título',
+                                anio: s.first_air_date ? s.first_air_date.split('-')[0] : 'N/D',
+                                portada: getImagenUrl(s.poster_path, 'w342'),
+                                puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A'
+                            };
+                            sC.appendChild(crearTarjeta(item, true));
+                            total++;
+                        });
                     }
                 }
-                if (series.results && series.results.length) {
-                    for (const s of series.results.slice(0, 12)) {
-                        const item = { id: s.id, tmdb_id: s.id, titulo: s.name || 'Sin título', anio: s.first_air_date ? s.first_air_date.split('-')[0] : 'N/D', portada: getImagenUrl(s.poster_path, 'w342'), puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A' };
-                        sC.appendChild(await crearTarjeta(item, true));
-                        total++;
-                    }
-                }
+                
                 if (total === 0) {
                     pC.innerHTML = `<p class="empty-msg">🔍 No se encontraron resultados para "${texto}"</p>`;
                     sC.innerHTML = '';
@@ -895,7 +811,7 @@ window.buscarGlobal = async function() {
                 return;
             }
             
-            for (const item of data.results.slice(0, 20)) {
+            data.results.slice(0, 20).forEach(item => {
                 const obj = {
                     id: item.id,
                     tmdb_id: item.id,
@@ -904,12 +820,104 @@ window.buscarGlobal = async function() {
                     portada: getImagenUrl(item.poster_path, 'w342'),
                     puntuacion: item.vote_average ? item.vote_average.toFixed(1) : 'N/A'
                 };
-                grid.appendChild(await crearTarjeta(obj, tipo === 'serie'));
-            }
+                grid.appendChild(crearTarjeta(obj, tipo === 'serie'));
+            });
             btn.style.display = 'none';
         } catch(e) { console.error(e); }
     }, 300);
 };
+
+// ============================================================
+// BUSCAR EN FIREBASE (DB1 + DB2)
+// ============================================================
+async function buscarEnFirebase(texto) {
+    const resultados = { peliculas: [], series: [] };
+    const textoLower = texto.toLowerCase();
+    
+    try {
+        // Buscar en DB1
+        const [pSnap1, sSnap1] = await Promise.all([
+            db1.ref('contenido_personalizado').once('value'),
+            db1.ref('series_personalizadas').once('value')
+        ]);
+        const pelis1 = pSnap1.val() || {};
+        const series1 = sSnap1.val() || {};
+        
+        for (const key of Object.keys(pelis1)) {
+            const p = pelis1[key];
+            if (p.titulo && p.titulo.toLowerCase().includes(textoLower)) {
+                resultados.peliculas.push({
+                    id: p.tmdb_id || key,
+                    tmdb_id: p.tmdb_id || key,
+                    titulo: p.titulo,
+                    anio: p.anio || 'N/D',
+                    portada: p.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
+                    puntuacion: p.puntuacion || 'N/A'
+                });
+            }
+        }
+        for (const key of Object.keys(series1)) {
+            const s = series1[key];
+            if (s.titulo && s.titulo.toLowerCase().includes(textoLower)) {
+                resultados.series.push({
+                    id: s.tmdb_id || key,
+                    tmdb_id: s.tmdb_id || key,
+                    titulo: s.titulo,
+                    anio: s.anio || 'N/D',
+                    portada: s.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
+                    puntuacion: s.puntuacion || 'N/A'
+                });
+            }
+        }
+        
+        // Buscar en DB2
+        const [pSnap2, sSnap2] = await Promise.all([
+            db2.ref('contenido_personalizado').once('value'),
+            db2.ref('series_personalizadas').once('value')
+        ]);
+        const pelis2 = pSnap2.val() || {};
+        const series2 = sSnap2.val() || {};
+        
+        for (const key of Object.keys(pelis2)) {
+            const p = pelis2[key];
+            if (p.titulo && p.titulo.toLowerCase().includes(textoLower)) {
+                // Verificar que no esté ya en resultados
+                const existe = resultados.peliculas.some(r => r.tmdb_id == p.tmdb_id);
+                if (!existe) {
+                    resultados.peliculas.push({
+                        id: p.tmdb_id || key,
+                        tmdb_id: p.tmdb_id || key,
+                        titulo: p.titulo,
+                        anio: p.anio || 'N/D',
+                        portada: p.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
+                        puntuacion: p.puntuacion || 'N/A'
+                    });
+                }
+            }
+        }
+        for (const key of Object.keys(series2)) {
+            const s = series2[key];
+            if (s.titulo && s.titulo.toLowerCase().includes(textoLower)) {
+                const existe = resultados.series.some(r => r.tmdb_id == s.tmdb_id);
+                if (!existe) {
+                    resultados.series.push({
+                        id: s.tmdb_id || key,
+                        tmdb_id: s.tmdb_id || key,
+                        titulo: s.titulo,
+                        anio: s.anio || 'N/D',
+                        portada: s.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
+                        puntuacion: s.puntuacion || 'N/A'
+                    });
+                }
+            }
+        }
+        
+    } catch(e) {
+        console.error('Error buscando en Firebase:', e);
+    }
+    
+    return resultados;
+}
 
 // ============================================================
 // BANNER APK
@@ -945,13 +953,31 @@ function descargarAPK() {
 }
 
 // ============================================================
+// SCROLL INFINITO
+// ============================================================
+const main = document.getElementById('mainContent');
+main.addEventListener('scroll', function() {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+        const st = main.scrollTop, sh = main.scrollHeight, ch = main.clientHeight;
+        if (st + ch >= sh - 100) {
+            if (document.getElementById('tabPeliculas').style.display !== 'none') {
+                if (!cargandoPeliculas && paginaPeliculas < totalPaginasPeliculas) cargarMasPeliculas();
+            } else if (document.getElementById('tabSeries').style.display !== 'none') {
+                if (!cargandoSeries && paginaSeries < totalPaginasSeries) cargarMasSeries();
+            }
+        }
+        guardarScroll();
+    }, 300);
+});
+
+// ============================================================
 // INICIAR
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
     const tab = restaurarEstado();
     cambiarTab(tab);
     setTimeout(mostrarBannerApp, 2000);
-    setTimeout(activarPantallaCompleta, 1000);
     setTimeout(restaurarScroll, 200);
 });
 
@@ -965,10 +991,11 @@ document.addEventListener('click', function() {
     }
 });
 
-cargarInicio();
-cargarPeliculas(1);
-cargarSeries(1);
-console.log('✅ TELY - 2 Bases de Datos + Proxy Silencioso');
+cargarContenidoFirebase();
+cargarPeliculasTMDB(1);
+cargarSeriesTMDB(1);
+
+console.log('✅ TELY - INDEX CON DB1 + DB2 (SIN DUPLICADOS)');
 console.log('🟢 DB1: tely-c9776');
 console.log('🩷 DB2: tely-bd2');
 </script>
