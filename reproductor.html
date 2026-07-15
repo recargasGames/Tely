@@ -92,9 +92,6 @@
         .banner-install-btn{background:linear-gradient(135deg,#7C3AED,#A78BFA);border:none;color:#fff;padding:.3rem .8rem;border-radius:6px;font-weight:700;font-size:.65rem;cursor:pointer;transition:.3s;display:flex;align-items:center;gap:.2rem}
         .banner-install-btn:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(124,58,237,.4)}
         .episodio-item .badge-op2-ep{font-size:.35rem;background:#3B82F6;color:#fff;padding:.02rem .35rem;border-radius:3px;font-weight:700;margin-left:.2rem}
-        .badge-db{font-size:.35rem;font-weight:700;padding:.01rem .3rem;border-radius:9999px;margin-left:.2rem;display:inline-block}
-        .badge-db.db1{background:rgba(16,185,129,.15);color:#34D399}
-        .badge-db.db2{background:rgba(236,72,153,.15);color:#EC4899}
     </style>
 </head>
 <body>
@@ -127,7 +124,6 @@
             <span class="rating">⭐ <span id="playerRating">-</span></span>
             <span id="playerGenero">-</span>
             <span id="playerTipo" style="color:#A78BFA;">🎬</span>
-            <span id="playerDB" style="display:none;"></span>
         </div>
         <div class="sinopsis" id="playerSinopsis">Cargando información...</div>
     </div>
@@ -185,41 +181,24 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <script>
 // ============================================================
-// 🔥 CONFIGURACIÓN - DB1 (PRINCIPAL) - tely-c9776
+// NUEVA CONFIGURACIÓN FIREBASE (tely-c9776)
 // ============================================================
-const firebaseConfig1 = {
+const firebaseConfig = {
     apiKey: "AIzaSyDSCjhkZBmBfpgsyLPdN50ISvgvzfGRH2Q",
     authDomain: "tely-c9776.firebaseapp.com",
     projectId: "tely-c9776",
     storageBucket: "tely-c9776.firebasestorage.app",
     messagingSenderId: "185494855835",
-    appId: "1:185494855835:web:cb113139c6d5aeb472263e"
+    appId: "1:185494855835:web:cb113139c6d5aeb472263e",
+    measurementId: "G-KTDT3WS0PP"
 };
 
-// ============================================================
-// 🔥 CONFIGURACIÓN - DB2 (SECUNDARIA) - tely-bd2
-// ============================================================
-const firebaseConfig2 = {
-    apiKey: "AIzaSyCEw5ZmFF4wWBgkAb5dR_hh_DClFmtN4KE",
-    authDomain: "tely-bd2.firebaseapp.com",
-    projectId: "tely-bd2",
-    storageBucket: "tely-bd2.firebasestorage.app",
-    messagingSenderId: "784532605615",
-    appId: "1:784532605615:web:dbf11b54673b7db6c1225a"
-};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
 
 // ============================================================
-// ⭐ INICIALIZAR - AUTENTICACIÓN SOLO EN DB1
-// ============================================================
-const app1 = firebase.initializeApp(firebaseConfig1, 'app1');
-const auth = firebase.auth(app1);
-const db1 = firebase.database(app1);
-
-const app2 = firebase.initializeApp(firebaseConfig2, 'app2');
-const db2 = firebase.database(app2);
-
-// ============================================================
-// ⭐ VARIABLES
+// VARIABLES
 // ============================================================
 const params = new URLSearchParams(window.location.search);
 let tmdbId = params.get('play');
@@ -235,12 +214,12 @@ let opcion2Disponible = false, opcionActiva = 1;
 let esSerie = false;
 let temporadasActuales = [];
 let tempActualIndex = 0;
-let dbOrigenActual = 'db1';
+let firebaseKeyActual = null; // Guardar la key para editar
 
 console.log('📌 ID:', tmdbId, '| Tipo:', tipo);
 
 // ============================================================
-// ⭐ FUNCIONES BÁSICAS
+// FUNCIONES BÁSICAS
 // ============================================================
 function volverAlIndex() {
     if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
@@ -325,104 +304,73 @@ function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
 }
 
 // ============================================================
-// ⭐ BUSCAR OPCIÓN 2 EN AMBAS BASES
+// ⭐ OBTENER OPCIÓN 2 DESDE FIREBASE (CORREGIDO)
 // ============================================================
 async function obtenerOpcion2DesdeFirebase(tmdb_id, tipo, temporada = 1, capitulo = 1) {
-    let enlace = null;
-    let dbOrigen = null;
-    
-    // 🔍 BUSCAR EN DB1
     try {
+        console.log('🔍 Buscando Opción 2 para:', tmdb_id, 'tipo:', tipo);
+        
         if (tipo === 'pelicula') {
-            const snap = await db1.ref('contenido_personalizado').orderByChild('tmdb_id').equalTo(parseInt(tmdb_id)).once('value');
+            // Buscar en contenido_personalizado por tmdb_id
+            const snap = await db.ref('contenido_personalizado').orderByChild('tmdb_id').equalTo(parseInt(tmdb_id)).once('value');
             const data = snap.val();
+            
             if (data) {
                 const keys = Object.keys(data);
                 for (const key of keys) {
                     const item = data[key];
                     if (item.opcion2 && item.opcion2.trim() !== '' && item.opcion2.startsWith('http')) {
-                        console.log('✅ Opción 2 encontrada en DB1');
-                        return { enlace: item.opcion2, db: 'db1' };
+                        console.log('✅ Opción 2 encontrada en contenido_personalizado:', item.opcion2);
+                        firebaseKeyActual = key; // Guardar la key
+                        return item.opcion2;
                     }
                 }
             }
+            
+            console.log('⚠️ No se encontró Opción 2 en contenido_personalizado');
+            return null;
+            
         } else {
-            const snap = await db1.ref('series_personalizadas').orderByChild('tmdb_id').equalTo(parseInt(tmdb_id)).once('value');
+            // Buscar en series_personalizadas por tmdb_id
+            const snap = await db.ref('series_personalizadas').orderByChild('tmdb_id').equalTo(parseInt(tmdb_id)).once('value');
             const data = snap.val();
+            
             if (data) {
                 const keys = Object.keys(data);
                 for (const key of keys) {
                     const serie = data[key];
+                    firebaseKeyActual = key; // Guardar la key
+                    
+                    // Buscar opcion2 a nivel de serie
+                    if (serie.opcion2 && serie.opcion2.trim() !== '' && serie.opcion2.startsWith('http')) {
+                        console.log('✅ Opción 2 encontrada a nivel de serie:', serie.opcion2);
+                        return serie.opcion2;
+                    }
+                    
+                    // Buscar en temporadas
                     if (serie.temporadas) {
                         for (const temp of serie.temporadas) {
                             if (temp.numero === parseInt(temporada) && temp.capitulos) {
                                 for (const cap of temp.capitulos) {
                                     if (cap.numero === parseInt(capitulo) && cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
-                                        console.log('✅ Opción 2 encontrada en DB1 (capítulo)');
-                                        return { enlace: cap.opcion2, db: 'db1' };
+                                        console.log('✅ Opción 2 encontrada en capítulo:', cap.opcion2);
+                                        return cap.opcion2;
                                     }
                                 }
                             }
                         }
                     }
-                    if (serie.opcion2 && serie.opcion2.trim() !== '' && serie.opcion2.startsWith('http')) {
-                        console.log('✅ Opción 2 encontrada en DB1 (serie)');
-                        return { enlace: serie.opcion2, db: 'db1' };
-                    }
                 }
             }
+            
+            console.log('⚠️ No se encontró Opción 2 en series_personalizadas');
+            return null;
         }
-    } catch(e) {
-        console.log('DB1: error al buscar', e);
+        
+    } catch (error) {
+        console.error('❌ Error al obtener Opción 2:', error);
+        return null;
     }
-    
-    // 🔍 BUSCAR EN DB2
-    try {
-        if (tipo === 'pelicula') {
-            const snap = await db2.ref('contenido_personalizado').orderByChild('tmdb_id').equalTo(parseInt(tmdb_id)).once('value');
-            const data = snap.val();
-            if (data) {
-                const keys = Object.keys(data);
-                for (const key of keys) {
-                    const item = data[key];
-                    if (item.opcion2 && item.opcion2.trim() !== '' && item.opcion2.startsWith('http')) {
-                        console.log('✅ Opción 2 encontrada en DB2');
-                        return { enlace: item.opcion2, db: 'db2' };
-                    }
-                }
-            }
-        } else {
-            const snap = await db2.ref('series_personalizadas').orderByChild('tmdb_id').equalTo(parseInt(tmdb_id)).once('value');
-            const data = snap.val();
-            if (data) {
-                const keys = Object.keys(data);
-                for (const key of keys) {
-                    const serie = data[key];
-                    if (serie.temporadas) {
-                        for (const temp of serie.temporadas) {
-                            if (temp.numero === parseInt(temporada) && temp.capitulos) {
-                                for (const cap of temp.capitulos) {
-                                    if (cap.numero === parseInt(capitulo) && cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
-                                        console.log('✅ Opción 2 encontrada en DB2 (capítulo)');
-                                        return { enlace: cap.opcion2, db: 'db2' };
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (serie.opcion2 && serie.opcion2.trim() !== '' && serie.opcion2.startsWith('http')) {
-                        console.log('✅ Opción 2 encontrada en DB2 (serie)');
-                        return { enlace: serie.opcion2, db: 'db2' };
-                    }
-                }
-            }
-        }
-    } catch(e) {
-        console.log('DB2: error al buscar', e);
-    }
-    
-    console.log('⚠️ Opción 2 no encontrada en ninguna base');
-    return { enlace: null, db: null };
 }
 
 // ============================================================
@@ -471,21 +419,17 @@ async function cargarPelicula() {
             document.getElementById('btnOp1').classList.add('active');
         }
         
-        // 2. BUSCAR OPCIÓN 2 EN AMBAS BASES
-        const resultado = await obtenerOpcion2DesdeFirebase(tmdbId, 'pelicula');
-        if (resultado.enlace) {
-            urlOp2 = resultado.enlace;
-            dbOrigenActual = resultado.db;
+        // 2. OBTENER OPCIÓN 2 DESDE FIREBASE
+        const enlaceFirebase = await obtenerOpcion2DesdeFirebase(tmdbId, 'pelicula');
+        if (enlaceFirebase) {
+            urlOp2 = enlaceFirebase;
             opcion2Disponible = true;
             document.getElementById('btnOp2').classList.remove('oculto');
-            document.getElementById('playerDB').style.display = 'inline';
-            document.getElementById('playerDB').innerHTML = `<span class="badge-db ${resultado.db}">${resultado.db === 'db1' ? '🟢 DB1' : '🩷 DB2'}</span>`;
-            console.log('✅ Opción 2 disponible desde', resultado.db);
+            console.log('✅ Opción 2 disponible');
         } else {
             urlOp2 = null;
             opcion2Disponible = false;
             document.getElementById('btnOp2').classList.add('oculto');
-            document.getElementById('playerDB').style.display = 'none';
             console.log('⚠️ Opción 2 NO disponible');
         }
         
@@ -547,8 +491,7 @@ async function cargarSerie() {
                         titulo: ep.name || `Capítulo ${ep.episode_number}`,
                         sinopsis: ep.overview || 'Sin sinopsis',
                         url: generarEnlaceUnlimplay(tmdbId, 'serie', t, ep.episode_number),
-                        opcion2: null,
-                        db: null
+                        opcion2: null // Se llenará luego
                     }));
                 temporadasActuales.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
             } catch(e) {}
@@ -572,22 +515,17 @@ async function cargarSerie() {
             
             urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
             
-            // Buscar Opción 2 en ambas bases
-            const resultado = await obtenerOpcion2DesdeFirebase(tmdbId, 'serie', tempNum, capNum);
-            if (resultado.enlace) {
-                urlOp2 = resultado.enlace;
-                cap.opcion2 = resultado.enlace;
-                cap.db = resultado.db;
-                dbOrigenActual = resultado.db;
+            // Obtener Opción 2 desde Firebase
+            const enlaceFirebase = await obtenerOpcion2DesdeFirebase(tmdbId, 'serie', tempNum, capNum);
+            if (enlaceFirebase) {
+                urlOp2 = enlaceFirebase;
+                cap.opcion2 = enlaceFirebase;
                 opcion2Disponible = true;
                 document.getElementById('btnOp2').classList.remove('oculto');
-                document.getElementById('playerDB').style.display = 'inline';
-                document.getElementById('playerDB').innerHTML = `<span class="badge-db ${resultado.db}">${resultado.db === 'db1' ? '🟢 DB1' : '🩷 DB2'}</span>`;
             } else {
                 urlOp2 = null;
                 opcion2Disponible = false;
                 document.getElementById('btnOp2').classList.add('oculto');
-                document.getElementById('playerDB').style.display = 'none';
             }
             
             if (urlOp1) {
@@ -659,14 +597,12 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
         if (idx === capSeleccionado) d.classList.add('activo');
         const capNum = cap.numero || idx + 1;
         const tieneOp2 = cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http');
-        const badgeDB = cap.db ? `<span class="badge-db ${cap.db}">${cap.db === 'db1' ? '🟢' : '🩷'}</span>` : '';
         
         d.innerHTML = `
             <div class="top">
                 <span class="numero">${capNum}.</span>
                 <span class="titulo">${cap.titulo || 'Episodio ' + capNum}</span>
                 ${tieneOp2 ? '<span class="badge-op2-ep">⭐ Op2</span>' : ''}
-                ${badgeDB}
             </div>
             <div class="sinopsis">${cap.sinopsis || ''}</div>
         `;
@@ -681,22 +617,17 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
             const capNum = cap.numero || idx + 1;
             urlOp1 = generarEnlaceUnlimplay(tmdbId, 'serie', tempNum, capNum);
             
-            // Buscar Opción 2 en ambas bases
-            const resultado = await obtenerOpcion2DesdeFirebase(tmdbId, 'serie', tempNum, capNum);
-            if (resultado.enlace) {
-                urlOp2 = resultado.enlace;
-                cap.opcion2 = resultado.enlace;
-                cap.db = resultado.db;
-                dbOrigenActual = resultado.db;
+            // Obtener Opción 2 para este capítulo
+            const enlaceFirebase = await obtenerOpcion2DesdeFirebase(tmdbId, 'serie', tempNum, capNum);
+            if (enlaceFirebase) {
+                urlOp2 = enlaceFirebase;
+                cap.opcion2 = enlaceFirebase;
                 opcion2Disponible = true;
                 document.getElementById('btnOp2').classList.remove('oculto');
-                document.getElementById('playerDB').style.display = 'inline';
-                document.getElementById('playerDB').innerHTML = `<span class="badge-db ${resultado.db}">${resultado.db === 'db1' ? '🟢 DB1' : '🩷 DB2'}</span>`;
             } else {
                 urlOp2 = null;
                 opcion2Disponible = false;
                 document.getElementById('btnOp2').classList.add('oculto');
-                document.getElementById('playerDB').style.display = 'none';
             }
             
             if (opcionActiva === 2 && !opcion2Disponible) {
@@ -867,9 +798,7 @@ if (tmdbId) {
     document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`;
 }
 
-console.log('⚡ Reproductor - 2 Bases de Datos');
-console.log('🟢 DB1: tely-c9776');
-console.log('🩷 DB2: tely-bd2');
+console.log('⚡ Reproductor - Con Opción 2 desde contenido_personalizado');
 </script>
 </body>
 </html>
