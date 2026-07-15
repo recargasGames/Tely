@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TELY 🎬 - Admin (Anti-Duplicados)</title>
+    <title>TELY 🎬 - Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -42,8 +42,6 @@
         .admin-btn-purple:hover{background:#7C3AED}
         .admin-btn-cyan{background:#06B6D4;color:#fff}
         .admin-btn-cyan:hover{background:#0891B2}
-        .admin-btn-pink{background:#EC4899;color:#fff}
-        .admin-btn-pink:hover{background:#DB2777}
         
         .btn-group{display:flex;gap:.3rem;flex-wrap:wrap;margin:.3rem 0}
         .btn-group .admin-btn{padding:.3rem 1rem;font-size:.75rem}
@@ -55,10 +53,6 @@
         .admin-item .info-item{flex:1;min-width:0}
         .admin-item .title{font-weight:600;font-size:.85rem}
         .admin-item .meta{font-size:.65rem;color:#94A3B8;display:flex;gap:.6rem;flex-wrap:wrap}
-        .admin-item .badge-db{font-size:.4rem;font-weight:700;padding:.01rem .35rem;border-radius:9999px;margin-left:.2rem}
-        .admin-item .badge-db.db1{background:rgba(16,185,129,.15);color:#34D399}
-        .admin-item .badge-db.db2{background:rgba(236,72,153,.15);color:#EC4899}
-        .admin-item .badge-db.duplicado{background:rgba(239,68,68,.15);color:#EF4444}
         
         .admin-item .enlace-wrap{width:100%;margin-top:.1rem}
         .admin-item .enlace{font-size:.6rem;color:#60A5FA;word-break:break-all;padding:.2rem .4rem;background:rgba(59,130,246,.06);border-radius:4px;border:1px solid rgba(59,130,246,.08);width:100%;cursor:pointer}
@@ -251,50 +245,39 @@
         <span id="adminStatus">Verificando acceso...</span>
     </div>
 
-    <!-- ⭐ GENERACIÓN - DB1 (PRINCIPAL) -->
-    <div class="admin-card" style="border-color:rgba(16,185,129,.4)">
-        <h3><i class="fas fa-database" style="color:#34D399;"></i> DB1 - Principal (tely-c9776)</h3>
+    <!-- ⭐ GENERACIÓN -->
+    <div class="admin-card" style="border-color:rgba(245,158,11,.4)">
+        <h3><i class="fas fa-wand-magic-sparkles" style="color:#F59E0B;"></i> Generar contenido</h3>
+        
         <div class="btn-group">
-            <button class="admin-btn admin-btn-green" onclick="generarPeliculasDB1()" style="font-size:.85rem;padding:.4rem 1.2rem;">
-                <i class="fas fa-film"></i> Generar Películas (DB1)
+            <button class="admin-btn admin-btn-magic" onclick="generarPeliculas()" style="font-size:.85rem;padding:.4rem 1.2rem;">
+                <i class="fas fa-film"></i> Generar Películas
             </button>
-            <button class="admin-btn admin-btn-green" onclick="generarSeriesDB1()" style="font-size:.85rem;padding:.4rem 1.2rem;">
-                <i class="fas fa-tv"></i> Generar Series (DB1)
+            <button class="admin-btn admin-btn-magic" onclick="generarSeries()" style="font-size:.85rem;padding:.4rem 1.2rem;background:#8B5CF6;">
+                <i class="fas fa-tv"></i> Generar Series
             </button>
-            <button class="admin-btn admin-btn-danger" onclick="limpiarDB1()" style="font-size:.7rem;padding:.2rem .8rem;">
-                <i class="fas fa-trash"></i> Limpiar DB1
+            <button class="admin-btn admin-btn-green" onclick="limpiarTodo()" style="font-size:.75rem;padding:.3rem 1rem;">
+                <i class="fas fa-trash"></i> Limpiar Todo
+            </button>
+            <button class="admin-btn admin-btn-blue" onclick="cargarContenido()" style="font-size:.75rem;padding:.3rem 1rem;">
+                <i class="fas fa-refresh"></i> Recargar
             </button>
         </div>
-        <div class="progress-bar"><div class="fill" id="progressFillDB1"></div></div>
-        <div class="info" id="progressInfoDB1" style="color:#94A3B8;font-size:.85rem;">Listo para generar en DB1</div>
-    </div>
-
-    <!-- ⭐ GENERACIÓN - DB2 (SECUNDARIA) CON VERIFICACIÓN -->
-    <div class="admin-card" style="border-color:rgba(236,72,153,.4)">
-        <h3><i class="fas fa-database" style="color:#EC4899;"></i> DB2 - Secundaria (tely-bd2) <span style="font-size:.6rem;color:#F59E0B;">✅ Anti-duplicados</span></h3>
-        <div class="btn-group">
-            <button class="admin-btn admin-btn-pink" onclick="generarPeliculasDB2()" style="font-size:.85rem;padding:.4rem 1.2rem;">
-                <i class="fas fa-film"></i> Generar Películas (DB2)
-            </button>
-            <button class="admin-btn admin-btn-pink" onclick="generarSeriesDB2()" style="font-size:.85rem;padding:.4rem 1.2rem;">
-                <i class="fas fa-tv"></i> Generar Series (DB2)
-            </button>
-            <button class="admin-btn admin-btn-danger" onclick="limpiarDB2()" style="font-size:.7rem;padding:.2rem .8rem;">
-                <i class="fas fa-trash"></i> Limpiar DB2
-            </button>
-        </div>
-        <div class="progress-bar"><div class="fill" id="progressFillDB2"></div></div>
-        <div class="info" id="progressInfoDB2" style="color:#94A3B8;font-size:.85rem;">Listo para generar en DB2</div>
+        
+        <div class="progress-bar"><div class="fill" id="progressFill"></div></div>
+        <div class="info" id="progressInfo" style="color:#94A3B8;font-size:.85rem;">Listo para generar</div>
     </div>
 
     <!-- ⭐ PEDIDOS -->
     <div class="admin-card" style="border-color:rgba(245,158,11,.3)">
         <h3><i class="fas fa-clipboard-list" style="color:#F59E0B;"></i> Pedidos de usuarios <span class="badge-pedidos" id="badgeTotalPedidos">0</span></h3>
+        
         <div style="display:flex;gap:.5rem;margin-bottom:.5rem;flex-wrap:wrap;">
             <button class="admin-btn admin-btn-blue" onclick="cargarPedidos()" style="padding:.2rem .8rem;font-size:.7rem;">
                 <i class="fas fa-refresh"></i> Recargar
             </button>
         </div>
+        
         <div id="listaPedidosAdmin" class="max-h-96 overflow-y-auto">
             <p class="loading-text">Cargando pedidos...</p>
         </div>
@@ -311,13 +294,8 @@
                 <option value="pelicula">🎬 Películas</option>
                 <option value="serie">📺 Series</option>
             </select>
-            <select id="filterAdminDB" onchange="cargarContenido()" style="padding:.4rem .8rem;border-radius:8px;border:1px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.85rem;cursor:pointer;">
-                <option value="todas">🌐 Todas las bases</option>
-                <option value="db1">🟢 DB1 (Principal)</option>
-                <option value="db2">🩷 DB2 (Secundaria)</option>
-            </select>
-            <button class="admin-btn admin-btn-blue" onclick="cargarContenido()" style="padding:.3rem 1rem;font-size:.75rem;">
-                <i class="fas fa-refresh"></i> Recargar
+            <button class="admin-btn admin-btn-blue" onclick="filtrarContenido()" style="padding:.3rem 1rem;font-size:.75rem;">
+                <i class="fas fa-filter"></i> Filtrar
             </button>
         </div>
         
@@ -344,38 +322,21 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <script>
 // ============================================================
-// 🔥 CONFIGURACIÓN - DB1 (PRINCIPAL) - PARA AUTENTICACIÓN
+// NUEVA CONFIGURACIÓN DE FIREBASE (Proyecto: tely-c9776)
 // ============================================================
-const firebaseConfig1 = {
+const firebaseConfig = {
     apiKey: "AIzaSyDSCjhkZBmBfpgsyLPdN50ISvgvzfGRH2Q",
     authDomain: "tely-c9776.firebaseapp.com",
     projectId: "tely-c9776",
     storageBucket: "tely-c9776.firebasestorage.app",
     messagingSenderId: "185494855835",
-    appId: "1:185494855835:web:cb113139c6d5aeb472263e"
+    appId: "1:185494855835:web:cb113139c6d5aeb472263e",
+    measurementId: "G-KTDT3WS0PP"
 };
 
-// ============================================================
-// 🔥 CONFIGURACIÓN - DB2 (SECUNDARIA) - SOLO DATOS
-// ============================================================
-const firebaseConfig2 = {
-    apiKey: "AIzaSyCEw5ZmFF4wWBgkAb5dR_hh_DClFmtN4KE",
-    authDomain: "tely-bd2.firebaseapp.com",
-    projectId: "tely-bd2",
-    storageBucket: "tely-bd2.firebasestorage.app",
-    messagingSenderId: "784532605615",
-    appId: "1:784532605615:web:dbf11b54673b7db6c1225a"
-};
-
-// ============================================================
-// ⭐ INICIALIZAR - AUTENTICACIÓN SOLO EN DB1
-// ============================================================
-const app1 = firebase.initializeApp(firebaseConfig1, 'app1');
-const auth = firebase.auth(app1);
-const db1 = firebase.database(app1);
-
-const app2 = firebase.initializeApp(firebaseConfig2, 'app2');
-const db2 = firebase.database(app2);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
 
 const ADMIN_EMAILS = ['aa3964063@gmail.com'];
 
@@ -383,7 +344,6 @@ let esAdmin = false;
 let generando = false;
 let totalGenerados = 0;
 let totalErrores = 0;
-let totalDuplicados = 0;
 let itemsPorPagina = 20;
 let paginaActual = 1;
 let peliculasLista = [];
@@ -393,7 +353,6 @@ let seriesKeys = [];
 let itemsEditando = {};
 let seriesExpandidas = {};
 let serieTempSeleccionada = {};
-let dbActual = 'todas';
 
 // ============================================================
 // FUNCIONES BÁSICAS
@@ -487,7 +446,7 @@ function actualizarUIAdmin(isAdmin) {
     const logoutBtn = document.getElementById('logoutBtn');
     
     if (isAdmin) {
-        statusEl.textContent = '✅ Acceso de Administrador concedido (Anti-Duplicados)';
+        statusEl.textContent = '✅ Acceso de Administrador concedido';
         protectedDiv.className = 'admin-protected';
         logoutBtn.style.display = 'flex';
     } else {
@@ -557,72 +516,21 @@ async function fetchTMDB(path, params = {}) {
 function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
 // ============================================================
-// ⭐ VERIFICAR SI EXISTE EN DB1 (Anti-Duplicados)
+// ⭐ GENERAR PELÍCULAS
 // ============================================================
-async function existeEnDB1(tmdb_id, tipo) {
-    try {
-        const path = tipo === 'pelicula' ? 'contenido_personalizado' : 'series_personalizadas';
-        const snap = await db1.ref(path).orderByChild('tmdb_id').equalTo(parseInt(tmdb_id)).once('value');
-        const data = snap.val();
-        return data !== null && Object.keys(data).length > 0;
-    } catch(e) {
-        return false;
-    }
-}
-
-// ============================================================
-// ⭐ GENERAR PELÍCULAS EN DB2 (CON VERIFICACIÓN)
-// ============================================================
-async function generarPeliculasDB2() {
+async function generarPeliculas() {
     if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
     if (generando) { mostrarToast('⏳ Ya está generando...', 'warning'); return; }
-    if (!confirm('⚠️ ¿Generar 5,000 películas en DB2 (Secundaria)?\n✅ Se verificarán duplicados con DB1')) return;
+    if (!confirm('⚠️ ¿Generar películas populares de TMDB?')) return;
     
-    await generarPeliculasConVerificacion(db2, 'DB2', 'progressFillDB2', 'progressInfoDB2');
-}
-
-// ============================================================
-// ⭐ GENERAR SERIES EN DB2 (CON VERIFICACIÓN)
-// ============================================================
-async function generarSeriesDB2() {
-    if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
-    if (generando) { mostrarToast('⏳ Ya está generando...', 'warning'); return; }
-    if (!confirm('⚠️ ¿Generar 4,000 series en DB2 (Secundaria)?\n✅ Se verificarán duplicados con DB1')) return;
-    
-    await generarSeriesConVerificacion(db2, 'DB2', 'progressFillDB2', 'progressInfoDB2');
-}
-
-// ============================================================
-// ⭐ GENERAR PELÍCULAS EN DB1 (SIN VERIFICACIÓN)
-// ============================================================
-async function generarPeliculasDB1() {
-    if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
-    if (generando) { mostrarToast('⏳ Ya está generando...', 'warning'); return; }
-    if (!confirm('⚠️ ¿Generar 5,000 películas en DB1 (Principal)?')) return;
-    
-    await generarPeliculasEnDB(db1, 'DB1', 'progressFillDB1', 'progressInfoDB1');
-}
-
-async function generarSeriesDB1() {
-    if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
-    if (generando) { mostrarToast('⏳ Ya está generando...', 'warning'); return; }
-    if (!confirm('⚠️ ¿Generar 4,000 series en DB1 (Principal)?')) return;
-    
-    await generarSeriesEnDB(db1, 'DB1', 'progressFillDB1', 'progressInfoDB1');
-}
-
-// ============================================================
-// ⭐ FUNCIÓN GENERAR PELÍCULAS (GENÉRICA)
-// ============================================================
-async function generarPeliculasEnDB(db, nombreDB, fillId, infoId) {
     generando = true;
     totalGenerados = 0;
     totalErrores = 0;
-    const fill = document.getElementById(fillId);
-    const info = document.getElementById(infoId);
+    const fill = document.getElementById('progressFill');
+    const info = document.getElementById('progressInfo');
     
     fill.style.width = '0%';
-    info.textContent = `🎬 ${nombreDB}: Obteniendo películas...`;
+    info.textContent = '🎬 Obteniendo películas...';
     
     let page = 1;
     let hasMore = true;
@@ -639,14 +547,14 @@ async function generarPeliculasEnDB(db, nombreDB, fillId, infoId) {
                 peliculasTotales.push(p);
             }
             
-            info.textContent = `🎬 ${nombreDB}: Cargando ${peliculasTotales.length}/${MAX_PELIS}`;
+            info.textContent = `🎬 Cargando películas... ${peliculasTotales.length}/${MAX_PELIS}`;
             fill.style.width = `${(peliculasTotales.length / MAX_PELIS) * 40}%`;
             page++;
             if (!data.total_pages || page > data.total_pages) hasMore = false;
             await sleep(50);
         }
         
-        info.textContent = `🎬 ${nombreDB}: Generando ${peliculasTotales.length} películas...`;
+        info.textContent = `🎬 Generando ${peliculasTotales.length} películas...`;
         for (let i = 0; i < peliculasTotales.length; i++) {
             try {
                 const p = peliculasTotales[i];
@@ -666,131 +574,36 @@ async function generarPeliculasEnDB(db, nombreDB, fillId, infoId) {
             } catch(e) { totalErrores++; }
             
             fill.style.width = `${40 + (i / peliculasTotales.length) * 60}%`;
-            info.textContent = `🎬 ${nombreDB}: ${totalGenerados}/${peliculasTotales.length} (${totalErrores} errores)`;
+            info.textContent = `🎬 ${totalGenerados}/${peliculasTotales.length} (${totalErrores} errores)`;
             await sleep(20);
         }
         
-        info.textContent = `✅ ${nombreDB}: ${totalGenerados} películas generadas (${totalErrores} errores)`;
-        mostrarToast(`✅ ${nombreDB}: ${totalGenerados} películas generadas`, 'success');
+        info.textContent = `✅ ${totalGenerados} películas generadas (${totalErrores} errores)`;
+        mostrarToast(`✅ ${totalGenerados} películas generadas`, 'success');
         cargarContenido();
     } catch(e) {
-        info.textContent = `❌ ${nombreDB}: Error: ${e.message}`;
+        info.textContent = `❌ Error: ${e.message}`;
         mostrarToast('❌ Error: ' + e.message, 'error');
     }
     generando = false;
 }
 
 // ============================================================
-// ⭐ FUNCIÓN GENERAR PELÍCULAS CON VERIFICACIÓN (DB2)
+// ⭐ GENERAR SERIES
 // ============================================================
-async function generarPeliculasConVerificacion(db, nombreDB, fillId, infoId) {
+async function generarSeries() {
+    if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
+    if (generando) { mostrarToast('⏳ Ya está generando...', 'warning'); return; }
+    if (!confirm('⚠️ ¿Generar series populares de TMDB?')) return;
+    
     generando = true;
     totalGenerados = 0;
     totalErrores = 0;
-    totalDuplicados = 0;
-    const fill = document.getElementById(fillId);
-    const info = document.getElementById(infoId);
+    const fill = document.getElementById('progressFill');
+    const info = document.getElementById('progressInfo');
     
     fill.style.width = '0%';
-    info.textContent = `🩷 ${nombreDB}: Obteniendo películas (verificando duplicados)...`;
-    
-    let page = 1;
-    let hasMore = true;
-    const MAX_PELIS = 5000;
-    let peliculasTotales = [];
-    
-    try {
-        // 1. Obtener películas de TMDB
-        while (peliculasTotales.length < MAX_PELIS && hasMore && page <= 100) {
-            const data = await fetchTMDB('movie/popular', { page: page });
-            if (!data.results || !data.results.length) { hasMore = false; break; }
-            
-            for (const p of data.results) {
-                if (peliculasTotales.length >= MAX_PELIS) break;
-                peliculasTotales.push(p);
-            }
-            
-            info.textContent = `🩷 ${nombreDB}: Cargando ${peliculasTotales.length}/${MAX_PELIS}`;
-            fill.style.width = `${(peliculasTotales.length / MAX_PELIS) * 30}%`;
-            page++;
-            if (!data.total_pages || page > data.total_pages) hasMore = false;
-            await sleep(50);
-        }
-        
-        info.textContent = `🩷 ${nombreDB}: Verificando duplicados con DB1...`;
-        fill.style.width = '35%';
-        
-        // 2. Verificar duplicados
-        let peliculasFiltradas = [];
-        for (let i = 0; i < peliculasTotales.length; i++) {
-            const p = peliculasTotales[i];
-            const existe = await existeEnDB1(p.id, 'pelicula');
-            if (!existe) {
-                peliculasFiltradas.push(p);
-            } else {
-                totalDuplicados++;
-            }
-            
-            if (i % 10 === 0) {
-                const progreso = 35 + (i / peliculasTotales.length) * 15;
-                fill.style.width = `${progreso}%`;
-                info.textContent = `🩷 ${nombreDB}: Verificando ${i}/${peliculasTotales.length}... (${totalDuplicados} duplicados)`;
-            }
-            await sleep(10);
-        }
-        
-        info.textContent = `🩷 ${nombreDB}: Generando ${peliculasFiltradas.length} películas (${totalDuplicados} duplicados omitidos)...`;
-        fill.style.width = '50%';
-        
-        // 3. Guardar en DB2
-        for (let i = 0; i < peliculasFiltradas.length; i++) {
-            try {
-                const p = peliculasFiltradas[i];
-                await db.ref('contenido_personalizado').push({
-                    titulo: p.title || `Película ${p.id}`,
-                    anio: p.release_date ? p.release_date.split('-')[0] : 'N/D',
-                    sinopsis: p.overview || 'Sin sinopsis',
-                    portada: getImagenUrl(p.poster_path, 'w342'),
-                    genero: 'Película',
-                    tipo: 'pelicula',
-                    tmdb_id: p.id,
-                    puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A',
-                    url: generarEnlaceUnlimplay(p.id, 'pelicula'),
-                    creado: Date.now(),
-                    _db: 'db2'
-                });
-                totalGenerados++;
-            } catch(e) { totalErrores++; }
-            
-            const progreso = 50 + (i / peliculasFiltradas.length) * 50;
-            fill.style.width = `${progreso}%`;
-            info.textContent = `🩷 ${nombreDB}: ${totalGenerados}/${peliculasFiltradas.length} (${totalDuplicados} duplicados, ${totalErrores} errores)`;
-            await sleep(20);
-        }
-        
-        info.textContent = `✅ ${nombreDB}: ${totalGenerados} películas generadas (${totalDuplicados} duplicados omitidos, ${totalErrores} errores)`;
-        mostrarToast(`✅ ${nombreDB}: ${totalGenerados} películas (${totalDuplicados} duplicados omitidos)`, 'success');
-        cargarContenido();
-    } catch(e) {
-        info.textContent = `❌ ${nombreDB}: Error: ${e.message}`;
-        mostrarToast('❌ Error: ' + e.message, 'error');
-    }
-    generando = false;
-}
-
-// ============================================================
-// ⭐ FUNCIÓN GENERAR SERIES CON VERIFICACIÓN (DB2)
-// ============================================================
-async function generarSeriesConVerificacion(db, nombreDB, fillId, infoId) {
-    generando = true;
-    totalGenerados = 0;
-    totalErrores = 0;
-    totalDuplicados = 0;
-    const fill = document.getElementById(fillId);
-    const info = document.getElementById(infoId);
-    
-    fill.style.width = '0%';
-    info.textContent = `🩷 ${nombreDB}: Obteniendo series (verificando duplicados)...`;
+    info.textContent = '📺 Obteniendo series...';
     
     let page = 1;
     let hasMore = true;
@@ -807,130 +620,19 @@ async function generarSeriesConVerificacion(db, nombreDB, fillId, infoId) {
                 seriesTotales.push(s);
             }
             
-            info.textContent = `🩷 ${nombreDB}: Cargando ${seriesTotales.length}/${MAX_SERIES}`;
-            fill.style.width = `${(seriesTotales.length / MAX_SERIES) * 30}%`;
-            page++;
-            if (!data.total_pages || page > data.total_pages) hasMore = false;
-            await sleep(50);
-        }
-        
-        info.textContent = `🩷 ${nombreDB}: Verificando duplicados con DB1...`;
-        fill.style.width = '35%';
-        
-        let seriesFiltradas = [];
-        for (let i = 0; i < seriesTotales.length; i++) {
-            const s = seriesTotales[i];
-            const existe = await existeEnDB1(s.id, 'serie');
-            if (!existe) {
-                seriesFiltradas.push(s);
-            } else {
-                totalDuplicados++;
-            }
-            
-            if (i % 10 === 0) {
-                const progreso = 35 + (i / seriesTotales.length) * 15;
-                fill.style.width = `${progreso}%`;
-                info.textContent = `🩷 ${nombreDB}: Verificando ${i}/${seriesTotales.length}... (${totalDuplicados} duplicados)`;
-            }
-            await sleep(10);
-        }
-        
-        info.textContent = `🩷 ${nombreDB}: Generando ${seriesFiltradas.length} series (${totalDuplicados} duplicados omitidos)...`;
-        fill.style.width = '50%';
-        
-        for (let i = 0; i < seriesFiltradas.length; i++) {
-            try {
-                const s = seriesFiltradas[i];
-                const temporadas = [];
-                for (let t = 1; t <= Math.min(s.number_of_seasons || 2, 2); t++) {
-                    try {
-                        const seasonData = await fetchTMDB(`tv/${s.id}/season/${t}`);
-                        if (!seasonData || !seasonData.episodes) continue;
-                        const capitulos = seasonData.episodes.slice(0, 10).map(ep => ({
-                            numero: ep.episode_number,
-                            titulo: ep.name || `Capítulo ${ep.episode_number}`,
-                            sinopsis: ep.overview || 'Sin sinopsis',
-                            url: generarEnlaceUnlimplay(s.id, 'serie', t, ep.episode_number),
-                            opcion2: null
-                        }));
-                        temporadas.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
-                    } catch(e) {}
-                }
-                if (temporadas.length > 0) {
-                    await db.ref('series_personalizadas').push({
-                        titulo: s.name || `Serie ${s.id}`,
-                        anio: s.first_air_date ? s.first_air_date.split('-')[0] : 'N/D',
-                        sinopsis: s.overview || 'Sin sinopsis',
-                        portada: getImagenUrl(s.poster_path, 'w342'),
-                        genero: 'Serie',
-                        tipo: 'serie',
-                        tmdb_id: s.id,
-                        puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A',
-                        temporadas: temporadas,
-                        url: generarEnlaceUnlimplay(s.id, 'serie', 1, 1),
-                        creado: Date.now(),
-                        _db: 'db2'
-                    });
-                    totalGenerados++;
-                }
-            } catch(e) { totalErrores++; }
-            
-            const progreso = 50 + (i / seriesFiltradas.length) * 50;
-            fill.style.width = `${progreso}%`;
-            info.textContent = `🩷 ${nombreDB}: ${totalGenerados}/${seriesFiltradas.length} (${totalDuplicados} duplicados, ${totalErrores} errores)`;
-            await sleep(20);
-        }
-        
-        info.textContent = `✅ ${nombreDB}: ${totalGenerados} series generadas (${totalDuplicados} duplicados omitidos, ${totalErrores} errores)`;
-        mostrarToast(`✅ ${nombreDB}: ${totalGenerados} series (${totalDuplicados} duplicados omitidos)`, 'success');
-        cargarContenido();
-    } catch(e) {
-        info.textContent = `❌ ${nombreDB}: Error: ${e.message}`;
-        mostrarToast('❌ Error: ' + e.message, 'error');
-    }
-    generando = false;
-}
-
-// ============================================================
-// ⭐ FUNCIÓN GENERAR SERIES (GENÉRICA - DB1)
-// ============================================================
-async function generarSeriesEnDB(db, nombreDB, fillId, infoId) {
-    generando = true;
-    totalGenerados = 0;
-    totalErrores = 0;
-    const fill = document.getElementById(fillId);
-    const info = document.getElementById(infoId);
-    
-    fill.style.width = '0%';
-    info.textContent = `📺 ${nombreDB}: Obteniendo series...`;
-    
-    let page = 1;
-    let hasMore = true;
-    const MAX_SERIES = 4000;
-    let seriesTotales = [];
-    
-    try {
-        while (seriesTotales.length < MAX_SERIES && hasMore && page <= 100) {
-            const data = await fetchTMDB('tv/popular', { page: page });
-            if (!data.results || !data.results.length) { hasMore = false; break; }
-            
-            for (const s of data.results) {
-                if (seriesTotales.length >= MAX_SERIES) break;
-                seriesTotales.push(s);
-            }
-            
-            info.textContent = `📺 ${nombreDB}: Cargando ${seriesTotales.length}/${MAX_SERIES}`;
+            info.textContent = `📺 Cargando series... ${seriesTotales.length}/${MAX_SERIES}`;
             fill.style.width = `${(seriesTotales.length / MAX_SERIES) * 40}%`;
             page++;
             if (!data.total_pages || page > data.total_pages) hasMore = false;
             await sleep(50);
         }
         
-        info.textContent = `📺 ${nombreDB}: Generando ${seriesTotales.length} series...`;
+        info.textContent = `📺 Generando ${seriesTotales.length} series...`;
         for (let i = 0; i < seriesTotales.length; i++) {
             try {
                 const s = seriesTotales[i];
                 const temporadas = [];
+                // Solo 2 temporadas por defecto
                 for (let t = 1; t <= Math.min(s.number_of_seasons || 2, 2); t++) {
                     try {
                         const seasonData = await fetchTMDB(`tv/${s.id}/season/${t}`);
@@ -964,262 +666,128 @@ async function generarSeriesEnDB(db, nombreDB, fillId, infoId) {
             } catch(e) { totalErrores++; }
             
             fill.style.width = `${40 + (i / seriesTotales.length) * 60}%`;
-            info.textContent = `📺 ${nombreDB}: ${totalGenerados}/${seriesTotales.length} (${totalErrores} errores)`;
+            info.textContent = `📺 ${totalGenerados}/${seriesTotales.length} (${totalErrores} errores)`;
             await sleep(20);
         }
         
-        info.textContent = `✅ ${nombreDB}: ${totalGenerados} series generadas (${totalErrores} errores)`;
-        mostrarToast(`✅ ${nombreDB}: ${totalGenerados} series generadas`, 'success');
+        info.textContent = `✅ ${totalGenerados} series generadas (${totalErrores} errores)`;
+        mostrarToast(`✅ ${totalGenerados} series generadas`, 'success');
         cargarContenido();
     } catch(e) {
-        info.textContent = `❌ ${nombreDB}: Error: ${e.message}`;
+        info.textContent = `❌ Error: ${e.message}`;
         mostrarToast('❌ Error: ' + e.message, 'error');
     }
     generando = false;
 }
 
 // ============================================================
-// ⭐ LIMPIAR BASES
+// ⭐ CARGAR TODAS LAS TEMPORADAS (BOTÓN ESPECIAL)
 // ============================================================
-async function limpiarDB1() {
+window.cargarTodasLasTemporadas = async function(key) {
     if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
-    if (!confirm('⚠️ ¿Eliminar TODO el contenido de DB1 (Principal)?\n¡No se puede deshacer!')) return;
-    try {
-        await db1.ref('contenido_personalizado').remove();
-        await db1.ref('series_personalizadas').remove();
-        mostrarToast('🗑️ DB1 limpiada', 'warning');
-        cargarContenido();
-    } catch(e) {
-        mostrarToast('❌ Error: ' + e.message, 'error');
-    }
-}
-
-async function limpiarDB2() {
-    if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
-    if (!confirm('⚠️ ¿Eliminar TODO el contenido de DB2 (Secundaria)?\n¡No se puede deshacer!')) return;
-    try {
-        await db2.ref('contenido_personalizado').remove();
-        await db2.ref('series_personalizadas').remove();
-        mostrarToast('🗑️ DB2 limpiada', 'warning');
-        cargarContenido();
-    } catch(e) {
-        mostrarToast('❌ Error: ' + e.message, 'error');
-    }
-}
-
-// ============================================================
-// ⭐ ELIMINAR ITEM
-// ============================================================
-window.eliminarItem = async function(key, tipo, dbOrigen) {
-    if (!confirm(`¿Eliminar este ${tipo} de ${dbOrigen}?`)) return;
-    try {
-        const db = dbOrigen === 'db1' ? db1 : db2;
-        const path = tipo === 'pelicula' ? 'contenido_personalizado' : 'series_personalizadas';
-        await db.ref(`${path}/${key}`).remove();
-        mostrarToast(`🗑️ ${tipo} eliminado de ${dbOrigen}`, 'warning');
-        cargarContenido();
-    } catch(e) {
-        mostrarToast('❌ Error: ' + e.message, 'error');
-    }
-};
-
-// ============================================================
-// ⭐ CARGAR CONTENIDO
-// ============================================================
-window.cargarContenido = async function() {
-    if (!esAdmin) return;
-    const container = document.getElementById('listaContenido');
-    container.innerHTML = '<p class="loading-text">🔍 Cargando contenido...</p>';
+    if (!confirm('⚠️ ¿Cargar TODAS las temporadas de esta serie desde TMDB?\nEsto puede tomar varios segundos.')) return;
     
-    dbActual = document.getElementById('filterAdminDB').value;
+    const btn = document.getElementById(`btn-cargar-temps-${key}`);
+    if (!btn) return;
+    
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner"></span> Cargando...';
+    btn.disabled = true;
     
     try {
-        let pData = {};
-        let sData = {};
-        
-        if (dbActual === 'todas' || dbActual === 'db1') {
-            const [pSnap1, sSnap1] = await Promise.all([
-                db1.ref('contenido_personalizado').once('value'),
-                db1.ref('series_personalizadas').once('value')
-            ]);
-            const pData1 = pSnap1.val() || {};
-            const sData1 = sSnap1.val() || {};
-            
-            for (const key of Object.keys(pData1)) {
-                pData[key + '_db1'] = { ...pData1[key], _db: 'db1' };
-            }
-            for (const key of Object.keys(sData1)) {
-                sData[key + '_db1'] = { ...sData1[key], _db: 'db1' };
-            }
-        }
-        
-        if (dbActual === 'todas' || dbActual === 'db2') {
-            const [pSnap2, sSnap2] = await Promise.all([
-                db2.ref('contenido_personalizado').once('value'),
-                db2.ref('series_personalizadas').once('value')
-            ]);
-            const pData2 = pSnap2.val() || {};
-            const sData2 = sSnap2.val() || {};
-            
-            for (const key of Object.keys(pData2)) {
-                pData[key + '_db2'] = { ...pData2[key], _db: 'db2' };
-            }
-            for (const key of Object.keys(sData2)) {
-                sData[key + '_db2'] = { ...sData2[key], _db: 'db2' };
-            }
-        }
-        
-        peliculasLista = Object.values(pData);
-        seriesLista = Object.values(sData);
-        peliculasKeys = Object.keys(pData);
-        seriesKeys = Object.keys(sData);
-        
-        if (!peliculasLista.length && !seriesLista.length) {
-            container.innerHTML = `
-                <div style="color:#64748B;text-align:center;padding:1rem;font-size:.9rem;">
-                    📭 No hay contenido guardado.
-                    <br><br>
-                    <button onclick="generarPeliculasDB1()" style="padding:.5rem 1.5rem;background:#34D399;border:none;border-radius:8px;color:#fff;font-weight:600;cursor:pointer;font-size:.8rem;">
-                        <i class="fas fa-film"></i> Generar en DB1
-                    </button>
-                    <button onclick="generarPeliculasDB2()" style="padding:.5rem 1.5rem;background:#EC4899;border:none;border-radius:8px;color:#fff;font-weight:600;cursor:pointer;font-size:.8rem;margin-left:.5rem;">
-                        <i class="fas fa-film"></i> Generar en DB2
-                    </button>
-                </div>
-            `;
-            document.getElementById('paginacionContainer').style.display = 'none';
+        // 1. Obtener la serie desde Firebase
+        const snap = await db.ref(`series_personalizadas/${key}`).once('value');
+        const serie = snap.val();
+        if (!serie) {
+            mostrarToast('❌ Serie no encontrada', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
             return;
         }
         
-        container.innerHTML = '';
-        
-        // Mostrar películas
-        if (peliculasLista.length) {
-            const div = document.createElement('div');
-            div.innerHTML = `<div style="font-weight:700;color:#A78BFA;margin:.3rem 0;">🎬 Películas (${peliculasLista.length})</div>`;
-            
-            peliculasLista.forEach((p, index) => {
-                const key = peliculasKeys[index];
-                const portada = p.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
-                const urlOp1 = p.url || 'Sin enlace';
-                const urlOp2 = p.opcion2 || '';
-                const dbOrigen = p._db || 'db1';
-                const badgeColor = dbOrigen === 'db1' ? 'db1' : 'db2';
-                const badgeText = dbOrigen === 'db1' ? '🟢 DB1' : '🩷 DB2';
-                
-                const item = document.createElement('div');
-                item.className = 'admin-item';
-                item.id = `item-${key}`;
-                item.dataset.titulo = p.titulo;
-                item.dataset.tipo = 'pelicula';
-                item.style.borderLeftColor = dbOrigen === 'db1' ? '#34D399' : '#EC4899';
-                
-                item.innerHTML = `
-                    <div class="top-row">
-                        <img src="${portada}" class="thumbnail" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-                        <div class="info-item">
-                            <div class="title">${p.titulo} <span class="badge-tipo pelicula">🎬</span> <span class="badge-db ${badgeColor}">${badgeText}</span></div>
-                            <div class="meta">${p.anio || 'N/D'} • ⭐ ${p.puntuacion || 'N/A'} • TMDB: ${p.tmdb_id}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="enlace-wrap url-wrap">
-                        <div style="font-size:.55rem;color:#34D399;margin-bottom:.05rem;">🔗 Opción 1</div>
-                        <div class="enlace op1" onclick="editarEnlace('${key}', 'pelicula', 'url', '${dbOrigen}')">${urlOp1}</div>
-                    </div>
-                    
-                    <div class="enlace-wrap ${urlOp2 ? 'op2-wrap' : ''}">
-                        <div style="font-size:.55rem;color:#60A5FA;margin-bottom:.05rem;">🔗 Opción 2</div>
-                        ${urlOp2 
-                            ? `<div class="enlace op2" onclick="editarEnlace('${key}', 'pelicula', 'op2', '${dbOrigen}')">${urlOp2}</div>`
-                            : `<div style="font-size:.55rem;color:#64748B;">Sin opción 2 <button class="admin-btn admin-btn-purple" style="padding:.05rem .4rem;font-size:.45rem;margin-left:.3rem;" onclick="agregarOpcion2('${key}', 'pelicula', '${p.tmdb_id}', '${dbOrigen}')"><i class="fas fa-plus"></i> Agregar</button></div>`
-                        }
-                    </div>
-                    
-                    <div class="actions">
-                        <button class="admin-btn admin-btn-danger" onclick="eliminarItem('${key}', 'pelicula', '${dbOrigen}')"><i class="fas fa-trash"></i> Eliminar</button>
-                    </div>
-                `;
-                div.appendChild(item);
-            });
-            container.appendChild(div);
+        const tmdbId = serie.tmdb_id;
+        if (!tmdbId) {
+            mostrarToast('❌ No tiene TMDB ID', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
         }
         
-        // Mostrar series (resumido)
-        if (seriesLista.length) {
-            const div = document.createElement('div');
-            div.innerHTML = `<div style="font-weight:700;color:#34D399;margin:.5rem 0 .3rem;">📺 Series (${seriesLista.length})</div>`;
-            
-            seriesLista.forEach((s, index) => {
-                const key = seriesKeys[index];
-                const capsCount = s.temporadas ? s.temporadas.reduce((sum, t) => sum + (t.capitulos ? t.capitulos.length : 0), 0) : 0;
-                const portada = s.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
-                const urlOp1 = s.url || 'Sin enlace';
-                const urlOp2 = s.opcion2 || '';
-                const dbOrigen = s._db || 'db1';
-                const badgeColor = dbOrigen === 'db1' ? 'db1' : 'db2';
-                const badgeText = dbOrigen === 'db1' ? '🟢 DB1' : '🩷 DB2';
-                
-                const item = document.createElement('div');
-                item.className = 'admin-item serie-expandida';
-                item.id = `item-${key}`;
-                item.dataset.titulo = s.titulo;
-                item.dataset.tipo = 'serie';
-                item.style.borderLeftColor = dbOrigen === 'db1' ? '#34D399' : '#EC4899';
-                
-                item.innerHTML = `
-                    <div class="top-row">
-                        <img src="${portada}" class="thumbnail" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-                        <div class="info-item">
-                            <div class="title">${s.titulo} <span class="badge-tipo serie">📺</span> <span class="badge-db ${badgeColor}">${badgeText}</span></div>
-                            <div class="meta">${s.anio || 'N/D'} • ${s.temporadas?.length || 0} temps • ${capsCount} caps • ⭐ ${s.puntuacion || 'N/A'} • TMDB: ${s.tmdb_id}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="enlace-wrap url-wrap">
-                        <div style="font-size:.55rem;color:#34D399;margin-bottom:.05rem;">🔗 Opción 1</div>
-                        <div class="enlace op1" onclick="editarEnlace('${key}', 'serie', 'url', '${dbOrigen}')">${urlOp1}</div>
-                    </div>
-                    
-                    <div class="enlace-wrap ${urlOp2 ? 'op2-wrap' : ''}">
-                        <div style="font-size:.55rem;color:#60A5FA;margin-bottom:.05rem;">🔗 Opción 2</div>
-                        ${urlOp2 
-                            ? `<div class="enlace op2" onclick="editarEnlace('${key}', 'serie', 'op2', '${dbOrigen}')">${urlOp2}</div>`
-                            : `<div style="font-size:.55rem;color:#64748B;">Sin opción 2 <button class="admin-btn admin-btn-purple" style="padding:.05rem .4rem;font-size:.45rem;margin-left:.3rem;" onclick="agregarOpcion2('${key}', 'serie', '${s.tmdb_id}', '${dbOrigen}')"><i class="fas fa-plus"></i> Agregar</button></div>`
-                        }
-                    </div>
-                    
-                    <div class="actions">
-                        <button class="admin-btn admin-btn-danger" onclick="eliminarItem('${key}', 'serie', '${dbOrigen}')"><i class="fas fa-trash"></i> Eliminar</button>
-                    </div>
-                `;
-                div.appendChild(item);
-            });
-            container.appendChild(div);
+        // 2. Obtener datos de la serie desde TMDB
+        mostrarToast('📡 Obteniendo datos de TMDB...', 'info');
+        const data = await fetchTMDB(`tv/${tmdbId}`);
+        if (!data || !data.id) {
+            mostrarToast('❌ Serie no encontrada en TMDB', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
         }
         
-        paginaActual = 1;
-        mostrarPagina();
+        const numTemporadas = data.number_of_seasons || 1;
+        mostrarToast(`📺 Cargando ${numTemporadas} temporadas...`, 'info');
+        
+        // 3. Obtener cada temporada
+        const nuevasTemporadas = [];
+        for (let t = 1; t <= numTemporadas; t++) {
+            try {
+                const seasonData = await fetchTMDB(`tv/${tmdbId}/season/${t}`);
+                if (!seasonData || !seasonData.episodes) continue;
+                
+                const capitulos = seasonData.episodes.map(ep => ({
+                    numero: ep.episode_number,
+                    titulo: ep.name || `Capítulo ${ep.episode_number}`,
+                    sinopsis: ep.overview || 'Sin sinopsis',
+                    url: generarEnlaceUnlimplay(tmdbId, 'serie', t, ep.episode_number),
+                    opcion2: null
+                }));
+                nuevasTemporadas.push({
+                    numero: t,
+                    nombre: seasonData.name || `Temporada ${t}`,
+                    capitulos: capitulos
+                });
+            } catch(e) {
+                console.error(`Error en temp ${t}:`, e);
+            }
+        }
+        
+        if (nuevasTemporadas.length === 0) {
+            mostrarToast('❌ No se pudieron cargar temporadas', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+        }
+        
+        // 4. Guardar en Firebase
+        await db.ref(`series_personalizadas/${key}/temporadas`).set(nuevasTemporadas);
+        
+        mostrarToast(`✅ ${nuevasTemporadas.length} temporadas cargadas`, 'success');
+        
+        // 5. Actualizar la lista en memoria
+        const idx = seriesKeys.indexOf(key);
+        if (idx !== -1) {
+            seriesLista[idx].temporadas = nuevasTemporadas;
+        }
+        
+        // 6. Recargar la vista de la serie
+        if (seriesExpandidas[key]) {
+            mostrarCapitulosSerie(key);
+        }
+        
+        btn.innerHTML = originalText;
+        btn.disabled = false;
         
     } catch(e) {
-        console.error('❌ Error:', e);
-        container.innerHTML = `
-            <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:1rem;text-align:center;">
-                <p style="color:#EF4444;font-size:.9rem;">❌ Error al cargar</p>
-                <p style="color:#94A3B8;font-size:.75rem;margin-top:.3rem;">${e.message || 'Verifica Firebase'}</p>
-                <button onclick="cargarContenido()" style="margin-top:.5rem;padding:.3rem 1rem;background:#7C3AED;border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:.75rem;">
-                    <i class="fas fa-refresh"></i> Reintentar
-                </button>
-            </div>
-        `;
+        console.error('Error:', e);
+        mostrarToast('❌ Error: ' + e.message, 'error');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     }
 };
 
 // ============================================================
-// ⭐ FUNCIONES DE EDICIÓN
+// ⭐ FUNCIONES DE EDICIÓN (OPCIÓN 1 Y 2)
 // ============================================================
-window.editarEnlace = function(key, tipo, campo, dbOrigen) {
-    const db = dbOrigen === 'db1' ? db1 : db2;
+window.editarEnlace = function(key, tipo, campo) {
     const container = document.getElementById(`item-${key}`);
     if (!container) return;
     
@@ -1244,7 +812,7 @@ window.editarEnlace = function(key, tipo, campo, dbOrigen) {
         <div style="font-size:.55rem;color:${color};margin-bottom:.1rem;">🔗 ${label}</div>
         <input class="edit-input" id="edit-input-${key}-${campo}" value="${currentUrl}" placeholder="Pega el nuevo enlace..." style="width:100%;">
         <div class="edit-actions">
-            <button class="save-btn" onclick="guardarEnlace('${key}', '${tipo}', '${campo}', '${dbOrigen}')"><i class="fas fa-check"></i> Guardar</button>
+            <button class="save-btn" onclick="guardarEnlace('${key}', '${tipo}', '${campo}')"><i class="fas fa-check"></i> Guardar</button>
             <button class="cancel-btn" onclick="cancelarEdicion('${key}')"><i class="fas fa-times"></i> Cancelar</button>
         </div>
     `;
@@ -1260,7 +828,7 @@ window.cancelarEdicion = function(key) {
     cargarContenido();
 };
 
-window.guardarEnlace = async function(key, tipo, campo, dbOrigen) {
+window.guardarEnlace = async function(key, tipo, campo) {
     const input = document.getElementById(`edit-input-${key}-${campo}`);
     if (!input) return;
     
@@ -1271,10 +839,9 @@ window.guardarEnlace = async function(key, tipo, campo, dbOrigen) {
     }
     
     try {
-        const db = dbOrigen === 'db1' ? db1 : db2;
         const path = tipo === 'pelicula' ? 'contenido_personalizado' : 'series_personalizadas';
         await db.ref(`${path}/${key}`).update({ [campo]: nuevoEnlace });
-        mostrarToast(`✅ ${campo} actualizada en ${dbOrigen}`, 'success');
+        mostrarToast(`✅ ${campo} actualizada`, 'success');
         delete itemsEditando[key];
         cargarContenido();
     } catch(e) {
@@ -1282,14 +849,14 @@ window.guardarEnlace = async function(key, tipo, campo, dbOrigen) {
     }
 };
 
-window.agregarOpcion2 = function(key, tipo, tmdbId, dbOrigen) {
-    const db = dbOrigen === 'db1' ? db1 : db2;
+// Agregar Opción 2
+window.agregarOpcion2 = function(key, tipo, tmdbId) {
     const container = document.getElementById(`item-${key}`);
     if (!container) return;
     
     const op2Existente = container.querySelector('.enlace-wrap.op2-wrap');
     if (op2Existente) {
-        editarEnlace(key, tipo, 'op2', dbOrigen);
+        editarEnlace(key, tipo, 'op2');
         return;
     }
     
@@ -1300,7 +867,7 @@ window.agregarOpcion2 = function(key, tipo, tmdbId, dbOrigen) {
         <div style="font-size:.55rem;color:#60A5FA;margin-bottom:.1rem;">🔗 Opción 2 (agregar)</div>
         <input class="edit-input" id="op2-input-${key}" placeholder="Pega enlace de BigMoly, VidMoly..." style="width:100%;">
         <div class="edit-actions">
-            <button class="save-btn" onclick="guardarOpcion2Nueva('${key}', '${tipo}', '${tmdbId}', '${dbOrigen}')"><i class="fas fa-check"></i> Guardar</button>
+            <button class="save-btn" onclick="guardarOpcion2Nueva('${key}', '${tipo}', '${tmdbId}')"><i class="fas fa-check"></i> Guardar</button>
             <button class="cancel-btn" onclick="cancelarOpcion2('${key}')"><i class="fas fa-times"></i> Cancelar</button>
         </div>
     `;
@@ -1318,7 +885,7 @@ window.agregarOpcion2 = function(key, tipo, tmdbId, dbOrigen) {
     }, 100);
 };
 
-window.guardarOpcion2Nueva = async function(key, tipo, tmdbId, dbOrigen) {
+window.guardarOpcion2Nueva = async function(key, tipo, tmdbId) {
     const input = document.getElementById(`op2-input-${key}`);
     if (!input) return;
     
@@ -1329,7 +896,6 @@ window.guardarOpcion2Nueva = async function(key, tipo, tmdbId, dbOrigen) {
     }
     
     try {
-        const db = dbOrigen === 'db1' ? db1 : db2;
         const path = tipo === 'pelicula' ? 'contenido_personalizado' : 'series_personalizadas';
         await db.ref(`${path}/${key}`).update({ opcion2: nuevoEnlace });
         mostrarToast('✅ Opción 2 agregada', 'success');
@@ -1346,6 +912,187 @@ window.cancelarOpcion2 = function(key) {
 };
 
 // ============================================================
+// ⭐ EDITAR CAPÍTULOS DE SERIES
+// ============================================================
+window.editarCapitulo = function(serieKey, tempNum, capIndex, campo) {
+    const inputId = `cap-${campo}-input-${serieKey}-${tempNum}-${capIndex}`;
+    const input = document.getElementById(inputId);
+    const display = document.getElementById(`cap-${campo}-display-${serieKey}-${tempNum}-${capIndex}`);
+    const saveBtn = document.getElementById(`cap-${campo}-save-${serieKey}-${tempNum}-${capIndex}`);
+    
+    if (!input || !display || !saveBtn) return;
+    
+    if (input.style.display === 'none' || !input.style.display) {
+        input.style.display = 'inline-block';
+        display.style.display = 'none';
+        saveBtn.style.display = 'inline-block';
+        input.focus();
+        input.select();
+    }
+};
+
+window.guardarCapitulo = async function(serieKey, tempNum, capIndex, campo) {
+    const inputId = `cap-${campo}-input-${serieKey}-${tempNum}-${capIndex}`;
+    const input = document.getElementById(inputId);
+    const display = document.getElementById(`cap-${campo}-display-${serieKey}-${tempNum}-${capIndex}`);
+    const saveBtn = document.getElementById(`cap-${campo}-save-${serieKey}-${tempNum}-${capIndex}`);
+    
+    if (!input || !display || !saveBtn) return;
+    
+    const nuevoEnlace = input.value.trim();
+    if (!nuevoEnlace) {
+        mostrarToast('❌ El enlace no puede estar vacío', 'error');
+        return;
+    }
+    
+    try {
+        const snap = await db.ref(`series_personalizadas/${serieKey}`).once('value');
+        const serie = snap.val();
+        if (!serie) { mostrarToast('❌ Serie no encontrada', 'error'); return; }
+        
+        const tempIndex = serie.temporadas.findIndex(t => t.numero === tempNum);
+        if (tempIndex === -1) { mostrarToast('❌ Temporada no encontrada', 'error'); return; }
+        
+        serie.temporadas[tempIndex].capitulos[capIndex][campo] = nuevoEnlace;
+        await db.ref(`series_personalizadas/${serieKey}`).update({ temporadas: serie.temporadas });
+        
+        mostrarToast(`✅ Capítulo ${campo} actualizado`, 'success');
+        input.style.display = 'none';
+        display.style.display = 'inline';
+        display.textContent = nuevoEnlace;
+        saveBtn.style.display = 'none';
+        
+        // Actualizar memoria
+        const idx = seriesKeys.indexOf(serieKey);
+        if (idx !== -1) {
+            seriesLista[idx] = serie;
+        }
+    } catch(e) {
+        mostrarToast('❌ Error: ' + e.message, 'error');
+    }
+};
+
+// ============================================================
+// ⭐ TOGGLE SERIE Y MOSTRAR CAPÍTULOS
+// ============================================================
+window.toggleSerie = function(key) {
+    seriesExpandidas[key] = !seriesExpandidas[key];
+    const container = document.getElementById(`serie-detalle-${key}`);
+    const btn = document.getElementById(`toggle-btn-${key}`);
+    
+    if (!container || !btn) return;
+    
+    if (seriesExpandidas[key]) {
+        container.style.display = 'block';
+        btn.innerHTML = '<i class="fas fa-chevron-up"></i> Ocultar caps';
+        const serie = seriesLista[seriesKeys.indexOf(key)];
+        if (serie && serie.temporadas && serie.temporadas.length) {
+            serieTempSeleccionada[key] = serie.temporadas[0].numero.toString();
+        } else {
+            serieTempSeleccionada[key] = '1';
+        }
+        mostrarCapitulosSerie(key);
+    } else {
+        container.style.display = 'none';
+        btn.innerHTML = '<i class="fas fa-chevron-down"></i> Ver caps';
+    }
+};
+
+window.cambiarTempSerie = function(key) {
+    const select = document.getElementById(`temp-select-${key}`);
+    if (select) {
+        serieTempSeleccionada[key] = select.value;
+        mostrarCapitulosSerie(key);
+    }
+};
+
+function mostrarCapitulosSerie(key) {
+    const container = document.getElementById(`serie-detalle-${key}`);
+    if (!container) return;
+    
+    const tempSeleccionada = parseInt(serieTempSeleccionada[key]) || 1;
+    const serie = seriesLista[seriesKeys.indexOf(key)];
+    if (!serie || !serie.temporadas) {
+        container.innerHTML = `
+            <div style="color:#94A3B8;font-size:.65rem;text-align:center;padding:.3rem;">
+                No hay temporadas. 
+                <button class="admin-btn admin-btn-cyan" style="padding:.1rem .6rem;font-size:.55rem;margin-top:.3rem;" onclick="cargarTodasLasTemporadas('${key}')">
+                    <i class="fas fa-download"></i> Cargar todas las temps
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    const temp = serie.temporadas.find(t => t.numero === tempSeleccionada);
+    if (!temp) {
+        container.innerHTML = `
+            <div style="color:#64748B;font-size:.65rem;padding:.2rem;">
+                No hay capítulos para la temporada ${tempSeleccionada}
+                <button class="admin-btn admin-btn-cyan" style="padding:.1rem .6rem;font-size:.55rem;margin-left:.3rem;" onclick="cargarTodasLasTemporadas('${key}')">
+                    <i class="fas fa-download"></i> Cargar todas
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = `
+        <div class="temp-selector-serie">
+            <label><i class="fas fa-layer-group"></i> Temporada:</label>
+            <select id="temp-select-${key}" onchange="cambiarTempSerie('${key}')">
+    `;
+    
+    serie.temporadas.forEach(t => {
+        const selected = t.numero === tempSeleccionada ? 'selected' : '';
+        html += `<option value="${t.numero}" ${selected}>Temporada ${t.numero}</option>`;
+    });
+    
+    html += `
+            </select>
+            <span class="badge-temp">${temp.capitulos ? temp.capitulos.length : 0} capítulos</span>
+            <button class="admin-btn admin-btn-cyan" style="padding:.05rem .5rem;font-size:.5rem;" onclick="cargarTodasLasTemporadas('${key}')">
+                <i class="fas fa-sync-alt"></i> Recargar temps
+            </button>
+        </div>
+        <div class="temporada-caps">
+    `;
+    
+    if (temp.capitulos && temp.capitulos.length) {
+        temp.capitulos.forEach((cap, idx) => {
+            const capUrl = cap.url || 'Sin enlace';
+            const capOp2 = cap.opcion2 || '';
+            
+            html += `
+                <div class="capitulo-detalle">
+                    <div class="cap-titulo">Cap ${cap.numero || idx + 1}: ${cap.titulo || 'Sin título'}</div>
+                    <div class="cap-meta">${cap.sinopsis || 'Sin sinopsis'}</div>
+                    <div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.1rem;align-items:center;">
+                        <span style="color:#34D399;font-size:.55rem;">▶ Op1:</span>
+                        <span id="cap-url-display-${key}-${tempSeleccionada}-${idx}" style="font-size:.55rem;color:#34D399;">${capUrl}</span>
+                        <input class="edit-input" id="cap-url-input-${key}-${tempSeleccionada}-${idx}" value="${capUrl}" style="display:none;width:120px;font-size:.5rem;">
+                        <button class="admin-btn admin-btn-blue" style="padding:.05rem .3rem;font-size:.45rem;" onclick="editarCapitulo('${key}', ${tempSeleccionada}, ${idx}, 'url')"><i class="fas fa-pen"></i></button>
+                        <button class="admin-btn admin-btn-green" id="cap-url-save-${key}-${tempSeleccionada}-${idx}" style="display:none;padding:.05rem .3rem;font-size:.45rem;" onclick="guardarCapitulo('${key}', ${tempSeleccionada}, ${idx}, 'url')"><i class="fas fa-check"></i></button>
+                    </div>
+                    <div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.1rem;align-items:center;">
+                        <span style="color:#60A5FA;font-size:.55rem;">▶ Op2:</span>
+                        <span id="cap-opcion2-display-${key}-${tempSeleccionada}-${idx}" style="font-size:.55rem;color:#60A5FA;">${capOp2 || 'Sin opción 2'}</span>
+                        <input class="edit-input" id="cap-opcion2-input-${key}-${tempSeleccionada}-${idx}" value="${capOp2 || ''}" style="display:none;width:120px;font-size:.5rem;">
+                        <button class="admin-btn admin-btn-purple" style="padding:.05rem .3rem;font-size:.45rem;" onclick="editarCapitulo('${key}', ${tempSeleccionada}, ${idx}, 'opcion2')"><i class="fas fa-pen"></i></button>
+                        <button class="admin-btn admin-btn-green" id="cap-opcion2-save-${key}-${tempSeleccionada}-${idx}" style="display:none;padding:.05rem .3rem;font-size:.45rem;" onclick="guardarCapitulo('${key}', ${tempSeleccionada}, ${idx}, 'opcion2')"><i class="fas fa-check"></i></button>
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        html += `<div style="color:#64748B;font-size:.65rem;padding:.2rem;">No hay capítulos en esta temporada</div>`;
+    }
+    
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
+// ============================================================
 // ⭐ PEDIDOS
 // ============================================================
 function cargarPedidos() {
@@ -1353,7 +1100,7 @@ function cargarPedidos() {
     const container = document.getElementById('listaPedidosAdmin');
     container.innerHTML = '<p class="loading-text">Cargando pedidos...</p>';
     
-    db1.ref('pedidos').orderByChild('fecha').once('value').then((snap) => {
+    db.ref('pedidos').orderByChild('fecha').once('value').then((snap) => {
         const data = snap.val();
         container.innerHTML = '';
         
@@ -1402,7 +1149,7 @@ function cargarPedidos() {
 
 function actualizarEstadoPedido(key, nuevoEstado) {
     if (!confirm(`¿Cambiar a "${nuevoEstado}"?`)) return;
-    db1.ref(`pedidos/${key}`).update({ estado: nuevoEstado }).then(() => {
+    db.ref(`pedidos/${key}`).update({ estado: nuevoEstado }).then(() => {
         mostrarToast(`✅ Pedido actualizado`, 'success');
         cargarPedidos();
     });
@@ -1410,11 +1157,34 @@ function actualizarEstadoPedido(key, nuevoEstado) {
 
 function eliminarPedido(key) {
     if (!confirm('⚠️ ¿Eliminar este pedido?')) return;
-    db1.ref(`pedidos/${key}`).remove().then(() => {
+    db.ref(`pedidos/${key}`).remove().then(() => {
         mostrarToast('🗑️ Pedido eliminado', 'warning');
         cargarPedidos();
     });
 }
+
+// ============================================================
+// ⭐ LIMPIAR TODO
+// ============================================================
+window.limpiarTodo = async function() {
+    if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
+    if (!confirm('⚠️ ¿Eliminar TODO el contenido de Firebase?\n¡No se puede deshacer!')) return;
+    try {
+        const snap = await db.ref().once('value');
+        const data = snap.val();
+        const updates = {};
+        if (data) {
+            Object.keys(data).forEach(key => {
+                if (key === 'contenido_personalizado' || key === 'series_personalizadas') updates[key] = null;
+            });
+            await db.ref().update(updates);
+        }
+        mostrarToast('🗑️ Todo eliminado', 'warning');
+        cargarContenido();
+    } catch(e) {
+        mostrarToast('❌ Error: ' + e.message, 'error');
+    }
+};
 
 // ============================================================
 // ⭐ FILTRAR Y PAGINACIÓN
@@ -1476,11 +1246,212 @@ function mostrarPagina() {
 }
 
 // ============================================================
-// ⭐ INICIO
+// ⭐ CARGAR CONTENIDO
 // ============================================================
-console.log('✅ Admin TELY - Anti-Duplicados');
-console.log('🟢 DB1: tely-c9776');
-console.log('🩷 DB2: tely-bd2 (con verificación)');
+window.cargarContenido = async function() {
+    if (!esAdmin) return;
+    const container = document.getElementById('listaContenido');
+    container.innerHTML = '<p class="loading-text">🔍 Cargando contenido...</p>';
+    
+    try {
+        const [pSnap, sSnap] = await Promise.all([
+            db.ref('contenido_personalizado').once('value'),
+            db.ref('series_personalizadas').once('value')
+        ]);
+        
+        const pData = pSnap.val() || {};
+        const sData = sSnap.val() || {};
+        
+        peliculasLista = Object.values(pData);
+        seriesLista = Object.values(sData);
+        peliculasKeys = Object.keys(pData);
+        seriesKeys = Object.keys(sData);
+        
+        if (!peliculasLista.length && !seriesLista.length) {
+            container.innerHTML = `
+                <div style="color:#64748B;text-align:center;padding:1rem;font-size:.9rem;">
+                    📭 No hay contenido guardado.
+                    <br><br>
+                    <button onclick="generarPeliculas()" style="padding:.5rem 1.5rem;background:#7C3AED;border:none;border-radius:8px;color:#fff;font-weight:600;cursor:pointer;font-size:.8rem;">
+                        <i class="fas fa-film"></i> Generar Películas
+                    </button>
+                    <button onclick="generarSeries()" style="padding:.5rem 1.5rem;background:#8B5CF6;border:none;border-radius:8px;color:#fff;font-weight:600;cursor:pointer;font-size:.8rem;margin-left:.5rem;">
+                        <i class="fas fa-tv"></i> Generar Series
+                    </button>
+                </div>
+            `;
+            document.getElementById('paginacionContainer').style.display = 'none';
+            return;
+        }
+        
+        container.innerHTML = '';
+        
+        // ⭐ PELÍCULAS
+        if (peliculasLista.length) {
+            const div = document.createElement('div');
+            div.innerHTML = `<div style="font-weight:700;color:#A78BFA;margin:.3rem 0;">🎬 Películas (${peliculasLista.length})</div>`;
+            
+            peliculasLista.forEach((p, index) => {
+                const key = peliculasKeys[index];
+                const portada = p.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
+                const urlOp1 = p.url || 'Sin enlace';
+                const urlOp2 = p.opcion2 || '';
+                
+                const item = document.createElement('div');
+                item.className = 'admin-item';
+                item.id = `item-${key}`;
+                item.dataset.titulo = p.titulo;
+                item.dataset.tipo = 'pelicula';
+                item.style.borderLeftColor = '#10B981';
+                
+                item.innerHTML = `
+                    <div class="top-row">
+                        <img src="${portada}" class="thumbnail" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+                        <div class="info-item">
+                            <div class="title">${p.titulo} <span class="badge-tipo pelicula">🎬</span></div>
+                            <div class="meta">${p.anio || 'N/D'} • ⭐ ${p.puntuacion || 'N/A'} • TMDB: ${p.tmdb_id}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="enlace-wrap url-wrap">
+                        <div style="font-size:.55rem;color:#34D399;margin-bottom:.05rem;">🔗 Opción 1</div>
+                        <div class="enlace op1" onclick="editarEnlace('${key}', 'pelicula', 'url')">${urlOp1}</div>
+                    </div>
+                    
+                    <div class="enlace-wrap ${urlOp2 ? 'op2-wrap' : ''}">
+                        <div style="font-size:.55rem;color:#60A5FA;margin-bottom:.05rem;">🔗 Opción 2</div>
+                        ${urlOp2 
+                            ? `<div class="enlace op2" onclick="editarEnlace('${key}', 'pelicula', 'op2')">${urlOp2}</div>`
+                            : `<div style="font-size:.55rem;color:#64748B;">Sin opción 2 <button class="admin-btn admin-btn-purple" style="padding:.05rem .4rem;font-size:.45rem;margin-left:.3rem;" onclick="agregarOpcion2('${key}', 'pelicula', '${p.tmdb_id}')"><i class="fas fa-plus"></i> Agregar</button></div>`
+                        }
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="admin-btn admin-btn-danger" onclick="eliminarItem('${key}', 'pelicula')"><i class="fas fa-trash"></i> Eliminar</button>
+                    </div>
+                `;
+                div.appendChild(item);
+            });
+            container.appendChild(div);
+        }
+        
+        // ⭐ SERIES
+        if (seriesLista.length) {
+            const div = document.createElement('div');
+            div.innerHTML = `<div style="font-weight:700;color:#34D399;margin:.5rem 0 .3rem;">📺 Series (${seriesLista.length})</div>`;
+            
+            seriesLista.forEach((s, index) => {
+                const key = seriesKeys[index];
+                const capsCount = s.temporadas ? s.temporadas.reduce((sum, t) => sum + (t.capitulos ? t.capitulos.length : 0), 0) : 0;
+                const isExpanded = seriesExpandidas[key] || false;
+                const portada = s.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
+                const urlOp1 = s.url || 'Sin enlace';
+                const urlOp2 = s.opcion2 || '';
+                const hasTemps = s.temporadas && s.temporadas.length > 0;
+                
+                const item = document.createElement('div');
+                item.className = 'admin-item serie-expandida';
+                item.id = `item-${key}`;
+                item.dataset.titulo = s.titulo;
+                item.dataset.tipo = 'serie';
+                item.style.borderLeftColor = '#34D399';
+                
+                if (!serieTempSeleccionada[key]) {
+                    if (s.temporadas && s.temporadas.length) {
+                        serieTempSeleccionada[key] = s.temporadas[0].numero.toString();
+                    } else {
+                        serieTempSeleccionada[key] = '1';
+                    }
+                }
+                
+                item.innerHTML = `
+                    <div class="top-row">
+                        <img src="${portada}" class="thumbnail" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+                        <div class="info-item">
+                            <div class="title">${s.titulo} <span class="badge-tipo serie">📺</span></div>
+                            <div class="meta">${s.anio || 'N/D'} • ${s.temporadas?.length || 0} temps • ${capsCount} caps • ⭐ ${s.puntuacion || 'N/A'} • TMDB: ${s.tmdb_id}</div>
+                            ${!hasTemps ? `<span style="color:#F59E0B;font-size:.55rem;display:block;">⚠️ Sin temporadas guardadas</span>` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="enlace-wrap url-wrap">
+                        <div style="font-size:.55rem;color:#34D399;margin-bottom:.05rem;">🔗 Opción 1</div>
+                        <div class="enlace op1" onclick="editarEnlace('${key}', 'serie', 'url')">${urlOp1}</div>
+                    </div>
+                    
+                    <div class="enlace-wrap ${urlOp2 ? 'op2-wrap' : ''}">
+                        <div style="font-size:.55rem;color:#60A5FA;margin-bottom:.05rem;">🔗 Opción 2</div>
+                        ${urlOp2 
+                            ? `<div class="enlace op2" onclick="editarEnlace('${key}', 'serie', 'op2')">${urlOp2}</div>`
+                            : `<div style="font-size:.55rem;color:#64748B;">Sin opción 2 <button class="admin-btn admin-btn-purple" style="padding:.05rem .4rem;font-size:.45rem;margin-left:.3rem;" onclick="agregarOpcion2('${key}', 'serie', '${s.tmdb_id}')"><i class="fas fa-plus"></i> Agregar</button></div>`
+                        }
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="toggle-series-btn" id="toggle-btn-${key}" onclick="toggleSerie('${key}')">
+                            <i class="fas fa-chevron-${isExpanded ? 'up' : 'down'}"></i> ${isExpanded ? 'Ocultar caps' : 'Ver caps'}
+                        </button>
+                        ${!hasTemps ? `
+                        <button class="admin-btn admin-btn-cyan" id="btn-cargar-temps-${key}" onclick="cargarTodasLasTemporadas('${key}')" style="padding:.1rem .6rem;font-size:.55rem;">
+                            <i class="fas fa-download"></i> Cargar todas las temps
+                        </button>
+                        ` : `
+                        <button class="admin-btn admin-btn-cyan" id="btn-cargar-temps-${key}" onclick="cargarTodasLasTemporadas('${key}')" style="padding:.1rem .6rem;font-size:.55rem;">
+                            <i class="fas fa-sync-alt"></i> Recargar temps
+                        </button>
+                        `}
+                        <button class="admin-btn admin-btn-danger" onclick="eliminarItem('${key}', 'serie')"><i class="fas fa-trash"></i> Eliminar</button>
+                    </div>
+                    <div id="serie-detalle-${key}" style="display:${isExpanded ? 'block' : 'none'};margin-top:.3rem;background:rgba(255,255,255,.02);border-radius:6px;padding:.2rem;">
+                        ${isExpanded ? `<div style="color:#94A3B8;font-size:.65rem;text-align:center;padding:.3rem;">Cargando capítulos...</div>` : ''}
+                    </div>
+                `;
+                div.appendChild(item);
+                
+                if (isExpanded) {
+                    setTimeout(() => mostrarCapitulosSerie(key), 100);
+                }
+            });
+            container.appendChild(div);
+        }
+        
+        paginaActual = 1;
+        mostrarPagina();
+        
+    } catch(e) {
+        console.error('❌ Error:', e);
+        container.innerHTML = `
+            <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:1rem;text-align:center;">
+                <p style="color:#EF4444;font-size:.9rem;">❌ Error al cargar</p>
+                <p style="color:#94A3B8;font-size:.75rem;margin-top:.3rem;">${e.message || 'Verifica Firebase'}</p>
+                <button onclick="cargarContenido()" style="margin-top:.5rem;padding:.3rem 1rem;background:#7C3AED;border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:.75rem;">
+                    <i class="fas fa-refresh"></i> Reintentar
+                </button>
+            </div>
+        `;
+    }
+};
+
+// ============================================================
+// ⭐ ELIMINAR ITEM
+// ============================================================
+window.eliminarItem = async function(key, tipo) {
+    if (!confirm(`¿Eliminar este ${tipo}?`)) return;
+    try {
+        const path = tipo === 'pelicula' ? 'contenido_personalizado' : 'series_personalizadas';
+        await db.ref(`${path}/${key}`).remove();
+        mostrarToast(`🗑️ ${tipo} eliminado`, 'warning');
+        cargarContenido();
+    } catch(e) {
+        mostrarToast('❌ Error: ' + e.message, 'error');
+    }
+};
+
+// ============================================================
+// ⭐ CARGA INICIAL
+// ============================================================
+console.log('✅ Admin TELY - Con botón "Cargar todas las temps"');
+console.log('📦 Proyecto: tely-c9776');
 
 setTimeout(() => {
     if (esAdmin) {
