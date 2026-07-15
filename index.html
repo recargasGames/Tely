@@ -427,7 +427,7 @@ function mostrarContenidoFirebase(pelis, series) {
 }
 
 // ============================================================
-// CREAR TARJETA
+// ⭐ CREAR TARJETA (CON REDIRECCIÓN MEJORADA)
 // ============================================================
 function crearTarjeta(item, esSerie = false) {
     const div = document.createElement('div');
@@ -435,6 +435,7 @@ function crearTarjeta(item, esSerie = false) {
     const tipo = esSerie ? '📺' : '🎬';
     const idReal = item.tmdb_id || item.id;
     const tipoReal = esSerie ? 'serie' : 'pelicula';
+    
     div.innerHTML = `
         <span class="badge-year">${item.anio || 'N/D'}</span>
         <span class="badge-type">${tipo}</span>
@@ -448,11 +449,26 @@ function crearTarjeta(item, esSerie = false) {
             </div>
         </div>
     `;
+    
     div.onclick = () => {
-        if (auth.currentUser) {
+        // Verificar autenticación
+        const user = auth.currentUser;
+        if (user) {
+            // ✅ Si está logueado, ir al reproductor
             const p = new URLSearchParams({ play: idReal, tipo: tipoReal });
             window.location.href = `reproductor.html?${p}`;
-        } else { window.location.href = 'login.html'; }
+        } else {
+            // ✅ Guardar película en sessionStorage
+            sessionStorage.setItem('peliculaPendiente', JSON.stringify({
+                id: idReal,
+                tipo: tipoReal,
+                titulo: item.titulo,
+                timestamp: Date.now()
+            }));
+            // ✅ Guardar también la URL completa para redirigir después del login
+            sessionStorage.setItem('redirectAfterLogin', 'reproductor.html');
+            window.location.href = 'login.html?redirect=reproductor';
+        }
     };
     return div;
 }
@@ -461,7 +477,11 @@ function crearTarjeta(item, esSerie = false) {
 // FAVORITOS Y LISTA
 // ============================================================
 function toggleFavorito(item) {
-    if (!auth.currentUser) { window.location.href = 'login.html'; return; }
+    if (!auth.currentUser) { 
+        sessionStorage.setItem('peliculaPendiente', JSON.stringify(item));
+        window.location.href = 'login.html'; 
+        return; 
+    }
     const uid = auth.currentUser.uid;
     const ref = db1.ref(`usuarios/${uid}/favoritos/${item.id}`);
     ref.once('value').then(s => {
@@ -470,8 +490,13 @@ function toggleFavorito(item) {
         cargarFavoritos();
     });
 }
+
 function toggleMiLista(item) {
-    if (!auth.currentUser) { window.location.href = 'login.html'; return; }
+    if (!auth.currentUser) { 
+        sessionStorage.setItem('peliculaPendiente', JSON.stringify(item));
+        window.location.href = 'login.html'; 
+        return; 
+    }
     const uid = auth.currentUser.uid;
     const ref = db1.ref(`usuarios/${uid}/milista/${item.id}`);
     ref.once('value').then(s => {
@@ -534,6 +559,7 @@ function getImagenUrl(path, size = 'w342') {
     if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
     return `https://image.tmdb.org/t/p/${size}${path}`;
 }
+
 function mostrarToast(msg, tipo = 'success') {
     const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
     const t = document.createElement('div');
@@ -556,9 +582,19 @@ function restaurarScroll() {
     try { document.getElementById('mainContent').scrollTop = parseInt(sessionStorage.getItem('scrollPos')) || 0; } catch(e) {}
 }
 
-function irALogin() { window.location.href = 'login.html'; }
-function cerrarSesion() { auth.signOut().then(() => { location.reload(); }); }
+function irALogin() { 
+    window.location.href = 'login.html'; 
+}
+function cerrarSesion() { 
+    auth.signOut().then(() => { 
+        // Limpiar sessionStorage al cerrar sesión
+        sessionStorage.removeItem('peliculaPendiente');
+        sessionStorage.removeItem('redirectAfterLogin');
+        location.reload(); 
+    }); 
+}
 function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
+
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('userDropdown');
     if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
@@ -567,7 +603,10 @@ document.addEventListener('click', (e) => {
 auth.onAuthStateChanged(user => {
     document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
     document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
-    if (user) { cargarFavoritos(); cargarMiLista(); }
+    if (user) { 
+        cargarFavoritos(); 
+        cargarMiLista(); 
+    }
 });
 
 function toggleTheme() {
