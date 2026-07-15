@@ -82,9 +82,6 @@
         .movie-card .badge-year{position:absolute;top:.15rem;left:.15rem;background:rgba(124,58,237,.85);color:#fff;padding:.03rem .25rem;border-radius:3px;font-size:.35rem;font-weight:700}
         .movie-card .badge-type{position:absolute;top:.15rem;right:.15rem;background:rgba(0,0,0,.7);color:#fff;padding:.03rem .25rem;border-radius:3px;font-size:.35rem;font-weight:600}
         .movie-card .badge-op2{position:absolute;bottom:.15rem;right:.15rem;background:rgba(59,130,246,.85);color:#fff;padding:.02rem .15rem;border-radius:3px;font-size:.3rem;font-weight:600}
-        .movie-card .badge-db{position:absolute;bottom:.15rem;left:.15rem;font-size:.3rem;font-weight:700;padding:.01rem .15rem;border-radius:2px}
-        .movie-card .badge-db.db1{background:rgba(16,185,129,.7);color:#fff}
-        .movie-card .badge-db.db2{background:rgba(236,72,153,.7);color:#fff}
         
         .section-title{font-size:.85rem;font-weight:700;margin:.3rem 0 .15rem;display:flex;align-items:center;gap:.2rem}
         .section-title i{color:#7C3AED}
@@ -284,7 +281,7 @@ const firebaseConfig1 = {
 };
 
 // ============================================================
-// 🔥 CONFIGURACIÓN - DB2 (SECUNDARIA)
+// 🔥 CONFIGURACIÓN - DB2 (SECUNDARIA - SOLO PARA BUSCADOR)
 // ============================================================
 const firebaseConfig2 = {
     apiKey: "AIzaSyCEw5ZmFF4wWBgkAb5dR_hh_DClFmtN4KE",
@@ -309,12 +306,10 @@ const db2 = firebase.database(app2);
 // ⭐⭐ PROXY Y CACHÉ
 // ============================================================
 const CACHE_TMDB = {};
-const PROXY_URL = 'https://corsproxy.io/?';
 
 async function fetchTMDB(path, params = {}) {
     const cacheKey = path + JSON.stringify(params);
     if (CACHE_TMDB[cacheKey]) {
-        console.log('📦 Usando caché:', path);
         return CACHE_TMDB[cacheKey];
     }
     
@@ -333,30 +328,20 @@ async function fetchTMDB(path, params = {}) {
 }
 
 // ============================================================
-// ⭐ CARGAR CONTENIDO DE FIREBASE (DB1 + DB2)
+// ⭐ CARGAR CONTENIDO DE FIREBASE (SOLO DB1)
 // ============================================================
 async function cargarContenidoFirebase() {
-    console.log('📡 Cargando contenido de Firebase...');
+    console.log('📡 Cargando contenido de DB1...');
     
     try {
-        const [pSnap1, sSnap1] = await Promise.all([
+        const [pSnap, sSnap] = await Promise.all([
             db1.ref('contenido_personalizado').once('value'),
             db1.ref('series_personalizadas').once('value')
         ]);
-        const pelis1 = pSnap1.val() || {};
-        const series1 = sSnap1.val() || {};
+        const pelis = pSnap.val() || {};
+        const series = sSnap.val() || {};
         
-        const [pSnap2, sSnap2] = await Promise.all([
-            db2.ref('contenido_personalizado').once('value'),
-            db2.ref('series_personalizadas').once('value')
-        ]);
-        const pelis2 = pSnap2.val() || {};
-        const series2 = sSnap2.val() || {};
-        
-        const todasPelis = { ...pelis1, ...pelis2 };
-        const todasSeries = { ...series1, ...series2 };
-        
-        mostrarContenidoFirebase(todasPelis, todasSeries);
+        mostrarContenidoFirebase(pelis, series);
         
     } catch(e) {
         console.error('❌ Error cargando Firebase:', e);
@@ -378,12 +363,7 @@ function mostrarContenidoFirebase(pelis, series) {
                 portada: p.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
                 puntuacion: p.puntuacion || 'N/A'
             };
-            const card = crearTarjeta(item, false);
-            const dbBadge = document.createElement('span');
-            dbBadge.className = 'badge-db ' + (p._db || 'db1');
-            dbBadge.textContent = p._db === 'db2' ? '🩷' : '🟢';
-            card.querySelector('.badge-type').after(dbBadge);
-            container.appendChild(card);
+            container.appendChild(crearTarjeta(item, false));
         });
     } else {
         container.innerHTML = '<p class="empty-msg">No hay películas en Firebase</p>';
@@ -403,12 +383,7 @@ function mostrarContenidoFirebase(pelis, series) {
                 portada: s.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
                 puntuacion: s.puntuacion || 'N/A'
             };
-            const card = crearTarjeta(item, true);
-            const dbBadge = document.createElement('span');
-            dbBadge.className = 'badge-db ' + (s._db || 'db1');
-            dbBadge.textContent = s._db === 'db2' ? '🩷' : '🟢';
-            card.querySelector('.badge-type').after(dbBadge);
-            sContainer.appendChild(card);
+            sContainer.appendChild(crearTarjeta(item, true));
         });
     } else {
         sContainer.innerHTML = '<p class="empty-msg">No hay series en Firebase</p>';
@@ -416,7 +391,7 @@ function mostrarContenidoFirebase(pelis, series) {
 }
 
 // ============================================================
-// ⭐ CREAR TARJETA (CON REDIRECCIÓN)
+// ⭐ CREAR TARJETA (SIN BADGES DE DB)
 // ============================================================
 function crearTarjeta(item, esSerie = false) {
     const div = document.createElement('div');
@@ -593,14 +568,12 @@ document.addEventListener('click', (e) => {
     if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
 });
 
-// ✅ onAuthStateChanged con verificación de película pendiente
 auth.onAuthStateChanged(user => {
     document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
     document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
     if (user) { 
         cargarFavoritos(); 
         cargarMiLista();
-        // ✅ Verificar película pendiente
         verificarPeliculaPendiente();
     }
 });
@@ -738,7 +711,7 @@ window.cargarMasSeries = function() {
 };
 
 // ============================================================
-// BUSCADOR GLOBAL
+// ⭐ BUSCADOR GLOBAL (BUSCA EN DB1 Y DB2)
 // ============================================================
 window.buscarGlobal = async function() {
     const input = document.getElementById('searchInput');
@@ -769,27 +742,45 @@ window.buscarGlobal = async function() {
                 btn = document.getElementById('btnMasSeries');
                 tipo = 'serie';
             } else {
-                // Buscar en Firebase
-                const resultados = await buscarEnFirebase(texto);
+                // 🔍 BUSCAR EN DB1 PRIMERO
+                const resultadosDB1 = await buscarEnDB1(texto);
                 const pC = document.getElementById('peliculasPopulares');
                 const sC = document.getElementById('seriesPopulares');
                 pC.innerHTML = '';
                 sC.innerHTML = '';
                 
                 let total = 0;
-                if (resultados.peliculas && resultados.peliculas.length) {
-                    resultados.peliculas.slice(0, 20).forEach(p => {
+                if (resultadosDB1.peliculas && resultadosDB1.peliculas.length) {
+                    resultadosDB1.peliculas.slice(0, 20).forEach(p => {
                         pC.appendChild(crearTarjeta(p));
                         total++;
                     });
                 }
-                if (resultados.series && resultados.series.length) {
-                    resultados.series.slice(0, 20).forEach(s => {
+                if (resultadosDB1.series && resultadosDB1.series.length) {
+                    resultadosDB1.series.slice(0, 20).forEach(s => {
                         sC.appendChild(crearTarjeta(s, true));
                         total++;
                     });
                 }
                 
+                // 🔍 SI NO HAY EN DB1, BUSCAR EN DB2
+                if (total === 0) {
+                    const resultadosDB2 = await buscarEnDB2(texto);
+                    if (resultadosDB2.peliculas && resultadosDB2.peliculas.length) {
+                        resultadosDB2.peliculas.slice(0, 20).forEach(p => {
+                            pC.appendChild(crearTarjeta(p));
+                            total++;
+                        });
+                    }
+                    if (resultadosDB2.series && resultadosDB2.series.length) {
+                        resultadosDB2.series.slice(0, 20).forEach(s => {
+                            sC.appendChild(crearTarjeta(s, true));
+                            total++;
+                        });
+                    }
+                }
+                
+                // SI NO HAY EN NINGUNA, BUSCAR EN TMDB
                 if (total === 0) {
                     const [pelisTMDB, seriesTMDB] = await Promise.all([
                         fetchTMDB('search/movie', { query: texto, page: 1 }),
@@ -862,22 +853,22 @@ window.buscarGlobal = async function() {
 };
 
 // ============================================================
-// BUSCAR EN FIREBASE
+// ⭐ BUSCAR EN DB1
 // ============================================================
-async function buscarEnFirebase(texto) {
+async function buscarEnDB1(texto) {
     const resultados = { peliculas: [], series: [] };
     const textoLower = texto.toLowerCase();
     
     try {
-        const [pSnap1, sSnap1] = await Promise.all([
+        const [pSnap, sSnap] = await Promise.all([
             db1.ref('contenido_personalizado').once('value'),
             db1.ref('series_personalizadas').once('value')
         ]);
-        const pelis1 = pSnap1.val() || {};
-        const series1 = sSnap1.val() || {};
+        const pelis = pSnap.val() || {};
+        const series = sSnap.val() || {};
         
-        for (const key of Object.keys(pelis1)) {
-            const p = pelis1[key];
+        for (const key of Object.keys(pelis)) {
+            const p = pelis[key];
             if (p.titulo && p.titulo.toLowerCase().includes(textoLower)) {
                 resultados.peliculas.push({
                     id: p.tmdb_id || key,
@@ -889,8 +880,8 @@ async function buscarEnFirebase(texto) {
                 });
             }
         }
-        for (const key of Object.keys(series1)) {
-            const s = series1[key];
+        for (const key of Object.keys(series)) {
+            const s = series[key];
             if (s.titulo && s.titulo.toLowerCase().includes(textoLower)) {
                 resultados.series.push({
                     id: s.tmdb_id || key,
@@ -902,49 +893,56 @@ async function buscarEnFirebase(texto) {
                 });
             }
         }
-        
-        const [pSnap2, sSnap2] = await Promise.all([
+    } catch(e) {
+        console.error('Error buscando en DB1:', e);
+    }
+    
+    return resultados;
+}
+
+// ============================================================
+// ⭐ BUSCAR EN DB2
+// ============================================================
+async function buscarEnDB2(texto) {
+    const resultados = { peliculas: [], series: [] };
+    const textoLower = texto.toLowerCase();
+    
+    try {
+        const [pSnap, sSnap] = await Promise.all([
             db2.ref('contenido_personalizado').once('value'),
             db2.ref('series_personalizadas').once('value')
         ]);
-        const pelis2 = pSnap2.val() || {};
-        const series2 = sSnap2.val() || {};
+        const pelis = pSnap.val() || {};
+        const series = sSnap.val() || {};
         
-        for (const key of Object.keys(pelis2)) {
-            const p = pelis2[key];
+        for (const key of Object.keys(pelis)) {
+            const p = pelis[key];
             if (p.titulo && p.titulo.toLowerCase().includes(textoLower)) {
-                const existe = resultados.peliculas.some(r => r.tmdb_id == p.tmdb_id);
-                if (!existe) {
-                    resultados.peliculas.push({
-                        id: p.tmdb_id || key,
-                        tmdb_id: p.tmdb_id || key,
-                        titulo: p.titulo,
-                        anio: p.anio || 'N/D',
-                        portada: p.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
-                        puntuacion: p.puntuacion || 'N/A'
-                    });
-                }
+                resultados.peliculas.push({
+                    id: p.tmdb_id || key,
+                    tmdb_id: p.tmdb_id || key,
+                    titulo: p.titulo,
+                    anio: p.anio || 'N/D',
+                    portada: p.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
+                    puntuacion: p.puntuacion || 'N/A'
+                });
             }
         }
-        for (const key of Object.keys(series2)) {
-            const s = series2[key];
+        for (const key of Object.keys(series)) {
+            const s = series[key];
             if (s.titulo && s.titulo.toLowerCase().includes(textoLower)) {
-                const existe = resultados.series.some(r => r.tmdb_id == s.tmdb_id);
-                if (!existe) {
-                    resultados.series.push({
-                        id: s.tmdb_id || key,
-                        tmdb_id: s.tmdb_id || key,
-                        titulo: s.titulo,
-                        anio: s.anio || 'N/D',
-                        portada: s.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
-                        puntuacion: s.puntuacion || 'N/A'
-                    });
-                }
+                resultados.series.push({
+                    id: s.tmdb_id || key,
+                    tmdb_id: s.tmdb_id || key,
+                    titulo: s.titulo,
+                    anio: s.anio || 'N/D',
+                    portada: s.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg',
+                    puntuacion: s.puntuacion || 'N/A'
+                });
             }
         }
-        
     } catch(e) {
-        console.error('Error buscando en Firebase:', e);
+        console.error('Error buscando en DB2:', e);
     }
     
     return resultados;
@@ -1022,14 +1020,13 @@ document.addEventListener('click', function() {
     }
 });
 
-// ✅ Cargar todo
 cargarContenidoFirebase();
 cargarPeliculasTMDB(1);
 cargarSeriesTMDB(1);
 
-console.log('✅ TELY - INDEX OPTIMIZADO');
+console.log('✅ TELY - INDEX SOLO DB1 + BUSCADOR DB1/DB2');
 console.log('🟢 DB1: tely-c9776');
-console.log('🩷 DB2: tely-bd2');
+console.log('🩷 DB2: tely-bd2 (solo buscador)');
 </script>
 </body>
 </html>
