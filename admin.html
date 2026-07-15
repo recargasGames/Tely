@@ -479,10 +479,13 @@ auth.onAuthStateChanged((user) => {
 // FUNCIONES AUXILIARES
 // ============================================================
 function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    const temp = parseInt(temporada) || 1;
+    const cap = parseInt(capitulo) || 1;
+    
     if (tipo === 'pelicula') {
         return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
     } else {
-        return `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temporada}/${capitulo}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+        return `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temp}/${cap}?lang=es-MX&autoplay=1&controls=1&logo=0`;
     }
 }
 
@@ -629,6 +632,7 @@ async function generarSeries() {
             try {
                 const s = seriesTotales[i];
                 const temporadas = [];
+                // Solo 2 temporadas por defecto
                 for (let t = 1; t <= Math.min(s.number_of_seasons || 2, 2); t++) {
                     try {
                         const seasonData = await fetchTMDB(`tv/${s.id}/season/${t}`);
@@ -677,14 +681,121 @@ async function generarSeries() {
 }
 
 // ============================================================
-// ⭐ FUNCIONES DE EDICIÓN (OPCIÓN 1 Y 2 FUNCIONALES)
+// ⭐ CARGAR TODAS LAS TEMPORADAS (BOTÓN ESPECIAL)
 // ============================================================
+window.cargarTodasLasTemporadas = async function(key) {
+    if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
+    if (!confirm('⚠️ ¿Cargar TODAS las temporadas de esta serie desde TMDB?\nEsto puede tomar varios segundos.')) return;
+    
+    const btn = document.getElementById(`btn-cargar-temps-${key}`);
+    if (!btn) return;
+    
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner"></span> Cargando...';
+    btn.disabled = true;
+    
+    try {
+        // 1. Obtener la serie desde Firebase
+        const snap = await db.ref(`series_personalizadas/${key}`).once('value');
+        const serie = snap.val();
+        if (!serie) {
+            mostrarToast('❌ Serie no encontrada', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+        }
+        
+        const tmdbId = serie.tmdb_id;
+        if (!tmdbId) {
+            mostrarToast('❌ No tiene TMDB ID', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+        }
+        
+        // 2. Obtener datos de la serie desde TMDB
+        mostrarToast('📡 Obteniendo datos de TMDB...', 'info');
+        const data = await fetchTMDB(`tv/${tmdbId}`);
+        if (!data || !data.id) {
+            mostrarToast('❌ Serie no encontrada en TMDB', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+        }
+        
+        const numTemporadas = data.number_of_seasons || 1;
+        mostrarToast(`📺 Cargando ${numTemporadas} temporadas...`, 'info');
+        
+        // 3. Obtener cada temporada
+        const nuevasTemporadas = [];
+        for (let t = 1; t <= numTemporadas; t++) {
+            try {
+                const seasonData = await fetchTMDB(`tv/${tmdbId}/season/${t}`);
+                if (!seasonData || !seasonData.episodes) continue;
+                
+                const capitulos = seasonData.episodes.map(ep => ({
+                    numero: ep.episode_number,
+                    titulo: ep.name || `Capítulo ${ep.episode_number}`,
+                    sinopsis: ep.overview || 'Sin sinopsis',
+                    url: generarEnlaceUnlimplay(tmdbId, 'serie', t, ep.episode_number),
+                    opcion2: null
+                }));
+                nuevasTemporadas.push({
+                    numero: t,
+                    nombre: seasonData.name || `Temporada ${t}`,
+                    capitulos: capitulos
+                });
+            } catch(e) {
+                console.error(`Error en temp ${t}:`, e);
+            }
+        }
+        
+        if (nuevasTemporadas.length === 0) {
+            mostrarToast('❌ No se pudieron cargar temporadas', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+        }
+        
+        // 4. Guardar en Firebase
+        await db.ref(`series_personalizadas/${key}/temporadas`).set(nuevasTemporadas);
+        
+        mostrarToast(`✅ ${nuevasTemporadas.length} temporadas cargadas`, 'success');
+        
+        // 5. Actualizar la lista en memoria
+        const idx = seriesKeys.indexOf(key);
+        if (idx !== -1) {
+            seriesLista[idx].temporadas = nuevasTemporadas;
+        }
+        
+        // 6. Recargar la vista de la serie
+        if (seriesExpandidas[key]) {
+            mostrarCapitulosSerie(key);
+        }
+        
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        
+    } catch(e) {
+        console.error('Error:', e);
+        mostrarToast('❌ Error: ' + e.message, 'error');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+};
 
-// Editar enlace (Op1 o Op2) - PELÍCULAS Y SERIES
+// ============================================================
+// ⭐ FUNCIONES DE EDICIÓN (OPCIÓN 1 Y 2)
+// ============================================================
 window.editarEnlace = function(key, tipo, campo) {
     const container = document.getElementById(`item-${key}`);
+    if (!container) return;
+    
     const enlaceWrap = container.querySelector(`.enlace-wrap.${campo}-wrap`);
+    if (!enlaceWrap) return;
+    
     const enlaceDiv = enlaceWrap.querySelector('.enlace');
+    if (!enlaceDiv) return;
     
     if (itemsEditando[key]) {
         cancelarEdicion(key);
@@ -694,8 +805,11 @@ window.editarEnlace = function(key, tipo, campo) {
     const currentUrl = enlaceDiv.textContent.trim();
     itemsEditando[key] = true;
     
+    const label = campo === 'url' ? 'Opción 1' : 'Opción 2';
+    const color = campo === 'url' ? '#34D399' : '#60A5FA';
+    
     enlaceWrap.innerHTML = `
-        <div style="font-size:.55rem;color:${campo === 'url' ? '#34D399' : '#60A5FA'};margin-bottom:.1rem;">🔗 ${campo === 'url' ? 'Opción 1' : 'Opción 2'}</div>
+        <div style="font-size:.55rem;color:${color};margin-bottom:.1rem;">🔗 ${label}</div>
         <input class="edit-input" id="edit-input-${key}-${campo}" value="${currentUrl}" placeholder="Pega el nuevo enlace..." style="width:100%;">
         <div class="edit-actions">
             <button class="save-btn" onclick="guardarEnlace('${key}', '${tipo}', '${campo}')"><i class="fas fa-check"></i> Guardar</button>
@@ -735,9 +849,10 @@ window.guardarEnlace = async function(key, tipo, campo) {
     }
 };
 
-// Agregar Opción 2 (si no existe)
+// Agregar Opción 2
 window.agregarOpcion2 = function(key, tipo, tmdbId) {
     const container = document.getElementById(`item-${key}`);
+    if (!container) return;
     
     const op2Existente = container.querySelector('.enlace-wrap.op2-wrap');
     if (op2Existente) {
@@ -757,7 +872,12 @@ window.agregarOpcion2 = function(key, tipo, tmdbId) {
         </div>
     `;
     
-    container.insertBefore(nuevoWrap, container.querySelector('.actions'));
+    const actions = container.querySelector('.actions');
+    if (actions) {
+        container.insertBefore(nuevoWrap, actions);
+    } else {
+        container.appendChild(nuevoWrap);
+    }
     
     setTimeout(() => {
         const input = document.getElementById(`op2-input-${key}`);
@@ -792,13 +912,15 @@ window.cancelarOpcion2 = function(key) {
 };
 
 // ============================================================
-// ⭐ EDITAR CAPÍTULOS DE SERIES (Op1 y Op2)
+// ⭐ EDITAR CAPÍTULOS DE SERIES
 // ============================================================
 window.editarCapitulo = function(serieKey, tempNum, capIndex, campo) {
     const inputId = `cap-${campo}-input-${serieKey}-${tempNum}-${capIndex}`;
     const input = document.getElementById(inputId);
     const display = document.getElementById(`cap-${campo}-display-${serieKey}-${tempNum}-${capIndex}`);
     const saveBtn = document.getElementById(`cap-${campo}-save-${serieKey}-${tempNum}-${capIndex}`);
+    
+    if (!input || !display || !saveBtn) return;
     
     if (input.style.display === 'none' || !input.style.display) {
         input.style.display = 'inline-block';
@@ -814,6 +936,8 @@ window.guardarCapitulo = async function(serieKey, tempNum, capIndex, campo) {
     const input = document.getElementById(inputId);
     const display = document.getElementById(`cap-${campo}-display-${serieKey}-${tempNum}-${capIndex}`);
     const saveBtn = document.getElementById(`cap-${campo}-save-${serieKey}-${tempNum}-${capIndex}`);
+    
+    if (!input || !display || !saveBtn) return;
     
     const nuevoEnlace = input.value.trim();
     if (!nuevoEnlace) {
@@ -837,9 +961,8 @@ window.guardarCapitulo = async function(serieKey, tempNum, capIndex, campo) {
         display.style.display = 'inline';
         display.textContent = nuevoEnlace;
         saveBtn.style.display = 'none';
-        seriesLista[seriesKeys.indexOf(serieKey)] = serie;
         
-        // Actualizar vista
+        // Actualizar memoria
         const idx = seriesKeys.indexOf(serieKey);
         if (idx !== -1) {
             seriesLista[idx] = serie;
@@ -857,9 +980,11 @@ window.toggleSerie = function(key) {
     const container = document.getElementById(`serie-detalle-${key}`);
     const btn = document.getElementById(`toggle-btn-${key}`);
     
+    if (!container || !btn) return;
+    
     if (seriesExpandidas[key]) {
         container.style.display = 'block';
-        btn.innerHTML = '<i class="fas fa-chevron-up"></i> Ocultar';
+        btn.innerHTML = '<i class="fas fa-chevron-up"></i> Ocultar caps';
         const serie = seriesLista[seriesKeys.indexOf(key)];
         if (serie && serie.temporadas && serie.temporadas.length) {
             serieTempSeleccionada[key] = serie.temporadas[0].numero.toString();
@@ -890,7 +1015,10 @@ function mostrarCapitulosSerie(key) {
     if (!serie || !serie.temporadas) {
         container.innerHTML = `
             <div style="color:#94A3B8;font-size:.65rem;text-align:center;padding:.3rem;">
-                No hay temporadas.
+                No hay temporadas. 
+                <button class="admin-btn admin-btn-cyan" style="padding:.1rem .6rem;font-size:.55rem;margin-top:.3rem;" onclick="cargarTodasLasTemporadas('${key}')">
+                    <i class="fas fa-download"></i> Cargar todas las temps
+                </button>
             </div>
         `;
         return;
@@ -901,6 +1029,9 @@ function mostrarCapitulosSerie(key) {
         container.innerHTML = `
             <div style="color:#64748B;font-size:.65rem;padding:.2rem;">
                 No hay capítulos para la temporada ${tempSeleccionada}
+                <button class="admin-btn admin-btn-cyan" style="padding:.1rem .6rem;font-size:.55rem;margin-left:.3rem;" onclick="cargarTodasLasTemporadas('${key}')">
+                    <i class="fas fa-download"></i> Cargar todas
+                </button>
             </div>
         `;
         return;
@@ -920,6 +1051,9 @@ function mostrarCapitulosSerie(key) {
     html += `
             </select>
             <span class="badge-temp">${temp.capitulos ? temp.capitulos.length : 0} capítulos</span>
+            <button class="admin-btn admin-btn-cyan" style="padding:.05rem .5rem;font-size:.5rem;" onclick="cargarTodasLasTemporadas('${key}')">
+                <i class="fas fa-sync-alt"></i> Recargar temps
+            </button>
         </div>
         <div class="temporada-caps">
     `;
@@ -1213,6 +1347,7 @@ window.cargarContenido = async function() {
                 const portada = s.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
                 const urlOp1 = s.url || 'Sin enlace';
                 const urlOp2 = s.opcion2 || '';
+                const hasTemps = s.temporadas && s.temporadas.length > 0;
                 
                 const item = document.createElement('div');
                 item.className = 'admin-item serie-expandida';
@@ -1235,6 +1370,7 @@ window.cargarContenido = async function() {
                         <div class="info-item">
                             <div class="title">${s.titulo} <span class="badge-tipo serie">📺</span></div>
                             <div class="meta">${s.anio || 'N/D'} • ${s.temporadas?.length || 0} temps • ${capsCount} caps • ⭐ ${s.puntuacion || 'N/A'} • TMDB: ${s.tmdb_id}</div>
+                            ${!hasTemps ? `<span style="color:#F59E0B;font-size:.55rem;display:block;">⚠️ Sin temporadas guardadas</span>` : ''}
                         </div>
                     </div>
                     
@@ -1255,6 +1391,15 @@ window.cargarContenido = async function() {
                         <button class="toggle-series-btn" id="toggle-btn-${key}" onclick="toggleSerie('${key}')">
                             <i class="fas fa-chevron-${isExpanded ? 'up' : 'down'}"></i> ${isExpanded ? 'Ocultar caps' : 'Ver caps'}
                         </button>
+                        ${!hasTemps ? `
+                        <button class="admin-btn admin-btn-cyan" id="btn-cargar-temps-${key}" onclick="cargarTodasLasTemporadas('${key}')" style="padding:.1rem .6rem;font-size:.55rem;">
+                            <i class="fas fa-download"></i> Cargar todas las temps
+                        </button>
+                        ` : `
+                        <button class="admin-btn admin-btn-cyan" id="btn-cargar-temps-${key}" onclick="cargarTodasLasTemporadas('${key}')" style="padding:.1rem .6rem;font-size:.55rem;">
+                            <i class="fas fa-sync-alt"></i> Recargar temps
+                        </button>
+                        `}
                         <button class="admin-btn admin-btn-danger" onclick="eliminarItem('${key}', 'serie')"><i class="fas fa-trash"></i> Eliminar</button>
                     </div>
                     <div id="serie-detalle-${key}" style="display:${isExpanded ? 'block' : 'none'};margin-top:.3rem;background:rgba(255,255,255,.02);border-radius:6px;padding:.2rem;">
@@ -1305,10 +1450,9 @@ window.eliminarItem = async function(key, tipo) {
 // ============================================================
 // ⭐ CARGA INICIAL
 // ============================================================
-console.log('✅ Admin TELY - Con Opción 2 funcional');
+console.log('✅ Admin TELY - Con botón "Cargar todas las temps"');
 console.log('📦 Proyecto: tely-c9776');
 
-// Cargar todo al inicio
 setTimeout(() => {
     if (esAdmin) {
         cargarContenido();
