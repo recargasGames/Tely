@@ -88,14 +88,14 @@
     import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail, onAuthStateChanged } from "firebase/auth";
 
     const firebaseConfig = {
-    apiKey: "AIzaSyDSCjhkZBmBfpgsyLPdN50ISvgvzfGRH2Q",
-    authDomain: "tely-c9776.firebaseapp.com",
-    projectId: "tely-c9776",
-    storageBucket: "tely-c9776.firebasestorage.app",
-    messagingSenderId: "185494855835",
-    appId: "1:185494855835:web:cb113139c6d5aeb472263e",
-    measurementId: "G-KTDT3WS0PP"
-};
+        apiKey: "AIzaSyDSCjhkZBmBfpgsyLPdN50ISvgvzfGRH2Q",
+        authDomain: "tely-c9776.firebaseapp.com",
+        projectId: "tely-c9776",
+        storageBucket: "tely-c9776.firebasestorage.app",
+        messagingSenderId: "185494855835",
+        appId: "1:185494855835:web:cb113139c6d5aeb472263e",
+        measurementId: "G-KTDT3WS0PP"
+    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -113,6 +113,30 @@
     function mostrarError(msg) { const el = document.getElementById('errorMsg'); el.textContent = msg; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 4000); }
     function mostrarExito(msg) { const el = document.getElementById('successMsg'); el.textContent = msg; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 4000); }
 
+    // ============================================================
+    // ⭐ VERIFICAR Y REDIRIGIR DESPUÉS DEL LOGIN
+    // ============================================================
+    function redirigirDespuesDeLogin() {
+        // 1. Verificar si hay película pendiente
+        const pendiente = sessionStorage.getItem('peliculaPendiente');
+        if (pendiente) {
+            try {
+                const data = JSON.parse(pendiente);
+                // Limpiar después de leer
+                sessionStorage.removeItem('peliculaPendiente');
+                const p = new URLSearchParams({ play: data.id, tipo: data.tipo });
+                window.location.href = `reproductor.html?${p}`;
+                return true;
+            } catch(e) {
+                console.error('Error al leer película pendiente:', e);
+            }
+        }
+        
+        // 2. Si no hay película pendiente, ir al index
+        window.location.href = 'index.html';
+        return false;
+    }
+
     window.iniciarSesionEmail = function() {
         const email = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value;
@@ -120,7 +144,13 @@
         if (!email || !password) { mostrarError('Completa todos los campos'); return; }
         btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando...';
         signInWithEmailAndPassword(auth, email, password)
-            .then(() => { mostrarExito('✅ Sesión iniciada'); setTimeout(() => window.location.href = 'index.html', 1000); })
+            .then(() => { 
+                mostrarExito('✅ Sesión iniciada');
+                // ✅ Redirigir después de un pequeño delay para que se muestre el mensaje
+                setTimeout(() => {
+                    redirigirDespuesDeLogin();
+                }, 500);
+            })
             .catch((e) => {
                 let msg = 'Error al iniciar sesión';
                 if (e.code === 'auth/user-not-found') msg = 'Usuario no encontrado';
@@ -136,7 +166,9 @@
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
         signInWithPopup(auth, provider)
-            .then(() => { window.location.href = 'index.html'; })
+            .then(() => {
+                redirigirDespuesDeLogin();
+            })
             .catch((e) => {
                 if (e.code === 'auth/popup-closed-by-user') mostrarError('⚠️ Cancelaste el inicio de sesión');
                 else mostrarError('❌ Error: ' + e.message);
@@ -150,7 +182,15 @@
             .catch(() => mostrarError('❌ Error al enviar el correo'));
     };
 
-    onAuthStateChanged(auth, user => { if (user) window.location.href = 'index.html'; });
+    // ============================================================
+    // ⭐ MONITOREO DE AUTENTICACIÓN
+    // ============================================================
+    onAuthStateChanged(auth, user => { 
+        if (user) {
+            // ✅ Redirigir después del login
+            redirigirDespuesDeLogin();
+        }
+    });
     </script>
 </body>
 </html>
