@@ -833,7 +833,7 @@ function cerrarBannerApp() {
     if (banner) { banner.style.display = 'none'; document.body.classList.remove('banner-activo'); localStorage.setItem('bannerAppCerrado', 'true'); }
 }
 function descargarAPK() {
-    const url = 'https://www.mediafire.com/file/vjw88jw597vfwdc/_Tely_19960416.apk/file';
+    const url = 'https://tely-xi.vercel.app/';
     mostrarToast('📱 Descargando...', 'info');
     const link = document.createElement('a');
     link.href = url;
