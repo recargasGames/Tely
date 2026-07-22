@@ -203,6 +203,73 @@
         
         .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.1);border-radius:50%;border-top-color:#7C3AED;animation:spin 0.8s linear infinite}
         @keyframes spin{to{transform:rotate(360deg)}}
+
+        /* Estilos para el formulario de agregar capítulo */
+        .add-capitulo-form {
+            background: rgba(255,255,255,.03);
+            border-radius: 6px;
+            padding: .5rem;
+            margin: .3rem 0;
+            border: 1px solid rgba(16,185,129,.2);
+            display: none;
+        }
+        .add-capitulo-form .form-row {
+            display: flex;
+            gap: .3rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: .2rem;
+        }
+        .add-capitulo-form .form-row label {
+            font-size: .55rem;
+            color: #94A3B8;
+            min-width: 50px;
+        }
+        .add-capitulo-form .form-row input {
+            flex: 1;
+            padding: .1rem .3rem;
+            border-radius: 4px;
+            border: 1px solid rgba(124,58,237,.2);
+            background: rgba(255,255,255,.05);
+            color: #fff;
+            font-size: .55rem;
+            min-width: 80px;
+        }
+        body:not(.dark) .add-capitulo-form .form-row input {
+            background: rgba(0,0,0,.05);
+            color: #111;
+        }
+        .add-capitulo-form .form-row input:focus {
+            outline: none;
+            border-color: #7C3AED;
+        }
+        .add-capitulo-form .form-actions {
+            display: flex;
+            gap: .3rem;
+            margin-top: .2rem;
+        }
+        .add-capitulo-form .form-actions button {
+            padding: .05rem .6rem;
+            font-size: .5rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .add-capitulo-form .form-actions .btn-guardar-cap {
+            background: rgba(16,185,129,.15);
+            color: #34D399;
+        }
+        .add-capitulo-form .form-actions .btn-guardar-cap:hover {
+            background: rgba(16,185,129,.25);
+        }
+        .add-capitulo-form .form-actions .btn-cancelar-cap {
+            background: rgba(239,68,68,.15);
+            color: #F87171;
+        }
+        .add-capitulo-form .form-actions .btn-cancelar-cap:hover {
+            background: rgba(239,68,68,.25);
+        }
     </style>
 </head>
 <body>
@@ -695,7 +762,6 @@ window.cargarTodasLasTemporadas = async function(key) {
     btn.disabled = true;
     
     try {
-        // 1. Obtener la serie desde Firebase
         const snap = await db.ref(`series_personalizadas/${key}`).once('value');
         const serie = snap.val();
         if (!serie) {
@@ -713,7 +779,6 @@ window.cargarTodasLasTemporadas = async function(key) {
             return;
         }
         
-        // 2. Obtener datos de la serie desde TMDB
         mostrarToast('📡 Obteniendo datos de TMDB...', 'info');
         const data = await fetchTMDB(`tv/${tmdbId}`);
         if (!data || !data.id) {
@@ -726,7 +791,6 @@ window.cargarTodasLasTemporadas = async function(key) {
         const numTemporadas = data.number_of_seasons || 1;
         mostrarToast(`📺 Cargando ${numTemporadas} temporadas...`, 'info');
         
-        // 3. Obtener cada temporada
         const nuevasTemporadas = [];
         for (let t = 1; t <= numTemporadas; t++) {
             try {
@@ -757,18 +821,15 @@ window.cargarTodasLasTemporadas = async function(key) {
             return;
         }
         
-        // 4. Guardar en Firebase
         await db.ref(`series_personalizadas/${key}/temporadas`).set(nuevasTemporadas);
         
         mostrarToast(`✅ ${nuevasTemporadas.length} temporadas cargadas`, 'success');
         
-        // 5. Actualizar la lista en memoria
         const idx = seriesKeys.indexOf(key);
         if (idx !== -1) {
             seriesLista[idx].temporadas = nuevasTemporadas;
         }
         
-        // 6. Recargar la vista de la serie
         if (seriesExpandidas[key]) {
             mostrarCapitulosSerie(key);
         }
@@ -781,6 +842,124 @@ window.cargarTodasLasTemporadas = async function(key) {
         mostrarToast('❌ Error: ' + e.message, 'error');
         btn.innerHTML = originalText;
         btn.disabled = false;
+    }
+};
+
+// ============================================================
+// ⭐ AGREGAR CAPÍTULO MANUALMENTE
+// ============================================================
+window.mostrarFormAgregarCapitulo = function(serieKey, tempNum) {
+    const formId = `add-cap-form-${serieKey}-${tempNum}`;
+    const form = document.getElementById(formId);
+    if (!form) return;
+    
+    // Toggle visibility
+    if (form.style.display === 'block') {
+        form.style.display = 'none';
+        return;
+    }
+    
+    form.style.display = 'block';
+    // Limpiar campos
+    const inputs = form.querySelectorAll('input');
+    inputs.forEach(inp => inp.value = '');
+    // Enfocar el primer input
+    const numInput = document.getElementById(`add-cap-num-${serieKey}-${tempNum}`);
+    if (numInput) numInput.focus();
+};
+
+window.guardarCapituloManual = async function(serieKey, tempNum) {
+    if (!esAdmin) { mostrarToast('⛔ No tienes permisos', 'error'); return; }
+    
+    const numInput = document.getElementById(`add-cap-num-${serieKey}-${tempNum}`);
+    const tituloInput = document.getElementById(`add-cap-titulo-${serieKey}-${tempNum}`);
+    const urlInput = document.getElementById(`add-cap-url-${serieKey}-${tempNum}`);
+    const op2Input = document.getElementById(`add-cap-op2-${serieKey}-${tempNum}`);
+    
+    if (!numInput || !tituloInput || !urlInput) {
+        mostrarToast('❌ Error en el formulario', 'error');
+        return;
+    }
+    
+    const numero = parseInt(numInput.value.trim());
+    const titulo = tituloInput.value.trim() || `Capítulo ${numero}`;
+    const url = urlInput.value.trim();
+    const opcion2 = op2Input.value.trim() || null;
+    
+    if (!numero || numero <= 0) {
+        mostrarToast('❌ Ingresa un número de capítulo válido', 'error');
+        return;
+    }
+    
+    if (!url) {
+        mostrarToast('❌ Ingresa un enlace para la Opción 1', 'error');
+        return;
+    }
+    
+    try {
+        // Obtener la serie actual
+        const snap = await db.ref(`series_personalizadas/${serieKey}`).once('value');
+        const serie = snap.val();
+        if (!serie) {
+            mostrarToast('❌ Serie no encontrada', 'error');
+            return;
+        }
+        
+        // Encontrar la temporada
+        let tempIndex = serie.temporadas.findIndex(t => t.numero === tempNum);
+        if (tempIndex === -1) {
+            // Si no existe, crear la temporada
+            serie.temporadas.push({
+                numero: tempNum,
+                nombre: `Temporada ${tempNum}`,
+                capitulos: []
+            });
+            tempIndex = serie.temporadas.length - 1;
+        }
+        
+        // Verificar si ya existe un capítulo con ese número
+        const existe = serie.temporadas[tempIndex].capitulos.some(c => c.numero === numero);
+        if (existe) {
+            mostrarToast(`⚠️ El capítulo ${numero} ya existe. Edita el existente.`, 'warning');
+            return;
+        }
+        
+        // Agregar el nuevo capítulo
+        const nuevoCap = {
+            numero: numero,
+            titulo: titulo,
+            sinopsis: 'Sin sinopsis',
+            url: url,
+            opcion2: opcion2
+        };
+        
+        serie.temporadas[tempIndex].capitulos.push(nuevoCap);
+        // Ordenar capítulos por número
+        serie.temporadas[tempIndex].capitulos.sort((a, b) => a.numero - b.numero);
+        
+        // Guardar en Firebase
+        await db.ref(`series_personalizadas/${serieKey}`).update({ temporadas: serie.temporadas });
+        
+        mostrarToast(`✅ Capítulo ${numero} agregado correctamente`, 'success');
+        
+        // Actualizar memoria
+        const idx = seriesKeys.indexOf(serieKey);
+        if (idx !== -1) {
+            seriesLista[idx] = serie;
+        }
+        
+        // Ocultar formulario
+        const formId = `add-cap-form-${serieKey}-${tempNum}`;
+        document.getElementById(formId).style.display = 'none';
+        
+        // Recargar vista de la serie
+        if (seriesExpandidas[serieKey]) {
+            mostrarCapitulosSerie(serieKey);
+        }
+        
+    } catch(e) {
+        console.error('Error:', e);
+        mostrarToast('❌ Error: ' + e.message, 'error');
     }
 };
 
@@ -962,7 +1141,6 @@ window.guardarCapitulo = async function(serieKey, tempNum, capIndex, campo) {
         display.textContent = nuevoEnlace;
         saveBtn.style.display = 'none';
         
-        // Actualizar memoria
         const idx = seriesKeys.indexOf(serieKey);
         if (idx !== -1) {
             seriesLista[idx] = serie;
@@ -1054,7 +1232,31 @@ function mostrarCapitulosSerie(key) {
             <button class="admin-btn admin-btn-cyan" style="padding:.05rem .5rem;font-size:.5rem;" onclick="cargarTodasLasTemporadas('${key}')">
                 <i class="fas fa-sync-alt"></i> Recargar temps
             </button>
+            <button class="admin-btn admin-btn-green" style="padding:.05rem .5rem;font-size:.5rem;" onclick="mostrarFormAgregarCapitulo('${key}', ${tempSeleccionada})">
+                <i class="fas fa-plus"></i> Agregar cap
+            </button>
         </div>
+        
+        <!-- Formulario para agregar capítulo -->
+        <div class="add-capitulo-form" id="add-cap-form-${key}-${tempSeleccionada}">
+            <div class="form-row">
+                <label>N°:</label>
+                <input type="number" id="add-cap-num-${key}-${tempSeleccionada}" placeholder="Ej: 23" min="1" style="width:50px;">
+                <label>Título:</label>
+                <input type="text" id="add-cap-titulo-${key}-${tempSeleccionada}" placeholder="Título del capítulo">
+            </div>
+            <div class="form-row">
+                <label>Op1:</label>
+                <input type="text" id="add-cap-url-${key}-${tempSeleccionada}" placeholder="https://...">
+                <label>Op2:</label>
+                <input type="text" id="add-cap-op2-${key}-${tempSeleccionada}" placeholder="https://... (opcional)">
+            </div>
+            <div class="form-actions">
+                <button class="btn-guardar-cap" onclick="guardarCapituloManual('${key}', ${tempSeleccionada})"><i class="fas fa-save"></i> Guardar</button>
+                <button class="btn-cancelar-cap" onclick="document.getElementById('add-cap-form-${key}-${tempSeleccionada}').style.display='none'"><i class="fas fa-times"></i> Cancelar</button>
+            </div>
+        </div>
+        
         <div class="temporada-caps">
     `;
     
@@ -1450,7 +1652,7 @@ window.eliminarItem = async function(key, tipo) {
 // ============================================================
 // ⭐ CARGA INICIAL
 // ============================================================
-console.log('✅ Admin TELY - Con botón "Cargar todas las temps"');
+console.log('✅ Admin TELY - Con botón "Agregar capítulo"');
 console.log('📦 Proyecto: tely-c9776');
 
 setTimeout(() => {
