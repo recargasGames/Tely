@@ -134,7 +134,7 @@
     <div class="player-controls" id="playerControls">
         <button class="btn-opcion active" id="btnOp1" onclick="reproducirOpcion(1)"><i class="fas fa-play"></i> Opción 1</button>
         <button class="btn-opcion opcion2 oculto" id="btnOp2" onclick="reproducirOpcion(2)">
-            <i class="fas fa-play"></i> Opción 2 <span class="badge-opcion2">⭐</span>
+            <i class="fas fa-play"></i> DISPONIBLE<span class="badge-opcion2">✅</span>
         </button>
         <button class="btn-recargar" onclick="recargarVideo()"><i class="fas fa-rotate"></i></button>
         <button class="btn-nueva-ventana" onclick="abrirNuevaVentana()"><i class="fas fa-external-link-alt"></i></button>
@@ -602,7 +602,7 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
             <div class="top">
                 <span class="numero">${capNum}.</span>
                 <span class="titulo">${cap.titulo || 'Episodio ' + capNum}</span>
-                ${tieneOp2 ? '<span class="badge-op2-ep">⭐ Op2</span>' : ''}
+                ${tieneOp2 ? '<span class="badge-op2-ep"> ✅ Disponible</span>' : ''}
             </div>
             <div class="sinopsis">${cap.sinopsis || ''}</div>
         `;
