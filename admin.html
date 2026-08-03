@@ -635,6 +635,7 @@ async function generarPeliculas() {
                     tmdb_id: p.id,
                     puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A',
                     url: generarEnlaceUnlimplay(p.id, 'pelicula'),
+                    opcion2: null,
                     creado: Date.now()
                 });
                 totalGenerados++;
@@ -726,6 +727,7 @@ async function generarSeries() {
                         puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A',
                         temporadas: temporadas,
                         url: generarEnlaceUnlimplay(s.id, 'serie', 1, 1),
+                        opcion2: null,
                         creado: Date.now()
                     });
                     totalGenerados++;
@@ -964,13 +966,25 @@ window.guardarCapituloManual = async function(serieKey, tempNum) {
 };
 
 // ============================================================
-// ⭐ FUNCIONES DE EDICIÓN (OPCIÓN 1 Y 2)
+// ⭐ FUNCIONES DE EDICIÓN (OPCIÓN 1 Y 2) - CORREGIDAS
 // ============================================================
 window.editarEnlace = function(key, tipo, campo) {
     const container = document.getElementById(`item-${key}`);
     if (!container) return;
     
-    const enlaceWrap = container.querySelector(`.enlace-wrap.${campo}-wrap`);
+    // Para películas con op2, buscamos el contenedor específico
+    let enlaceWrap;
+    if (tipo === 'pelicula' && campo === 'op2') {
+        enlaceWrap = container.querySelector('.enlace-wrap.op2-wrap');
+        if (!enlaceWrap) {
+            // Si no existe, creamos uno con el botón de agregar
+            agregarOpcion2(key, tipo, '');
+            return;
+        }
+    } else {
+        enlaceWrap = container.querySelector(`.enlace-wrap.${campo === 'op2' ? 'op2-wrap' : 'url-wrap'}`);
+    }
+    
     if (!enlaceWrap) return;
     
     const enlaceDiv = enlaceWrap.querySelector('.enlace');
@@ -984,8 +998,11 @@ window.editarEnlace = function(key, tipo, campo) {
     const currentUrl = enlaceDiv.textContent.trim();
     itemsEditando[key] = true;
     
-    const label = campo === 'url' ? 'Opción 1' : 'Opción 2';
-    const color = campo === 'url' ? '#34D399' : '#60A5FA';
+    const label = campo === 'op2' ? 'Opción 2' : 'Opción 1';
+    const color = campo === 'op2' ? '#60A5FA' : '#34D399';
+    
+    // Guardamos qué campo estamos editando
+    enlaceWrap.dataset.campo = campo;
     
     enlaceWrap.innerHTML = `
         <div style="font-size:.55rem;color:${color};margin-bottom:.1rem;">🔗 ${label}</div>
@@ -1007,6 +1024,7 @@ window.cancelarEdicion = function(key) {
     cargarContenido();
 };
 
+// CORREGIDA: Guarda correctamente la opción 2
 window.guardarEnlace = async function(key, tipo, campo) {
     const input = document.getElementById(`edit-input-${key}-${campo}`);
     if (!input) return;
@@ -1019,8 +1037,10 @@ window.guardarEnlace = async function(key, tipo, campo) {
     
     try {
         const path = tipo === 'pelicula' ? 'contenido_personalizado' : 'series_personalizadas';
-        await db.ref(`${path}/${key}`).update({ [campo]: nuevoEnlace });
-        mostrarToast(`✅ ${campo} actualizada`, 'success');
+        // IMPORTANTE: Si el campo es 'op2', guardamos como 'opcion2' en la base de datos
+        const campoDb = campo === 'op2' ? 'opcion2' : campo;
+        await db.ref(`${path}/${key}`).update({ [campoDb]: nuevoEnlace });
+        mostrarToast(`✅ ${campo === 'op2' ? 'Opción 2' : 'Enlace'} actualizado`, 'success');
         delete itemsEditando[key];
         cargarContenido();
     } catch(e) {
@@ -1028,7 +1048,7 @@ window.guardarEnlace = async function(key, tipo, campo) {
     }
 };
 
-// Agregar Opción 2
+// CORREGIDA: Guarda correctamente la opción 2 nueva
 window.agregarOpcion2 = function(key, tipo, tmdbId) {
     const container = document.getElementById(`item-${key}`);
     if (!container) return;
@@ -1046,7 +1066,7 @@ window.agregarOpcion2 = function(key, tipo, tmdbId) {
         <div style="font-size:.55rem;color:#60A5FA;margin-bottom:.1rem;">🔗 Opción 2 (agregar)</div>
         <input class="edit-input" id="op2-input-${key}" placeholder="Pega enlace de BigMoly, VidMoly..." style="width:100%;">
         <div class="edit-actions">
-            <button class="save-btn" onclick="guardarOpcion2Nueva('${key}', '${tipo}', '${tmdbId}')"><i class="fas fa-check"></i> Guardar</button>
+            <button class="save-btn" onclick="guardarOpcion2Nueva('${key}', '${tipo}')"><i class="fas fa-check"></i> Guardar</button>
             <button class="cancel-btn" onclick="cancelarOpcion2('${key}')"><i class="fas fa-times"></i> Cancelar</button>
         </div>
     `;
@@ -1064,7 +1084,8 @@ window.agregarOpcion2 = function(key, tipo, tmdbId) {
     }, 100);
 };
 
-window.guardarOpcion2Nueva = async function(key, tipo, tmdbId) {
+// CORREGIDA: Guarda correctamente en 'opcion2'
+window.guardarOpcion2Nueva = async function(key, tipo) {
     const input = document.getElementById(`op2-input-${key}`);
     if (!input) return;
     
@@ -1076,6 +1097,7 @@ window.guardarOpcion2Nueva = async function(key, tipo, tmdbId) {
     
     try {
         const path = tipo === 'pelicula' ? 'contenido_personalizado' : 'series_personalizadas';
+        // Guardamos como 'opcion2'
         await db.ref(`${path}/${key}`).update({ opcion2: nuevoEnlace });
         mostrarToast('✅ Opción 2 agregada', 'success');
         cargarContenido();
