@@ -343,7 +343,7 @@ async function obtenerOpcion2DesdeFirebase(tmdb_id, tipo, temporada = 1, capitul
                     
                     // Buscar opcion2 a nivel de serie
                     if (serie.opcion2 && serie.opcion2.trim() !== '' && serie.opcion2.startsWith('http')) {
-                        console.log('✅ Opción 2 encontrada a nivel de serie:', serie.opcion2);
+                        console.log(' Opción 2 encontrada a nivel de serie:', serie.opcion2);
                         return serie.opcion2;
                     }
                     
@@ -353,7 +353,7 @@ async function obtenerOpcion2DesdeFirebase(tmdb_id, tipo, temporada = 1, capitul
                             if (temp.numero === parseInt(temporada) && temp.capitulos) {
                                 for (const cap of temp.capitulos) {
                                     if (cap.numero === parseInt(capitulo) && cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) {
-                                        console.log('✅ Opción 2 encontrada en capítulo:', cap.opcion2);
+                                        console.log(' Opción 2 encontrada en capítulo:', cap.opcion2);
                                         return cap.opcion2;
                                     }
                                 }
@@ -602,7 +602,7 @@ function mostrarEpisodios(tempIndex, capSeleccionado = 0) {
             <div class="top">
                 <span class="numero">${capNum}.</span>
                 <span class="titulo">${cap.titulo || 'Episodio ' + capNum}</span>
-                ${tieneOp2 ? '<span class="badge-op2-ep"> ✅ Disponible</span>' : ''}
+                ${tieneOp2 ? '<span class="badge-op2-ep"> Opción 2</span>' : ''}
             </div>
             <div class="sinopsis">${cap.sinopsis || ''}</div>
         `;
