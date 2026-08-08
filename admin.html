@@ -44,6 +44,8 @@
         .admin-btn-cyan:hover{background:#0891B2}
         .admin-btn-amber{background:#F59E0B;color:#111}
         .admin-btn-amber:hover{background:#D97706}
+        .admin-btn-pink{background:#EC4899;color:#fff}
+        .admin-btn-pink:hover{background:#DB2777}
         
         .btn-group{display:flex;gap:.3rem;flex-wrap:wrap;margin:.3rem 0}
         .btn-group .admin-btn{padding:.3rem 1rem;font-size:.75rem}
@@ -78,6 +80,7 @@
         .admin-item .badge-tipo{font-size:.5rem;font-weight:600;padding:.03rem .4rem;border-radius:4px}
         .admin-item .badge-tipo.pelicula{background:rgba(124,58,237,.12);color:#A78BFA}
         .admin-item .badge-tipo.serie{background:rgba(16,185,129,.12);color:#34D399}
+        .admin-item .badge-tipo.tmdb{background:rgba(245,158,11,.15);color:#F59E0B}
         
         .user-dropdown{position:absolute;right:0;top:calc(100% + 8px);background:rgba(26,26,46,.95);border-radius:12px;width:200px;border:1px solid rgba(124,58,237,.15);padding:.4rem 0;display:none;z-index:50;box-shadow:0 20px 60px rgba(0,0,0,.5)}
         .user-dropdown.show{display:block}
@@ -117,6 +120,7 @@
         body:not(.dark) .login-footer{color:#555}
         .login-footer a{color:#A78BFA;text-decoration:none;font-weight:600}
         body:not(.dark) .login-footer a{color:#7C3AED}
+        
         .search-admin{display:flex;gap:.5rem;margin-bottom:.5rem;flex-wrap:wrap}
         .search-admin input{flex:1;padding:.4rem .8rem;border-radius:8px;border:1px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.85rem;min-width:150px}
         body:not(.dark) .search-admin input{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
@@ -124,6 +128,29 @@
         .search-admin select{padding:.4rem .8rem;border-radius:8px;border:1px solid rgba(124,58,237,.2);background:rgba(255,255,255,.05);color:#fff;font-size:.85rem;cursor:pointer}
         body:not(.dark) .search-admin select{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.1)}
         .search-admin select:focus{outline:none;border-color:#7C3AED}
+        
+        /* Estilos para resultados de TMDB */
+        .tmdb-result-item{display:flex;align-items:center;gap:.8rem;padding:.5rem .8rem;background:rgba(255,255,255,.03);border-radius:8px;border-left:3px solid #F59E0B;margin-bottom:.3rem;cursor:pointer;transition:.2s}
+        .tmdb-result-item:hover{background:rgba(245,158,11,.08)}
+        body:not(.dark) .tmdb-result-item{background:rgba(0,0,0,.03)}
+        body:not(.dark) .tmdb-result-item:hover{background:rgba(245,158,11,.05)}
+        .tmdb-result-item .thumb{width:40px;height:60px;border-radius:4px;object-fit:cover;background:#1A1A2E;flex-shrink:0}
+        .tmdb-result-item .info{flex:1;min-width:0}
+        .tmdb-result-item .titulo{font-weight:600;font-size:.8rem}
+        .tmdb-result-item .detalle{font-size:.6rem;color:#94A3B8}
+        .tmdb-result-item .badge-tipo{font-size:.5rem;font-weight:600;padding:.03rem .4rem;border-radius:4px}
+        .tmdb-result-item .badge-tipo.pelicula{background:rgba(124,58,237,.12);color:#A78BFA}
+        .tmdb-result-item .badge-tipo.serie{background:rgba(16,185,129,.12);color:#34D399}
+        .tmdb-result-item .acciones{display:flex;gap:.3rem;flex-shrink:0}
+        .tmdb-result-item .acciones button{padding:.1rem .5rem;font-size:.5rem;border-radius:4px;border:none;cursor:pointer;font-weight:600;transition:.2s}
+        .tmdb-result-item .acciones .btn-agregar-op2{background:rgba(139,92,246,.15);color:#A78BFA}
+        .tmdb-result-item .acciones .btn-agregar-op2:hover{background:rgba(139,92,246,.25)}
+        .tmdb-result-item .acciones .btn-ver{background:rgba(59,130,246,.15);color:#3B82F6}
+        .tmdb-result-item .acciones .btn-ver:hover{background:rgba(59,130,246,.25)}
+        
+        .tmdb-results-container{max-height:400px;overflow-y:auto;margin-top:.5rem}
+        .tmdb-loading{color:#94A3B8;text-align:center;padding:1rem;font-size:.8rem}
+        .tmdb-empty{color:#64748B;text-align:center;padding:1rem;font-size:.8rem}
         
         .capitulo-detalle{background:rgba(255,255,255,.02);border-radius:6px;padding:.2rem .4rem;margin:.15rem 0;border-left:2px solid rgba(59,130,246,.3)}
         .capitulo-detalle .cap-titulo{font-size:.65rem;font-weight:500;color:#E2E8F0}
@@ -272,7 +299,6 @@
             background: rgba(239,68,68,.25);
         }
 
-        /* NUEVO: Estilo para el mensaje de búsqueda */
         .no-results {
             color: #94A3B8;
             text-align: center;
@@ -289,6 +315,131 @@
             gap: .3rem;
             flex-wrap: wrap;
             align-items: center;
+        }
+        
+        /* Modal para agregar opción 2 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.8);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-box {
+            background: #1A1A2E;
+            border-radius: 16px;
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid rgba(124,58,237,.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        body:not(.dark) .modal-box {
+            background: #fff;
+            border-color: rgba(0,0,0,.1);
+        }
+        .modal-box h3 {
+            font-weight: 700;
+            margin-bottom: .5rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        .modal-box .modal-close {
+            background: rgba(239,68,68,.15);
+            border: none;
+            color: #F87171;
+            padding: .2rem .6rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: .75rem;
+            margin-left: auto;
+        }
+        .modal-box .modal-close:hover {
+            background: rgba(239,68,68,.25);
+        }
+        .modal-box input {
+            width: 100%;
+            padding: .5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(124,58,237,.2);
+            background: rgba(255,255,255,.05);
+            color: #fff;
+            font-size: .8rem;
+            margin: .3rem 0;
+        }
+        body:not(.dark) .modal-box input {
+            background: rgba(0,0,0,.05);
+            color: #111;
+        }
+        .modal-box input:focus {
+            outline: none;
+            border-color: #7C3AED;
+        }
+        .modal-box .modal-actions {
+            display: flex;
+            gap: .5rem;
+            margin-top: .5rem;
+        }
+        .modal-box .modal-actions button {
+            padding: .3rem 1rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .75rem;
+        }
+        .modal-box .modal-actions .btn-guardar-modal {
+            background: #7C3AED;
+            color: #fff;
+        }
+        .modal-box .modal-actions .btn-guardar-modal:hover {
+            background: #6D28D9;
+        }
+        .modal-box .modal-actions .btn-cancelar-modal {
+            background: rgba(239,68,68,.15);
+            color: #F87171;
+        }
+        .modal-box .modal-actions .btn-cancelar-modal:hover {
+            background: rgba(239,68,68,.25);
+        }
+        .modal-box .info-pelicula {
+            display: flex;
+            gap: .8rem;
+            align-items: center;
+            padding: .5rem 0;
+        }
+        .modal-box .info-pelicula img {
+            width: 60px;
+            height: 90px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: #1A1A2E;
+        }
+        .modal-box .info-pelicula .text {
+            flex: 1;
+        }
+        .modal-box .info-pelicula .text .titulo {
+            font-weight: 600;
+            font-size: .9rem;
+        }
+        .modal-box .info-pelicula .text .meta {
+            font-size: .7rem;
+            color: #94A3B8;
+        }
+        .badge-tmdb {
+            background: rgba(245,158,11,.15);
+            color: #F59E0B;
+            font-size: .5rem;
+            padding: .03rem .4rem;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -332,8 +483,31 @@
         <span id="adminStatus">Verificando acceso...</span>
     </div>
 
+    <!-- ⭐ BUSCADOR TMDB (NUEVO) -->
     <div class="admin-card" style="border-color:rgba(245,158,11,.4)">
-        <h3><i class="fas fa-wand-magic-sparkles" style="color:#F59E0B;"></i> Generar contenido</h3>
+        <h3><i class="fas fa-search" style="color:#F59E0B;"></i> Buscar en TMDB</h3>
+        <p style="font-size:.75rem;color:#94A3B8;margin-bottom:.5rem;">Busca cualquier película o serie en TMDB y agrégale una Opción 2</p>
+        
+        <div class="search-admin">
+            <input type="text" id="tmdbSearchInput" placeholder="🔍 Buscar en TMDB (ej: El sacerdote, Avatar...)" style="flex:2;">
+            <select id="tmdbSearchType">
+                <option value="movie">🎬 Películas</option>
+                <option value="tv">📺 Series</option>
+                <option value="multi">🌐 Ambos</option>
+            </select>
+            <button class="admin-btn admin-btn-amber" onclick="buscarEnTMDB()" style="padding:.4rem 1.2rem;">
+                <i class="fas fa-search"></i> Buscar
+            </button>
+        </div>
+        
+        <div id="tmdbResults" class="tmdb-results-container">
+            <div class="tmdb-empty">🔍 Busca una película o serie para ver resultados</div>
+        </div>
+    </div>
+
+    <!-- ⭐ GENERACIÓN -->
+    <div class="admin-card" style="border-color:rgba(124,58,237,.15)">
+        <h3><i class="fas fa-wand-magic-sparkles" style="color:#7C3AED;"></i> Generar contenido</h3>
         
         <div class="btn-group">
             <button class="admin-btn admin-btn-magic" onclick="generarPeliculas()" style="font-size:.85rem;padding:.4rem 1.2rem;">
@@ -354,6 +528,7 @@
         <div class="info" id="progressInfo" style="color:#94A3B8;font-size:.85rem;">Listo para generar</div>
     </div>
 
+    <!-- ⭐ PEDIDOS -->
     <div class="admin-card" style="border-color:rgba(245,158,11,.3)">
         <h3><i class="fas fa-clipboard-list" style="color:#F59E0B;"></i> Pedidos de usuarios <span class="badge-pedidos" id="badgeTotalPedidos">0</span></h3>
         
@@ -368,27 +543,23 @@
         </div>
     </div>
 
+    <!-- ⭐ CONTENIDO EN FIREBASE -->
     <div class="admin-card">
-        <h3><i class="fas fa-list text-emerald-500"></i> Contenido en Firebase</h3>
+        <h3><i class="fas fa-database text-emerald-500"></i> Contenido en Firebase</h3>
         
         <div class="search-admin">
-            <input type="text" id="searchAdminInput" placeholder="🔍 Buscar por título..." oninput="filtrarContenido()">
+            <input type="text" id="searchAdminInput" placeholder="🔍 Filtrar en Firebase..." oninput="filtrarContenido()">
             <select id="filterAdminTipo" onchange="filtrarContenido()">
                 <option value="todos">Todos</option>
                 <option value="pelicula">🎬 Películas</option>
                 <option value="serie">📺 Series</option>
             </select>
-            <div class="search-actions">
-                <button class="admin-btn admin-btn-blue" onclick="filtrarContenido()" style="padding:.3rem 1rem;font-size:.75rem;">
-                    <i class="fas fa-filter"></i> Filtrar
-                </button>
-                <button class="admin-btn admin-btn-amber" onclick="mostrarTodo()" style="padding:.3rem 1rem;font-size:.75rem;">
-                    <i class="fas fa-eye"></i> Ver todo
-                </button>
-                <button class="admin-btn admin-btn-cyan" onclick="buscarEnFirebase()" style="padding:.3rem 1rem;font-size:.75rem;">
-                    <i class="fas fa-search"></i> Buscar en DB
-                </button>
-            </div>
+            <button class="admin-btn admin-btn-blue" onclick="filtrarContenido()" style="padding:.3rem 1rem;font-size:.75rem;">
+                <i class="fas fa-filter"></i> Filtrar
+            </button>
+            <button class="admin-btn admin-btn-cyan" onclick="mostrarTodoFirebase()" style="padding:.3rem 1rem;font-size:.75rem;">
+                <i class="fas fa-eye"></i> Ver todo
+            </button>
         </div>
         
         <div id="listaContenido" class="max-h-96 overflow-y-auto">
@@ -403,12 +574,35 @@
                 <option value="10">10</option>
                 <option value="20" selected>20</option>
                 <option value="50">50</option>
-                <option value="100">100</option>
                 <option value="9999">Todas</option>
             </select>
         </div>
     </div>
 </main>
+
+<!-- ⭐ MODAL PARA AGREGAR OPCIÓN 2 -->
+<div class="modal-overlay" id="modalAgregarOp2">
+    <div class="modal-box">
+        <h3>
+            <i class="fas fa-link" style="color:#60A5FA;"></i> Agregar Opción 2
+            <button class="modal-close" onclick="cerrarModal()"><i class="fas fa-times"></i> Cerrar</button>
+        </h3>
+        <div class="info-pelicula" id="modalInfoPelicula">
+            <img id="modalPortada" src="" alt="Portada">
+            <div class="text">
+                <div class="titulo" id="modalTitulo">Título</div>
+                <div class="meta" id="modalMeta">Año • Tipo</div>
+                <div class="meta" style="font-size:.6rem;color:#64748B;" id="modalTmdbId">TMDB ID: ---</div>
+            </div>
+        </div>
+        <label style="font-size:.7rem;color:#94A3B8;">🔗 Enlace de la Opción 2 (BigMoly, VidMoly, etc.)</label>
+        <input type="text" id="modalOp2Input" placeholder="https://...">
+        <div class="modal-actions">
+            <button class="btn-guardar-modal" onclick="guardarOp2DesdeModal()"><i class="fas fa-save"></i> Guardar Opción 2</button>
+            <button class="btn-cancelar-modal" onclick="cerrarModal()"><i class="fas fa-times"></i> Cancelar</button>
+        </div>
+    </div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -446,8 +640,9 @@ let seriesKeys = [];
 let itemsEditando = {};
 let seriesExpandidas = {};
 let serieTempSeleccionada = {};
-let todosLosItems = [];
-let busquedaActiva = false;
+
+// Variables para el modal
+let modalData = null;
 
 // ============================================================
 // FUNCIONES BÁSICAS
@@ -577,7 +772,7 @@ function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
     const temp = parseInt(temporada) || 1;
     const cap = parseInt(capitulo) || 1;
     
-    if (tipo === 'pelicula') {
+    if (tipo === 'pelicula' || tipo === 'movie') {
         return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
     } else {
         return `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temp}/${cap}?lang=es-MX&autoplay=1&controls=1&logo=0`;
@@ -611,159 +806,189 @@ async function fetchTMDB(path, params = {}) {
 function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
 // ============================================================
-// BUSCAR EN FIREBASE DIRECTAMENTE (NUEVA FUNCIÓN)
+// ⭐ BUSCAR EN TMDB (NUEVA FUNCIÓN)
 // ============================================================
-window.buscarEnFirebase = async function() {
-    const termino = document.getElementById('searchAdminInput').value.trim();
-    if (!termino) {
-        mostrarToast('📝 Escribe un título para buscar', 'warning');
+window.buscarEnTMDB = async function() {
+    const query = document.getElementById('tmdbSearchInput').value.trim();
+    const tipo = document.getElementById('tmdbSearchType').value;
+    
+    if (!query) {
+        mostrarToast('📝 Escribe lo que quieres buscar en TMDB', 'warning');
         return;
     }
     
+    const container = document.getElementById('tmdbResults');
+    container.innerHTML = '<div class="tmdb-loading"><span class="spinner"></span> Buscando en TMDB...</div>';
+    
+    try {
+        const data = await fetchTMDB('search/' + tipo, { query: query });
+        
+        if (!data.results || data.results.length === 0) {
+            container.innerHTML = `
+                <div class="tmdb-empty">
+                    <i class="fas fa-search" style="font-size:1.5rem;color:#64748B;display:block;margin-bottom:.5rem;"></i>
+                    No se encontraron resultados para "${query}"
+                    <div class="sugerencia">💡 Prueba con otra palabra o revisa la ortografía</div>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        data.results.forEach((item, index) => {
+            const titulo = item.title || item.name || 'Sin título';
+            const anio = item.release_date ? item.release_date.split('-')[0] : 
+                         item.first_air_date ? item.first_air_date.split('-')[0] : 'N/D';
+            const tipoItem = item.media_type || tipo;
+            const esPelicula = tipoItem === 'movie';
+            const tmdbId = item.id;
+            const portada = getImagenUrl(item.poster_path, 'w92');
+            const puntuacion = item.vote_average ? item.vote_average.toFixed(1) : 'N/A';
+            
+            html += `
+                <div class="tmdb-result-item" style="animation: fadeIn 0.3s ease ${index * 0.05}s both;">
+                    <img src="${portada}" class="thumb" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+                    <div class="info">
+                        <div class="titulo">${titulo} <span class="badge-tipo ${esPelicula ? 'pelicula' : 'serie'}">${esPelicula ? '🎬' : '📺'}</span></div>
+                        <div class="detalle">${anio} • ⭐ ${puntuacion} • TMDB: ${tmdbId}</div>
+                        ${item.overview ? `<div class="detalle" style="font-size:.55rem;color:#64748B;margin-top:.1rem;">${item.overview.substring(0, 80)}${item.overview.length > 80 ? '...' : ''}</div>` : ''}
+                    </div>
+                    <div class="acciones">
+                        <button class="btn-agregar-op2" onclick="abrirModalAgregarOp2(${tmdbId}, '${esPelicula ? 'movie' : 'tv'}', '${titulo.replace(/'/g, "\\'")}', ${anio})">
+                            <i class="fas fa-link"></i> Opción 2
+                        </button>
+                        <button class="btn-ver" onclick="window.open('https://www.themoviedb.org/${esPelicula ? 'movie' : 'tv'}/${tmdbId}', '_blank')">
+                            <i class="fas fa-external-link-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        mostrarToast(`✅ ${data.results.length} resultados encontrados en TMDB`, 'success');
+        
+    } catch(e) {
+        console.error('Error en búsqueda TMDB:', e);
+        container.innerHTML = `
+            <div class="tmdb-empty" style="color:#EF4444;">
+                ❌ Error al buscar: ${e.message}
+                <button onclick="buscarEnTMDB()" style="display:block;margin:.5rem auto;padding:.3rem 1rem;background:#7C3AED;border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:.75rem;">
+                    <i class="fas fa-refresh"></i> Reintentar
+                </button>
+            </div>
+        `;
+    }
+};
+
+// ============================================================
+// ⭐ MODAL PARA AGREGAR OPCIÓN 2 DESDE TMDB
+// ============================================================
+window.abrirModalAgregarOp2 = function(tmdbId, tipo, titulo, anio) {
     if (!esAdmin) {
         mostrarToast('⛔ No tienes permisos', 'error');
         return;
     }
     
-    mostrarToast('🔍 Buscando en Firebase...', 'info');
+    modalData = {
+        tmdbId: tmdbId,
+        tipo: tipo,
+        titulo: titulo,
+        anio: anio
+    };
+    
+    document.getElementById('modalTitulo').textContent = titulo;
+    document.getElementById('modalMeta').textContent = `${anio || 'N/D'} • ${tipo === 'movie' ? '🎬 Película' : '📺 Serie'}`;
+    document.getElementById('modalTmdbId').textContent = `TMDB ID: ${tmdbId}`;
+    document.getElementById('modalPortada').src = `https://image.tmdb.org/t/p/w92/${tmdbId}.jpg`;
+    document.getElementById('modalPortada').onerror = function() {
+        this.src = 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
+    };
+    document.getElementById('modalOp2Input').value = '';
+    
+    document.getElementById('modalAgregarOp2').classList.add('active');
+};
+
+window.cerrarModal = function() {
+    document.getElementById('modalAgregarOp2').classList.remove('active');
+    modalData = null;
+};
+
+window.guardarOp2DesdeModal = async function() {
+    if (!modalData) {
+        mostrarToast('❌ Error: No hay datos', 'error');
+        return;
+    }
+    
+    const enlace = document.getElementById('modalOp2Input').value.trim();
+    if (!enlace) {
+        mostrarToast('❌ Ingresa un enlace para la Opción 2', 'error');
+        return;
+    }
     
     try {
-        // Buscar en películas
-        const pSnap = await db.ref('contenido_personalizado').once('value');
-        const pData = pSnap.val() || {};
+        const { tmdbId, tipo, titulo, anio } = modalData;
+        const path = tipo === 'movie' ? 'contenido_personalizado' : 'series_personalizadas';
+        const tipoFirebase = tipo === 'movie' ? 'pelicula' : 'serie';
         
-        // Buscar en series
-        const sSnap = await db.ref('series_personalizadas').once('value');
-        const sData = sSnap.val() || {};
+        // Buscar si ya existe en Firebase
+        const snap = await db.ref(path).orderByChild('tmdb_id').equalTo(tmdbId).once('value');
+        const data = snap.val();
         
-        const resultados = [];
-        const terminoLower = termino.toLowerCase();
+        let keyExistente = null;
+        let itemExistente = null;
         
-        // Buscar en películas
-        Object.entries(pData).forEach(([key, value]) => {
-            const titulo = (value.titulo || '').toLowerCase();
-            if (titulo.includes(terminoLower)) {
-                resultados.push({
-                    key: key,
-                    tipo: 'pelicula',
-                    titulo: value.titulo,
-                    anio: value.anio,
-                    portada: value.portada,
-                    url: value.url,
-                    opcion2: value.opcion2,
-                    tmdb_id: value.tmdb_id,
-                    puntuacion: value.puntuacion
-                });
+        if (data) {
+            const entries = Object.entries(data);
+            if (entries.length > 0) {
+                keyExistente = entries[0][0];
+                itemExistente = entries[0][1];
             }
-        });
-        
-        // Buscar en series
-        Object.entries(sData).forEach(([key, value]) => {
-            const titulo = (value.titulo || '').toLowerCase();
-            if (titulo.includes(terminoLower)) {
-                resultados.push({
-                    key: key,
-                    tipo: 'serie',
-                    titulo: value.titulo,
-                    anio: value.anio,
-                    portada: value.portada,
-                    url: value.url,
-                    opcion2: value.opcion2,
-                    tmdb_id: value.tmdb_id,
-                    puntuacion: value.puntuacion,
-                    temporadas: value.temporadas
-                });
-            }
-        });
-        
-        if (resultados.length === 0) {
-            mostrarToast(`❌ No se encontró "${termino}" en Firebase`, 'error');
-            const container = document.getElementById('listaContenido');
-            container.innerHTML = `
-                <div class="no-results">
-                    <i class="fas fa-search" style="font-size:2rem;color:#64748B;display:block;margin-bottom:.5rem;"></i>
-                    No se encontró "${termino}"
-                    <div class="sugerencia">💡 Prueba con otra palabra o revisa el título exacto</div>
-                    <button onclick="mostrarTodo()" style="margin-top:.5rem;padding:.3rem 1rem;background:#7C3AED;border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:.75rem;">
-                        <i class="fas fa-eye"></i> Ver todo
-                    </button>
-                </div>
-            `;
-            document.getElementById('paginacionContainer').style.display = 'none';
-            return;
         }
         
-        mostrarToast(`✅ ${resultados.length} resultado(s) encontrado(s)`, 'success');
-        
-        // Mostrar resultados
-        const container = document.getElementById('listaContenido');
-        container.innerHTML = '';
-        busquedaActiva = true;
-        
-        // Título de resultados
-        const header = document.createElement('div');
-        header.style.cssText = 'color:#F59E0B;font-weight:700;margin:.3rem 0;font-size:.85rem;';
-        header.innerHTML = `🔍 Resultados para "${termino}" (${resultados.length}) <button onclick="mostrarTodo()" style="background:transparent;border:1px solid #7C3AED;color:#A78BFA;padding:.1rem .6rem;border-radius:4px;font-size:.6rem;cursor:pointer;margin-left:.5rem;">✕ Limpiar</button>`;
-        container.appendChild(header);
-        
-        resultados.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'admin-item';
-            div.id = `item-${item.key}`;
-            div.dataset.titulo = item.titulo;
-            div.dataset.tipo = item.tipo;
-            div.style.borderLeftColor = item.tipo === 'pelicula' ? '#10B981' : '#34D399';
+        if (keyExistente && itemExistente) {
+            // Actualizar opción 2 del existente
+            await db.ref(`${path}/${keyExistente}`).update({ opcion2: enlace });
+            mostrarToast(`✅ Opción 2 agregada a "${titulo}" (existente)`, 'success');
+        } else {
+            // Crear nuevo item con opción 2
+            const nuevoItem = {
+                titulo: titulo,
+                anio: anio || 'N/D',
+                sinopsis: 'Sin sinopsis disponible',
+                portada: getImagenUrl(`/w342/${tmdbId}.jpg`),
+                genero: tipo === 'movie' ? 'Película' : 'Serie',
+                tipo: tipoFirebase,
+                tmdb_id: tmdbId,
+                puntuacion: 'N/A',
+                url: generarEnlaceUnlimplay(tmdbId, tipo),
+                opcion2: enlace,
+                creado: Date.now()
+            };
             
-            const portada = item.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
-            const urlOp1 = item.url || 'Sin enlace';
-            const urlOp2 = item.opcion2 || '';
+            if (tipo === 'tv') {
+                nuevoItem.temporadas = [];
+            }
             
-            div.innerHTML = `
-                <div class="top-row">
-                    <img src="${portada}" class="thumbnail" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
-                    <div class="info-item">
-                        <div class="title">${item.titulo} <span class="badge-tipo ${item.tipo}">${item.tipo === 'pelicula' ? '🎬' : '📺'}</span></div>
-                        <div class="meta">${item.anio || 'N/D'} • ⭐ ${item.puntuacion || 'N/A'} • TMDB: ${item.tmdb_id || 'N/A'}</div>
-                    </div>
-                </div>
-                
-                <div class="enlace-wrap url-wrap">
-                    <div style="font-size:.55rem;color:#34D399;margin-bottom:.05rem;">🔗 Opción 1</div>
-                    <div class="enlace op1" onclick="editarEnlace('${item.key}', '${item.tipo}', 'url')">${urlOp1}</div>
-                </div>
-                
-                <div class="enlace-wrap ${urlOp2 ? 'op2-wrap' : ''}">
-                    <div style="font-size:.55rem;color:#60A5FA;margin-bottom:.05rem;">🔗 Opción 2</div>
-                    ${urlOp2 
-                        ? `<div class="enlace op2" onclick="editarEnlace('${item.key}', '${item.tipo}', 'op2')">${urlOp2}</div>`
-                        : `<div style="font-size:.55rem;color:#64748B;">Sin opción 2 <button class="admin-btn admin-btn-purple" style="padding:.05rem .4rem;font-size:.45rem;margin-left:.3rem;" onclick="agregarOpcion2('${item.key}', '${item.tipo}', '${item.tmdb_id || ''}')"><i class="fas fa-plus"></i> Agregar</button></div>`
-                    }
-                </div>
-                
-                <div class="actions">
-                    <button class="admin-btn admin-btn-danger" onclick="eliminarItem('${item.key}', '${item.tipo}')"><i class="fas fa-trash"></i> Eliminar</button>
-                </div>
-            `;
-            container.appendChild(div);
-        });
+            await db.ref(path).push(nuevoItem);
+            mostrarToast(`✅ "${titulo}" agregado a Firebase con Opción 2`, 'success');
+        }
         
-        document.getElementById('paginacionContainer').style.display = 'none';
+        cerrarModal();
+        cargarContenido();
         
     } catch(e) {
-        console.error('Error en búsqueda:', e);
-        mostrarToast('❌ Error al buscar: ' + e.message, 'error');
+        console.error('Error:', e);
+        mostrarToast('❌ Error al guardar: ' + e.message, 'error');
     }
 };
 
-// ============================================================
-// MOSTRAR TODO (LIMPIAR BÚSQUEDA)
-// ============================================================
-window.mostrarTodo = function() {
-    document.getElementById('searchAdminInput').value = '';
-    busquedaActiva = false;
-    cargarContenido();
-    mostrarToast('📋 Mostrando todo el contenido', 'info');
-};
+// Enter para buscar en TMDB
+document.getElementById('tmdbSearchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        buscarEnTMDB();
+    }
+});
 
 // ============================================================
 // GENERAR PELÍCULAS
@@ -817,7 +1042,7 @@ async function generarPeliculas() {
                     tipo: 'pelicula',
                     tmdb_id: p.id,
                     puntuacion: p.vote_average ? p.vote_average.toFixed(1) : 'N/A',
-                    url: generarEnlaceUnlimplay(p.id, 'pelicula'),
+                    url: generarEnlaceUnlimplay(p.id, 'movie'),
                     opcion2: null,
                     creado: Date.now()
                 });
@@ -891,7 +1116,7 @@ async function generarSeries() {
                             numero: ep.episode_number,
                             titulo: ep.name || `Capítulo ${ep.episode_number}`,
                             sinopsis: ep.overview || 'Sin sinopsis',
-                            url: generarEnlaceUnlimplay(s.id, 'serie', t, ep.episode_number),
+                            url: generarEnlaceUnlimplay(s.id, 'tv', t, ep.episode_number),
                             opcion2: null
                         }));
                         temporadas.push({ numero: t, nombre: seasonData.name || `Temporada ${t}`, capitulos });
@@ -908,7 +1133,7 @@ async function generarSeries() {
                         tmdb_id: s.id,
                         puntuacion: s.vote_average ? s.vote_average.toFixed(1) : 'N/A',
                         temporadas: temporadas,
-                        url: generarEnlaceUnlimplay(s.id, 'serie', 1, 1),
+                        url: generarEnlaceUnlimplay(s.id, 'tv', 1, 1),
                         opcion2: null,
                         creado: Date.now()
                     });
@@ -985,7 +1210,7 @@ window.cargarTodasLasTemporadas = async function(key) {
                     numero: ep.episode_number,
                     titulo: ep.name || `Capítulo ${ep.episode_number}`,
                     sinopsis: ep.overview || 'Sin sinopsis',
-                    url: generarEnlaceUnlimplay(tmdbId, 'serie', t, ep.episode_number),
+                    url: generarEnlaceUnlimplay(tmdbId, 'tv', t, ep.episode_number),
                     opcion2: null
                 }));
                 nuevasTemporadas.push({
@@ -1615,12 +1840,12 @@ window.limpiarTodo = async function() {
 };
 
 // ============================================================
-// FILTRAR Y PAGINACIÓN - MEJORADA
+// FILTRAR Y PAGINACIÓN
 // ============================================================
 window.filtrarContenido = function() {
     const searchTerm = document.getElementById('searchAdminInput').value.toLowerCase().trim();
     const tipoFilter = document.getElementById('filterAdminTipo').value;
-    const items = document.querySelectorAll('.admin-item');
+    const items = document.querySelectorAll('#listaContenido .admin-item');
     let encontrados = 0;
     
     items.forEach(item => {
@@ -1635,7 +1860,6 @@ window.filtrarContenido = function() {
         if (match) encontrados++;
     });
     
-    // Mostrar mensaje si no hay resultados
     const container = document.getElementById('listaContenido');
     const noResults = container.querySelector('.no-results');
     if (encontrados === 0 && items.length > 0) {
@@ -1644,11 +1868,8 @@ window.filtrarContenido = function() {
             msg.className = 'no-results';
             msg.innerHTML = `
                 <i class="fas fa-search" style="font-size:1.5rem;color:#64748B;display:block;margin-bottom:.5rem;"></i>
-                No se encontraron resultados para "${searchTerm || 'la búsqueda'}"
-                <div class="sugerencia">💡 Prueba con otra palabra o usa el botón "Buscar en DB"</div>
-                <button onclick="mostrarTodo()" style="margin-top:.5rem;padding:.3rem 1rem;background:#7C3AED;border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:.75rem;">
-                    <i class="fas fa-eye"></i> Ver todo
-                </button>
+                No se encontraron resultados en Firebase
+                <div class="sugerencia">💡 Prueba buscando en TMDB arriba</div>
             `;
             container.appendChild(msg);
         }
@@ -1656,41 +1877,27 @@ window.filtrarContenido = function() {
         if (noResults) noResults.remove();
     }
     
-    // Actualizar paginación
-    const totalItems = document.querySelectorAll('.admin-item').length;
+    // Mostrar paginación solo si hay items visibles
     const totalVisible = encontrados;
-    const totalPaginas = Math.ceil(totalVisible / itemsPorPagina);
     const pagContainer = document.getElementById('paginacionContainer');
-    
-    if (totalVisible > itemsPorPagina && searchTerm === '') {
-        pagContainer.style.display = 'flex';
-        paginaActual = 1;
-        mostrarPagina();
-    } else if (totalVisible > itemsPorPagina && searchTerm !== '') {
+    if (totalVisible > itemsPorPagina && items.length > 0) {
         pagContainer.style.display = 'flex';
         paginaActual = 1;
         mostrarPagina();
     } else {
         pagContainer.style.display = 'none';
     }
-    
-    if (encontrados > 0 && searchTerm !== '') {
-        const header = document.querySelector('.search-results-header');
-        if (!header) {
-            const h = document.createElement('div');
-            h.className = 'search-results-header';
-            h.style.cssText = 'color:#F59E0B;font-weight:700;margin:.3rem 0;font-size:.85rem;';
-            h.innerHTML = `🔍 Resultados para "${searchTerm}" (${encontrados}) <button onclick="mostrarTodo()" style="background:transparent;border:1px solid #7C3AED;color:#A78BFA;padding:.1rem .6rem;border-radius:4px;font-size:.6rem;cursor:pointer;margin-left:.5rem;">✕ Limpiar</button>`;
-            container.prepend(h);
-        }
-    } else {
-        const header = container.querySelector('.search-results-header');
-        if (header) header.remove();
-    }
+};
+
+window.mostrarTodoFirebase = function() {
+    document.getElementById('searchAdminInput').value = '';
+    document.getElementById('filterAdminTipo').value = 'todos';
+    cargarContenido();
+    mostrarToast('📋 Mostrando todo el contenido de Firebase', 'info');
 };
 
 function cambiarPagina(dir) {
-    const items = document.querySelectorAll('.admin-item');
+    const items = document.querySelectorAll('#listaContenido .admin-item');
     const visibleItems = Array.from(items).filter(item => item.style.display !== 'none');
     const totalVisible = visibleItems.length;
     const totalPaginas = Math.ceil(totalVisible / itemsPorPagina);
@@ -1708,12 +1915,12 @@ function cambiarPaginaSize() {
 }
 
 function mostrarPagina() {
-    const items = document.querySelectorAll('.admin-item');
+    const items = document.querySelectorAll('#listaContenido .admin-item');
     const visibleItems = Array.from(items).filter(item => item.style.display !== 'none');
     const totalVisible = visibleItems.length;
     const totalPaginas = Math.ceil(totalVisible / itemsPorPagina);
     
-    if (totalVisible <= itemsPorPagina) {
+    if (totalVisible <= itemsPorPagina || totalVisible === 0) {
         document.getElementById('paginacionContainer').style.display = 'none';
         return;
     }
@@ -1721,9 +1928,7 @@ function mostrarPagina() {
     const inicio = (paginaActual - 1) * itemsPorPagina;
     const fin = Math.min(inicio + itemsPorPagina, totalVisible);
     
-    // Ocultar todos primero
     visibleItems.forEach(item => item.style.display = 'none');
-    // Mostrar los de la página actual
     visibleItems.slice(inicio, fin).forEach(item => item.style.display = 'flex');
     
     document.getElementById('infoPagina').textContent = `Página ${paginaActual} de ${totalPaginas}`;
@@ -1733,7 +1938,7 @@ function mostrarPagina() {
 }
 
 // ============================================================
-// CARGAR CONTENIDO - MEJORADO
+// CARGAR CONTENIDO
 // ============================================================
 window.cargarContenido = async function() {
     if (!esAdmin) return;
@@ -1757,7 +1962,7 @@ window.cargarContenido = async function() {
         if (!peliculasLista.length && !seriesLista.length) {
             container.innerHTML = `
                 <div style="color:#64748B;text-align:center;padding:1rem;font-size:.9rem;">
-                    📭 No hay contenido guardado.
+                    📭 No hay contenido guardado en Firebase.
                     <br><br>
                     <button onclick="generarPeliculas()" style="padding:.5rem 1.5rem;background:#7C3AED;border:none;border-radius:8px;color:#fff;font-weight:600;cursor:pointer;font-size:.8rem;">
                         <i class="fas fa-film"></i> Generar Películas
@@ -1765,6 +1970,8 @@ window.cargarContenido = async function() {
                     <button onclick="generarSeries()" style="padding:.5rem 1.5rem;background:#8B5CF6;border:none;border-radius:8px;color:#fff;font-weight:600;cursor:pointer;font-size:.8rem;margin-left:.5rem;">
                         <i class="fas fa-tv"></i> Generar Series
                     </button>
+                    <br><br>
+                    <span style="font-size:.7rem;color:#64748B;">O busca en TMDB arriba y agrega Opción 2</span>
                 </div>
             `;
             document.getElementById('paginacionContainer').style.display = 'none';
@@ -1905,9 +2112,16 @@ window.cargarContenido = async function() {
         }
         
         paginaActual = 1;
-        mostrarPagina();
+        const items = container.querySelectorAll('.admin-item');
+        const totalItems = items.length;
+        if (totalItems > itemsPorPagina) {
+            document.getElementById('paginacionContainer').style.display = 'flex';
+            mostrarPagina();
+        } else {
+            document.getElementById('paginacionContainer').style.display = 'none';
+        }
         
-        // Aplicar filtro si hay texto en la búsqueda
+        // Aplicar filtro si hay texto
         const searchInput = document.getElementById('searchAdminInput');
         if (searchInput.value.trim()) {
             filtrarContenido();
@@ -1945,7 +2159,7 @@ window.eliminarItem = async function(key, tipo) {
 // ============================================================
 // CARGA INICIAL
 // ============================================================
-console.log('✅ Admin TELY - Buscador mejorado y opción 2 corregida');
+console.log('✅ Admin TELY - Buscador TMDB + Opción 2');
 console.log('📦 Proyecto: tely-c9776');
 
 setTimeout(() => {
