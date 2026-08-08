@@ -42,6 +42,8 @@
         .admin-btn-purple:hover{background:#7C3AED}
         .admin-btn-cyan{background:#06B6D4;color:#fff}
         .admin-btn-cyan:hover{background:#0891B2}
+        .admin-btn-amber{background:#F59E0B;color:#111}
+        .admin-btn-amber:hover{background:#D97706}
         
         .btn-group{display:flex;gap:.3rem;flex-wrap:wrap;margin:.3rem 0}
         .btn-group .admin-btn{padding:.3rem 1rem;font-size:.75rem}
@@ -269,6 +271,25 @@
         .add-capitulo-form .form-actions .btn-cancelar-cap:hover {
             background: rgba(239,68,68,.25);
         }
+
+        /* NUEVO: Estilo para el mensaje de búsqueda */
+        .no-results {
+            color: #94A3B8;
+            text-align: center;
+            padding: 1rem;
+            font-size: .85rem;
+        }
+        .no-results .sugerencia {
+            color: #F59E0B;
+            font-size: .75rem;
+            margin-top: .3rem;
+        }
+        .search-actions {
+            display: flex;
+            gap: .3rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -357,9 +378,17 @@
                 <option value="pelicula">🎬 Películas</option>
                 <option value="serie">📺 Series</option>
             </select>
-            <button class="admin-btn admin-btn-blue" onclick="filtrarContenido()" style="padding:.3rem 1rem;font-size:.75rem;">
-                <i class="fas fa-filter"></i> Filtrar
-            </button>
+            <div class="search-actions">
+                <button class="admin-btn admin-btn-blue" onclick="filtrarContenido()" style="padding:.3rem 1rem;font-size:.75rem;">
+                    <i class="fas fa-filter"></i> Filtrar
+                </button>
+                <button class="admin-btn admin-btn-amber" onclick="mostrarTodo()" style="padding:.3rem 1rem;font-size:.75rem;">
+                    <i class="fas fa-eye"></i> Ver todo
+                </button>
+                <button class="admin-btn admin-btn-cyan" onclick="buscarEnFirebase()" style="padding:.3rem 1rem;font-size:.75rem;">
+                    <i class="fas fa-search"></i> Buscar en DB
+                </button>
+            </div>
         </div>
         
         <div id="listaContenido" class="max-h-96 overflow-y-auto">
@@ -375,6 +404,7 @@
                 <option value="20" selected>20</option>
                 <option value="50">50</option>
                 <option value="100">100</option>
+                <option value="9999">Todas</option>
             </select>
         </div>
     </div>
@@ -416,6 +446,8 @@ let seriesKeys = [];
 let itemsEditando = {};
 let seriesExpandidas = {};
 let serieTempSeleccionada = {};
+let todosLosItems = [];
+let busquedaActiva = false;
 
 // ============================================================
 // FUNCIONES BÁSICAS
@@ -577,6 +609,161 @@ async function fetchTMDB(path, params = {}) {
 }
 
 function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+// ============================================================
+// BUSCAR EN FIREBASE DIRECTAMENTE (NUEVA FUNCIÓN)
+// ============================================================
+window.buscarEnFirebase = async function() {
+    const termino = document.getElementById('searchAdminInput').value.trim();
+    if (!termino) {
+        mostrarToast('📝 Escribe un título para buscar', 'warning');
+        return;
+    }
+    
+    if (!esAdmin) {
+        mostrarToast('⛔ No tienes permisos', 'error');
+        return;
+    }
+    
+    mostrarToast('🔍 Buscando en Firebase...', 'info');
+    
+    try {
+        // Buscar en películas
+        const pSnap = await db.ref('contenido_personalizado').once('value');
+        const pData = pSnap.val() || {};
+        
+        // Buscar en series
+        const sSnap = await db.ref('series_personalizadas').once('value');
+        const sData = sSnap.val() || {};
+        
+        const resultados = [];
+        const terminoLower = termino.toLowerCase();
+        
+        // Buscar en películas
+        Object.entries(pData).forEach(([key, value]) => {
+            const titulo = (value.titulo || '').toLowerCase();
+            if (titulo.includes(terminoLower)) {
+                resultados.push({
+                    key: key,
+                    tipo: 'pelicula',
+                    titulo: value.titulo,
+                    anio: value.anio,
+                    portada: value.portada,
+                    url: value.url,
+                    opcion2: value.opcion2,
+                    tmdb_id: value.tmdb_id,
+                    puntuacion: value.puntuacion
+                });
+            }
+        });
+        
+        // Buscar en series
+        Object.entries(sData).forEach(([key, value]) => {
+            const titulo = (value.titulo || '').toLowerCase();
+            if (titulo.includes(terminoLower)) {
+                resultados.push({
+                    key: key,
+                    tipo: 'serie',
+                    titulo: value.titulo,
+                    anio: value.anio,
+                    portada: value.portada,
+                    url: value.url,
+                    opcion2: value.opcion2,
+                    tmdb_id: value.tmdb_id,
+                    puntuacion: value.puntuacion,
+                    temporadas: value.temporadas
+                });
+            }
+        });
+        
+        if (resultados.length === 0) {
+            mostrarToast(`❌ No se encontró "${termino}" en Firebase`, 'error');
+            const container = document.getElementById('listaContenido');
+            container.innerHTML = `
+                <div class="no-results">
+                    <i class="fas fa-search" style="font-size:2rem;color:#64748B;display:block;margin-bottom:.5rem;"></i>
+                    No se encontró "${termino}"
+                    <div class="sugerencia">💡 Prueba con otra palabra o revisa el título exacto</div>
+                    <button onclick="mostrarTodo()" style="margin-top:.5rem;padding:.3rem 1rem;background:#7C3AED;border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:.75rem;">
+                        <i class="fas fa-eye"></i> Ver todo
+                    </button>
+                </div>
+            `;
+            document.getElementById('paginacionContainer').style.display = 'none';
+            return;
+        }
+        
+        mostrarToast(`✅ ${resultados.length} resultado(s) encontrado(s)`, 'success');
+        
+        // Mostrar resultados
+        const container = document.getElementById('listaContenido');
+        container.innerHTML = '';
+        busquedaActiva = true;
+        
+        // Título de resultados
+        const header = document.createElement('div');
+        header.style.cssText = 'color:#F59E0B;font-weight:700;margin:.3rem 0;font-size:.85rem;';
+        header.innerHTML = `🔍 Resultados para "${termino}" (${resultados.length}) <button onclick="mostrarTodo()" style="background:transparent;border:1px solid #7C3AED;color:#A78BFA;padding:.1rem .6rem;border-radius:4px;font-size:.6rem;cursor:pointer;margin-left:.5rem;">✕ Limpiar</button>`;
+        container.appendChild(header);
+        
+        resultados.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'admin-item';
+            div.id = `item-${item.key}`;
+            div.dataset.titulo = item.titulo;
+            div.dataset.tipo = item.tipo;
+            div.style.borderLeftColor = item.tipo === 'pelicula' ? '#10B981' : '#34D399';
+            
+            const portada = item.portada || 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
+            const urlOp1 = item.url || 'Sin enlace';
+            const urlOp2 = item.opcion2 || '';
+            
+            div.innerHTML = `
+                <div class="top-row">
+                    <img src="${portada}" class="thumbnail" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'">
+                    <div class="info-item">
+                        <div class="title">${item.titulo} <span class="badge-tipo ${item.tipo}">${item.tipo === 'pelicula' ? '🎬' : '📺'}</span></div>
+                        <div class="meta">${item.anio || 'N/D'} • ⭐ ${item.puntuacion || 'N/A'} • TMDB: ${item.tmdb_id || 'N/A'}</div>
+                    </div>
+                </div>
+                
+                <div class="enlace-wrap url-wrap">
+                    <div style="font-size:.55rem;color:#34D399;margin-bottom:.05rem;">🔗 Opción 1</div>
+                    <div class="enlace op1" onclick="editarEnlace('${item.key}', '${item.tipo}', 'url')">${urlOp1}</div>
+                </div>
+                
+                <div class="enlace-wrap ${urlOp2 ? 'op2-wrap' : ''}">
+                    <div style="font-size:.55rem;color:#60A5FA;margin-bottom:.05rem;">🔗 Opción 2</div>
+                    ${urlOp2 
+                        ? `<div class="enlace op2" onclick="editarEnlace('${item.key}', '${item.tipo}', 'op2')">${urlOp2}</div>`
+                        : `<div style="font-size:.55rem;color:#64748B;">Sin opción 2 <button class="admin-btn admin-btn-purple" style="padding:.05rem .4rem;font-size:.45rem;margin-left:.3rem;" onclick="agregarOpcion2('${item.key}', '${item.tipo}', '${item.tmdb_id || ''}')"><i class="fas fa-plus"></i> Agregar</button></div>`
+                    }
+                </div>
+                
+                <div class="actions">
+                    <button class="admin-btn admin-btn-danger" onclick="eliminarItem('${item.key}', '${item.tipo}')"><i class="fas fa-trash"></i> Eliminar</button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+        
+        document.getElementById('paginacionContainer').style.display = 'none';
+        
+    } catch(e) {
+        console.error('Error en búsqueda:', e);
+        mostrarToast('❌ Error al buscar: ' + e.message, 'error');
+    }
+};
+
+// ============================================================
+// MOSTRAR TODO (LIMPIAR BÚSQUEDA)
+// ============================================================
+window.mostrarTodo = function() {
+    document.getElementById('searchAdminInput').value = '';
+    busquedaActiva = false;
+    cargarContenido();
+    mostrarToast('📋 Mostrando todo el contenido', 'info');
+};
 
 // ============================================================
 // GENERAR PELÍCULAS
@@ -1428,26 +1615,85 @@ window.limpiarTodo = async function() {
 };
 
 // ============================================================
-// FILTRAR Y PAGINACIÓN
+// FILTRAR Y PAGINACIÓN - MEJORADA
 // ============================================================
 window.filtrarContenido = function() {
-    const searchTerm = document.getElementById('searchAdminInput').value.toLowerCase();
+    const searchTerm = document.getElementById('searchAdminInput').value.toLowerCase().trim();
     const tipoFilter = document.getElementById('filterAdminTipo').value;
     const items = document.querySelectorAll('.admin-item');
+    let encontrados = 0;
     
     items.forEach(item => {
-        const titulo = item.dataset.titulo?.toLowerCase() || '';
+        const titulo = (item.dataset.titulo || '').toLowerCase();
         const tipo = item.dataset.tipo || '';
         let match = true;
+        
         if (searchTerm && !titulo.includes(searchTerm)) match = false;
         if (tipoFilter !== 'todos' && tipo !== tipoFilter) match = false;
+        
         item.style.display = match ? 'flex' : 'none';
+        if (match) encontrados++;
     });
+    
+    // Mostrar mensaje si no hay resultados
+    const container = document.getElementById('listaContenido');
+    const noResults = container.querySelector('.no-results');
+    if (encontrados === 0 && items.length > 0) {
+        if (!noResults) {
+            const msg = document.createElement('div');
+            msg.className = 'no-results';
+            msg.innerHTML = `
+                <i class="fas fa-search" style="font-size:1.5rem;color:#64748B;display:block;margin-bottom:.5rem;"></i>
+                No se encontraron resultados para "${searchTerm || 'la búsqueda'}"
+                <div class="sugerencia">💡 Prueba con otra palabra o usa el botón "Buscar en DB"</div>
+                <button onclick="mostrarTodo()" style="margin-top:.5rem;padding:.3rem 1rem;background:#7C3AED;border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:.75rem;">
+                    <i class="fas fa-eye"></i> Ver todo
+                </button>
+            `;
+            container.appendChild(msg);
+        }
+    } else {
+        if (noResults) noResults.remove();
+    }
+    
+    // Actualizar paginación
+    const totalItems = document.querySelectorAll('.admin-item').length;
+    const totalVisible = encontrados;
+    const totalPaginas = Math.ceil(totalVisible / itemsPorPagina);
+    const pagContainer = document.getElementById('paginacionContainer');
+    
+    if (totalVisible > itemsPorPagina && searchTerm === '') {
+        pagContainer.style.display = 'flex';
+        paginaActual = 1;
+        mostrarPagina();
+    } else if (totalVisible > itemsPorPagina && searchTerm !== '') {
+        pagContainer.style.display = 'flex';
+        paginaActual = 1;
+        mostrarPagina();
+    } else {
+        pagContainer.style.display = 'none';
+    }
+    
+    if (encontrados > 0 && searchTerm !== '') {
+        const header = document.querySelector('.search-results-header');
+        if (!header) {
+            const h = document.createElement('div');
+            h.className = 'search-results-header';
+            h.style.cssText = 'color:#F59E0B;font-weight:700;margin:.3rem 0;font-size:.85rem;';
+            h.innerHTML = `🔍 Resultados para "${searchTerm}" (${encontrados}) <button onclick="mostrarTodo()" style="background:transparent;border:1px solid #7C3AED;color:#A78BFA;padding:.1rem .6rem;border-radius:4px;font-size:.6rem;cursor:pointer;margin-left:.5rem;">✕ Limpiar</button>`;
+            container.prepend(h);
+        }
+    } else {
+        const header = container.querySelector('.search-results-header');
+        if (header) header.remove();
+    }
 };
 
 function cambiarPagina(dir) {
-    const totalItems = document.querySelectorAll('.admin-item').length;
-    const totalPaginas = Math.ceil(totalItems / itemsPorPagina);
+    const items = document.querySelectorAll('.admin-item');
+    const visibleItems = Array.from(items).filter(item => item.style.display !== 'none');
+    const totalVisible = visibleItems.length;
+    const totalPaginas = Math.ceil(totalVisible / itemsPorPagina);
     const nuevaPagina = paginaActual + dir;
     if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas) {
         paginaActual = nuevaPagina;
@@ -1462,32 +1708,32 @@ function cambiarPaginaSize() {
 }
 
 function mostrarPagina() {
-    const container = document.getElementById('listaContenido');
-    const pagContainer = document.getElementById('paginacionContainer');
-    const items = container.querySelectorAll('.admin-item');
-    const totalItems = items.length;
-    const totalPaginas = Math.ceil(totalItems / itemsPorPagina);
+    const items = document.querySelectorAll('.admin-item');
+    const visibleItems = Array.from(items).filter(item => item.style.display !== 'none');
+    const totalVisible = visibleItems.length;
+    const totalPaginas = Math.ceil(totalVisible / itemsPorPagina);
     
-    if (totalItems <= itemsPorPagina) {
-        pagContainer.style.display = 'none';
+    if (totalVisible <= itemsPorPagina) {
+        document.getElementById('paginacionContainer').style.display = 'none';
         return;
     }
     
     const inicio = (paginaActual - 1) * itemsPorPagina;
-    const fin = Math.min(inicio + itemsPorPagina, totalItems);
+    const fin = Math.min(inicio + itemsPorPagina, totalVisible);
     
-    items.forEach((item, index) => {
-        item.style.display = (index >= inicio && index < fin) ? 'flex' : 'none';
-    });
+    // Ocultar todos primero
+    visibleItems.forEach(item => item.style.display = 'none');
+    // Mostrar los de la página actual
+    visibleItems.slice(inicio, fin).forEach(item => item.style.display = 'flex');
     
     document.getElementById('infoPagina').textContent = `Página ${paginaActual} de ${totalPaginas}`;
     document.getElementById('btnPaginaPrev').disabled = paginaActual <= 1;
     document.getElementById('btnPaginaNext').disabled = paginaActual >= totalPaginas;
-    pagContainer.style.display = 'flex';
+    document.getElementById('paginacionContainer').style.display = 'flex';
 }
 
 // ============================================================
-// CARGAR CONTENIDO
+// CARGAR CONTENIDO - MEJORADO
 // ============================================================
 window.cargarContenido = async function() {
     if (!esAdmin) return;
@@ -1530,7 +1776,8 @@ window.cargarContenido = async function() {
         // PELÍCULAS
         if (peliculasLista.length) {
             const div = document.createElement('div');
-            div.innerHTML = `<div style="font-weight:700;color:#A78BFA;margin:.3rem 0;">🎬 Películas (${peliculasLista.length})</div>`;
+            const totalPelis = peliculasLista.length;
+            div.innerHTML = `<div style="font-weight:700;color:#A78BFA;margin:.3rem 0;">🎬 Películas (${totalPelis})</div>`;
             
             peliculasLista.forEach((p, index) => {
                 const key = peliculasKeys[index];
@@ -1579,7 +1826,8 @@ window.cargarContenido = async function() {
         // SERIES
         if (seriesLista.length) {
             const div = document.createElement('div');
-            div.innerHTML = `<div style="font-weight:700;color:#34D399;margin:.5rem 0 .3rem;">📺 Series (${seriesLista.length})</div>`;
+            const totalSeries = seriesLista.length;
+            div.innerHTML = `<div style="font-weight:700;color:#34D399;margin:.5rem 0 .3rem;">📺 Series (${totalSeries})</div>`;
             
             seriesLista.forEach((s, index) => {
                 const key = seriesKeys[index];
@@ -1659,6 +1907,12 @@ window.cargarContenido = async function() {
         paginaActual = 1;
         mostrarPagina();
         
+        // Aplicar filtro si hay texto en la búsqueda
+        const searchInput = document.getElementById('searchAdminInput');
+        if (searchInput.value.trim()) {
+            filtrarContenido();
+        }
+        
     } catch(e) {
         console.error('❌ Error:', e);
         container.innerHTML = `
@@ -1691,7 +1945,7 @@ window.eliminarItem = async function(key, tipo) {
 // ============================================================
 // CARGA INICIAL
 // ============================================================
-console.log('✅ Admin TELY - Edición de Opción 2 corregida');
+console.log('✅ Admin TELY - Buscador mejorado y opción 2 corregida');
 console.log('📦 Proyecto: tely-c9776');
 
 setTimeout(() => {
