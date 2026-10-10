@@ -1,689 +1,568 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0A0A0F">
-<title>TELY 🎬 - Reproductor</title>
-<link rel="icon" href="logo.png" type="image/png">
-<link rel="apple-touch-icon" href="logo.png">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-<style>
-:root{
- --bg:#0A0A0F;--panel:#12121c;--purple:#7C3AED;--light:#A78BFA;
- --text:#fff;--muted:#94A3B8;--border:rgba(124,58,237,.18)
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif}
-body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
-button,select{font:inherit}
-button{cursor:pointer}
-button:focus-visible,select:focus-visible{outline:2px solid var(--light);outline-offset:2px}
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-thumb{background:var(--purple);border-radius:10px}
-.main-content{width:100%;max-width:760px;min-height:100vh;margin:auto;padding:0 12px 24px}
-.header-flotante{position:sticky;top:0;z-index:50;background:rgba(10,10,15,.94);backdrop-filter:blur(14px);padding:10px 2px;border-bottom:1px solid var(--border)}
-.top-header{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.brand{font-size:25px;font-weight:900;letter-spacing:2px;background:linear-gradient(135deg,#7C3AED,#C4B5FD);background-clip:text;-webkit-background-clip:text;color:transparent}
-.top-actions{display:flex;align-items:center;gap:7px}
-.icon-btn,.user-btn{width:36px;height:36px;flex-shrink:0;border-radius:50%;border:1px solid var(--border);background:#ffffff08;color:white;display:flex;align-items:center;justify-content:center}
-.icon-btn:hover,.user-btn:hover{background:#7C3AED33}
-.btn-fullscreen,.btn-opcion,.btn-recargar,.btn-nueva-ventana{border:1px solid var(--border);background:#ffffff09;color:#fff;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-.btn-fullscreen:hover,.btn-opcion:hover{border-color:var(--purple)}
-.user-menu{position:relative}
-.user-btn{font-size:17px}
-.user-dropdown{position:absolute;right:0;top:44px;width:170px;background:#1a1a2e;border:1px solid var(--border);border-radius:10px;padding:5px 0;display:none;z-index:100;box-shadow:0 15px 35px #0008}
-.user-dropdown.show{display:block}
-.user-dropdown a{display:flex;gap:9px;align-items:center;padding:11px;color:#ddd;text-decoration:none;font-size:13px}
-.user-dropdown a:hover{background:#7c3aed22}
-.user-dropdown hr{border:0;border-top:1px solid var(--border)}
-.info-top{padding:15px 0 9px}
-.info-top h1{font-size:clamp(20px,5vw,27px);line-height:1.2;font-weight:800;overflow-wrap:anywhere}
-.meta{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin:8px 0}
-.rating{color:#FBBF24;font-weight:700}
-.tipo-tag{color:var(--light)}
-.sinopsis{font-size:13px;color:#a5a5b8;line-height:1.55}
-.player-wrapper{position:relative;width:100%;aspect-ratio:16/9;background:#000;border:1px solid #30233f;border-radius:12px;overflow:hidden;margin:8px 0}
-.player-wrapper iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
-.player-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#050508;color:#b6a8d5;text-align:center;padding:18px}
-.player-placeholder i{font-size:35px;color:var(--light)}
-.player-placeholder p{font-size:13px;line-height:1.5}
-.player-controls{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 16px}
-.btn-opcion.active{background:var(--purple);border-color:var(--purple)}
-.btn-opcion.opcion2{border-color:#3b82f655;color:#60A5FA;background:#3b82f614}
-.btn-opcion.opcion2.active{background:#2563eb;color:white;border-color:#2563eb}
-.oculto{display:none!important}
-.badge-opcion2{font-size:9px;background:#FBBF24;color:#111;padding:2px 5px;border-radius:4px;margin-left:3px}
-.btn-recargar{background:#10b98115;border-color:#10b98145;color:#34D399}
-.btn-nueva-ventana{background:#ef444410;border-color:#ef444433;color:#F87171}
-.estado-carga{font-size:12px;color:var(--muted);margin:6px 0 12px;line-height:1.5}
-.alerta{display:none;padding:12px;margin:10px 0;background:#351321;border:1px solid #7f1d3c;color:#fecdd3;border-radius:10px;font-size:13px;line-height:1.5}
-.episodios-section{margin-top:12px;background:#ffffff04;border:1px solid var(--border);border-radius:12px;padding:12px}
-.section-header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-.section-header h3,.titulo-recomendadas{font-size:15px;font-weight:800}
-.temp-selector select{max-width:190px;background:#171321;color:#fff;border:1px solid var(--border);border-radius:7px;padding:8px;font-size:12px}
-.acciones{display:flex;gap:6px;flex-wrap:wrap}
-.acciones button{background:#ffffff08;border:1px solid var(--border);border-radius:7px;color:#c4b5fd;padding:7px 9px;font-size:11px}
-.episodios-list{display:flex;flex-direction:column;gap:7px;max-height:360px;overflow-y:auto}
-.episodio-item{padding:10px;background:#ffffff04;border:1px solid transparent;border-radius:8px;cursor:pointer}
-.episodio-item:hover{background:#ffffff0a}
-.episodio-item.activo{border-color:var(--purple);background:#7c3aed18}
-.ep-top{display:flex;align-items:flex-start;gap:8px}
-.ep-numero{color:var(--light);font-size:12px;font-weight:800;white-space:nowrap}
-.ep-titulo{font-size:12px;color:#eee;font-weight:600;flex:1}
-.ep-estado{font-size:10px;color:#34D399}
-.ep-sinopsis{font-size:11px;color:#85859b;line-height:1.4;margin:5px 0 0 32px}
-.recomendaciones-wrap{margin-top:18px}
-.titulo-recomendadas{margin-bottom:10px}
-.recomendaciones{display:flex;gap:10px;overflow-x:auto;padding:3px 1px 12px;scrollbar-width:thin}
-.recomendacion{flex:0 0 100px;cursor:pointer;background:#ffffff05;border:1px solid transparent;border-radius:9px;overflow:hidden}
-.recomendacion:hover{border-color:var(--purple)}
-.recomendacion img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;background:#171321}
-.recomendacion p{padding:7px;font-size:11px;color:#ccc;line-height:1.35}
-.empty{font-size:12px;color:#777;padding:12px 0}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#10B981;color:white;padding:11px 16px;border-radius:9px;z-index:9999;font-size:12px;font-weight:700;max-width:90%;box-shadow:0 6px 24px #0008}
-#bannerApp{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;background:#171321;border-top:2px solid var(--purple);padding:10px 12px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -5px 25px #0008}
-.banner-inner{max-width:700px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.banner-brand{display:flex;align-items:center;gap:9px;min-width:0}
-.banner-logo-img{width:35px;height:35px;object-fit:cover;border-radius:8px}
-.banner-title{font-size:12px;font-weight:800}
-.banner-sub{font-size:10px;color:var(--muted);margin-top:3px}
-.banner-buttons{display:flex;align-items:center;gap:6px}
-.banner-install-btn{background:linear-gradient(135deg,#7C3AED,#A78BFA);border:0;color:white;padding:9px 11px;border-radius:7px;font-weight:800;font-size:11px;white-space:nowrap}
-.banner-close{background:#ffffff12;color:#ddd;border:0;border-radius:7px;padding:9px}
-body.banner-activo .main-content{padding-bottom:100px}
-#playerWrapper:fullscreen{width:100vw;height:100vh;max-width:none;aspect-ratio:auto;border:0;border-radius:0;margin:0}
-#playerWrapper:fullscreen iframe{width:100%;height:100%}
-#playerWrapper:fullscreen .player-placeholder{height:100%}
-@media(max-width:480px){
- .main-content{padding-left:10px;padding-right:10px}
- .brand{font-size:22px}
- .top-actions{gap:5px}
- .icon-btn,.user-btn{width:33px;height:33px}
- .btn-fullscreen{padding:8px 9px;font-size:11px}
- .player-wrapper{border-radius:9px}
- .recomendacion{flex-basis:84px}
- .episodios-section{padding:10px}
-}
-@media(min-width:600px){
- .main-content{padding-left:18px;padding-right:18px}
- .recomendacion{flex-basis:115px}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>TELY 🎬 - Reproductor</title>
+    <link rel="icon" href="logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        html,body{width:100%;height:100%;overflow:hidden;background:#0F0F17}
+        body{background:#0F0F17;color:#f8fafc;font-family:'Segoe UI',Roboto,sans-serif;min-height:100vh;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+        ::-webkit-scrollbar{display:none}
+        .main-content{width:100%;height:100vh;overflow-y:auto;margin:0 auto;max-width:640px}
+        .header-flotante{position:sticky;top:0;z-index:50;background:rgba(15,15,23,.88);backdrop-filter:blur(16px);padding:.6rem .8rem;border-bottom:1px solid rgba(139,92,246,.12)}
+        .top-header{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+        .top-header h1{font-size:1.1rem;font-weight:700;background:linear-gradient(135deg,#8B5CF6,#C4B5FD);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .top-actions{display:flex;align-items:center;gap:.4rem}
+        .icon-btn{background:rgba(255,255,255,.06);border:none;color:#cbd5e1;width:38px;height:38px;border-radius:999px;cursor:pointer;font-size:1rem;transition:.25s ease;display:flex;align-items:center;justify-content:center}
+        .icon-btn:hover{background:rgba(139,92,246,.18);color:#fff}
+        .btn-fullscreen{background:rgba(255,255,255,.06);border:1px solid rgba(139,92,246,.25);color:#e2e8f0;padding:.3rem .7rem;border-radius:8px;font-weight:600;font-size:.7rem;cursor:pointer;transition:.25s ease;display:flex;align-items:center;gap:.25rem}
+        .btn-fullscreen:hover{background:rgba(139,92,246,.12);border-color:#8B5CF6;color:#fff}
+        .player-wrapper{position:relative;background:#000;border-radius:16px;overflow:hidden;aspect-ratio:16/9;width:calc(100% - 1.2rem);margin:.6rem auto 0}
+        .player-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;background:#000}
+        .info-section{padding:.7rem .8rem .4rem}
+        .info-section h1{font-size:1.3rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#8B5CF6,#C4B5FD);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .meta-row{color:#94a3b8;font-size:.75rem;display:flex;gap:.7rem;flex-wrap:wrap;margin:.3rem 0}
+        .meta-row .rating{color:#fbbf24;font-weight:700}
+        .synopsis-text{color:#cbd5e1;font-size:.8rem;line-height:1.5;margin-top:.4rem}
+        .controls-row{display:flex;gap:.4rem;flex-wrap:wrap;padding:.2rem .8rem .6rem}
+        .btn-play-option{background:rgba(255,255,255,.05);border:1px solid rgba(139,92,246,.22);color:#e2e8f0;padding:.4rem .9rem;border-radius:8px;font-weight:600;font-size:.7rem;cursor:pointer;transition:.25s ease}
+        .btn-play-option.active{border-color:#8B5CF6;background:#8B5CF6;color:#fff}
+        .btn-play-option.alt{border-color:rgba(59,130,246,.4);background:rgba(59,130,246,.08);color:#93c5fd}
+        .btn-play-option.alt.active{background:#3B82F6;border-color:#3B82F6;color:#fff}
+        .btn-play-option.hidden{display:none}
+        .badge-alt{display:inline-block;background:#fbbf24;color:#0b1120;font-size:.48rem;font-weight:700;padding:.08rem .3rem;border-radius:4px;margin-left:.2rem}
+        .btn-action-green{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.28);color:#6ee7b7;padding:.4rem .8rem;border-radius:8px;font-weight:600;font-size:.7rem;cursor:pointer;transition:.25s ease}
+        .btn-action-green:hover{background:rgba(16,185,129,.22)}
+        .btn-action-red{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#f87171;padding:.4rem .8rem;border-radius:8px;font-weight:600;font-size:.7rem;cursor:pointer;transition:.25s ease}
+        .btn-action-red:hover{background:rgba(239,68,68,.16)}
+        .error-video{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#0F0F17;color:#f87171;gap:.6rem;text-align:center;padding:.8rem}
+        .error-video i{font-size:2.8rem}
+        .error-video .sub{color:#64748b;font-size:.75rem}
+        .user-dropdown{position:absolute;right:.6rem;top:calc(100% + 8px);background:rgba(22,22,36,.96);border-radius:10px;width:170px;border:1px solid rgba(139,92,246,.18);padding:.3rem 0;display:none;z-index:60;box-shadow:0 24px 70px rgba(0,0,0,.55)}
+        .user-dropdown.show{display:block}
+        .user-dropdown a{display:flex;align-items:center;gap:.4rem;padding:.45rem .7rem;color:#cbd5e1;text-decoration:none;font-size:.8rem;transition:.2s ease}
+        .user-dropdown a:hover{background:rgba(139,92,246,.12);color:#fff}
+        .user-dropdown hr{margin:.2rem 0;border:none;border-top:1px solid rgba(139,92,246,.1)}
+        .user-menu{position:relative}
+        .episodes-section{margin:.4rem .8rem;background:rgba(255,255,255,.03);border-radius:14px;padding:.7rem;border:1px solid rgba(139,92,246,.08)}
+        .ep-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.4rem;margin-bottom:.5rem}
+        .ep-header h3{font-size:.85rem;font-weight:700;color:#f8fafc;display:flex;align-items:center;gap:.35rem}
+        .season-selector select{background:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(139,92,246,.18);border-radius:8px;padding:.25rem .5rem;font-size:.7rem;font-weight:600;cursor:pointer;outline:none}
+        .ep-actions button{background:rgba(255,255,255,.05);border:none;color:#94a3b8;padding:.2rem .4rem;border-radius:6px;font-size:.7rem;margin-left:.2rem;cursor:pointer;transition:.2s ease}
+        .ep-actions button:hover{color:#fff;background:rgba(139,92,246,.12)}
+        .ep-list{display:flex;flex-direction:column;gap:.3rem;max-height:260px;overflow-y:auto;padding-right:.2rem}
+        .ep-item{display:flex;flex-direction:column;padding:.4rem .5rem;background:rgba(255,255,255,.02);border-radius:9px;cursor:pointer;border:1px solid transparent;transition:.22s ease}
+        .ep-item:hover{background:rgba(255,255,255,.05)}
+        .ep-item.active{border-color:#8B5CF6;background:rgba(139,92,246,.08)}
+        .ep-top{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+        .ep-num{font-size:.62rem;color:#c4b5fd;font-weight:700}
+        .ep-title{font-size:.72rem;color:#e2e8f0;font-weight:500;flex:1}
+        .ep-status-ok{font-size:.55rem;color:#6ee7b7;font-weight:600}
+        .ep-status-no{font-size:.55rem;color:#f87171;font-weight:600}
+        .ep-desc{font-size:.62rem;color:#94a3b8;margin-top:.1rem;padding-left:1.4rem;line-height:1.35}
+        .badge-ep-alt{font-size:.48rem;background:#3B82F6;color:#fff;padding:.08rem .4rem;border-radius:4px;font-weight:700;margin-left:.25rem}
+        .rec-wrap{margin:.6rem .8rem .8rem}
+        .rec-title{font-weight:600;font-size:.85rem;color:#f8fafc;margin-bottom:.4rem}
+        .rec-row{display:flex;gap:.45rem;overflow-x:auto;padding:.2rem 0}
+        .rec-card{flex:0 0 auto;width:86px;cursor:pointer;border-radius:10px;overflow:hidden;text-align:center;transition:.28s ease;background:rgba(255,255,255,.02)}
+        .rec-card:hover{transform:scale(1.06);box-shadow:0 10px 32px rgba(0,0,0,.35)}
+        .rec-card img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:8px;display:block;background:#1e1e2f}
+        .rec-card p{font-size:.52rem;text-align:center;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.1rem;padding:0 .2rem}
+        .ep-list::-webkit-scrollbar{width:4px}
+        .ep-list::-webkit-scrollbar-track{background:rgba(255,255,255,.02)}
+        .ep-list::-webkit-scrollbar-thumb{background:#8B5CF6;border-radius:12px}
+        @media(max-width:480px){
+            .rec-card{width:72px}
+            .rec-card p{font-size:.48rem}
+        }
+        body:fullscreen .header-flotante{display:none!important}
+        body:fullscreen .main-content{padding:0!important;max-width:100%!important}
+        body:fullscreen .player-wrapper{border-radius:0!important;aspect-ratio:auto!important;height:100vh!important;width:100vw!important;margin:0!important}
+        body:fullscreen .info-section,
+        body:fullscreen .controls-row,
+        body:fullscreen .episodes-section,
+        body:fullscreen .rec-wrap,
+        body:fullscreen #bannerApp{display:none!important}
+        #bannerApp{display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1c1c30,#2b2b42);border-top:2px solid #8B5CF6;padding:.6rem .8rem;z-index:9999;box-shadow:0 -6px 32px rgba(139,92,246,.28);animation:slideUp 0.5s ease-out}
+        @keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+        .banner-logo-img{width:34px;height:34px;border-radius:8px;object-fit:cover}
+        .banner-install-btn{background:linear-gradient(135deg,#8B5CF6,#C4B5FD);border:none;color:#fff;padding:.4rem .9rem;border-radius:8px;font-weight:700;font-size:.72rem;cursor:pointer;transition:.25s ease;display:flex;align-items:center;gap:.25rem}
+        .banner-install-btn:hover{transform:scale(1.04);box-shadow:0 0 22px rgba(139,92,246,.42)}
+        body.banner-activo{padding-bottom:70px}
+    </style>
 </head>
-
 <body>
 <main class="main-content">
- <header class="header-flotante">
-  <div class="top-header">
-   <div class="brand"><i class="fas fa-play"></i> TELY</div>
-   <div class="top-actions">
-    <button class="icon-btn" onclick="volverAlIndex()" aria-label="Volver"><i class="fas fa-arrow-left"></i></button>
-    <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Cambiar tema"><i class="fas fa-moon"></i></button>
-    <button class="btn-fullscreen" onclick="toggleFullscreen()"><i class="fas fa-expand"></i><span>Pantalla completa</span></button>
-    <div class="user-menu">
-     <button class="user-btn" onclick="toggleUserMenu()" aria-label="Cuenta"><i class="fas fa-user-circle"></i></button>
-     <div class="user-dropdown" id="userDropdown">
-      <a href="perfil.html"><i class="fas fa-user"></i> Mi perfil</a>
-      <hr>
-      <a href="login.html" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Iniciar sesión</a>
-      <a href="#" id="logoutBtn" style="display:none" onclick="cerrarSesion(event)"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
-     </div>
+    <div class="header-flotante">
+        <div class="top-header">
+            <h1><i class="fas fa-play"></i> TELY</h1>
+            <div class="top-actions">
+                <button class="icon-btn" onclick="volverAlIndex()"><i class="fas fa-arrow-left"></i></button>
+                <button class="icon-btn" onclick="toggleTheme()" id="themeBtn"><i class="fas fa-moon"></i></button>
+                <button class="btn-fullscreen" onclick="toggleFullscreen()"><i class="fas fa-expand"></i> Pantalla completa</button>
+                <div class="user-menu">
+                    <button class="icon-btn" onclick="toggleUserMenu()"><i class="fas fa-user-circle"></i></button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="perfil.html"><i class="fas fa-user"></i> Mi perfil</a>
+                        <hr>
+                        <a href="#" id="loginBtn" onclick="irALogin()"><i class="fas fa-sign-in-alt"></i> Iniciar sesión</a>
+                        <a href="#" id="logoutBtn" style="display:none;" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-   </div>
-  </div>
- </header>
 
- <div id="alerta" class="alerta"></div>
+    <div class="player-wrapper" id="playerWrapper"></div>
 
- <section class="info-top">
-  <h1 id="playerTitulo">Cargando contenido...</h1>
-  <div class="meta">
-   <span id="playerAnio">—</span>
-   <span class="rating">⭐ <span id="playerRating">—</span></span>
-   <span id="playerGenero">—</span>
-   <span class="tipo-tag" id="playerTipo">🎬</span>
-  </div>
-  <p class="sinopsis" id="playerSinopsis">Cargando información...</p>
- </section>
+    <div class="info-section">
+        <h1 id="playerTitulo">Cargando...</h1>
+        <div class="meta-row">
+            <span id="playerAnio">-</span>
+            <span class="rating">⭐ <span id="playerRating">-</span></span>
+            <span id="playerGenero">-</span>
+            <span id="playerTipo" style="color:#C4B5FD;">🎬</span>
+        </div>
+        <div class="synopsis-text" id="playerSinopsis">Cargando información...</div>
+    </div>
 
- <div class="player-wrapper" id="playerWrapper">
-  <div class="player-placeholder" id="playerPlaceholder">
-   <i class="fas fa-circle-notch fa-spin"></i>
-   <p>Preparando reproductor...</p>
-  </div>
- </div>
+    <div class="controls-row" id="playerControls">
+        <button class="btn-play-option active" id="btnOp1" onclick="reproducirOpcion(1)">
+            <i class="fas fa-play"></i> Opción 1
+        </button>
+        <button class="btn-play-option alt hidden" id="btnOp2" onclick="reproducirOpcion(2)">
+            <i class="fas fa-play"></i> Opción 2<span class="badge-alt"></span>
+        </button>
+        <button class="btn-action-green" onclick="recargarVideo()"><i class="fas fa-rotate"></i> Recargar</button>
+        <button class="btn-action-red" onclick="abrirNuevaVentana()"><i class="fas fa-external-link-alt"></i> Nueva ventana</button>
+    </div>
 
- <div class="player-controls">
-  <button class="btn-opcion active" id="btnOp1" onclick="reproducirOpcion(1)"><i class="fas fa-play"></i> Opción 1</button>
-  <button class="btn-opcion opcion2 oculto" id="btnOp2" onclick="reproducirOpcion(2)"><i class="fas fa-play"></i> Opción 2 <span class="badge-opcion2">ALTERNATIVA</span></button>
-  <button class="btn-recargar" onclick="recargarVideo()" aria-label="Recargar vídeo"><i class="fas fa-rotate"></i> Recargar</button>
-  <button class="btn-nueva-ventana" onclick="abrirNuevaVentana()"><i class="fas fa-external-link-alt"></i> Abrir aparte</button>
- </div>
- <p class="estado-carga" id="estadoCarga">Cargando enlaces de reproducción...</p>
+    <div class="episodes-section" id="episodiosSection" style="display:none;">
+        <div class="ep-header">
+            <h3><i class="fas fa-list"></i> Episodios</h3>
+            <div class="season-selector">
+                <select id="tempSelect" onchange="cambiarTempSelect()"></select>
+            </div>
+            <div class="ep-actions">
+                <button onclick="reportarFalla()"><i class="fas fa-flag"></i> Reportar</button>
+                <button onclick="ayuda()"><i class="fas fa-question-circle"></i> Ayuda</button>
+            </div>
+        </div>
+        <div class="ep-list" id="episodiosList"></div>
+    </div>
 
- <section class="episodios-section" id="episodiosSection" style="display:none">
-  <div class="section-header">
-   <h3><i class="fas fa-list"></i> Episodios</h3>
-   <div class="temp-selector"><select id="tempSelect" onchange="cambiarTempSelect()"></select></div>
-   <div class="acciones">
-    <button onclick="reportarFalla()"><i class="fas fa-flag"></i> Reportar</button>
-    <button onclick="ayuda()"><i class="fas fa-question-circle"></i> Ayuda</button>
-   </div>
-  </div>
-  <div class="episodios-list" id="episodiosList"></div>
- </section>
-
- <section class="recomendaciones-wrap">
-  <h2 class="titulo-recomendadas">Te podría gustar</h2>
-  <div class="recomendaciones" id="recomendaciones"></div>
- </section>
+    <div class="rec-wrap">
+        <h4 class="rec-title">Te podría gustar</h4>
+        <div class="rec-row" id="recomendaciones"></div>
+    </div>
 </main>
 
 <div id="bannerApp">
- <div class="banner-inner">
-  <div class="banner-brand">
-   <img src="logo.png" alt="TELY" class="banner-logo-img" onerror="this.style.display='none'">
-   <div><div class="banner-title">📱 ¿Quieres instalar TELY?</div><div class="banner-sub">Mejor experiencia en tu teléfono</div></div>
-  </div>
-  <div class="banner-buttons">
-   <button class="banner-install-btn" onclick="descargarAPK()"><i class="fas fa-download"></i> Instalar</button>
-   <button class="banner-close" onclick="cerrarBannerApp()" aria-label="Cerrar"><i class="fas fa-times"></i></button>
-  </div>
- </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;max-width:640px;margin:0 auto;gap:0.5rem;">
+        <div style="display:flex;align-items:center;gap:0.4rem;flex:1;">
+            <img src="logo.png" alt="TELY" class="banner-logo-img" onerror="this.style.display='none'">
+            <div>
+                <div style="font-weight:700;font-size:.8rem;color:#fff;">📱 ¿Quieres instalar TELY?</div>
+                <div style="font-size:.62rem;color:#94A3B8;">Experiencia optimizada</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:0.4rem;flex-shrink:0;align-items:center;">
+            <button onclick="descargarAPK()" class="banner-install-btn"><i class="fas fa-download"></i> Instalar</button>
+            <button onclick="cerrarBannerApp()" style="background:rgba(255,255,255,.1);border:none;color:#94A3B8;padding:.3rem .5rem;border-radius:8px;font-size:.8rem;cursor:pointer;"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-
 <script>
-"use strict";
-
-/* FIREBASE: conserva el proyecto original */
+// Configuración Firebase
 const firebaseConfig = {
- apiKey:"AIzaSyDSCjhkZBmBfpgsyLPdN50ISvgvzfGRH2Q",
- authDomain:"tely-c9776.firebaseapp.com",
- projectId:"tely-c9776",
- storageBucket:"tely-c9776.firebasestorage.app",
- messagingSenderId:"185494855835",
- appId:"1:185494855835:web:cb113139c6d5aeb472263e",
- measurementId:"G-KTDT3WS0PP"
+    apiKey: "AIzaSyDSCjhkZBmBfpgsyLPdN50ISvgvzfGRH2Q",
+    authDomain: "tely-c9776.firebaseapp.com",
+    projectId: "tely-c9776",
+    storageBucket: "tely-c9776.firebasestorage.app",
+    messagingSenderId: "185494855835",
+    appId: "1:185494855835:web:cb113139c6d5aeb472263e",
+    measurementId: "G-KTDT3WS0PP"
 };
 
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
-const API_TMDB = "https://tely-xi.vercel.app/api/tmdb";
 
-const params = new URLSearchParams(location.search);
-let tmdbId = params.get("play");
-if (tmdbId && tmdbId.startsWith("tmdb_")) tmdbId = tmdbId.replace("tmdb_","");
-const tipoParametro = (params.get("tipo") || "pelicula").toLowerCase();
-let esSerie = ["tv","serie","series","show"].includes(tipoParametro);
-let temporadaActual = parseInt(params.get("temp") || "1",10);
-let episodioActual = parseInt(params.get("cap") || "1",10);
-if (!Number.isFinite(temporadaActual) || temporadaActual < 1) temporadaActual = 1;
-if (!Number.isFinite(episodioActual) || episodioActual < 1) episodioActual = 1;
+const params = new URLSearchParams(window.location.search);
+let tmdbId = params.get('play');
+if (tmdbId && typeof tmdbId === 'string' && tmdbId.startsWith('tmdb_')) {
+    tmdbId = tmdbId.replace('tmdb_', '');
+}
+const tipo = params.get('tipo') || 'pelicula';
+const tempRestaurar = params.get('temp') ? parseInt(params.get('temp')) : null;
+const capRestaurar = params.get('cap') ? parseInt(params.get('cap')) : null;
 
-let contenidoActual = null;
 let urlOp1 = null, urlOp2 = null, urlActual = null;
 let opcion2Disponible = false, opcionActiva = 1;
+let esSerie = false;
 let temporadasActuales = [];
-let episodiosActuales = [];
-let recomendacionesActuales = [];
+let tempActualIndex = 0;
 let firebaseKeyActual = null;
-let registroPersonalizado = null;
-let ultimaCargaId = 0;
 
-const PLACEHOLDER = "https://image.tmdb.org/t/p/w342";
-const $ = id => document.getElementById(id);
+console.log('📌 ID:', tmdbId, '| Tipo:', tipo);
 
-function volverAlIndex(){
- if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(()=>{});
- location.href = "index.html";
+function volverAlIndex() {
+    if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+    window.location.href = 'index.html';
 }
-function toggleFullscreen(){
- const wrapper = $("playerWrapper");
- if(!document.fullscreenElement){
-  const fn = wrapper.requestFullscreen || wrapper.webkitRequestFullscreen;
-  if(fn){ const p = fn.call(wrapper); if(p && p.catch) p.catch(()=>mostrarToast("No se pudo activar pantalla completa","error")); }
-  else mostrarToast("Tu navegador no permite pantalla completa","warning");
- }else{
-  const fn = document.exitFullscreen || document.webkitExitFullscreen;
-  if(fn) fn.call(document).catch?.(()=>{});
- }
+
+function toggleFullscreen() {
+    const w = document.getElementById('playerWrapper');
+    if (!document.fullscreenElement) {
+        if (w.requestFullscreen) w.requestFullscreen();
+        else if (w.webkitRequestFullscreen) w.webkitRequestFullscreen();
+    } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }
 }
-function toggleUserMenu(){ $("userDropdown").classList.toggle("show"); }
-document.addEventListener("click",e=>{
- if(!e.target.closest(".user-menu")) $("userDropdown").classList.remove("show");
+
+function irALogin() { window.location.href = 'login.html'; }
+function cerrarSesion() { auth.signOut().then(() => { window.location.href = 'index.html'; }); }
+function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('userDropdown');
+    if (menu && !e.target.closest('.user-menu')) menu.classList.remove('show');
 });
-function irALogin(){ location.href="login.html"; }
-async function cerrarSesion(e){
- if(e) e.preventDefault();
- try{ await auth.signOut(); location.href="index.html"; }
- catch(err){ mostrarToast("No se pudo cerrar sesión","error"); }
-}
-auth.onAuthStateChanged(user=>{
- $("loginBtn").style.display=user?"none":"flex";
- $("logoutBtn").style.display=user?"flex":"none";
+auth.onAuthStateChanged(user => {
+    document.getElementById('loginBtn').style.display = user ? 'none' : 'flex';
+    document.getElementById('logoutBtn').style.display = user ? 'flex' : 'none';
 });
 
-function toggleTheme(){
- const light=document.body.classList.toggle("tema-claro");
- localStorage.setItem("tely-player-theme",light?"light":"dark");
- aplicarTema();
+function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('themeBtn');
+    if (body.classList.contains('dark')) {
+        body.classList.remove('dark');
+        btn.innerHTML = '<i class="fas fa-moon"></i>';
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.classList.add('dark');
+        btn.innerHTML = '<i class="fas fa-sun"></i>';
+        localStorage.setItem('theme', 'dark');
+    }
 }
-function aplicarTema(){
- const light=localStorage.getItem("tely-player-theme")==="light";
- document.body.classList.toggle("tema-claro",light);
- $("themeBtn").innerHTML=light?'<i class="fas fa-sun"></i>':'<i class="fas fa-moon"></i>';
-}
-(function instalarTemaClaro(){
- const style=document.createElement("style");
- style.textContent=`body.tema-claro{--bg:#f5f3fa;--text:#171322;color:#171322}
- body.tema-claro .header-flotante{background:#f5f3faed}
- body.tema-claro .info-top h1,body.tema-claro .section-header h3,body.tema-claro .titulo-recomendadas{color:#171322}
- body.tema-claro .sinopsis,body.tema-claro .meta{color:#625b70}
- body.tema-claro .episodios-section,body.tema-claro .episodio-item,body.tema-claro .recomendacion{background:#fff}
- body.tema-claro .ep-titulo,body.tema-claro .recomendacion p{color:#272033}
- body.tema-claro .icon-btn,body.tema-claro .user-btn,body.tema-claro .btn-opcion{color:#272033;background:#fff}`;
- document.head.appendChild(style);
-})();
-aplicarTema();
-
-function getImagenUrl(path,size="w342"){
- if(!path) return "https://placehold.co/342x513/171321/a78bfa?text=TELY";
- if(/^https?:\/\//i.test(path)) return path;
- return `https://image.tmdb.org/t/p/${size}${path}`;
-}
-function mostrarToast(msg,tipo="success"){
- const colores={success:"#059669",warning:"#D97706",error:"#DC2626",info:"#2563EB"};
- const t=document.createElement("div");
- t.className="toast";t.style.background=colores[tipo]||colores.success;t.textContent=msg;
- document.body.appendChild(t);
- setTimeout(()=>t.remove(),2800);
-}
-function mostrarAlerta(msg){
- $("alerta").textContent=msg;
- $("alerta").style.display="block";
-}
-function ocultarAlerta(){ $("alerta").style.display="none"; }
-function actualizarEstado(msg){ $("estadoCarga").textContent=msg; }
-
-async function fetchTMDB(path,extra={}){
- const query=new URLSearchParams({path,...extra});
- const response=await fetch(`${API_TMDB}?${query.toString()}`,{headers:{Accept:"application/json"}});
- if(!response.ok) throw new Error(`TMDB respondió ${response.status}`);
- return response.json();
-}
-function generarEnlaceUnlimplay(id,tipoContenido,temp=1,cap=1){
- const t=parseInt(temp,10)||1,c=parseInt(cap,10)||1;
- if(tipoContenido==="pelicula"){
-  return `https://unlimplay.com/play/embed/movie/${encodeURIComponent(id)}?lang=es-MX&autoplay=1&controls=1&logo=0`;
- }
- return `https://unlimplay.com/play/embed/tv/${encodeURIComponent(id)}/${t}/${c}?lang=es-MX&autoplay=1&controls=1&logo=0`;
-}
-function renderPlayer(url){
- const wrapper=$("playerWrapper");
- wrapper.innerHTML="";
- if(!url){
-  wrapper.innerHTML='<div class="player-placeholder"><i class="fas fa-video-slash"></i><p>No hay un enlace de reproducción disponible.</p></div>';
-  return;
- }
- const iframe=document.createElement("iframe");
- iframe.src=url;
- iframe.title="Reproductor TELY";
- iframe.allow="autoplay; fullscreen; encrypted-media; picture-in-picture";
- iframe.allowFullscreen=true;
- iframe.referrerPolicy="origin";
- iframe.setAttribute("loading","eager");
- wrapper.appendChild(iframe);
- urlActual=url;
-}
-function reproducirOpcion(n){
- if(n===2 && !opcion2Disponible){mostrarToast("La opción 2 no está disponible","warning");return;}
- opcionActiva=n;
- const url=n===2?urlOp2:urlOp1;
- if(!url){mostrarToast("No hay enlace para esta opción","error");return;}
- $("btnOp1").classList.toggle("active",n===1);
- $("btnOp2").classList.toggle("active",n===2);
- renderPlayer(url);
- actualizarEstado(n===1?"Reproduciendo con la opción 1.":"Reproduciendo con la opción 2.");
-}
-function recargarVideo(){
- if(!urlActual){mostrarToast("Todavía no hay vídeo para recargar","warning");return;}
- const url=urlActual;
- renderPlayer("about:blank");
- setTimeout(()=>renderPlayer(url),120);
- mostrarToast("Reproductor recargado","info");
-}
-function abrirNuevaVentana(){
- if(!urlActual){mostrarToast("No hay ningún enlace disponible","warning");return;}
- const win=window.open(urlActual,"_blank","noopener,noreferrer");
- if(!win) mostrarToast("El navegador bloqueó la ventana emergente","warning");
-}
-function prepararOpciones(urlPrincipal,urlAlternativo){
- urlOp1=urlPrincipal||null;
- urlOp2=urlAlternativo||null;
- opcion2Disponible=Boolean(urlOp2 && urlOp2!==urlOp1);
- $("btnOp2").classList.toggle("oculto",!opcion2Disponible);
- $("btnOp1").classList.toggle("active",true);
- $("btnOp2").classList.remove("active");
- opcionActiva=1;
- if(urlOp1) renderPlayer(urlOp1);
- else{
-  $("playerWrapper").innerHTML='<div class="player-placeholder"><i class="fas fa-video-slash"></i><p>No se encontró un enlace de reproducción.</p></div>';
- }
+if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.remove('dark');
+    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>';
+} else {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').innerHTML = '<i class="fas fa-sun"></i>';
 }
 
-/*
- * OPCIÓN 2 DESDE FIREBASE
- * Busca registros usando IDs habituales. Si tu esquema utiliza otros
- * nombres de campos, adapta las listas de abajo a los nombres reales.
- */
-function normalizarRegistro(data,key,path){
- if(!data || typeof data!=="object") return null;
- const id=String(data.tmdbId ?? data.tmdb_id ?? data.id_tmdb ?? data.id ?? "");
- const url=data.url ?? data.enlace ?? data.embed ?? data.videoUrl ??
-           data.video_url ?? data.url_reproductor ?? data.link ?? "";
- const temporada=Number(data.temporada ?? data.season ?? data.temp ?? 0);
- const episodio=Number(data.episodio ?? data.episode ?? data.capitulo ?? data.cap ?? 0);
- return {data,key,path,id,url,temporada,episodio};
-}
-function coincideRegistro(reg){
- if(!reg) return false;
- const idBuscado=String(tmdbId||"").replace(/^tmdb_/,"");
- const ids=[reg.id,reg.data.tmdbId,reg.data.tmdb_id,reg.data.id_tmdb,reg.data.idContenido,reg.data.contenidoId]
-  .filter(v=>v!==undefined && v!==null).map(String);
- const porId=ids.includes(idBuscado);
- const tituloBuscado=String(contenidoActual?.title||contenidoActual?.name||"").trim().toLowerCase();
- const tituloRegistro=String(reg.data.titulo||reg.data.title||reg.data.nombre||reg.data.name||"").trim().toLowerCase();
- const porTitulo=tituloBuscado && tituloRegistro && tituloBuscado===tituloRegistro;
- if(!porId && !porTitulo) return false;
- if(esSerie){
-  const t=Number(reg.data.temporada??reg.data.season??reg.data.temp??temporadaActual);
-  const e=Number(reg.data.episodio??reg.data.episode??reg.data.capitulo??reg.data.cap??episodioActual);
-  if(reg.temporada && t!==temporadaActual) return false;
-  if(reg.episodio && e!==episodioActual) return false;
- }
- return true;
-}
-async function buscarOpcion2Firebase(){
- const paths=esSerie
-  ? ["series_personalizadas","contenido_personalizado"]
-  : ["contenido_personalizado","peliculas_personalizadas","series_personalizadas"];
- for(const path of paths){
-  try{
-   const snap=await db.ref(path).once("value");
-   const value=snap.val();
-   if(!value) continue;
-   const registros=[];
-   if(Array.isArray(value)){
-    value.forEach((v,i)=>{const r=normalizarRegistro(v,String(i),path);if(r)registros.push(r);});
-   }else if(typeof value==="object"){
-    Object.entries(value).forEach(([key,v])=>{const r=normalizarRegistro(v,key,path);if(r)registros.push(r);});
-   }
-   const encontrado=registros.find(coincideRegistro);
-   if(encontrado){
-    firebaseKeyActual=encontrado.key;
-    registroPersonalizado=encontrado.data;
-    const d=encontrado.data;
-    const url=d.url_op2||d.urlOp2||d.enlace_opcion2||d.opcion2_url||
-      d.url_alternativa||d.alternativa||d.url||d.enlace||d.embed||
-      d.videoUrl||d.video_url||d.url_reproductor||d.link;
-    if(typeof url==="string" && /^https?:\/\//i.test(url)) return url;
-   }
-  }catch(err){
-   console.warn("No se pudo consultar Firebase en",path,err);
-  }
- }
- return null;
+function getImagenUrl(path, size = 'w342') {
+    if (!path) return 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
+    if (path.startsWith('http')) return path;
+    return `https://image.tmdb.org/t/p/${size}${path}`;
 }
 
-/* METADATOS */
-function pintarMetadata(item){
- const titulo=item.title||item.name||item.original_title||item.original_name||"Contenido";
- $("playerTitulo").textContent=titulo;
- const fecha=item.release_date||item.first_air_date||"";
- $("playerAnio").textContent=fecha?fecha.slice(0,4):"Año desconocido";
- $("playerRating").textContent=Number(item.vote_average)>0?Number(item.vote_average).toFixed(1):"N/D";
- $("playerGenero").textContent=(item.genres||[]).slice(0,3).map(g=>g.name).join(" · ")||"";
- $("playerTipo").textContent=esSerie?"📺 Serie":"🎬 Película";
- $("playerSinopsis").textContent=item.overview||"No hay sinopsis disponible.";
- document.title=`${titulo} | TELY`;
-}
-async function cargarPelicula(){
- const carga=++ultimaCargaId;
- ocultarAlerta();
- actualizarEstado("Consultando información de la película...");
- try{
-  const item=await fetchTMDB(`movie/${encodeURIComponent(tmdbId)}`,{language:"es-ES"});
-  if(carga!==ultimaCargaId)return;
-  contenidoActual=item;pintarMetadata(item);
-  actualizarEstado("Preparando opciones de reproducción...");
-  const principal=generarEnlaceUnlimplay(tmdbId,"pelicula");
-  const alternativa=await buscarOpcion2Firebase();
-  if(carga!==ultimaCargaId)return;
-  prepararOpciones(principal,alternativa);
-  actualizarEstado(opcion2Disponible?"Hay dos opciones de reproducción disponibles.":"Película lista para reproducir.");
-  await cargarRecomendaciones("movie");
- }catch(error){
-  console.error("Error cargando película:",error);
-  mostrarAlerta("No se pudo cargar la información de la película. Comprueba la conexión con la API de TMDB.");
-  $("playerTitulo").textContent="No se pudo cargar el contenido";
-  $("playerSinopsis").textContent="Inténtalo nuevamente en unos momentos.";
-  actualizarEstado("Error de carga: "+(error.message||"sin conexión"));
-  const alternativa=await buscarOpcion2Firebase().catch(()=>null);
-  if(alternativa) prepararOpciones(alternativa,null);
- }
+function mostrarToast(msg, tipo = 'success') {
+    const colores = { success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' };
+    const t = document.createElement('div');
+    t.style.cssText = `position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:${colores[tipo]||'#10B981'};color:#fff;padding:8px 16px;border-radius:10px;z-index:9999;font-weight:600;font-size:.75rem;max-width:92%;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.5);transition:opacity 0.3s;`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2200);
 }
 
-/* SERIES, TEMPORADAS Y EPISODIOS */
-async function cargarSerie(){
- const carga=++ultimaCargaId;
- ocultarAlerta();
- actualizarEstado("Consultando información de la serie...");
- try{
-  const serie=await fetchTMDB(`tv/${encodeURIComponent(tmdbId)}`,{language:"es-ES"});
-  if(carga!==ultimaCargaId)return;
-  esSerie=true;contenidoActual=serie;pintarMetadata(serie);
-  temporadasActuales=(serie.seasons||[]).filter(s=>Number(s.season_number)>0);
-  if(!temporadasActuales.length && serie.seasons?.some(s=>Number(s.season_number)===0)){
-   temporadasActuales=serie.seasons.filter(s=>Number(s.season_number)===0);
-  }
-  $("episodiosSection").style.display="block";
-  pintarSelectorTemporadas();
-  const existe=temporadasActuales.some(s=>Number(s.season_number)===temporadaActual);
-  if(!existe && temporadasActuales.length) temporadaActual=Number(temporadasActuales[0].season_number);
-  $("tempSelect").value=String(temporadaActual);
-  await cargarEpisodios(temporadaActual,episodioActual);
-  await cargarRecomendaciones("tv");
- }catch(error){
-  console.error("Error cargando serie:",error);
-  mostrarAlerta("No se pudo cargar la serie. Revisa la conexión con TMDB e inténtalo de nuevo.");
-  $("playerTitulo").textContent="No se pudo cargar la serie";
-  actualizarEstado("Error de carga: "+(error.message||"sin conexión"));
- }
-}
-function pintarSelectorTemporadas(){
- const select=$("tempSelect");select.innerHTML="";
- temporadasActuales.forEach(temp=>{
-  const opt=document.createElement("option");
-  opt.value=String(temp.season_number);
-  opt.textContent=temp.name||`Temporada ${temp.season_number}`;
-  select.appendChild(opt);
- });
-}
-async function cambiarTempSelect(){
- const t=Number($("tempSelect").value);
- if(!Number.isFinite(t))return;
- temporadaActual=t;episodioActual=1;
- actualizarParametrosURL();
- await cargarEpisodios(t,1);
-}
-async function cargarEpisodios(numeroTemporada,episodioPreferido){
- const carga=ultimaCargaId;
- const contenedor=$("episodiosList");
- contenedor.innerHTML='<p class="empty">Cargando episodios...</p>';
- actualizarEstado(`Cargando temporada ${numeroTemporada}...`);
- try{
-  const datos=await fetchTMDB(`tv/${encodeURIComponent(tmdbId)}/season/${numeroTemporada}`,{language:"es-ES"});
-  if(carga!==ultimaCargaId)return;
-  episodiosActuales=datos.episodes||[];
-  contenedor.innerHTML="";
-  if(!episodiosActuales.length){
-   contenedor.innerHTML='<p class="empty">No hay episodios disponibles para esta temporada.</p>';
-   return;
-  }
-  episodiosActuales.forEach(ep=>{
-   const card=document.createElement("div");
-   card.className="episodio-item";
-   if(Number(ep.episode_number)===Number(episodioPreferido))card.classList.add("activo");
-   const top=document.createElement("div");top.className="ep-top";
-   const num=document.createElement("span");num.className="ep-numero";
-   num.textContent=`E${String(ep.episode_number).padStart(2,"0")}`;
-   const title=document.createElement("span");title.className="ep-titulo";
-   title.textContent=ep.name||`Episodio ${ep.episode_number}`;
-   const estado=document.createElement("span");estado.className="ep-estado";estado.textContent="▶ Ver";
-   top.append(num,title,estado);card.appendChild(top);
-   if(ep.overview){
-    const sin=document.createElement("p");sin.className="ep-sinopsis";sin.textContent=ep.overview;card.appendChild(sin);
-   }
-   card.addEventListener("click",()=>seleccionarEpisodio(numeroTemporada,Number(ep.episode_number)));
-   contenedor.appendChild(card);
-  });
-  let elegido=episodiosActuales.find(e=>Number(e.episode_number)===Number(episodioPreferido));
-  if(!elegido)elegido=episodiosActuales[0];
-  await seleccionarEpisodio(numeroTemporada,Number(elegido.episode_number),false);
-  actualizarEstado(`Temporada ${numeroTemporada}: ${episodiosActuales.length} episodios.`);
- }catch(error){
-  console.error("Error cargando episodios:",error);
-  contenedor.innerHTML='<p class="empty">No se pudieron cargar los episodios. Cambia de temporada o inténtalo de nuevo.</p>';
-  mostrarToast("Error cargando episodios","error");
- }
-}
-async function seleccionarEpisodio(temp,cap,actualizar=true){
- temporadaActual=temp;episodioActual=cap;
- $("tempSelect").value=String(temp);
- [...$("episodiosList").children].forEach(card=>card.classList.remove("activo"));
- const epIndex=episodiosActuales.findIndex(e=>Number(e.episode_number)===cap);
- if(epIndex>=0 && $("episodiosList").children[epIndex]) $("episodiosList").children[epIndex].classList.add("activo");
- if(actualizar)actualizarParametrosURL();
- actualizarEstado(`Preparando temporada ${temp}, episodio ${cap}...`);
- const principal=generarEnlaceUnlimplay(tmdbId,"serie",temp,cap);
- const alternativa=await buscarOpcion2Firebase();
- prepararOpciones(principal,alternativa);
- $("playerTipo").textContent=`📺 T${temp} · E${cap}`;
-}
-function actualizarParametrosURL(){
- const u=new URL(location.href);
- u.searchParams.set("play",tmdbId);
- u.searchParams.set("tipo",esSerie?"serie":"pelicula");
- if(esSerie){u.searchParams.set("temp",temporadaActual);u.searchParams.set("cap",episodioActual);}
- history.replaceState({}, "",u);
+async function fetchTMDB(path, params = {}) {
+    const q = new URLSearchParams({ path, ...params });
+    const res = await fetch(`https://tely-xi.vercel.app/api/tmdb?${q}`);
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+    return res.json();
 }
 
-/* RECOMENDACIONES */
-async function cargarRecomendaciones(tipoContenido){
- const box=$("recomendaciones");
- box.innerHTML='<span class="empty">Buscando recomendaciones...</span>';
- try{
-  const data=await fetchTMDB(`${tipoContenido}/${encodeURIComponent(tmdbId)}/recommendations`,{language:"es-ES"});
-  recomendacionesActuales=(data.results||[]).filter(x=>x.poster_path).slice(0,15);
-  box.innerHTML="";
-  if(!recomendacionesActuales.length){
-   box.innerHTML='<span class="empty">No hay recomendaciones disponibles.</span>';return;
-  }
-  recomendacionesActuales.forEach(item=>{
-   const card=document.createElement("article");card.className="recomendacion";
-   const img=document.createElement("img");img.src=getImagenUrl(item.poster_path);img.alt=item.title||item.name||"Portada";img.loading="lazy";
-   const p=document.createElement("p");p.textContent=item.title||item.name||"Ver contenido";
-   card.append(img,p);
-   card.addEventListener("click",()=>{
-    const url=new URL("reproductor.html",location.href);
-    url.searchParams.set("play",item.id);
-    url.searchParams.set("tipo",tipoContenido==="tv"?"serie":"pelicula");
-    location.href=url.href;
-   });
-   box.appendChild(card);
-  });
- }catch(error){
-  console.warn("Recomendaciones no disponibles:",error);
-  box.innerHTML='<span class="empty">No se pudieron cargar las recomendaciones.</span>';
- }
+function generarEnlaceUnlimplay(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    const temp = parseInt(temporada) || 1;
+    const cap = parseInt(capitulo) || 1;
+    if (tipo === 'pelicula') {
+        return `https://unlimplay.com/play/embed/movie/${tmdb_id}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+    } else {
+        return `https://unlimplay.com/play/embed/tv/${tmdb_id}/${temp}/${cap}?lang=es-MX&autoplay=1&controls=1&logo=0`;
+    }
 }
 
-/* REPORTES Y AYUDA */
-async function reportarFalla(){
- const user=auth.currentUser;
- const descripcion=prompt("Describe brevemente el problema con la reproducción:");
- if(!descripcion||!descripcion.trim())return;
- const reporte={
-  contenidoId:String(tmdbId||""),
-  titulo:contenidoActual?.title||contenidoActual?.name||$("playerTitulo").textContent,
-  tipo:esSerie?"serie":"pelicula",
-  temporada:esSerie?temporadaActual:null,
-  episodio:esSerie?episodioActual:null,
-  opcion:opcionActiva,
-  descripcion:descripcion.trim(),
-  uid:user?.uid||null,
-  email:user?.email||null,
-  fecha:Date.now(),
-  estado:"pendiente"
- };
- try{
-  await db.ref("reportes_reproduccion").push(reporte);
-  mostrarToast("Reporte enviado. Gracias.","success");
- }catch(error){
-  console.error(error);
-  mostrarToast("No se pudo guardar el reporte. Contacta al administrador.","error");
- }
-}
-function ayuda(){
- alert("Ayuda de TELY\n\n1. Prueba la opción 2 si la opción 1 no reproduce.\n2. Pulsa Recargar para reiniciar el vídeo.\n3. Comprueba tu conexión.\n4. Si el problema continúa, usa Reportar.");
+async function obtenerOpcion2DesdeFirebase(tmdb_id, tipo, temporada = 1, capitulo = 1) {
+    try {
+        console.log('🔍 Buscando Opción 2 para:', tmdb_id, 'tipo:', tipo);
+        if (tipo === 'pelicula') {
+            const snap = await db.ref('contenido_personalizado').orderByChild('tmdb_id').equalTo(parseInt(tmdb_id)).once('value');
+            const data = snap.val();
+            if (data) {
+                const keys = Object.keys(data);
+                for (const key of keys) {
+                    const item = data[key];
+                    if (item.opcion2 && item.opcion2.trim() !== '' && item.opcion2.startsWith('http')) {
+                        console.log('✅ Opción 2 encontrada:', item.opcion2);
+                        firebaseKeyActual = key;
+                        return item.opcion2;
+                    }
+                }
+            }
+            return null;
+        } else {
+            const snap = await db.ref('series_personalizadas').orderByChild('tmdb_id').equalTo(parseInt(tmdb_id)).once('value');
+            const data = snap.val();
+            if (data) {
+                const keys = Object.keys(data);
+                for (const key of keys) {
+                    const serie = data[key];
+                    firebaseKeyActual = key;
+                    if (serie.opcion2 && serie.opcion2.trim() !== '' && serie.opcion2.startsWith('http')) return serie.opcion2;
+                    if (serie.temporadas) {
+                        for (const temp of serie.temporadas) {
+                            if (temp.numero === parseInt(temporada) && temp.capitulos) {
+                                for (const cap of temp.capitulos) {
+                                    if (cap.numero === parseInt(capitulo) && cap.opcion2 && cap.opcion2.trim() !== '' && cap.opcion2.startsWith('http')) return cap.opcion2;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+    } catch (error) {
+        console.error('❌ Error Opción2:', error);
+        return null;
+    }
 }
 
-/* BANNER DE INSTALACIÓN */
-function cerrarBannerApp(){
- $("bannerApp").style.display="none";
- document.body.classList.remove("banner-activo");
- try{sessionStorage.setItem("tely-banner-cerrado","1");}catch(e){}
+function reproducirDirecto(url) {
+    if (!url) return;
+    const wrapper = document.getElementById('playerWrapper');
+    urlActual = url;
+    let finalUrl = url;
+    if (finalUrl.includes('unlimplay.com')) {
+        if (!finalUrl.includes('autoplay')) finalUrl += finalUrl.includes('?') ? '&autoplay=1&controls=1&logo=0' : '?autoplay=1&controls=1&logo=0';
+        if (finalUrl.includes('unlimplay.com/play/') && !finalUrl.includes('unlimplay.com/play/embed/')) finalUrl = finalUrl.replace('unlimplay.com/play/', 'unlimplay.com/play/embed/');
+        finalUrl += '&t=' + Date.now();
+    } else {
+        finalUrl += (finalUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+    }
+    const iframe = document.createElement('iframe');
+    iframe.src = finalUrl;
+    iframe.frameborder = "0";
+    iframe.referrerpolicy = "no-referrer-when-downgrade";
+    iframe.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+    iframe.allowfullscreen = true;
+    iframe.style.cssText = "width:100%;height:100%;border:none;background:#000;position:absolute;top:0;left:0;";
+    iframe.loading = "eager";
+    wrapper.innerHTML = '';
+    wrapper.appendChild(iframe);
 }
-function descargarAPK(){
- /* Cambia apkUrl por la dirección real de tu APK, si está alojada. */
- const apkUrl="app-tely.apk";
- const a=document.createElement("a");a.href=apkUrl;a.download="TELY.apk";
- document.body.appendChild(a);a.click();a.remove();
-}
-(function mostrarBanner(){
- try{
-  if(!sessionStorage.getItem("tely-banner-cerrado")){
-   setTimeout(()=>{$("bannerApp").style.display="block";document.body.classList.add("banner-activo");},5000);
-  }
- }catch(e){}
-})();
 
-/* ARRANQUE */
-async function iniciar(){
- if(!tmdbId){
-  $("playerTitulo").textContent="Contenido no especificado";
-  $("playerSinopsis").textContent="Vuelve al catálogo y selecciona una película o serie.";
-  $("playerWrapper").innerHTML='<div class="player-placeholder"><i class="fas fa-film"></i><p>No se recibió el identificador del contenido.<br>Abre este reproductor desde el catálogo de TELY.</p></div>';
-  actualizarEstado("Falta el parámetro play en la dirección.");
-  return;
- }
- try{
-  if(esSerie)await cargarSerie();
-  else await cargarPelicula();
- }catch(error){
-  console.error("Error inesperado:",error);
-  mostrarAlerta("Ocurrió un error inesperado al iniciar el reproductor.");
-  actualizarEstado(error.message||"Error inesperado.");
- }
+async function cargarPelicula() {
+    try {
+        urlOp1 = generarEnlaceUnlimplay(tmdbId, 'pelicula');
+        if (urlOp1) { reproducirDirecto(urlOp1); document.getElementById('btnOp1').classList.add('active'); }
+        const enlaceFirebase = await obtenerOpcion2DesdeFirebase(tmdbId, 'pelicula');
+        if (enlaceFirebase) {
+            urlOp2 = enlaceFirebase; opcion2Disponible = true; document.getElementById('btnOp2').classList.remove('hidden');
+        } else {
+            urlOp2 = null; opcion2Disponible = false; document.getElementById('btnOp2').classList.add('hidden');
+        }
+        const data = await fetchTMDB(`movie/${tmdbId}`);
+        if (data && data.id) {
+            document.getElementById('playerTitulo').textContent = data.title || 'Sin título';
+            document.getElementById('playerAnio').textContent = data.release_date ? data.release_date.split('-')[0] : 'N/D';
+            document.getElementById('playerRating').textContent = data.vote_average ? data.vote_average.toFixed(1) : 'N/A';
+            document.getElementById('playerGenero').textContent = data.genres ? data.genres.map(g => g.name).join(', ') : 'Película';
+            document.getElementById('playerSinopsis').textContent = data.overview || 'Sin sinopsis';
+            document.getElementById('playerTipo').textContent = '🎬 Película';
+            document.getElementById('playerTipo').style.color = '#C4B5FD';
+        }
+        cargarRecomendacionesPelicula(tmdbId);
+    } catch(e) { console.error('Error pelicula:', e); }
 }
-iniciar();
+
+async function cargarSerie() {
+    try {
+        const data = await fetchTMDB(`tv/${tmdbId}`);
+        if (!data || !data.id) {
+            document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>Serie no encontrada</span></div>`;
+            return;
+        }
+        document.getElementById('playerTitulo').textContent = data.name || 'Sin título';
+        document.getElementById('playerAnio').textContent = data.first_air_date ? data.first_air_date.split('-')[0] : 'N/D';
+        document.getElementById('playerRating').textContent = data.vote_average ? data.vote_average.toFixed(1) : 'N/A';
+        document.getElementById('playerGenero').textContent = data.genres ? data.genres.map(g => g.name).join(', ') : 'Serie';
+        document.getElementById('playerSinopsis').textContent = data.overview || 'Sin sinopsis';
+        document.getElementById('playerTipo').textContent = '📺 Serie';
+        document.getElementById('playerTipo').style.color = '#6ee7b7';
+        esSerie = true;
+        temporadasActuales = [];
+        const numTemps = Math.min(data.number_of_seasons || 1, 10);
+        for (let t = 1; t <= numTemps; t++) {
+            try {
+                const seasonData = await fetchTMDB(`tv/${tmdbId}/season/${t}`);
+                if (!seasonData || !seasonData.episodes) continue;
+                const capitulos = seasonData.episodes.sort((a,b)=>a.episode_number-b.episode_number).map(ep=>({
+                    numero: ep.episode_number, titulo: ep.name||`Capítulo ${ep.episode_number}`, sinopsis: ep.overview||'Sin sinopsis',
+                    url: generarEnlaceUnlimplay(tmdbId,'serie',t,ep.episode_number), opcion2:null
+                }));
+                temporadasActuales.push({numero:t, nombre:seasonData.name||`Temporada ${t}`, capitulos});
+            }catch(e){}
+        }
+        let tempIndex=0,capIndex=0;
+        if(tempRestaurar!==null&&tempRestaurar<temporadasActuales.length) tempIndex=tempRestaurar;
+        if(capRestaurar!==null&&temporadasActuales[tempIndex]?.capitulos?.length>capIndex) capIndex=capRestaurar;
+        const temp = temporadasActuales[tempIndex];
+        if(temp&&temp.capitulos&&temp.capitulos.length){
+            const cap = temp.capitulos[capIndex]||temp.capitulos[0];
+            const tempNum = temp.numero||1, capNum = cap.numero||1;
+            urlOp1 = generarEnlaceUnlimplay(tmdbId,'serie',tempNum,capNum);
+            const enlaceFirebase = await obtenerOpcion2DesdeFirebase(tmdbId,'serie',tempNum,capNum);
+            if(enlaceFirebase){ urlOp2=enlaceFirebase; cap.opcion2=enlaceFirebase; opcion2Disponible=true; document.getElementById('btnOp2').classList.remove('hidden'); }
+            else { urlOp2=null; opcion2Disponible=false; document.getElementById('btnOp2').classList.add('hidden'); }
+            if(urlOp1){ reproducirDirecto(urlOp1); document.getElementById('btnOp1').classList.add('active'); }
+        }
+        if(temporadasActuales.length) mostrarEpisodiosConTemporadas(temporadasActuales);
+        cargarRecomendacionesSerie(tmdbId);
+    } catch(e) {
+        console.error('Error serie:',e);
+        document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>Error al cargar la serie</span><span class="sub">${e.message}</span></div>`;
+    }
+}
+
+function mostrarEpisodiosConTemporadas(temporadas) {
+    if(!temporadas||!temporadas.length) return;
+    document.getElementById('episodiosSection').style.display = 'block';
+    const select = document.getElementById('tempSelect');
+    select.innerHTML = '';
+    temporadas.forEach((t,idx)=>{
+        const opt = document.createElement('option'); opt.value=idx; opt.textContent=`Temporada ${t.numero}`; select.appendChild(opt);
+    });
+    let tempIndex=0;
+    if(tempRestaurar!==null&&tempRestaurar<temporadas.length) tempIndex=tempRestaurar;
+    select.value=tempIndex; tempActualIndex=tempIndex; mostrarEpisodios(tempIndex);
+}
+
+async function mostrarEpisodios(tempIndex, capSeleccionado=0) {
+    if(!temporadasActuales[tempIndex]) return;
+    const temp = temporadasActuales[tempIndex];
+    const container = document.getElementById('episodiosList'); container.innerHTML='';
+    if(!temp.capitulos||!temp.capitulos.length){ container.innerHTML='<p style="color:#94a3b8;padding:.4rem;text-align:center;font-size:.75rem;">Sin capítulos disponibles</p>'; return; }
+    const capitulosOrdenados = [...temp.capitulos].sort((a,b)=>a.numero-b.numero);
+    const tempNum = temp.numero||1;
+    capitulosOrdenados.forEach((cap,idx)=>{
+        const d = document.createElement('div'); d.className='ep-item'; if(idx===capSeleccionado) d.classList.add('active');
+        const capNum = cap.numero||idx+1;
+        const tieneOp2 = cap.opcion2 && cap.opcion2.trim()!=='' && cap.opcion2.startsWith('http');
+        d.innerHTML = `<div class="ep-top"><span class="ep-num">${capNum}.</span><span class="ep-title">${cap.titulo||'Episodio '+capNum}</span>${tieneOp2?'<span class="badge-ep-alt">Opción2</span>':''}</div><div class="ep-desc">${cap.sinopsis||''}</div>`;
+        d.onclick = async ()=>{
+            if(!cap.url){ mostrarToast('❌ Sin enlace disponible','error'); return; }
+            document.querySelectorAll('.ep-item').forEach(el=>el.classList.remove('active')); d.classList.add('active');
+            const tN = temp.numero||1, cN = cap.numero||idx+1;
+            urlOp1 = generarEnlaceUnlimplay(tmdbId,'serie',tN,cN);
+            const enlaceFirebase = await obtenerOpcion2DesdeFirebase(tmdbId,'serie',tN,cN);
+            if(enlaceFirebase){ urlOp2=enlaceFirebase; cap.opcion2=enlaceFirebase; opcion2Disponible=true; document.getElementById('btnOp2').classList.remove('hidden'); }
+            else { urlOp2=null; opcion2Disponible=false; document.getElementById('btnOp2').classList.add('hidden'); }
+            if(opcionActiva===2&&!opcion2Disponible){ opcionActiva=1; document.getElementById('btnOp1').classList.add('active'); document.getElementById('btnOp2').classList.remove('active'); }
+            if(opcionActiva===2&&opcion2Disponible&&urlOp2) reproducirDirecto(urlOp2); else reproducirDirecto(urlOp1);
+        };
+        container.appendChild(d);
+    });
+}
+
+function cambiarTempSelect() {
+    const select = document.getElementById('tempSelect');
+    const idx = parseInt(select.value); tempActualIndex=idx; mostrarEpisodios(idx,0);
+}
+
+function reproducirOpcion(opcion) {
+    if(opcion===1&&urlOp1){ opcionActiva=1; document.getElementById('btnOp1').classList.add('active'); document.getElementById('btnOp2').classList.remove('active'); reproducirDirecto(urlOp1); }
+    else if(opcion===2&&opcion2Disponible&&urlOp2){ opcionActiva=2; document.getElementById('btnOp2').classList.add('active'); document.getElementById('btnOp1').classList.remove('active'); reproducirDirecto(urlOp2); }
+    else mostrarToast('❌ Opción no disponible','error');
+}
+
+function recargarVideo() { if(urlActual){ mostrarToast('🔄 Recargando…','info'); reproducirDirecto(urlActual); } else mostrarToast('❌ No hay video activo','error'); }
+function abrirNuevaVentana() { if(urlActual) window.open(urlActual,'_blank'); else mostrarToast('❌ No hay enlace','error'); }
+function reportarFalla() { mostrarToast('📋 Reporte enviado','success'); }
+function ayuda() { mostrarToast('💬 Contáctanos para ayuda','info'); }
+
+async function cargarRecomendacionesPelicula(tmdbId) {
+    const container = document.getElementById('recomendaciones');
+    container.innerHTML='<p style="color:#94a3b8;font-size:.7rem;padding:.6rem;">Cargando recomendaciones…</p>';
+    try {
+        const data = await fetchTMDB(`movie/${tmdbId}/recommendations`,{page:1});
+        container.innerHTML='';
+        if(!data.results||!data.results.length){ container.innerHTML='<p style="color:#94a3b8;font-size:.7rem;padding:.6rem;">Sin recomendaciones</p>'; return; }
+        data.results.slice(0,8).forEach(p=>{
+            const div = document.createElement('div'); div.className='rec-card';
+            const imgUrl = p.poster_path ? getImagenUrl(p.poster_path,'w185') : 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
+            div.innerHTML = `<img src="${imgUrl}" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'"><p>${p.title||p.name||'Sin título'}</p>`;
+            div.onclick = ()=>{ window.location.href=`reproductor.html?play=${p.id}&tipo=pelicula`; };
+            container.appendChild(div);
+        });
+    } catch(e){ container.innerHTML='<p style="color:#94a3b8;font-size:.7rem;padding:.6rem;">Sin recomendaciones</p>'; }
+}
+
+async function cargarRecomendacionesSerie(tmdbId) {
+    const container = document.getElementById('recomendaciones');
+    container.innerHTML='<p style="color:#94a3b8;font-size:.7rem;padding:.6rem;">Cargando recomendaciones…</p>';
+    try {
+        const data = await fetchTMDB(`tv/${tmdbId}/recommendations`,{page:1});
+        container.innerHTML='';
+        if(!data.results||!data.results.length){ container.innerHTML='<p style="color:#94a3b8;font-size:.7rem;padding:.6rem;">Sin recomendaciones</p>'; return; }
+        data.results.slice(0,8).forEach(p=>{
+            const div = document.createElement('div'); div.className='rec-card';
+            const imgUrl = p.poster_path ? getImagenUrl(p.poster_path,'w185') : 'https://i.postimg.cc/8k4h4K7y/placeholder.jpg';
+            const tipo = p.media_type === 'movie' ? 'pelicula' : 'serie';
+            div.innerHTML = `<img src="${imgUrl}" loading="lazy" onerror="this.src='https://i.postimg.cc/8k4h4K7y/placeholder.jpg'"><p>${p.name||p.title||'Sin título'}</p>`;
+            div.onclick = ()=>{ window.location.href=`reproductor.html?play=${p.id}&tipo=${tipo}`; };
+            container.appendChild(div);
+        });
+    } catch(e){ container.innerHTML='<p style="color:#94a3b8;font-size:.7rem;padding:.6rem;">Sin recomendaciones</p>'; }
+}
+
+function detectarPlataforma() {
+    const ua = navigator.userAgent || '';
+    const esWebView = /wv|WebView|Android.*(wv|WebView)/i.test(ua);
+    const esNavegador = !esWebView && /Android|iPhone|iPad|iPod/i.test(ua);
+    return { esWebView, esNavegador };
+}
+function mostrarBannerApp() {
+    const banner = document.getElementById('bannerApp');
+    if(!banner) return;
+    if(localStorage.getItem('bannerAppCerrado')==='true') return;
+    const { esNavegador } = detectarPlataforma();
+    if(esNavegador){ banner.style.display='block'; document.body.classList.add('banner-activo'); }
+}
+function cerrarBannerApp() {
+    const banner = document.getElementById('bannerApp');
+    if(banner){ banner.style.display='none'; document.body.classList.remove('banner-activo'); localStorage.setItem('bannerAppCerrado','true'); }
+}
+function descargarAPK() {
+    const urlAPK = 'https://appsgeyser.io/19960416/Tely';
+    mostrarToast('📱 Iniciando descarga…','info');
+    const link = document.createElement('a'); link.href=urlAPK; link.target='_blank'; link.download='Tely.apk';
+    document.body.appendChild(link); link.click(); document.body.removeChild(link); setTimeout(cerrarBannerApp,2000);
+}
+
+history.pushState(null,'',window.location.href);
+window.addEventListener('popstate',e=>{ volverAlIndex(); e.preventDefault(); return false; });
+document.addEventListener('backbutton',e=>{ volverAlIndex(); e.preventDefault(); e.stopPropagation(); return false; },false);
+
+document.addEventListener('DOMContentLoaded',()=>{ setTimeout(mostrarBannerApp,2000); });
+
+if(tmdbId){ if(tipo==='pelicula') cargarPelicula(); else cargarSerie(); }
+else { document.getElementById('playerWrapper').innerHTML = `<div class="error-video"><i class="fas fa-exclamation-triangle"></i><span>No se especificó contenido</span></div>`; }
+console.log('⚡ Reproductor rediseñado - Opción 2 desde Firebase');
 </script>
 </body>
 </html>
